@@ -1,0 +1,266 @@
+<?xml version='1.0' encoding='utf-8'?>
+<ct:contentTypeSchema ct:_="" ma:contentTypeID="0x0101005C80D874A689144AA0964E84E3FE6723" xmlns:ma="http://schemas.microsoft.com/office/2006/metadata/properties/metaAttributes" ma:contentTypeScope="" xmlns:ct="http://schemas.microsoft.com/office/2006/metadata/contentType" ma:contentTypeName="Document" ma:_="" ma:contentTypeVersion="21" ma:versionID="0639f15a0677e5f46febe665467e5b6f" ma:contentTypeDescription="Create a new document.">
+ <xsd:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" ma:fieldsID="66edb74df1ed69287b084c3f75cfe6c8" ns3:_="" xmlns:ns3="edf7c40f-1bd5-4aa4-9bc8-4f6ecf6671fe" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://schemas.microsoft.com/office/2006/metadata/properties" ma:root="true" ns2:_="" xmlns:p="http://schemas.microsoft.com/office/2006/metadata/properties" xmlns:ns2="bb898510-3ea7-4a81-86ee-8e486b012de5">
+  <xsd:import namespace="bb898510-3ea7-4a81-86ee-8e486b012de5"/>
+  <xsd:import namespace="edf7c40f-1bd5-4aa4-9bc8-4f6ecf6671fe"/>
+  <xsd:element name="properties">
+   <xsd:complexType>
+    <xsd:sequence>
+     <xsd:element name="documentManagement">
+      <xsd:complexType>
+       <xsd:all>
+        <xsd:element minOccurs="0" ref="ns2:SharedWithUsers"/>
+        <xsd:element minOccurs="0" ref="ns2:SharedWithDetails"/>
+        <xsd:element minOccurs="0" ref="ns3:MediaServiceMetadata"/>
+        <xsd:element minOccurs="0" ref="ns3:MediaServiceFastMetadata"/>
+        <xsd:element minOccurs="0" ref="ns3:MediaServiceDateTaken"/>
+        <xsd:element minOccurs="0" ref="ns3:MediaLengthInSeconds"/>
+        <xsd:element minOccurs="0" ref="ns3:Remarks"/>
+        <xsd:element minOccurs="0" ref="ns3:lcf76f155ced4ddcb4097134ff3c332f"/>
+        <xsd:element minOccurs="0" ref="ns2:TaxCatchAll"/>
+        <xsd:element minOccurs="0" ref="ns3:MediaServiceOCR"/>
+        <xsd:element minOccurs="0" ref="ns3:MediaServiceGenerationTime"/>
+        <xsd:element minOccurs="0" ref="ns3:MediaServiceEventHashCode"/>
+        <xsd:element minOccurs="0" ref="ns3:MediaServiceLocation"/>
+        <xsd:element minOccurs="0" ref="ns3:MediaServiceObjectDetectorVersions"/>
+        <xsd:element minOccurs="0" ref="ns3:ProjectStatus"/>
+        <xsd:element minOccurs="0" ref="ns3:ProjectID"/>
+        <xsd:element minOccurs="0" ref="ns3:MediaServiceSearchProperties"/>
+        <xsd:element minOccurs="0" ref="ns3:MediaServiceBillingMetadata"/>
+       </xsd:all>
+      </xsd:complexType>
+     </xsd:element>
+    </xsd:sequence>
+   </xsd:complexType>
+  </xsd:element>
+ </xsd:schema>
+ <xsd:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:dms="http://schemas.microsoft.com/office/2006/documentManagement/types" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="bb898510-3ea7-4a81-86ee-8e486b012de5" elementFormDefault="qualified" xmlns:pc="http://schemas.microsoft.com/office/infopath/2007/PartnerControls">
+  <xsd:import namespace="http://schemas.microsoft.com/office/2006/documentManagement/types"/>
+  <xsd:import namespace="http://schemas.microsoft.com/office/infopath/2007/PartnerControls"/>
+  <xsd:element name="SharedWithUsers" ma:index="8" nillable="true" ma:readOnly="true" ma:displayName="Shared With" ma:internalName="SharedWithUsers">
+   <xsd:complexType>
+    <xsd:complexContent>
+     <xsd:extension base="dms:UserMulti">
+      <xsd:sequence>
+       <xsd:element maxOccurs="unbounded" name="UserInfo" minOccurs="0">
+        <xsd:complexType>
+         <xsd:sequence>
+          <xsd:element name="DisplayName" minOccurs="0" type="xsd:string"/>
+          <xsd:element name="AccountId" minOccurs="0" nillable="true" type="dms:UserId"/>
+          <xsd:element name="AccountType" minOccurs="0" type="xsd:string"/>
+         </xsd:sequence>
+        </xsd:complexType>
+       </xsd:element>
+      </xsd:sequence>
+     </xsd:extension>
+    </xsd:complexContent>
+   </xsd:complexType>
+  </xsd:element>
+  <xsd:element name="SharedWithDetails" ma:index="9" nillable="true" ma:readOnly="true" ma:displayName="Shared With Details" ma:internalName="SharedWithDetails">
+   <xsd:simpleType>
+    <xsd:restriction base="dms:Note">
+     <xsd:maxLength value="255"/>
+    </xsd:restriction>
+   </xsd:simpleType>
+  </xsd:element>
+  <xsd:element ma:hidden="true" name="TaxCatchAll" ma:web="bb898510-3ea7-4a81-86ee-8e486b012de5" ma:showField="CatchAllData" ma:index="17" nillable="true" ma:displayName="Taxonomy Catch All Column" ma:list="{d72b8a56-a952-411f-abee-133b71ce6c9c}" ma:internalName="TaxCatchAll">
+   <xsd:complexType>
+    <xsd:complexContent>
+     <xsd:extension base="dms:MultiChoiceLookup">
+      <xsd:sequence>
+       <xsd:element maxOccurs="unbounded" name="Value" minOccurs="0" nillable="true" type="dms:Lookup"/>
+      </xsd:sequence>
+     </xsd:extension>
+    </xsd:complexContent>
+   </xsd:complexType>
+  </xsd:element>
+ </xsd:schema>
+ <xsd:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:dms="http://schemas.microsoft.com/office/2006/documentManagement/types" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="edf7c40f-1bd5-4aa4-9bc8-4f6ecf6671fe" elementFormDefault="qualified" xmlns:pc="http://schemas.microsoft.com/office/infopath/2007/PartnerControls">
+  <xsd:import namespace="http://schemas.microsoft.com/office/2006/documentManagement/types"/>
+  <xsd:import namespace="http://schemas.microsoft.com/office/infopath/2007/PartnerControls"/>
+  <xsd:element ma:hidden="true" name="MediaServiceMetadata" ma:index="10" nillable="true" ma:readOnly="true" ma:displayName="MediaServiceMetadata" ma:internalName="MediaServiceMetadata">
+   <xsd:simpleType>
+    <xsd:restriction base="dms:Note"/>
+   </xsd:simpleType>
+  </xsd:element>
+  <xsd:element ma:hidden="true" name="MediaServiceFastMetadata" ma:index="11" nillable="true" ma:readOnly="true" ma:displayName="MediaServiceFastMetadata" ma:internalName="MediaServiceFastMetadata">
+   <xsd:simpleType>
+    <xsd:restriction base="dms:Note"/>
+   </xsd:simpleType>
+  </xsd:element>
+  <xsd:element ma:indexed="true" ma:hidden="true" name="MediaServiceDateTaken" ma:index="12" nillable="true" ma:readOnly="true" ma:displayName="MediaServiceDateTaken" ma:internalName="MediaServiceDateTaken">
+   <xsd:simpleType>
+    <xsd:restriction base="dms:Text"/>
+   </xsd:simpleType>
+  </xsd:element>
+  <xsd:element ma:hidden="true" name="MediaLengthInSeconds" ma:index="13" nillable="true" ma:readOnly="true" ma:displayName="MediaLengthInSeconds" ma:internalName="MediaLengthInSeconds">
+   <xsd:simpleType>
+    <xsd:restriction base="dms:Unknown"/>
+   </xsd:simpleType>
+  </xsd:element>
+  <xsd:element ma:format="Dropdown" name="Remarks" ma:index="14" nillable="true" ma:displayName="Remarks" ma:internalName="Remarks">
+   <xsd:simpleType>
+    <xsd:restriction base="dms:Text">
+     <xsd:maxLength value="255"/>
+    </xsd:restriction>
+   </xsd:simpleType>
+  </xsd:element>
+  <xsd:element ma:sspId="ae219f0f-d120-4fae-9134-ba51938c58d3" ma:taxonomy="true" ma:isKeyword="false" ma:taxonomyFieldName="MediaServiceImageTags" name="lcf76f155ced4ddcb4097134ff3c332f" ma:taxonomyMulti="true" ma:termSetId="09814cd3-568e-fe90-9814-8d621ff8fb84" ma:index="16" nillable="true" ma:readOnly="false" ma:fieldId="{5cf76f15-5ced-4ddc-b409-7134ff3c332f}" ma:anchorId="fba54fb3-c3e1-fe81-a776-ca4b69148c4d" ma:open="true" ma:displayName="Image Tags" ma:internalName="lcf76f155ced4ddcb4097134ff3c332f">
+   <xsd:complexType>
+    <xsd:sequence>
+     <xsd:element maxOccurs="1" minOccurs="0" ref="pc:Terms"/>
+    </xsd:sequence>
+   </xsd:complexType>
+  </xsd:element>
+  <xsd:element name="MediaServiceOCR" ma:index="18" nillable="true" ma:readOnly="true" ma:displayName="Extracted Text" ma:internalName="MediaServiceOCR">
+   <xsd:simpleType>
+    <xsd:restriction base="dms:Note">
+     <xsd:maxLength value="255"/>
+    </xsd:restriction>
+   </xsd:simpleType>
+  </xsd:element>
+  <xsd:element ma:hidden="true" name="MediaServiceGenerationTime" ma:index="19" nillable="true" ma:readOnly="true" ma:displayName="MediaServiceGenerationTime" ma:internalName="MediaServiceGenerationTime">
+   <xsd:simpleType>
+    <xsd:restriction base="dms:Text"/>
+   </xsd:simpleType>
+  </xsd:element>
+  <xsd:element ma:hidden="true" name="MediaServiceEventHashCode" ma:index="20" nillable="true" ma:readOnly="true" ma:displayName="MediaServiceEventHashCode" ma:internalName="MediaServiceEventHashCode">
+   <xsd:simpleType>
+    <xsd:restriction base="dms:Text"/>
+   </xsd:simpleType>
+  </xsd:element>
+  <xsd:element ma:indexed="true" name="MediaServiceLocation" ma:index="21" nillable="true" ma:readOnly="true" ma:displayName="Location" ma:internalName="MediaServiceLocation">
+   <xsd:simpleType>
+    <xsd:restriction base="dms:Text"/>
+   </xsd:simpleType>
+  </xsd:element>
+  <xsd:element ma:indexed="true" ma:hidden="true" name="MediaServiceObjectDetectorVersions" ma:index="22" nillable="true" ma:readOnly="true" ma:displayName="MediaServiceObjectDetectorVersions" ma:internalName="MediaServiceObjectDetectorVersions">
+   <xsd:simpleType>
+    <xsd:restriction base="dms:Text"/>
+   </xsd:simpleType>
+  </xsd:element>
+  <xsd:element ma:format="Dropdown" name="ProjectStatus" ma:index="23" nillable="true" ma:displayName="Project Status" ma:internalName="ProjectStatus">
+   <xsd:simpleType>
+    <xsd:restriction base="dms:Choice">
+     <xsd:enumeration value="Ideation"/>
+     <xsd:enumeration value="In Progress"/>
+     <xsd:enumeration value="Completed"/>
+     <xsd:enumeration value="On Hold"/>
+    </xsd:restriction>
+   </xsd:simpleType>
+  </xsd:element>
+  <xsd:element ma:format="Dropdown" name="ProjectID" ma:index="24" nillable="true" ma:displayName="Project ID" ma:internalName="ProjectID">
+   <xsd:simpleType>
+    <xsd:restriction base="dms:Text">
+     <xsd:maxLength value="255"/>
+    </xsd:restriction>
+   </xsd:simpleType>
+  </xsd:element>
+  <xsd:element ma:hidden="true" name="MediaServiceSearchProperties" ma:index="25" nillable="true" ma:readOnly="true" ma:displayName="MediaServiceSearchProperties" ma:internalName="MediaServiceSearchProperties">
+   <xsd:simpleType>
+    <xsd:restriction base="dms:Note"/>
+   </xsd:simpleType>
+  </xsd:element>
+  <xsd:element ma:hidden="true" name="MediaServiceBillingMetadata" ma:index="26" nillable="true" ma:readOnly="true" ma:displayName="MediaServiceBillingMetadata" ma:internalName="MediaServiceBillingMetadata">
+   <xsd:simpleType>
+    <xsd:restriction base="dms:Note"/>
+   </xsd:simpleType>
+  </xsd:element>
+ </xsd:schema>
+ <xsd:schema attributeFormDefault="unqualified" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" blockDefault="#all" xmlns:odoc="http://schemas.microsoft.com/internal/obd" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:dcterms="http://purl.org/dc/terms/" targetNamespace="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" elementFormDefault="qualified">
+  <xsd:import namespace="http://purl.org/dc/elements/1.1/" schemaLocation="http://dublincore.org/schemas/xmls/qdc/2003/04/02/dc.xsd"/>
+  <xsd:import namespace="http://purl.org/dc/terms/" schemaLocation="http://dublincore.org/schemas/xmls/qdc/2003/04/02/dcterms.xsd"/>
+  <xsd:element name="coreProperties" type="CT_coreProperties"/>
+  <xsd:complexType name="CT_coreProperties">
+   <xsd:all>
+    <xsd:element maxOccurs="1" minOccurs="0" ref="dc:creator"/>
+    <xsd:element maxOccurs="1" minOccurs="0" ref="dcterms:created"/>
+    <xsd:element maxOccurs="1" minOccurs="0" ref="dc:identifier"/>
+    <xsd:element maxOccurs="1" name="contentType" minOccurs="0" ma:index="0" type="xsd:string" ma:displayName="Content Type"/>
+    <xsd:element maxOccurs="1" minOccurs="0" ma:index="4" ma:displayName="Title" ref="dc:title"/>
+    <xsd:element maxOccurs="1" minOccurs="0" ref="dc:subject"/>
+    <xsd:element maxOccurs="1" minOccurs="0" ref="dc:description"/>
+    <xsd:element maxOccurs="1" name="keywords" minOccurs="0" type="xsd:string"/>
+    <xsd:element maxOccurs="1" minOccurs="0" ref="dc:language"/>
+    <xsd:element maxOccurs="1" name="category" minOccurs="0" type="xsd:string"/>
+    <xsd:element maxOccurs="1" name="version" minOccurs="0" type="xsd:string"/>
+    <xsd:element maxOccurs="1" name="revision" minOccurs="0" type="xsd:string">
+     <xsd:annotation>
+      <xsd:documentation>&#xd;
+                        This value indicates the number of saves or revisions. The application is responsible for updating this value after each revision.&#xd;
+                    </xsd:documentation>
+     </xsd:annotation>
+    </xsd:element>
+    <xsd:element maxOccurs="1" name="lastModifiedBy" minOccurs="0" type="xsd:string"/>
+    <xsd:element maxOccurs="1" minOccurs="0" ref="dcterms:modified"/>
+    <xsd:element maxOccurs="1" name="contentStatus" minOccurs="0" type="xsd:string"/>
+   </xsd:all>
+  </xsd:complexType>
+ </xsd:schema>
+ <xs:schema attributeFormDefault="unqualified" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://schemas.microsoft.com/office/infopath/2007/PartnerControls" elementFormDefault="qualified" xmlns:pc="http://schemas.microsoft.com/office/infopath/2007/PartnerControls">
+  <xs:element name="Person">
+   <xs:complexType>
+    <xs:sequence>
+     <xs:element minOccurs="0" ref="pc:DisplayName"/>
+     <xs:element minOccurs="0" ref="pc:AccountId"/>
+     <xs:element minOccurs="0" ref="pc:AccountType"/>
+    </xs:sequence>
+   </xs:complexType>
+  </xs:element>
+  <xs:element name="DisplayName" type="xs:string"/>
+  <xs:element name="AccountId" type="xs:string"/>
+  <xs:element name="AccountType" type="xs:string"/>
+  <xs:element name="BDCAssociatedEntity">
+   <xs:complexType>
+    <xs:sequence>
+     <xs:element maxOccurs="unbounded" minOccurs="0" ref="pc:BDCEntity"/>
+    </xs:sequence>
+    <xs:attribute ref="pc:EntityNamespace"/>
+    <xs:attribute ref="pc:EntityName"/>
+    <xs:attribute ref="pc:SystemInstanceName"/>
+    <xs:attribute ref="pc:AssociationName"/>
+   </xs:complexType>
+  </xs:element>
+  <xs:attribute name="EntityNamespace" type="xs:string"/>
+  <xs:attribute name="EntityName" type="xs:string"/>
+  <xs:attribute name="SystemInstanceName" type="xs:string"/>
+  <xs:attribute name="AssociationName" type="xs:string"/>
+  <xs:element name="BDCEntity">
+   <xs:complexType>
+    <xs:sequence>
+     <xs:element minOccurs="0" ref="pc:EntityDisplayName"/>
+     <xs:element minOccurs="0" ref="pc:EntityInstanceReference"/>
+     <xs:element minOccurs="0" ref="pc:EntityId1"/>
+     <xs:element minOccurs="0" ref="pc:EntityId2"/>
+     <xs:element minOccurs="0" ref="pc:EntityId3"/>
+     <xs:element minOccurs="0" ref="pc:EntityId4"/>
+     <xs:element minOccurs="0" ref="pc:EntityId5"/>
+    </xs:sequence>
+   </xs:complexType>
+  </xs:element>
+  <xs:element name="EntityDisplayName" type="xs:string"/>
+  <xs:element name="EntityInstanceReference" type="xs:string"/>
+  <xs:element name="EntityId1" type="xs:string"/>
+  <xs:element name="EntityId2" type="xs:string"/>
+  <xs:element name="EntityId3" type="xs:string"/>
+  <xs:element name="EntityId4" type="xs:string"/>
+  <xs:element name="EntityId5" type="xs:string"/>
+  <xs:element name="Terms">
+   <xs:complexType>
+    <xs:sequence>
+     <xs:element maxOccurs="unbounded" minOccurs="0" ref="pc:TermInfo"/>
+    </xs:sequence>
+   </xs:complexType>
+  </xs:element>
+  <xs:element name="TermInfo">
+   <xs:complexType>
+    <xs:sequence>
+     <xs:element minOccurs="0" ref="pc:TermName"/>
+     <xs:element minOccurs="0" ref="pc:TermId"/>
+    </xs:sequence>
+   </xs:complexType>
+  </xs:element>
+  <xs:element name="TermName" type="xs:string"/>
+  <xs:element name="TermId" type="xs:string"/>
+ </xs:schema>
+</ct:contentTypeSchema>

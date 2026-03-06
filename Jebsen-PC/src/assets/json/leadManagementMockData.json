@@ -1,0 +1,2063 @@
+{
+  "leadList": {
+    "code": 200,
+    "msg": "操作成功",
+    "data": {
+      "list": [
+        {
+          "id": "LEAD-001",
+          "oneId": "ONE-202401001",
+          "customerName": "陈建华",
+          "phone": "138****8888",
+          "leadType": "aftersales_cs",
+          "ruleId": "RULE-001",
+          "ruleName": "新转续提醒规则",
+          "priority": "high",
+          "status": "pending",
+          "pushTarget": "BDC外呼系统",
+          "pushStatus": "pending",
+          "pushTime": null,
+          "assignedAdvisor": null,
+          "payload": {
+            "oneId": "ONE-202401001",
+            "customerName": "陈建华",
+            "phone": "138****8888",
+            "vehicleInfo": {
+              "vin": "LSGBF5338CH123456",
+              "licensePlate": "京A12345",
+              "model": "XC60",
+              "lastServiceDate": "2023-07-15",
+              "nextServiceDate": "2024-01-20",
+              "mileage": 35000
+            },
+            "leadType": "aftersales_cs",
+            "triggerReason": "车辆维保周期即将到期，建议提前预约"
+          },
+          "createdAt": "2024-01-13 09:00:00",
+          "updatedAt": "2024-01-13 09:00:00"
+        },
+        {
+          "id": "LEAD-002",
+          "oneId": "ONE-202401002",
+          "customerName": "王芳",
+          "phone": "139****9999",
+          "leadType": "newcar_cs",
+          "ruleId": "RULE-002",
+          "ruleName": "续转续提醒规则",
+          "priority": "medium",
+          "status": "pushed",
+          "pushTarget": "BDC外呼系统",
+          "pushStatus": "success",
+          "pushTime": "2024-01-13 10:30:00",
+          "assignedAdvisor": "张顾问",
+          "payload": {
+            "oneId": "ONE-202401002",
+            "customerName": "王芳",
+            "phone": "139****9999",
+            "couponInfo": {
+              "couponId": "COUPON-001",
+              "couponName": "保养代金券",
+              "amount": 500,
+              "expireDate": "2024-01-20",
+              "remainingDays": 7
+            },
+            "leadType": "newcar_cs",
+            "triggerReason": "代金券即将在7天后过期，建议尽快使用"
+          },
+          "createdAt": "2024-01-13 08:30:00",
+          "updatedAt": "2024-01-13 10:30:00",
+          "processedBy": "BDC外呼系统",
+          "processedAt": "2024-01-13 10:35:00"
+        },
+        {
+          "id": "LEAD-003",
+          "oneId": "ONE-202401003",
+          "customerName": "周杰",
+          "phone": "137****7777",
+          "leadType": "cm_custom",
+          "ruleId": "RULE-003",
+          "ruleName": "活跃客户营销规则",
+          "priority": "high",
+          "status": "processing",
+          "pushTarget": "BDC外呼系统",
+          "pushStatus": "success",
+          "pushTime": "2024-01-13 11:00:00",
+          "assignedAdvisor": "李顾问",
+          "payload": {
+            "oneId": "ONE-202401003",
+            "customerName": "周杰",
+            "phone": "137****7777",
+            "customerMetrics": {
+              "annualConsumption": 85000,
+              "loyaltyLevel": "VIP",
+              "visitFrequency": 12,
+              "lastVisitDays": 15
+            },
+            "leadType": "cm_custom",
+            "triggerReason": "年消费超过8万元的高价值客户，建议进行升级服务推荐"
+          },
+          "createdAt": "2024-01-13 07:00:00",
+          "updatedAt": "2024-01-13 11:05:00",
+          "processedBy": "BDC外呼系统",
+          "processedAt": "2024-01-13 11:00:00"
+        },
+        {
+          "id": "LEAD-004",
+          "oneId": "ONE-202401004",
+          "customerName": "孙伟",
+          "phone": "136****6666",
+          "leadType": "bdc_aftersales_recall",
+          "ruleId": "RULE-004",
+          "ruleName": "沉睡预警规则",
+          "priority": "high",
+          "status": "completed",
+          "pushTarget": "BDC外呼系统",
+          "pushStatus": "success",
+          "pushTime": "2024-01-12 14:20:00",
+          "assignedAdvisor": "王顾问",
+          "payload": {
+            "oneId": "ONE-202401004",
+            "customerName": "孙伟",
+            "phone": "136****6666",
+            "churnRisk": {
+              "riskLevel": "high",
+              "lastVisitDays": 180,
+              "lastOrderDate": "2023-07-15",
+              "reason": "超过180天未到店"
+            },
+            "leadType": "bdc_aftersales_recall",
+            "triggerReason": "客户超过180天未到店，存在流失风险，建议主动联系"
+          },
+          "createdAt": "2024-01-12 09:00:00",
+          "updatedAt": "2024-01-13 15:00:00",
+          "processedBy": "BDC外呼系统",
+          "processedAt": "2024-01-12 14:25:00",
+          "feedback": "已联系客户，客户表示近期会到店"
+        },
+        {
+          "id": "LEAD-005",
+          "oneId": "ONE-202401005",
+          "customerName": "孙七",
+          "phone": "135****5555",
+          "leadType": "bdc_renewal",
+          "ruleId": "RULE-005",
+          "ruleName": "待激活机会规则",
+          "priority": "medium",
+          "status": "pushed",
+          "pushTarget": "BDC外呼系统",
+          "pushStatus": "success",
+          "pushTime": "2024-01-13 12:00:00",
+          "assignedAdvisor": "刘顾问",
+          "payload": {
+            "oneId": "ONE-202401005",
+            "customerName": "孙七",
+            "phone": "135****5555",
+            "repurchaseInfo": {
+              "lastPurchaseDate": "2023-10-15",
+              "purchaseCycle": 90,
+              "recommendedProducts": ["保养套餐", "轮胎更换"]
+            },
+            "leadType": "bdc_renewal",
+            "triggerReason": "根据客户历史购买周期，预计近期有复购需求"
+          },
+          "createdAt": "2024-01-13 06:00:00",
+          "updatedAt": "2024-01-13 12:00:00"
+        },
+        {
+          "id": "LEAD-006",
+          "oneId": "ONE-202401006",
+          "customerName": "周八",
+          "phone": "134****4444",
+          "leadType": "bdc_campaign",
+          "ruleId": "RULE-006",
+          "ruleName": "在修不在保服务规则",
+          "priority": "medium",
+          "status": "pending",
+          "pushTarget": "BDC外呼系统",
+          "pushStatus": "pending",
+          "pushTime": null,
+          "assignedAdvisor": null,
+          "payload": {
+            "oneId": "ONE-202401006",
+            "customerName": "周八",
+            "phone": "134****4444",
+            "upgradeInfo": {
+              "currentModel": "XC60",
+              "currentVehicleAge": 5,
+              "annualConsumption": 60000,
+              "recommendedModels": ["XC90", "S90"]
+            },
+            "leadType": "bdc_campaign",
+            "triggerReason": "客户车辆使用5年，消费能力较强，适合推荐升级车型"
+          },
+          "createdAt": "2024-01-13 13:00:00",
+          "updatedAt": "2024-01-13 13:00:00"
+        },
+        {
+          "id": "LEAD-007",
+          "oneId": "ONE-202401007",
+          "customerName": "吴九",
+          "phone": "133****3333",
+          "leadType": "aftersales_cs",
+          "ruleId": "RULE-001",
+          "ruleName": "新转续提醒规则",
+          "priority": "high",
+          "status": "pushed",
+          "pushTarget": "BDC外呼系统",
+          "pushStatus": "failed",
+          "pushTime": "2024-01-13 14:00:00",
+          "assignedAdvisor": null,
+          "payload": {
+            "oneId": "ONE-202401007",
+            "customerName": "吴九",
+            "phone": "133****3333",
+            "vehicleInfo": {
+              "vin": "LSGBF5338CH123457",
+              "licensePlate": "京B12345",
+              "model": "S90",
+              "lastServiceDate": "2023-08-20",
+              "nextServiceDate": "2024-01-18",
+              "mileage": 42000
+            },
+            "leadType": "aftersales_cs",
+            "triggerReason": "车辆维保周期即将到期"
+          },
+          "createdAt": "2024-01-13 07:30:00",
+          "updatedAt": "2024-01-13 14:00:00"
+        },
+        {
+          "id": "LEAD-008",
+          "oneId": "ONE-202401008",
+          "customerName": "郑十",
+          "phone": "132****2222",
+          "leadType": "newcar_cs",
+          "ruleId": "RULE-002",
+          "ruleName": "续转续提醒规则",
+          "priority": "medium",
+          "status": "pending",
+          "pushTarget": "BDC外呼系统",
+          "pushStatus": "pending",
+          "pushTime": null,
+          "assignedAdvisor": null,
+          "payload": {
+            "oneId": "ONE-202401008",
+            "customerName": "郑十",
+            "phone": "132****2222",
+            "couponInfo": {
+              "couponId": "COUPON-002",
+              "couponName": "维修代金券",
+              "amount": 1000,
+              "expireDate": "2024-01-15",
+              "remainingDays": 2
+            },
+            "leadType": "newcar_cs",
+            "triggerReason": "代金券即将在2天后过期"
+          },
+          "createdAt": "2024-01-13 10:00:00",
+          "updatedAt": "2024-01-13 10:00:00"
+        },
+        {
+          "id": "LEAD-009",
+          "oneId": "ONE-202401009",
+          "customerName": "钱十一",
+          "phone": "131****1111",
+          "leadType": "cm_custom",
+          "ruleId": "RULE-003",
+          "ruleName": "活跃客户营销规则",
+          "priority": "high",
+          "status": "completed",
+          "pushTarget": "BDC外呼系统",
+          "pushStatus": "success",
+          "pushTime": "2024-01-12 16:00:00",
+          "assignedAdvisor": "陈顾问",
+          "payload": {
+            "oneId": "ONE-202401009",
+            "customerName": "钱十一",
+            "phone": "131****1111",
+            "customerMetrics": {
+              "annualConsumption": 92000,
+              "loyaltyLevel": "VIP",
+              "visitFrequency": 15,
+              "lastVisitDays": 8
+            },
+            "leadType": "cm_custom",
+            "triggerReason": "年消费超过9万元的高价值客户"
+          },
+          "createdAt": "2024-01-12 08:00:00",
+          "updatedAt": "2024-01-13 16:30:00",
+          "processedBy": "BDC外呼系统",
+          "processedAt": "2024-01-12 16:05:00",
+          "feedback": "客户已接受升级服务推荐"
+        },
+        {
+          "id": "LEAD-010",
+          "oneId": "ONE-202401010",
+          "customerName": "孙十二",
+          "phone": "130****0000",
+          "leadType": "bdc_aftersales_recall",
+          "ruleId": "RULE-004",
+          "ruleName": "沉睡预警规则",
+          "priority": "high",
+          "status": "processing",
+          "pushTarget": "BDC外呼系统",
+          "pushStatus": "success",
+          "pushTime": "2024-01-13 15:00:00",
+          "assignedAdvisor": "周顾问",
+          "payload": {
+            "oneId": "ONE-202401010",
+            "customerName": "孙十二",
+            "phone": "130****0000",
+            "churnRisk": {
+              "riskLevel": "high",
+              "lastVisitDays": 200,
+              "lastOrderDate": "2023-06-20",
+              "reason": "超过200天未到店"
+            },
+            "leadType": "bdc_aftersales_recall",
+            "triggerReason": "客户超过200天未到店，存在流失风险"
+          },
+          "createdAt": "2024-01-11 09:00:00",
+          "updatedAt": "2024-01-13 15:00:00",
+          "processedBy": "BDC外呼系统",
+          "processedAt": "2024-01-13 15:05:00"
+        },
+        {
+          "id": "LEAD-011",
+          "oneId": "ONE-202401011",
+          "customerName": "李十三",
+          "phone": "159****1111",
+          "leadType": "bdc_renewal",
+          "ruleId": "RULE-005",
+          "ruleName": "待激活机会规则",
+          "priority": "medium",
+          "status": "pending",
+          "pushTarget": "BDC外呼系统",
+          "pushStatus": "pending",
+          "pushTime": null,
+          "assignedAdvisor": null,
+          "payload": {
+            "oneId": "ONE-202401011",
+            "customerName": "李十三",
+            "phone": "159****1111",
+            "repurchaseInfo": {
+              "lastPurchaseDate": "2023-11-20",
+              "purchaseCycle": 60,
+              "recommendedProducts": ["机油更换", "空气滤清器"]
+            },
+            "leadType": "bdc_renewal",
+            "triggerReason": "根据客户历史购买周期，预计近期有复购需求"
+          },
+          "createdAt": "2024-01-13 11:00:00",
+          "updatedAt": "2024-01-13 11:00:00"
+        },
+        {
+          "id": "LEAD-012",
+          "oneId": "ONE-202401012",
+          "customerName": "王十四",
+          "phone": "158****2222",
+          "leadType": "bdc_campaign",
+          "ruleId": "RULE-006",
+          "ruleName": "在修不在保服务规则",
+          "priority": "medium",
+          "status": "pushed",
+          "pushTarget": "BDC外呼系统",
+          "pushStatus": "success",
+          "pushTime": "2024-01-13 16:00:00",
+          "assignedAdvisor": "吴顾问",
+          "payload": {
+            "oneId": "ONE-202401012",
+            "customerName": "王十四",
+            "phone": "158****2222",
+            "upgradeInfo": {
+              "currentModel": "S60",
+              "currentVehicleAge": 6,
+              "annualConsumption": 70000,
+              "recommendedModels": ["S90", "XC90"]
+            },
+            "leadType": "bdc_campaign",
+            "triggerReason": "客户车辆使用6年，消费能力较强"
+          },
+          "createdAt": "2024-01-13 05:00:00",
+          "updatedAt": "2024-01-13 16:00:00",
+          "processedBy": "BDC外呼系统",
+          "processedAt": "2024-01-13 16:05:00"
+        },
+        {
+          "id": "LEAD-013",
+          "oneId": "ONE-202401013",
+          "customerName": "张十五",
+          "phone": "157****3333",
+          "leadType": "aftersales_cs",
+          "ruleId": "RULE-001",
+          "ruleName": "新转续提醒规则",
+          "priority": "high",
+          "status": "rejected",
+          "pushTarget": "BDC外呼系统",
+          "pushStatus": "success",
+          "pushTime": "2024-01-13 08:00:00",
+          "assignedAdvisor": "赵顾问",
+          "payload": {
+            "oneId": "ONE-202401013",
+            "customerName": "张十五",
+            "phone": "157****3333",
+            "vehicleInfo": {
+              "vin": "LSGBF5338CH123458",
+              "licensePlate": "京C12345",
+              "model": "XC40",
+              "lastServiceDate": "2023-09-10",
+              "nextServiceDate": "2024-01-22",
+              "mileage": 28000
+            },
+            "leadType": "aftersales_cs",
+            "triggerReason": "车辆维保周期即将到期"
+          },
+          "createdAt": "2024-01-13 06:00:00",
+          "updatedAt": "2024-01-13 08:30:00",
+          "processedBy": "BDC外呼系统",
+          "processedAt": "2024-01-13 08:05:00",
+          "feedback": "客户拒绝服务"
+        },
+        {
+          "id": "LEAD-014",
+          "oneId": "ONE-202401014",
+          "customerName": "赵十六",
+          "phone": "156****4444",
+          "leadType": "newcar_cs",
+          "ruleId": "RULE-002",
+          "ruleName": "续转续提醒规则",
+          "priority": "medium",
+          "status": "processing",
+          "pushTarget": "BDC外呼系统",
+          "pushStatus": "success",
+          "pushTime": "2024-01-13 13:30:00",
+          "assignedAdvisor": "孙顾问",
+          "payload": {
+            "oneId": "ONE-202401014",
+            "customerName": "赵十六",
+            "phone": "156****4444",
+            "couponInfo": {
+              "couponId": "COUPON-003",
+              "couponName": "保养代金券",
+              "amount": 800,
+              "expireDate": "2024-01-16",
+              "remainingDays": 3
+            },
+            "leadType": "newcar_cs",
+            "triggerReason": "代金券即将在3天后过期"
+          },
+          "createdAt": "2024-01-13 09:30:00",
+          "updatedAt": "2024-01-13 13:30:00",
+          "processedBy": "BDC外呼系统",
+          "processedAt": "2024-01-13 13:35:00"
+        },
+        {
+          "id": "LEAD-015",
+          "oneId": "ONE-202401015",
+          "customerName": "周十七",
+          "phone": "155****5555",
+          "leadType": "cm_custom",
+          "ruleId": "RULE-003",
+          "ruleName": "活跃客户营销规则",
+          "priority": "high",
+          "status": "pending",
+          "pushTarget": "BDC外呼系统",
+          "pushStatus": "pending",
+          "pushTime": null,
+          "assignedAdvisor": null,
+          "payload": {
+            "oneId": "ONE-202401015",
+            "customerName": "周十七",
+            "phone": "155****5555",
+            "customerMetrics": {
+              "annualConsumption": 78000,
+              "loyaltyLevel": "VIP",
+              "visitFrequency": 10,
+              "lastVisitDays": 20
+            },
+            "leadType": "cm_custom",
+            "triggerReason": "年消费超过7万元的高价值客户"
+          },
+          "createdAt": "2024-01-13 14:00:00",
+          "updatedAt": "2024-01-13 14:00:00"
+        },
+        {
+          "id": "LEAD-016",
+          "oneId": "ONE-202401016",
+          "customerName": "吴十八",
+          "phone": "154****6666",
+          "leadType": "bdc_aftersales_recall",
+          "ruleId": "RULE-004",
+          "ruleName": "沉睡预警规则",
+          "priority": "high",
+          "status": "pushed",
+          "pushTarget": "BDC外呼系统",
+          "pushStatus": "failed",
+          "pushTime": "2024-01-13 12:30:00",
+          "assignedAdvisor": null,
+          "payload": {
+            "oneId": "ONE-202401016",
+            "customerName": "吴十八",
+            "phone": "154****6666",
+            "churnRisk": {
+              "riskLevel": "high",
+              "lastVisitDays": 220,
+              "lastOrderDate": "2023-06-01",
+              "reason": "超过220天未到店"
+            },
+            "leadType": "bdc_aftersales_recall",
+            "triggerReason": "客户超过220天未到店，存在流失风险"
+          },
+          "createdAt": "2024-01-10 10:00:00",
+          "updatedAt": "2024-01-13 12:30:00"
+        },
+        {
+          "id": "LEAD-017",
+          "oneId": "ONE-202401017",
+          "customerName": "郑十九",
+          "phone": "153****7777",
+          "leadType": "bdc_renewal",
+          "ruleId": "RULE-005",
+          "ruleName": "待激活机会规则",
+          "priority": "medium",
+          "status": "completed",
+          "pushTarget": "BDC外呼系统",
+          "pushStatus": "success",
+          "pushTime": "2024-01-12 17:00:00",
+          "assignedAdvisor": "郑顾问",
+          "payload": {
+            "oneId": "ONE-202401017",
+            "customerName": "郑十九",
+            "phone": "153****7777",
+            "repurchaseInfo": {
+              "lastPurchaseDate": "2023-09-25",
+              "purchaseCycle": 105,
+              "recommendedProducts": ["保养套餐", "刹车片更换"]
+            },
+            "leadType": "bdc_renewal",
+            "triggerReason": "根据客户历史购买周期，预计近期有复购需求"
+          },
+          "createdAt": "2024-01-12 07:00:00",
+          "updatedAt": "2024-01-13 17:30:00",
+          "processedBy": "BDC外呼系统",
+          "processedAt": "2024-01-12 17:05:00",
+          "feedback": "客户已预约到店"
+        },
+        {
+          "id": "LEAD-018",
+          "oneId": "ONE-202401018",
+          "customerName": "钱二十",
+          "phone": "152****8888",
+          "leadType": "bdc_campaign",
+          "ruleId": "RULE-006",
+          "ruleName": "在修不在保服务规则",
+          "priority": "medium",
+          "status": "processing",
+          "pushTarget": "BDC外呼系统",
+          "pushStatus": "success",
+          "pushTime": "2024-01-13 09:30:00",
+          "assignedAdvisor": "钱顾问",
+          "payload": {
+            "oneId": "ONE-202401018",
+            "customerName": "钱二十",
+            "phone": "152****8888",
+            "upgradeInfo": {
+              "currentModel": "V60",
+              "currentVehicleAge": 7,
+              "annualConsumption": 65000,
+              "recommendedModels": ["XC60", "S90"]
+            },
+            "leadType": "bdc_campaign",
+            "triggerReason": "客户车辆使用7年，适合推荐升级车型"
+          },
+          "createdAt": "2024-01-13 04:00:00",
+          "updatedAt": "2024-01-13 09:35:00",
+          "processedBy": "BDC外呼系统",
+          "processedAt": "2024-01-13 09:30:00"
+        },
+        {
+          "id": "LEAD-019",
+          "oneId": "ONE-202401019",
+          "customerName": "高宁",
+          "phone": "151****9999",
+          "leadType": "pcn_aftersales_campaign",
+          "ruleId": "RULE-007",
+          "ruleName": "价值分层-钻石客户规则",
+          "priority": "high",
+          "status": "pending",
+          "pushTarget": "BDC外呼系统",
+          "pushStatus": "pending",
+          "pushTime": null,
+          "assignedAdvisor": null,
+          "payload": {
+            "oneId": "ONE-202401019",
+            "customerName": "高宁",
+            "phone": "151****9999",
+            "valueSegment": {
+              "level": "diamond",
+              "annualConsumption": 180000,
+              "loyaltyScore": 98
+            },
+            "leadType": "pcn_aftersales_campaign",
+            "triggerReason": "价值分层为钻石客户，需专属顾问一对一跟进"
+          },
+          "createdAt": "2024-01-13 15:30:00",
+          "updatedAt": "2024-01-13 15:30:00"
+        },
+        {
+          "id": "LEAD-020",
+          "oneId": "ONE-202401020",
+          "customerName": "崔然",
+          "phone": "150****8888",
+          "leadType": "ttr_survey",
+          "ruleId": "RULE-008",
+          "ruleName": "价值分层-黄金客户规则",
+          "priority": "medium",
+          "status": "processing",
+          "pushTarget": "BDC外呼系统",
+          "pushStatus": "success",
+          "pushTime": "2024-01-13 16:20:00",
+          "assignedAdvisor": "高顾问",
+          "payload": {
+            "oneId": "ONE-202401020",
+            "customerName": "崔然",
+            "phone": "150****8888",
+            "valueSegment": {
+              "level": "gold",
+              "annualConsumption": 98000,
+              "loyaltyScore": 86
+            },
+            "leadType": "ttr_survey",
+            "triggerReason": "高价值黄金客户，推荐保养增值套餐"
+          },
+          "createdAt": "2024-01-13 12:00:00",
+          "updatedAt": "2024-01-13 16:20:00",
+          "processedBy": "BDC外呼系统",
+          "processedAt": "2024-01-13 16:25:00"
+        },
+        {
+          "id": "LEAD-021",
+          "oneId": "ONE-202401021",
+          "customerName": "石澜",
+          "phone": "149****7777",
+          "leadType": "aftersales_cs",
+          "ruleId": "RULE-009",
+          "ruleName": "价值分层-白银客户规则",
+          "priority": "medium",
+          "status": "completed",
+          "pushTarget": "BDC外呼系统",
+          "pushStatus": "success",
+          "pushTime": "2024-01-12 18:00:00",
+          "assignedAdvisor": "石顾问",
+          "payload": {
+            "oneId": "ONE-202401021",
+            "customerName": "石澜",
+            "phone": "149****7777",
+            "valueSegment": {
+              "level": "silver",
+              "annualConsumption": 62000,
+              "loyaltyScore": 72
+            },
+            "leadType": "aftersales_cs",
+            "triggerReason": "白银客户维系，提供年度保养优惠券"
+          },
+          "createdAt": "2024-01-12 08:00:00",
+          "updatedAt": "2024-01-13 18:10:00",
+          "processedBy": "BDC外呼系统",
+          "processedAt": "2024-01-12 18:05:00",
+          "feedback": "客户确认接受年度保养预约"
+        },
+        {
+          "id": "LEAD-022",
+          "oneId": "ONE-202401022",
+          "customerName": "何晓",
+          "phone": "148****6666",
+          "leadType": "bdc_campaign",
+          "ruleId": "RULE-010",
+          "ruleName": "BDC Campaign触达",
+          "priority": "medium",
+          "status": "pending",
+          "pushTarget": "BDC外呼系统",
+          "pushStatus": "pending",
+          "pushTime": null,
+          "assignedAdvisor": null,
+          "payload": {
+            "oneId": "ONE-202401022",
+            "customerName": "何晓",
+            "phone": "148****6666",
+            "campaign": {
+              "name": "春季养护活动",
+              "channel": "SMS",
+              "batchId": "BDC-CAMP-202401"
+            },
+            "leadType": "bdc_campaign",
+            "triggerReason": "入选BDC春季养护Campaign批次"
+          },
+          "createdAt": "2024-01-14 09:00:00",
+          "updatedAt": "2024-01-14 09:00:00"
+        },
+        {
+          "id": "LEAD-023",
+          "oneId": "ONE-202401023",
+          "customerName": "吕扬",
+          "phone": "147****5555",
+          "leadType": "bdc_aftersales_recall",
+          "ruleId": "RULE-011",
+          "ruleName": "BDC售后流失15个月",
+          "priority": "high",
+          "status": "processing",
+          "pushTarget": "BDC外呼系统",
+          "pushStatus": "success",
+          "pushTime": "2024-01-14 10:30:00",
+          "assignedAdvisor": "吕顾问",
+          "payload": {
+            "oneId": "ONE-202401023",
+            "customerName": "吕扬",
+            "phone": "147****5555",
+            "churnWindowMonths": 15,
+            "lastServiceDate": "2022-10-10",
+            "leadType": "bdc_aftersales_recall",
+            "triggerReason": "15个月未到店，触发售后流失召回"
+          },
+          "createdAt": "2024-01-14 08:30:00",
+          "updatedAt": "2024-01-14 10:35:00"
+        },
+        {
+          "id": "LEAD-024",
+          "oneId": "ONE-202401024",
+          "customerName": "范萌",
+          "phone": "146****4444",
+          "leadType": "bdc_aftersales_recall",
+          "ruleId": "RULE-012",
+          "ruleName": "BDC售后商机召回",
+          "priority": "medium",
+          "status": "pushed",
+          "pushTarget": "BDC外呼系统",
+          "pushStatus": "success",
+          "pushTime": "2024-01-14 11:00:00",
+          "assignedAdvisor": "范顾问",
+          "payload": {
+            "oneId": "ONE-202401024",
+            "customerName": "范萌",
+            "phone": "146****4444",
+            "recallReason": "上次预约未成交，需二次触达",
+            "leadType": "bdc_aftersales_recall"
+          },
+          "createdAt": "2024-01-14 07:30:00",
+          "updatedAt": "2024-01-14 11:05:00",
+          "processedBy": "BDC外呼系统",
+          "processedAt": "2024-01-14 11:10:00"
+        },
+        {
+          "id": "LEAD-025",
+          "oneId": "ONE-202401025",
+          "customerName": "柏晨",
+          "phone": "145****3333",
+          "leadType": "bdc_renewal",
+          "ruleId": "RULE-013",
+          "ruleName": "BDC续保商机",
+          "priority": "high",
+          "status": "completed",
+          "pushTarget": "BDC外呼系统",
+          "pushStatus": "success",
+          "pushTime": "2024-01-14 12:00:00",
+          "assignedAdvisor": "柏顾问",
+          "payload": {
+            "oneId": "ONE-202401025",
+            "customerName": "柏晨",
+            "phone": "145****3333",
+            "policyExpireDate": "2024-02-10",
+            "renewalOffer": 12000,
+            "leadType": "bdc_renewal",
+            "triggerReason": "保单即将到期，触发续保提醒"
+          },
+          "createdAt": "2024-01-14 06:50:00",
+          "updatedAt": "2024-01-14 12:10:00",
+          "processedBy": "BDC外呼系统",
+          "processedAt": "2024-01-14 12:05:00"
+        },
+        {
+          "id": "LEAD-026",
+          "oneId": "ONE-202401026",
+          "customerName": "钱若",
+          "phone": "144****2222",
+          "leadType": "cm_custom",
+          "ruleId": "RULE-014",
+          "ruleName": "CM自定义商机",
+          "priority": "medium",
+          "status": "pending",
+          "pushTarget": "BDC外呼系统",
+          "pushStatus": "pending",
+          "pushTime": null,
+          "assignedAdvisor": null,
+          "payload": {
+            "oneId": "ONE-202401026",
+            "customerName": "钱若",
+            "phone": "144****2222",
+            "customConfig": {
+              "template": "CM-202401",
+              "owner": "CM管理员"
+            },
+            "leadType": "cm_custom",
+            "triggerReason": "自定义规则命中目标人群"
+          },
+          "createdAt": "2024-01-14 13:00:00",
+          "updatedAt": "2024-01-14 13:00:00"
+        },
+        {
+          "id": "LEAD-027",
+          "oneId": "ONE-202401027",
+          "customerName": "唐臻",
+          "phone": "143****1111",
+          "leadType": "pcn_aftersales_campaign",
+          "ruleId": "RULE-015",
+          "ruleName": "PCN售后Campaign",
+          "priority": "medium",
+          "status": "pushed",
+          "pushTarget": "BDC外呼系统",
+          "pushStatus": "success",
+          "pushTime": "2024-01-14 14:20:00",
+          "assignedAdvisor": "唐顾问",
+          "payload": {
+            "oneId": "ONE-202401027",
+            "customerName": "唐臻",
+            "phone": "143****1111",
+            "campaign": {
+              "name": "PCN售后活动",
+              "channel": "WeCom"
+            },
+            "leadType": "pcn_aftersales_campaign",
+            "triggerReason": "PCN售后活动批次推送"
+          },
+          "createdAt": "2024-01-14 10:00:00",
+          "updatedAt": "2024-01-14 14:20:00"
+        },
+        {
+          "id": "LEAD-028",
+          "oneId": "ONE-202401028",
+          "customerName": "尹浩",
+          "phone": "142****9999",
+          "leadType": "ttr_survey",
+          "ruleId": "RULE-016",
+          "ruleName": "TTR调研",
+          "priority": "low",
+          "status": "pending",
+          "pushTarget": "BDC外呼系统",
+          "pushStatus": "pending",
+          "pushTime": null,
+          "assignedAdvisor": null,
+          "payload": {
+            "oneId": "ONE-202401028",
+            "customerName": "尹浩",
+            "phone": "142****9999",
+            "survey": {
+              "topic": "TTR体验调研",
+              "dueDate": "2024-02-01"
+            },
+            "leadType": "ttr_survey",
+            "triggerReason": "入选TTR调研目标名单"
+          },
+          "createdAt": "2024-01-14 09:40:00",
+          "updatedAt": "2024-01-14 09:40:00"
+        },
+        {
+          "id": "LEAD-029",
+          "oneId": "ONE-202401029",
+          "customerName": "花蕾",
+          "phone": "141****8888",
+          "leadType": "newcar_cs",
+          "ruleId": "RULE-017",
+          "ruleName": "客群模板核验",
+          "priority": "medium",
+          "status": "processing",
+          "pushTarget": "BDC外呼系统",
+          "pushStatus": "success",
+          "pushTime": "2024-01-14 15:00:00",
+          "assignedAdvisor": "花顾问",
+          "payload": {
+            "oneId": "ONE-202401029",
+            "customerName": "花蕾",
+            "phone": "141****8888",
+            "template": "Segment-Validation-202401",
+            "leadType": "newcar_cs",
+            "triggerReason": "模板核验批次触发，需人工复核"
+          },
+          "createdAt": "2024-01-14 11:30:00",
+          "updatedAt": "2024-01-14 15:05:00",
+          "processedBy": "BDC外呼系统",
+          "processedAt": "2024-01-14 15:10:00"
+        },
+        {
+          "id": "LEAD-030",
+          "oneId": "ONE-202401030",
+          "customerName": "安澜",
+          "phone": "140****7777",
+          "leadType": "aftersales_cs",
+          "ruleId": "RULE-018",
+          "ruleName": "售后满意度回访",
+          "priority": "low",
+          "status": "completed",
+          "pushTarget": "BDC外呼系统",
+          "pushStatus": "success",
+          "pushTime": "2024-01-14 16:00:00",
+          "assignedAdvisor": "安顾问",
+          "payload": {
+            "oneId": "ONE-202401030",
+            "customerName": "安澜",
+            "phone": "140****7777",
+            "csat": {
+              "lastServiceDate": "2024-01-05",
+              "advisor": "王顾问"
+            },
+            "leadType": "aftersales_cs",
+            "triggerReason": "售后服务完成后回访满意度"
+          },
+          "createdAt": "2024-01-14 12:20:00",
+          "updatedAt": "2024-01-14 16:05:00",
+          "processedBy": "BDC外呼系统",
+          "processedAt": "2024-01-14 16:06:00",
+          "feedback": "客户反馈满意，已完成回访"
+        },
+        {
+          "id": "LEAD-031",
+          "oneId": "ONE-202401031",
+          "customerName": "殷琪",
+          "phone": "139****6665",
+          "leadType": "newcar_cs",
+          "ruleId": "RULE-019",
+          "ruleName": "新车满意度回访",
+          "priority": "medium",
+          "status": "pushed",
+          "pushTarget": "BDC外呼系统",
+          "pushStatus": "success",
+          "pushTime": "2024-01-14 16:30:00",
+          "assignedAdvisor": "殷顾问",
+          "payload": {
+            "oneId": "ONE-202401031",
+            "customerName": "殷琪",
+            "phone": "139****6665",
+            "deliveryDate": "2023-12-28",
+            "vehicle": "Taycan",
+            "leadType": "newcar_cs",
+            "triggerReason": "新车交付后满意度回访"
+          },
+          "createdAt": "2024-01-14 10:10:00",
+          "updatedAt": "2024-01-14 16:30:00",
+          "processedBy": "BDC外呼系统",
+          "processedAt": "2024-01-14 16:35:00"
+        }
+      ],
+      "total": 31
+    }
+  },
+  "dashboard": {
+    "code": 200,
+    "msg": "操作成功",
+    "data": {
+      "todayTotal": 331,
+      "todayPushed": 198,
+      "pendingCount": 78,
+      "processingCount": 45,
+      "completedCount": 208,
+      "successRate": 92.5,
+      "byType": [
+        {
+          "type": "new_to_renew",
+          "count": 58
+        },
+        {
+          "type": "renew_to_renew",
+          "count": 42
+        },
+        {
+          "type": "in_repair_no_insurance",
+          "count": 28
+        },
+        {
+          "type": "dormant",
+          "count": 15
+        },
+        {
+          "type": "pending_activation",
+          "count": 8
+        },
+        {
+          "type": "active",
+          "count": 5
+        },
+        {
+          "type": "diamond",
+          "count": 12
+        },
+        {
+          "type": "gold",
+          "count": 35
+        },
+        {
+          "type": "silver",
+          "count": 88
+        },
+        {
+          "type": "bdc_campaign",
+          "count": 22
+        },
+        {
+          "type": "bdc_aftersales_churn_15m",
+          "count": 18
+        },
+        {
+          "type": "bdc_aftersales_recall",
+          "count": 14
+        },
+        {
+          "type": "bdc_renewal",
+          "count": 20
+        },
+        {
+          "type": "cm_custom",
+          "count": 10
+        },
+        {
+          "type": "pcn_aftersales_campaign",
+          "count": 16
+        },
+        {
+          "type": "ttr_survey",
+          "count": 9
+        },
+        {
+          "type": "segment_template_validation",
+          "count": 7
+        },
+        {
+          "type": "aftersales_cs",
+          "count": 16
+        },
+        {
+          "type": "newcar_cs",
+          "count": 12
+        }
+      ],
+      "byStatus": [
+        {
+          "status": "pending",
+          "count": 45
+        },
+        {
+          "status": "pushed",
+          "count": 32
+        },
+        {
+          "status": "processing",
+          "count": 23
+        },
+        {
+          "status": "completed",
+          "count": 88
+        },
+        {
+          "status": "rejected",
+          "count": 5
+        },
+        {
+          "status": "failed",
+          "count": 3
+        }
+      ]
+    }
+  },
+  "ruleList": {
+    "code": 200,
+    "msg": "操作成功",
+    "data": {
+      "list": [
+        {
+          "id": "RULE-001",
+          "name": "维保到期提醒规则",
+          "description": "当车辆维保周期即将到期时（提前7天），自动生成商机",
+          "triggerType": "event",
+          "triggerConfig": {
+            "eventType": "maintenance_due",
+            "conditions": [
+              {
+                "field": "nextServiceDate",
+                "operator": "<=",
+                "value": "7天后"
+              }
+            ]
+          },
+          "leadType": "aftersales_cs",
+          "priority": "high",
+          "pushTarget": "BDC外呼系统",
+          "pushConfig": {
+            "apiUrl": "https://api.BDC外呼系统.example.com/leads",
+            "retryTimes": 3
+          },
+          "enabled": true,
+          "creator": "系统管理员",
+          "createdAt": "2024-01-10 10:00:00",
+          "updatedAt": "2024-01-12 15:30:00"
+        },
+        {
+          "id": "RULE-002",
+          "name": "代金券到期提醒规则",
+          "description": "当代金券剩余有效期<=3天时，自动生成商机",
+          "triggerType": "event",
+          "triggerConfig": {
+            "eventType": "coupon_expiring",
+            "conditions": [
+              {
+                "field": "couponExpireDays",
+                "operator": "<=",
+                "value": 3
+              }
+            ]
+          },
+          "leadType": "newcar_cs",
+          "priority": "medium",
+          "pushTarget": "BDC外呼系统",
+          "pushConfig": {
+            "apiUrl": "https://api.bdc.example.com/leads",
+            "retryTimes": 2
+          },
+          "enabled": true,
+          "creator": "业务专员",
+          "createdAt": "2024-01-08 09:00:00",
+          "updatedAt": "2024-01-10 11:20:00"
+        },
+        {
+          "id": "RULE-003",
+          "name": "高价值客户营销规则",
+          "description": "年消费>=8万元的高价值客户，自动生成营销商机",
+          "triggerType": "segment",
+          "triggerConfig": {
+            "segmentId": "SEG-001",
+            "conditions": [
+              {
+                "field": "annualConsumption",
+                "operator": ">=",
+                "value": 80000
+              }
+            ]
+          },
+          "leadType": "cm_custom",
+          "priority": "high",
+          "pushTarget": "BDC外呼系统",
+          "pushConfig": {
+            "apiUrl": "https://api.BDC外呼系统.example.com/leads",
+            "retryTimes": 3
+          },
+          "enabled": true,
+          "creator": "系统管理员",
+          "createdAt": "2024-01-05 14:00:00",
+          "updatedAt": "2024-01-08 16:00:00"
+        },
+        {
+          "id": "RULE-004",
+          "name": "流失预警规则",
+          "description": "超过180天未到店的客户，自动生成流失预警商机",
+          "triggerType": "event",
+          "triggerConfig": {
+            "eventType": "churn_risk",
+            "conditions": [
+              {
+                "field": "lastVisitDays",
+                "operator": ">=",
+                "value": 180
+              }
+            ]
+          },
+          "leadType": "bdc_aftersales_recall",
+          "priority": "high",
+          "pushTarget": "BDC外呼系统",
+          "pushConfig": {
+            "apiUrl": "https://api.crm.example.com/leads",
+            "retryTimes": 2
+          },
+          "enabled": true,
+          "creator": "业务专员",
+          "createdAt": "2024-01-03 10:00:00",
+          "updatedAt": "2024-01-05 09:30:00"
+        },
+        {
+          "id": "RULE-005",
+          "name": "复购机会规则",
+          "description": "根据客户历史购买周期，预测复购时间点并生成商机",
+          "triggerType": "schedule",
+          "triggerConfig": {
+            "schedule": "0 9 * * *",
+            "conditions": [
+              {
+                "field": "purchaseCycle",
+                "operator": ">=",
+                "value": "预计复购日期"
+              }
+            ]
+          },
+          "leadType": "bdc_renewal",
+          "priority": "medium",
+          "pushTarget": "BDC外呼系统",
+          "pushConfig": {
+            "apiUrl": "https://api.bdc.example.com/leads",
+            "retryTimes": 2
+          },
+          "enabled": true,
+          "creator": "系统管理员",
+          "createdAt": "2024-01-01 08:00:00",
+          "updatedAt": "2024-01-02 10:00:00"
+        },
+        {
+          "id": "RULE-006",
+          "name": "升级机会规则",
+          "description": "车辆使用>=5年且年消费>=6万元的客户，推荐升级车型",
+          "triggerType": "segment",
+          "triggerConfig": {
+            "segmentId": "SEG-002",
+            "conditions": [
+              {
+                "field": "vehicleAge",
+                "operator": ">=",
+                "value": 5
+              },
+              {
+                "field": "annualConsumption",
+                "operator": ">=",
+                "value": 60000
+              }
+            ]
+          },
+          "leadType": "bdc_campaign",
+          "priority": "medium",
+          "pushTarget": "BDC外呼系统",
+          "pushConfig": {
+            "apiUrl": "https://api.BDC外呼系统.example.com/leads",
+            "retryTimes": 3
+          },
+          "enabled": false,
+          "creator": "业务专员",
+          "createdAt": "2023-12-28 15:00:00",
+          "updatedAt": "2024-01-10 11:00:00"
+        },
+        {
+          "id": "RULE-007",
+          "name": "价值分层-钻石客户规则",
+          "description": "价值分层为钻石客户，创建VIP关怀商机",
+          "triggerType": "segment",
+          "triggerConfig": {
+            "segmentId": "SEG-003",
+            "conditions": [
+              { "field": "valueSegment", "operator": "=", "value": "diamond" },
+              { "field": "annualConsumption", "operator": ">=", "value": 150000 }
+            ]
+          },
+          "leadType": "pcn_aftersales_campaign",
+          "priority": "high",
+          "pushTarget": "BDC外呼系统",
+          "pushConfig": {
+            "apiUrl": "https://api.crm.example.com/leads",
+            "retryTimes": 2
+          },
+          "enabled": true,
+          "creator": "业务专员",
+          "createdAt": "2024-01-11 09:00:00",
+          "updatedAt": "2024-01-12 10:00:00"
+        },
+        {
+          "id": "RULE-008",
+          "name": "价值分层-黄金客户规则",
+          "description": "黄金客户推荐保养增值套餐",
+          "triggerType": "segment",
+          "triggerConfig": {
+            "segmentId": "SEG-004",
+            "conditions": [
+              { "field": "valueSegment", "operator": "=", "value": "gold" },
+              { "field": "loyaltyScore", "operator": ">=", "value": 80 }
+            ]
+          },
+          "leadType": "ttr_survey",
+          "priority": "medium",
+          "pushTarget": "BDC外呼系统",
+          "pushConfig": {
+            "apiUrl": "https://api.bdc.example.com/leads",
+            "retryTimes": 2
+          },
+          "enabled": true,
+          "creator": "系统管理员",
+          "createdAt": "2024-01-09 10:00:00",
+          "updatedAt": "2024-01-10 14:00:00"
+        },
+        {
+          "id": "RULE-009",
+          "name": "价值分层-白银客户规则",
+          "description": "白银客户关怀，自动推送基础保养优惠",
+          "triggerType": "segment",
+          "triggerConfig": {
+            "segmentId": "SEG-005",
+            "conditions": [
+              { "field": "valueSegment", "operator": "=", "value": "silver" },
+              { "field": "visitFrequency", "operator": "<=", "value": 2 }
+            ]
+          },
+          "leadType": "aftersales_cs",
+          "priority": "medium",
+          "pushTarget": "BDC外呼系统",
+          "pushConfig": {
+            "apiUrl": "https://api.BDC外呼系统.example.com/leads",
+            "retryTimes": 2
+          },
+          "enabled": false,
+          "creator": "业务专员",
+          "createdAt": "2024-01-07 08:00:00",
+          "updatedAt": "2024-01-08 09:00:00"
+        },
+        {
+          "id": "RULE-010",
+          "name": "BDC Campaign触达",
+          "description": "BDC活动批次触达客户并生成商机",
+          "triggerType": "event",
+          "triggerConfig": {
+            "eventType": "bdc_campaign",
+            "conditions": [
+              { "field": "campaignBatch", "operator": "in", "value": ["BDC-CAMP-202401"] }
+            ]
+          },
+          "leadType": "bdc_campaign",
+          "priority": "medium",
+          "pushTarget": "BDC外呼系统",
+          "enabled": true,
+          "creator": "营销运营",
+          "createdAt": "2024-01-11 10:00:00",
+          "updatedAt": "2024-01-12 10:00:00"
+        },
+        {
+          "id": "RULE-011",
+          "name": "BDC售后流失15个月",
+          "description": "距上次到店>15个月客户，触发售后流失召回商机",
+          "triggerType": "event",
+          "triggerConfig": {
+            "eventType": "aftersales_churn",
+            "conditions": [
+              { "field": "monthsSinceVisit", "operator": ">=", "value": 15 }
+            ]
+          },
+          "leadType": "bdc_aftersales_recall",
+          "priority": "high",
+          "pushTarget": "BDC外呼系统",
+          "enabled": true,
+          "creator": "售后运营",
+          "createdAt": "2024-01-10 09:00:00",
+          "updatedAt": "2024-01-11 11:00:00"
+        },
+        {
+          "id": "RULE-012",
+          "name": "BDC售后商机召回",
+          "description": "上次商机未成交，触发二次召回",
+          "triggerType": "event",
+          "triggerConfig": {
+            "eventType": "opportunity_recall",
+            "conditions": [
+              { "field": "lastLeadStatus", "operator": "in", "value": ["failed", "rejected"] }
+            ]
+          },
+          "leadType": "bdc_aftersales_recall",
+          "priority": "medium",
+          "pushTarget": "BDC外呼系统",
+          "enabled": true,
+          "creator": "BDC运营",
+          "createdAt": "2024-01-09 14:00:00",
+          "updatedAt": "2024-01-10 09:00:00"
+        },
+        {
+          "id": "RULE-013",
+          "name": "BDC续保商机",
+          "description": "保单即将到期触发续保商机",
+          "triggerType": "event",
+          "triggerConfig": {
+            "eventType": "policy_expiring",
+            "conditions": [
+              { "field": "daysToExpire", "operator": "<=", "value": 30 }
+            ]
+          },
+          "leadType": "bdc_renewal",
+          "priority": "high",
+          "pushTarget": "BDC外呼系统",
+          "enabled": true,
+          "creator": "保险专员",
+          "createdAt": "2024-01-08 10:00:00",
+          "updatedAt": "2024-01-09 15:00:00"
+        },
+        {
+          "id": "RULE-014",
+          "name": "CM自定义商机",
+          "description": "CM自定义模板生成商机",
+          "triggerType": "segment",
+          "triggerConfig": {
+            "segmentId": "CM-202401",
+            "conditions": [
+              { "field": "customTag", "operator": "exists", "value": true }
+            ]
+          },
+          "leadType": "cm_custom",
+          "priority": "medium",
+          "pushTarget": "BDC外呼系统",
+          "enabled": true,
+          "creator": "CM管理员",
+          "createdAt": "2024-01-07 08:00:00",
+          "updatedAt": "2024-01-08 08:30:00"
+        },
+        {
+          "id": "RULE-015",
+          "name": "PCN售后Campaign",
+          "description": "PCN渠道售后活动批次",
+          "triggerType": "event",
+          "triggerConfig": {
+            "eventType": "pcn_campaign",
+            "conditions": [
+              { "field": "channel", "operator": "=", "value": "pcn" }
+            ]
+          },
+          "leadType": "pcn_aftersales_campaign",
+          "priority": "medium",
+          "pushTarget": "BDC外呼系统",
+          "enabled": true,
+          "creator": "渠道运营",
+          "createdAt": "2024-01-06 11:00:00",
+          "updatedAt": "2024-01-07 09:20:00"
+        },
+        {
+          "id": "RULE-016",
+          "name": "TTR调研",
+          "description": "TTR体验调研触发回访",
+          "triggerType": "schedule",
+          "triggerConfig": {
+            "schedule": "0 10 * * 1",
+            "conditions": [
+              { "field": "ttrEligible", "operator": "=", "value": true }
+            ]
+          },
+          "leadType": "ttr_survey",
+          "priority": "low",
+          "pushTarget": "BDC外呼系统",
+          "enabled": true,
+          "creator": "调研运营",
+          "createdAt": "2024-01-05 10:00:00",
+          "updatedAt": "2024-01-06 09:00:00"
+        },
+        {
+          "id": "RULE-017",
+          "name": "客群模板核验",
+          "description": "客群模板核验批次生成复核商机",
+          "triggerType": "segment",
+          "triggerConfig": {
+            "segmentId": "SEG-VALIDATION",
+            "conditions": [
+              { "field": "templateReady", "operator": "=", "value": true }
+            ]
+          },
+          "leadType": "newcar_cs",
+          "priority": "medium",
+          "pushTarget": "BDC外呼系统",
+          "enabled": true,
+          "creator": "数据运营",
+          "createdAt": "2024-01-04 09:00:00",
+          "updatedAt": "2024-01-05 10:00:00"
+        },
+        {
+          "id": "RULE-018",
+          "name": "售后满意度回访",
+          "description": "售后服务完成后触发满意度回访商机",
+          "triggerType": "event",
+          "triggerConfig": {
+            "eventType": "csat_after_sales",
+            "conditions": [
+              { "field": "serviceCompleted", "operator": "=", "value": true }
+            ]
+          },
+          "leadType": "aftersales_cs",
+          "priority": "low",
+          "pushTarget": "BDC外呼系统",
+          "enabled": true,
+          "creator": "售后客服",
+          "createdAt": "2024-01-03 10:00:00",
+          "updatedAt": "2024-01-04 11:00:00"
+        },
+        {
+          "id": "RULE-019",
+          "name": "新车满意度回访",
+          "description": "新车交付后满意度回访商机",
+          "triggerType": "event",
+          "triggerConfig": {
+            "eventType": "csat_new_car",
+            "conditions": [
+              { "field": "daysAfterDelivery", "operator": "<=", "value": 30 }
+            ]
+          },
+          "leadType": "newcar_cs",
+          "priority": "medium",
+          "pushTarget": "BDC外呼系统",
+          "enabled": true,
+          "creator": "交付专员",
+          "createdAt": "2024-01-02 09:00:00",
+          "updatedAt": "2024-01-03 09:30:00"
+        }
+      ],
+      "total": 19
+    }
+  },
+  "auditList": {
+    "code": 200,
+    "msg": "操作成功",
+    "data": {
+      "list": [
+        {
+          "id": "AUDIT-20240113-001",
+          "leadId": "LEAD-001",
+          "oneId": "ONE-202401001",
+          "operation": "create",
+          "operator": "系统自动",
+          "operateTime": "2024-01-13 09:00:00",
+          "targetSystem": null,
+          "customerName": "陈建华",
+          "leadType": "aftersales_cs",
+          "payload": {
+            "oneId": "ONE-202401001",
+            "customerName": "陈建华",
+            "phone": "138****8888",
+            "leadType": "aftersales_cs",
+            "vehicleInfo": {
+              "vin": "LSGBF5338CH123456",
+              "licensePlate": "京A12345",
+              "model": "XC60",
+              "nextServiceDate": "2024-01-20"
+            }
+          },
+          "result": "success",
+          "errorMessage": null,
+          "responseData": null
+        },
+        {
+          "id": "AUDIT-20240113-002",
+          "leadId": "LEAD-002",
+          "oneId": "ONE-202401002",
+          "operation": "push",
+          "operator": "系统自动",
+          "operateTime": "2024-01-13 10:30:00",
+          "targetSystem": "wechat",
+          "customerName": "王芳",
+          "leadType": "newcar_cs",
+          "payload": {
+            "opportunity_ids": ["LEAD-002"],
+            "target_system": "wechat",
+            "assignee": null,
+            "contacts": [
+              {
+                "phone": "139****9999",
+                "source": "DMS",
+                "relation": "本人"
+              }
+            ],
+            "log_id": 9921,
+            "timestamp": "2024-01-13T10:30:00.000Z"
+          },
+          "result": "success",
+          "errorMessage": null,
+          "responseData": {
+            "taskId": "TASK-20240113001",
+            "status": "received",
+            "message": "商机已成功推送到企业微信",
+            "receiveTime": "2024-01-13 10:30:05"
+          }
+        },
+        {
+          "id": "AUDIT-20240113-003",
+          "leadId": "LEAD-003",
+          "oneId": "ONE-202401003",
+          "operation": "push",
+          "operator": "系统自动",
+          "operateTime": "2024-01-13 11:00:00",
+          "targetSystem": "BDC外呼系统",
+          "customerName": "周杰",
+          "leadType": "cm_custom",
+          "payload": {
+            "opportunity_ids": ["LEAD-003"],
+            "target_system": "BDC外呼系统",
+            "assignee": "BDC-001",
+            "contacts": [
+              {
+                "phone": "137****7777",
+                "source": "DMS",
+                "relation": "本人"
+              }
+            ],
+            "log_id": 9922,
+            "timestamp": "2024-01-13T11:00:00.000Z"
+          },
+          "result": "success",
+          "errorMessage": null,
+          "responseData": {
+            "taskId": "BDC-20240113002",
+            "status": "assigned",
+            "assignedTo": "BDC-001",
+            "message": "商机已分配给BDC外呼人员",
+            "assignTime": "2024-01-13 11:00:08"
+          }
+        },
+        {
+          "id": "AUDIT-20240113-004",
+          "leadId": "BATCH-001",
+          "oneId": "BATCH",
+          "operation": "push",
+          "operator": "管理员",
+          "operateTime": "2024-01-13 14:20:00",
+          "targetSystem": "BDC外呼系统",
+          "customerName": "批量推送",
+          "leadType": "pcn_aftersales_campaign",
+          "batchCount": 15,
+          "payload": {
+            "opportunity_ids": [
+              "LEAD-101",
+              "LEAD-102",
+              "LEAD-103",
+              "LEAD-104",
+              "LEAD-105",
+              "LEAD-106",
+              "LEAD-107",
+              "LEAD-108",
+              "LEAD-109",
+              "LEAD-110",
+              "LEAD-111",
+              "LEAD-112",
+              "LEAD-113",
+              "LEAD-114",
+              "LEAD-115"
+            ],
+            "target_system": "BDC外呼系统",
+            "assignee": "BDC-002",
+            "batch_info": {
+              "category": "diamond",
+              "target": "advisor",
+              "count": 15
+            },
+            "log_id": 9923,
+            "timestamp": "2024-01-13T14:20:00.000Z"
+          },
+          "result": "success",
+          "errorMessage": null,
+          "responseData": {
+            "taskIds": ["BDC-20240113003", "BDC-20240113004", "BDC-20240113005"],
+            "status": "assigned",
+            "message": "批量推送成功，共推送15条商机",
+            "assignTime": "2024-01-13 14:20:12"
+          }
+        },
+        {
+          "id": "AUDIT-20240113-005",
+          "leadId": "LEAD-004",
+          "oneId": "ONE-202401004",
+          "operation": "reload",
+          "operator": "管理员",
+          "operateTime": "2024-01-13 14:00:00",
+          "targetSystem": "crm",
+          "customerName": "孙伟",
+          "leadType": "bdc_aftersales_recall",
+          "payload": {
+            "leadId": "LEAD-004",
+            "oneId": "ONE-202401004",
+            "reason": "手动重载"
+          },
+          "result": "success",
+          "errorMessage": null,
+          "responseData": {
+            "message": "商机重载成功",
+            "reloadTime": "2024-01-13 14:00:05"
+          }
+        },
+        {
+          "id": "AUDIT-20240113-006",
+          "leadId": "LEAD-005",
+          "oneId": "ONE-202401005",
+          "operation": "push",
+          "operator": "系统自动",
+          "operateTime": "2024-01-13 12:00:00",
+          "targetSystem": "wechat",
+          "customerName": "孙七",
+          "leadType": "bdc_renewal",
+          "payload": {
+            "opportunity_ids": ["LEAD-005"],
+            "target_system": "wechat",
+            "assignee": null,
+            "contacts": [
+              {
+                "phone": "135****5555",
+                "source": "车机",
+                "relation": "本人"
+              }
+            ],
+            "log_id": 9924,
+            "timestamp": "2024-01-13T12:00:00.000Z"
+          },
+          "result": "failed",
+          "errorMessage": "企业微信API调用失败：网络超时，请稍后重试",
+          "responseData": null
+        },
+        {
+          "id": "AUDIT-20240113-007",
+          "leadId": "BATCH-002",
+          "oneId": "BATCH",
+          "operation": "push",
+          "operator": "管理员",
+          "operateTime": "2024-01-13 15:30:00",
+          "targetSystem": "BDC外呼系统",
+          "customerName": "批量推送",
+          "leadType": "aftersales_cs",
+          "batchCount": 50,
+          "payload": {
+            "opportunity_ids": ["LEAD-201", "LEAD-202", "LEAD-203"],
+            "target_system": "BDC外呼系统",
+            "assignee": null,
+            "batch_info": {
+              "category": "new_to_renew",
+              "target": "advisor",
+              "count": 50
+            },
+            "log_id": 9925,
+            "timestamp": "2024-01-13T15:30:00.000Z"
+          },
+          "result": "success",
+          "errorMessage": null,
+          "responseData": {
+            "taskIds": ["BDC-20240113006"],
+            "status": "assigned",
+            "message": "批量推送成功，共推送50条商机",
+            "assignTime": "2024-01-13 15:30:08"
+          }
+        },
+        {
+          "id": "AUDIT-20240113-008",
+          "leadId": "LEAD-006",
+          "oneId": "ONE-202401006",
+          "operation": "update",
+          "operator": "业务专员",
+          "operateTime": "2024-01-13 13:15:00",
+          "targetSystem": null,
+          "customerName": "周八",
+          "leadType": "bdc_campaign",
+          "payload": {
+            "leadId": "LEAD-006",
+            "changes": {
+              "priority": {
+                "old": "medium",
+                "new": "high"
+              },
+              "status": {
+                "old": "pending",
+                "new": "pushed"
+              }
+            }
+          },
+          "result": "success",
+          "errorMessage": null,
+          "responseData": {
+            "message": "商机更新成功"
+          }
+        },
+        {
+          "id": "AUDIT-20240113-009",
+          "leadId": "LEAD-007",
+          "oneId": "ONE-202401007",
+          "operation": "push",
+          "operator": "系统自动",
+          "operateTime": "2024-01-13 16:00:00",
+          "targetSystem": "crm",
+          "customerName": "吴九",
+          "leadType": "bdc_aftersales_recall",
+          "payload": {
+            "opportunity_ids": ["LEAD-007"],
+            "target_system": "crm",
+            "assignee": "CRM-001",
+            "contacts": [
+              {
+                "phone": "133****3333",
+                "source": "官网注册",
+                "relation": "本人"
+              }
+            ],
+            "log_id": 9926,
+            "timestamp": "2024-01-13T16:00:00.000Z"
+          },
+          "result": "success",
+          "errorMessage": null,
+          "responseData": {
+            "taskId": "CRM-20240113001",
+            "status": "created",
+            "message": "商机已成功推送到CRM系统",
+            "createTime": "2024-01-13 16:00:05"
+          }
+        },
+        {
+          "id": "AUDIT-20240113-010",
+          "leadId": "LEAD-008",
+          "oneId": "ONE-202401008",
+          "operation": "push",
+          "operator": "系统自动",
+          "operateTime": "2024-01-13 16:30:00",
+          "targetSystem": "BDC外呼系统",
+          "customerName": "郑十",
+          "leadType": "aftersales_cs",
+          "payload": {
+            "opportunity_ids": ["LEAD-008"],
+            "target_system": "BDC外呼系统",
+            "assignee": null,
+            "contacts": [
+              {
+                "phone": "132****2222",
+                "source": "DMS",
+                "relation": "本人"
+              }
+            ],
+            "log_id": 9927,
+            "timestamp": "2024-01-13T16:30:00.000Z"
+          },
+          "result": "failed",
+          "errorMessage": "BDC系统返回错误：手机号格式不正确",
+          "responseData": {
+            "errorCode": "INVALID_PHONE",
+            "errorMessage": "手机号格式不正确",
+            "timestamp": "2024-01-13 16:30:03"
+          }
+        },
+        {
+          "id": "AUDIT-20240112-001",
+          "leadId": "LEAD-009",
+          "oneId": "ONE-202401009",
+          "operation": "create",
+          "operator": "系统自动",
+          "operateTime": "2024-01-12 08:00:00",
+          "targetSystem": null,
+          "customerName": "钱十一",
+          "leadType": "newcar_cs",
+          "payload": {
+            "oneId": "ONE-202401009",
+            "customerName": "钱十一",
+            "phone": "131****1111",
+            "leadType": "newcar_cs",
+            "couponInfo": {
+              "couponId": "COUPON-002",
+              "amount": 1000,
+              "expireDate": "2024-01-15"
+            }
+          },
+          "result": "success",
+          "errorMessage": null,
+          "responseData": null
+        },
+        {
+          "id": "AUDIT-20240112-002",
+          "leadId": "LEAD-010",
+          "oneId": "ONE-202401010",
+          "operation": "delete",
+          "operator": "管理员",
+          "operateTime": "2024-01-12 17:00:00",
+          "targetSystem": null,
+          "customerName": "孙十二",
+          "leadType": "bdc_renewal",
+          "payload": {
+            "leadId": "LEAD-010",
+            "reason": "客户主动取消"
+          },
+          "result": "success",
+          "errorMessage": null,
+          "responseData": {
+            "message": "商机删除成功"
+          }
+        },
+        {
+          "id": "AUDIT-20240113-011",
+          "leadId": "LEAD-019",
+          "oneId": "ONE-202401019",
+          "operation": "create",
+          "operator": "系统自动",
+          "operateTime": "2024-01-13 15:30:00",
+          "targetSystem": null,
+          "customerName": "高宁",
+          "leadType": "pcn_aftersales_campaign",
+          "payload": {
+            "oneId": "ONE-202401019",
+            "customerName": "高宁",
+            "phone": "151****9999",
+            "leadType": "pcn_aftersales_campaign",
+            "valueSegment": {
+              "level": "diamond",
+              "annualConsumption": 180000,
+              "loyaltyScore": 98
+            }
+          },
+          "result": "success",
+          "errorMessage": null,
+          "responseData": null
+        },
+        {
+          "id": "AUDIT-20240113-012",
+          "leadId": "LEAD-020",
+          "oneId": "ONE-202401020",
+          "operation": "push",
+          "operator": "系统自动",
+          "operateTime": "2024-01-13 16:20:00",
+          "targetSystem": "wechat",
+          "customerName": "崔然",
+          "leadType": "ttr_survey",
+          "payload": {
+            "opportunity_ids": ["LEAD-020"],
+            "target_system": "wechat",
+            "assignee": null,
+            "contacts": [
+              {
+                "phone": "150****8888",
+                "source": "DMS",
+                "relation": "本人"
+              }
+            ],
+            "log_id": 9928,
+            "timestamp": "2024-01-13T16:20:00.000Z"
+          },
+          "result": "success",
+          "errorMessage": null,
+          "responseData": {
+            "taskId": "WECHAT-20240113001",
+            "status": "received",
+            "message": "商机已推送至企业微信",
+            "receiveTime": "2024-01-13 16:20:05"
+          }
+        },
+        {
+          "id": "AUDIT-20240113-013",
+          "leadId": "LEAD-021",
+          "oneId": "ONE-202401021",
+          "operation": "push",
+          "operator": "系统自动",
+          "operateTime": "2024-01-12 18:00:00",
+          "targetSystem": "BDC外呼系统",
+          "customerName": "石澜",
+          "leadType": "aftersales_cs",
+          "payload": {
+            "opportunity_ids": ["LEAD-021"],
+            "target_system": "BDC外呼系统",
+            "assignee": "BDC-006",
+            "contacts": [
+              {
+                "phone": "149****7777",
+                "source": "DMS",
+                "relation": "本人"
+              }
+            ],
+            "log_id": 9929,
+            "timestamp": "2024-01-12T18:00:00.000Z"
+          },
+          "result": "success",
+          "errorMessage": null,
+          "responseData": {
+            "taskId": "BDC-20240113007",
+            "status": "assigned",
+            "message": "商机已成功推送并分配顾问",
+            "assignTime": "2024-01-12 18:00:06"
+          }
+        },
+        {
+          "id": "AUDIT-20240114-001",
+          "leadId": "LEAD-022",
+          "oneId": "ONE-202401022",
+          "operation": "create",
+          "operator": "系统自动",
+          "operateTime": "2024-01-14 09:00:00",
+          "targetSystem": null,
+          "customerName": "何晓",
+          "leadType": "bdc_campaign",
+          "payload": {
+            "oneId": "ONE-202401022",
+            "campaign": "BDC-CAMP-202401",
+            "leadType": "bdc_campaign"
+          },
+          "result": "success",
+          "errorMessage": null,
+          "responseData": null
+        },
+        {
+          "id": "AUDIT-20240114-002",
+          "leadId": "LEAD-025",
+          "oneId": "ONE-202401025",
+          "operation": "push",
+          "operator": "系统自动",
+          "operateTime": "2024-01-14 12:00:00",
+          "targetSystem": "BDC外呼系统",
+          "customerName": "柏晨",
+          "leadType": "bdc_renewal",
+          "payload": {
+            "opportunity_ids": ["LEAD-025"],
+            "target_system": "BDC外呼系统",
+            "log_id": 9930
+          },
+          "result": "success",
+          "errorMessage": null,
+          "responseData": {
+            "taskId": "BDC-20240114001",
+            "status": "assigned",
+            "assignTime": "2024-01-14 12:00:06"
+          }
+        },
+        {
+          "id": "AUDIT-20240114-003",
+          "leadId": "LEAD-030",
+          "oneId": "ONE-202401030",
+          "operation": "push",
+          "operator": "系统自动",
+          "operateTime": "2024-01-14 16:00:00",
+          "targetSystem": "wechat",
+          "customerName": "安澜",
+          "leadType": "aftersales_cs",
+          "payload": {
+            "opportunity_ids": ["LEAD-030"],
+            "target_system": "wechat",
+            "log_id": 9931
+          },
+          "result": "success",
+          "errorMessage": null,
+          "responseData": {
+            "taskId": "WECHAT-20240114001",
+            "status": "received",
+            "receiveTime": "2024-01-14 16:00:05"
+          }
+        }
+      ],
+      "total": 18
+    }
+  },
+  "add": {
+    "code": 200,
+    "msg": "创建成功",
+    "data": null
+  },
+  "update": {
+    "code": 200,
+    "msg": "更新成功",
+    "data": null
+  },
+  "delete": {
+    "code": 200,
+    "msg": "删除成功",
+    "data": null
+  },
+  "push": {
+    "code": 200,
+    "msg": "推送成功",
+    "data": null
+  },
+  "reload": {
+    "code": 200,
+    "msg": "重载成功",
+    "data": null
+  },
+  "toggle": {
+    "code": 200,
+    "msg": "操作成功",
+    "data": null
+  }
+}

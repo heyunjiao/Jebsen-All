@@ -1,0 +1,1511 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>C360权限配置确认表-完整版</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        max-width: 1400px;
+        padding: 20px;
+        margin: 0 auto;
+        font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+        line-height: 1.6;
+        color: #333333;
+        background: #f5f7fa;
+      }
+      .container {
+        padding: 30px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 12px rgb(0 0 0 / 10%);
+      }
+      .header {
+        padding-bottom: 20px;
+        margin-bottom: 30px;
+        text-align: center;
+        border-bottom: 2px solid #409eff;
+      }
+      h1 {
+        margin: 0 0 10px;
+        font-size: 28px;
+        color: #2c3e50;
+      }
+      .subtitle {
+        font-size: 14px;
+        color: #606266;
+      }
+      .edit-tip {
+        padding: 15px;
+        margin-bottom: 25px;
+        font-size: 14px;
+        color: #409eff;
+        background: #ecf5ff;
+        border-left: 4px solid #409eff;
+        border-radius: 6px;
+      }
+      .edit-tip b {
+        color: #303133;
+      }
+      h2 {
+        padding: 10px 0;
+        margin: 30px 0 15px;
+        font-size: 20px;
+        color: #303133;
+        border-bottom: 2px solid #e4e7ed;
+      }
+      h3 {
+        margin: 20px 0 10px;
+        font-size: 16px;
+        font-weight: 600;
+        color: #606266;
+      }
+      table {
+        width: 100%;
+        margin-bottom: 30px;
+        font-size: 13px;
+        table-layout: auto;
+        border-collapse: collapse;
+        background: white;
+        box-shadow: 0 1px 4px rgb(0 0 0 / 8%);
+      }
+      th,
+      td {
+        padding: 10px 8px;
+        text-align: center;
+        word-wrap: break-word;
+        vertical-align: middle;
+        border: 1px solid #dcdfe6;
+      }
+      th {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        font-weight: 600;
+        color: #303133;
+        background: linear-gradient(to bottom, #f5f7fa, #e9ecef);
+      }
+      td:first-child {
+        min-width: 150px;
+        font-weight: 500;
+        text-align: left;
+        background: #fafafa;
+      }
+
+      /* 允许编辑的样式指示 */
+      [contenteditable="true"]:hover {
+        cursor: text;
+        background: #f0f9ff;
+        outline: 2px dashed #409eff;
+        outline-offset: -2px;
+      }
+      .section-title {
+        padding-left: 15px !important;
+        font-size: 14px;
+        font-weight: bold;
+        color: #303133;
+        text-align: left !important;
+        background: #e9ecef !important;
+      }
+      .role-header {
+        min-width: 100px;
+        font-weight: 600;
+        background: #f0f2f5;
+      }
+
+      /* 权限标识样式 */
+      .permission-yes {
+        font-weight: bold;
+        color: #67c23a;
+      }
+      .permission-no {
+        color: #f56c6c;
+      }
+
+      /* 响应式设计 */
+      .table-wrapper {
+        margin-bottom: 20px;
+        overflow-x: auto;
+      }
+
+      @media (width <= 1200px) {
+        .table-wrapper {
+          overflow-x: scroll;
+        }
+        table {
+          min-width: 1000px;
+        }
+      }
+      .legend {
+        padding: 12px 15px;
+        margin-bottom: 20px;
+        font-size: 13px;
+        background: #f5f7fa;
+        border-radius: 4px;
+      }
+      .legend-item {
+        display: inline-block;
+        margin-right: 20px;
+      }
+      .legend-item::before {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        margin-right: 5px;
+        vertical-align: middle;
+        content: "";
+      }
+      .legend-yes::before {
+        background: #67c23a;
+        border-radius: 2px;
+      }
+      .legend-no::before {
+        background: #f56c6c;
+        border-radius: 2px;
+      }
+      .footer {
+        padding-top: 20px;
+        margin-top: 40px;
+        font-size: 12px;
+        color: #909399;
+        text-align: right;
+        border-top: 1px solid #e4e7ed;
+      }
+
+      /* 数据权限表格特殊样式 */
+      .data-scope-table td {
+        text-align: left;
+      }
+      .data-scope-table td:first-child {
+        font-weight: 600;
+        background: #f0f2f5;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1 contenteditable="true">C360 客户全景平台 - 权限配置确认表</h1>
+        <p class="subtitle">完整版权限配置矩阵 | 支持在线编辑</p>
+      </div>
+
+      <div class="edit-tip">
+        <b>📝 编辑提示：</b
+        >下方所有表格内容已开启<b>直接编辑</b>模式。您可以直接点击单元格进行修改、删减或增加角色/模块。修改后可直接保存或打印。
+      </div>
+
+      <div class="legend">
+        <span class="legend-item legend-yes">✅ 有权限</span>
+        <span class="legend-item legend-no">❌ 无权限</span>
+      </div>
+
+      <h2 contenteditable="true">一、人员角色定义</h2>
+      <div class="table-wrapper">
+        <table contenteditable="true">
+          <thead>
+            <tr>
+              <th style="width: 120px">角色名称</th>
+              <th style="width: 150px">角色编码</th>
+              <th style="width: 100px">角色级别</th>
+              <th>主要职责</th>
+              <th style="width: 200px">适用人员</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>系统管理员</td>
+              <td>admin</td>
+              <td>管理员</td>
+              <td>系统配置管理、客户账号管理、角色权限配置、系统监控</td>
+              <td>IT管理员、系统运维人员</td>
+            </tr>
+            <tr>
+              <td>运营经理</td>
+              <td>operation_manager</td>
+              <td>经理</td>
+              <td>客户数据管理、分群管理、标签管理、数据质量处理、团队管理</td>
+              <td>运营部门经理、高级运营人员</td>
+            </tr>
+            <tr>
+              <td>运营专员</td>
+              <td>operation_specialist</td>
+              <td>普通员工</td>
+              <td>客户数据查询、客户维护、标签管理、分群创建</td>
+              <td>运营部门普通员工</td>
+            </tr>
+            <tr>
+              <td>数据分析师</td>
+              <td>data_analyst</td>
+              <td>数据专员</td>
+              <td>数据分析、报表生成、数据洞察、数据质量检查</td>
+              <td>数据分析部门人员</td>
+            </tr>
+            <tr>
+              <td>营销经理</td>
+              <td>marketing_manager</td>
+              <td>经理</td>
+              <td>客户分群创建、商机跟进、营销活动执行、团队管理</td>
+              <td>营销部门经理、高级营销人员</td>
+            </tr>
+            <tr>
+              <td>营销专员</td>
+              <td>marketing_specialist</td>
+              <td>普通员工</td>
+              <td>客户查看、分群查看、商机跟进、营销活动执行</td>
+              <td>营销部门普通员工</td>
+            </tr>
+            <tr>
+              <td>销售经理</td>
+              <td>sales_manager</td>
+              <td>经理</td>
+              <td>商机管理、客户查看、销售数据录入、团队管理</td>
+              <td>销售部门经理、高级销售人员</td>
+            </tr>
+            <tr>
+              <td>销售人员</td>
+              <td>sales_person</td>
+              <td>普通员工</td>
+              <td>商机跟进、客户信息查看、销售数据录入</td>
+              <td>销售部门普通员工</td>
+            </tr>
+            <tr>
+              <td>客服人员</td>
+              <td>customer_service</td>
+              <td>普通员工</td>
+              <td>客户信息查看、客户咨询处理</td>
+              <td>客服部门人员</td>
+            </tr>
+            <tr>
+              <td>审计人员</td>
+              <td>auditor</td>
+              <td>数据专员</td>
+              <td>操作日志查看、登录日志查看、审计追溯</td>
+              <td>审计部门人员</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 contenteditable="true">二、功能菜单访问权限矩阵</h2>
+      <div class="table-wrapper">
+        <table contenteditable="true">
+          <thead>
+            <tr>
+              <th style="min-width: 200px">菜单模块</th>
+              <th class="role-header">系统管理员</th>
+              <th class="role-header">运营经理</th>
+              <th class="role-header">运营专员</th>
+              <th class="role-header">数据分析师</th>
+              <th class="role-header">营销经理</th>
+              <th class="role-header">营销专员</th>
+              <th class="role-header">销售经理</th>
+              <th class="role-header">销售人员</th>
+              <th class="role-header">客服人员</th>
+              <th class="role-header">审计人员</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="section-title" colspan="11">概览与监控</td>
+            </tr>
+            <tr>
+              <td>欢迎页</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+            </tr>
+            <tr>
+              <td>数据监控看板</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>✅</td>
+            </tr>
+            <tr>
+              <td class="section-title" colspan="11">数据处理与治理</td>
+            </tr>
+            <tr>
+              <td>异常中心</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>✅</td>
+            </tr>
+            <tr>
+              <td>审批中心</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>✅</td>
+            </tr>
+            <tr>
+              <td>源数据采集与质量门禁工作台</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>✅</td>
+            </tr>
+            <tr>
+              <td class="section-title" colspan="11">客户与资产管理</td>
+            </tr>
+            <tr>
+              <td>顾客列表</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+            </tr>
+            <tr>
+              <td>顾客批量操作</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>顾客筛选与分群</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>标签管理</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>分群管理</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="section-title" colspan="11">业务运营</td>
+            </tr>
+            <tr>
+              <td>商机看板</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>商机列表</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>商机规则配置</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>商机追踪</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="section-title" colspan="11">系统管理</td>
+            </tr>
+            <tr>
+              <td>账号管理</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>角色管理</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>菜单管理</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>部门管理</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>通知公告</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>数据催收配置</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="section-title" colspan="11">系统监控</td>
+            </tr>
+            <tr>
+              <td>操作日志</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>✅</td>
+            </tr>
+            <tr>
+              <td>登录日志</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>✅</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 contenteditable="true">三、核心操作权限（按钮级）</h2>
+
+      <h3 contenteditable="true">3.1 顾客列表模块按钮权限</h3>
+      <div class="table-wrapper">
+        <table contenteditable="true">
+          <thead>
+            <tr>
+              <th style="min-width: 150px">按钮功能</th>
+              <th class="role-header">系统管理员</th>
+              <th class="role-header">运营经理</th>
+              <th class="role-header">运营专员</th>
+              <th class="role-header">数据分析师</th>
+              <th class="role-header">营销经理</th>
+              <th class="role-header">营销专员</th>
+              <th class="role-header">销售经理</th>
+              <th class="role-header">销售人员</th>
+              <th class="role-header">客服人员</th>
+              <th class="role-header">审计人员</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>新增客户</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>编辑客户</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>删除客户</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>查看详情</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+            </tr>
+            <tr>
+              <td>导出数据</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>✅</td>
+            </tr>
+            <tr>
+              <td>导入数据</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>合并OneID</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>批量操作</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>纠错反馈</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 contenteditable="true">3.2 标签管理模块按钮权限</h3>
+      <div class="table-wrapper">
+        <table contenteditable="true">
+          <thead>
+            <tr>
+              <th style="min-width: 150px">按钮功能</th>
+              <th class="role-header">系统管理员</th>
+              <th class="role-header">运营经理</th>
+              <th class="role-header">运营专员</th>
+              <th class="role-header">数据分析师</th>
+              <th class="role-header">营销经理</th>
+              <th class="role-header">营销专员</th>
+              <th class="role-header">销售经理</th>
+              <th class="role-header">销售人员</th>
+              <th class="role-header">客服人员</th>
+              <th class="role-header">审计人员</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>新增标签</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>编辑标签</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>删除标签</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>发布标签</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>停用标签</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>修改标签规则</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>查看详情</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 contenteditable="true">3.3 分群管理模块按钮权限</h3>
+      <div class="table-wrapper">
+        <table contenteditable="true">
+          <thead>
+            <tr>
+              <th style="min-width: 150px">按钮功能</th>
+              <th class="role-header">系统管理员</th>
+              <th class="role-header">运营经理</th>
+              <th class="role-header">运营专员</th>
+              <th class="role-header">数据分析师</th>
+              <th class="role-header">营销经理</th>
+              <th class="role-header">营销专员</th>
+              <th class="role-header">销售经理</th>
+              <th class="role-header">销售人员</th>
+              <th class="role-header">客服人员</th>
+              <th class="role-header">审计人员</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>新建分群</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>编辑分群</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>删除分群</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>预览分群</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>推送商机</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>导出分群</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>查看详情</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 contenteditable="true">3.4 商机管理模块按钮权限</h3>
+      <div class="table-wrapper">
+        <table contenteditable="true">
+          <thead>
+            <tr>
+              <th style="min-width: 150px">按钮功能</th>
+              <th class="role-header">系统管理员</th>
+              <th class="role-header">运营经理</th>
+              <th class="role-header">运营专员</th>
+              <th class="role-header">数据分析师</th>
+              <th class="role-header">营销经理</th>
+              <th class="role-header">营销专员</th>
+              <th class="role-header">销售经理</th>
+              <th class="role-header">销售人员</th>
+              <th class="role-header">客服人员</th>
+              <th class="role-header">审计人员</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>新增商机</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>编辑商机</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>删除商机</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>查看详情</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>导出商机</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>规则配置</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>商机跟进</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 contenteditable="true">3.5 异常中心模块按钮权限</h3>
+      <div class="table-wrapper">
+        <table contenteditable="true">
+          <thead>
+            <tr>
+              <th style="min-width: 150px">按钮功能</th>
+              <th class="role-header">系统管理员</th>
+              <th class="role-header">运营经理</th>
+              <th class="role-header">运营专员</th>
+              <th class="role-header">数据分析师</th>
+              <th class="role-header">营销经理</th>
+              <th class="role-header">营销专员</th>
+              <th class="role-header">销售经理</th>
+              <th class="role-header">销售人员</th>
+              <th class="role-header">客服人员</th>
+              <th class="role-header">审计人员</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>处理异常</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>批量忽略</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>快速编辑</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>同步重试</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>合并OneID</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>拆分OneID</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>查看详情</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>✅</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 contenteditable="true">3.6 审批中心模块按钮权限</h3>
+      <div class="table-wrapper">
+        <table contenteditable="true">
+          <thead>
+            <tr>
+              <th style="min-width: 150px">按钮功能</th>
+              <th class="role-header">系统管理员</th>
+              <th class="role-header">运营经理</th>
+              <th class="role-header">运营专员</th>
+              <th class="role-header">数据分析师</th>
+              <th class="role-header">营销经理</th>
+              <th class="role-header">营销专员</th>
+              <th class="role-header">销售经理</th>
+              <th class="role-header">销售人员</th>
+              <th class="role-header">客服人员</th>
+              <th class="role-header">审计人员</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>批准</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>驳回</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>查看详情</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>✅</td>
+            </tr>
+            <tr>
+              <td>批量审批</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 contenteditable="true">四、数据权限配置</h2>
+      <div class="table-wrapper">
+        <table contenteditable="true" class="data-scope-table">
+          <thead>
+            <tr>
+              <th style="width: 150px">角色名称</th>
+              <th style="width: 200px">数据范围类型</th>
+              <th>数据范围说明</th>
+              <th style="width: 250px">适用场景</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>系统管理员</td>
+              <td>全部数据权限</td>
+              <td>可访问系统内所有数据，无任何限制</td>
+              <td>系统配置、全局数据管理</td>
+            </tr>
+            <tr>
+              <td>运营经理</td>
+              <td>本部门及以下数据权限</td>
+              <td>可访问所在部门及下级部门的所有数据</td>
+              <td>运营部门经理管理团队数据</td>
+            </tr>
+            <tr>
+              <td>运营专员</td>
+              <td>本部门数据权限</td>
+              <td>仅可访问所在部门的数据</td>
+              <td>运营部门普通员工处理部门数据</td>
+            </tr>
+            <tr>
+              <td>数据分析师</td>
+              <td>全部数据权限</td>
+              <td>可访问系统内所有数据，用于数据分析</td>
+              <td>数据分析、报表生成</td>
+            </tr>
+            <tr>
+              <td>营销经理</td>
+              <td>本部门及以下数据权限</td>
+              <td>可访问所在部门及下级部门的所有数据</td>
+              <td>营销部门经理管理团队数据</td>
+            </tr>
+            <tr>
+              <td>营销专员</td>
+              <td>本部门数据权限</td>
+              <td>仅可访问所在部门的数据</td>
+              <td>营销部门普通员工处理部门数据</td>
+            </tr>
+            <tr>
+              <td>销售经理</td>
+              <td>本部门及以下数据权限</td>
+              <td>可访问所在部门及下级部门的所有数据</td>
+              <td>销售部门经理管理团队数据</td>
+            </tr>
+            <tr>
+              <td>销售人员</td>
+              <td>仅本人数据权限</td>
+              <td>仅可访问自己创建或分配的数据</td>
+              <td>销售人员查看自己的客户和商机</td>
+            </tr>
+            <tr>
+              <td>客服人员</td>
+              <td>仅本人数据权限</td>
+              <td>仅可访问自己处理的客户数据</td>
+              <td>客服人员查看自己处理的客户信息</td>
+            </tr>
+            <tr>
+              <td>审计人员</td>
+              <td>全部数据权限</td>
+              <td>可访问系统内所有数据，用于审计追溯</td>
+              <td>操作日志、登录日志审计</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 contenteditable="true">五、字段脱敏权限配置</h2>
+      <div class="table-wrapper">
+        <table contenteditable="true">
+          <thead>
+            <tr>
+              <th style="min-width: 120px">字段名称</th>
+              <th class="role-header">系统管理员</th>
+              <th class="role-header">运营经理</th>
+              <th class="role-header">运营专员</th>
+              <th class="role-header">数据分析师</th>
+              <th class="role-header">营销经理</th>
+              <th class="role-header">营销专员</th>
+              <th class="role-header">销售经理</th>
+              <th class="role-header">销售人员</th>
+              <th class="role-header">客服人员</th>
+              <th class="role-header">审计人员</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>姓名</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+            </tr>
+            <tr>
+              <td>手机号</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>掩码</td>
+              <td>掩码</td>
+              <td>掩码</td>
+              <td>掩码</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>掩码</td>
+              <td>掩码</td>
+            </tr>
+            <tr>
+              <td>身份证号</td>
+              <td>明文</td>
+              <td>掩码</td>
+              <td>掩码</td>
+              <td>掩码</td>
+              <td>掩码</td>
+              <td>掩码</td>
+              <td>掩码</td>
+              <td>掩码</td>
+              <td>掩码</td>
+              <td>掩码</td>
+            </tr>
+            <tr>
+              <td>邮箱</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+            </tr>
+            <tr>
+              <td>地址</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+            </tr>
+            <tr>
+              <td>VIN码</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>掩码</td>
+              <td>掩码</td>
+            </tr>
+            <tr>
+              <td>车牌号</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>掩码</td>
+              <td>掩码</td>
+            </tr>
+            <tr>
+              <td>年消费金额</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>掩码</td>
+              <td>明文</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="padding: 15px; margin: 20px 0; background: #f0f9ff; border-left: 4px solid #409eff; border-radius: 6px">
+        <strong>脱敏规则说明：</strong>
+        <ul style="padding-left: 20px; margin: 10px 0 0; font-size: 13px">
+          <li><strong>明文：</strong>完整显示，不进行脱敏处理（如：13812345678）</li>
+          <li><strong>掩码：</strong>中间部分用*号替代（如：138****5678 或 320***********1234）</li>
+          <li><strong>手机号掩码规则：</strong>保留前3位和后4位，中间4位脱敏</li>
+          <li><strong>身份证掩码规则：</strong>保留前3位和后4位，中间部分脱敏</li>
+        </ul>
+      </div>
+
+      <div class="footer">
+        <p>文档版本：v2.0 | 创建日期：2024年 | 维护人员：产品团队</p>
+        <p style="margin-top: 5px; font-size: 11px; color: #c0c4cc">本表格支持在线编辑，修改后可直接保存或打印使用</p>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,311 @@
+{
+  "config": {
+    "code": 200,
+    "msg": "操作成功",
+    "data": {
+      "id": 1,
+      "schedules": [
+        {
+          "stage": "T+0",
+          "time": "18:00",
+          "recipientType": "owner",
+          "recipientEmail": "operator@company.com",
+          "description": "当天18:00前未上传，发送给操作人（唯一邮箱）"
+        },
+        {
+          "stage": "T+1",
+          "time": "9:00",
+          "recipientType": "owner",
+          "recipientEmail": "operator@company.com",
+          "description": "第二天9:00发现未上传，发送给操作人（唯一邮箱），告知missing，要求补传"
+        },
+        {
+          "stage": "T+2",
+          "time": "9:00",
+          "recipientType": "dept_head",
+          "recipientEmail": "data_team1@company.com,data_team2@company.com,data_team3@company.com",
+          "description": "后一天9:00仍未上传，发送给C360项目组数据专员（多个邮箱，用逗号分隔）"
+        }
+      ],
+      "ccEmail": "data_team@company.com",
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-15T10:30:00.000Z"
+    }
+  },
+  "monitorList": {
+    "code": 200,
+    "msg": "操作成功",
+    "data": {
+      "list": [
+        {
+          "id": 1,
+          "employeeName": "Alice Chen",
+          "email": "alice.chen@company.com",
+          "dataSource": "DMS",
+          "uploadStatus": "overdue",
+          "deadline": "T+1 18:00",
+          "overdueDays": 2,
+          "status": "active",
+          "department": "数据部",
+          "position": "数据操作人",
+          "lastNudgeTime": "2024-01-10 09:00:00",
+          "nudgeCount": 2,
+          "createdAt": "2024-01-01T00:00:00.000Z",
+          "updatedAt": "2024-01-10T09:00:00.000Z"
+        },
+        {
+          "id": 2,
+          "employeeName": "Bob Zhang",
+          "email": "bob.zhang@company.com",
+          "dataSource": "BDC",
+          "uploadStatus": "pending",
+          "deadline": "T+1 18:00",
+          "overdueDays": 0,
+          "status": "active",
+          "department": "数据部",
+          "position": "数据操作人",
+          "lastNudgeTime": "2024-01-08 14:30:00",
+          "nudgeCount": 1,
+          "createdAt": "2024-01-02T00:00:00.000Z",
+          "updatedAt": "2024-01-08T14:30:00.000Z"
+        },
+        {
+          "id": 3,
+          "employeeName": "Charlie Li",
+          "email": "charlie.li@company.com",
+          "dataSource": "CRM",
+          "uploadStatus": "overdue",
+          "deadline": "T+1 18:00",
+          "overdueDays": 5,
+          "status": "resigned",
+          "department": "数据部",
+          "position": "数据操作人",
+          "lastNudgeTime": "2024-01-05 11:20:00",
+          "nudgeCount": 3,
+          "createdAt": "2024-01-03T00:00:00.000Z",
+          "updatedAt": "2024-01-12T16:00:00.000Z"
+        },
+        {
+          "id": 4,
+          "employeeName": "David Wang",
+          "email": "david.wang@company.com",
+          "dataSource": "ERP",
+          "uploadStatus": "overdue",
+          "deadline": "T+1 18:00",
+          "overdueDays": 3,
+          "status": "resigned",
+          "department": "数据部",
+          "position": "数据操作人",
+          "lastNudgeTime": "2024-01-06 10:15:00",
+          "nudgeCount": 1,
+          "createdAt": "2024-01-04T00:00:00.000Z",
+          "updatedAt": "2024-01-11T09:30:00.000Z"
+        },
+        {
+          "id": 5,
+          "employeeName": "Eve Liu",
+          "email": "eve.liu@company.com",
+          "dataSource": "DMS",
+          "uploadStatus": "completed",
+          "deadline": "T+1 18:00",
+          "overdueDays": 0,
+          "status": "active",
+          "department": "数据部",
+          "position": "数据操作人",
+          "lastNudgeTime": null,
+          "nudgeCount": 0,
+          "createdAt": "2024-01-05T00:00:00.000Z",
+          "updatedAt": "2024-01-05T00:00:00.000Z"
+        },
+        {
+          "id": 6,
+          "employeeName": "Frank Zhao",
+          "email": "frank.zhao@company.com",
+          "dataSource": "BDC",
+          "uploadStatus": "pending",
+          "deadline": "T+1 18:00",
+          "overdueDays": 0,
+          "status": "active",
+          "department": "数据部",
+          "position": "数据操作人",
+          "lastNudgeTime": "2024-01-09 15:45:00",
+          "nudgeCount": 2,
+          "createdAt": "2024-01-06T00:00:00.000Z",
+          "updatedAt": "2024-01-09T15:45:00.000Z"
+        },
+        {
+          "id": 7,
+          "employeeName": "Grace Wu",
+          "email": "grace.wu@company.com",
+          "dataSource": "CRM",
+          "uploadStatus": "completed",
+          "deadline": "T+1 18:00",
+          "overdueDays": 0,
+          "status": "active",
+          "department": "数据部",
+          "position": "数据操作人",
+          "lastNudgeTime": "2024-01-07 13:20:00",
+          "nudgeCount": 1,
+          "createdAt": "2024-01-07T00:00:00.000Z",
+          "updatedAt": "2024-01-07T13:20:00.000Z"
+        },
+        {
+          "id": 8,
+          "employeeName": "Henry Sun",
+          "email": "henry.sun@company.com",
+          "dataSource": "ERP",
+          "uploadStatus": "overdue",
+          "deadline": "T+1 18:00",
+          "overdueDays": 4,
+          "status": "resigned",
+          "department": "数据部",
+          "position": "数据操作人",
+          "lastNudgeTime": "2024-01-04 16:10:00",
+          "nudgeCount": 2,
+          "createdAt": "2024-01-08T00:00:00.000Z",
+          "updatedAt": "2024-01-10T11:00:00.000Z"
+        },
+        {
+          "id": 9,
+          "employeeName": "Iris Ma",
+          "email": "iris.ma@company.com",
+          "dataSource": "DMS",
+          "uploadStatus": "pending",
+          "deadline": "T+1 18:00",
+          "overdueDays": 0,
+          "status": "active",
+          "department": "数据部",
+          "position": "数据操作人",
+          "lastNudgeTime": null,
+          "nudgeCount": 0,
+          "createdAt": "2024-01-09T00:00:00.000Z",
+          "updatedAt": "2024-01-09T00:00:00.000Z"
+        },
+        {
+          "id": 10,
+          "employeeName": "Jack Zhou",
+          "email": "jack.zhou@company.com",
+          "dataSource": "BDC",
+          "uploadStatus": "completed",
+          "deadline": "T+1 18:00",
+          "overdueDays": 0,
+          "status": "active",
+          "department": "数据部",
+          "position": "数据操作人",
+          "lastNudgeTime": "2024-01-11 09:30:00",
+          "nudgeCount": 1,
+          "createdAt": "2024-01-10T00:00:00.000Z",
+          "updatedAt": "2024-01-11T09:30:00.000Z"
+        }
+      ],
+      "total": 10
+    }
+  },
+  "emptyList": {
+    "code": 200,
+    "msg": "操作成功",
+    "data": {
+      "list": [],
+      "total": 0
+    }
+  },
+  "errorResponse": {
+    "code": 500,
+    "msg": "服务器错误"
+  },
+  "nudgeSuccess": {
+    "code": 200,
+    "msg": "操作成功",
+    "data": {
+      "success": true,
+      "message": "催收通知已发送"
+    }
+  },
+  "nudgeFailed": {
+    "code": 500,
+    "msg": "发送失败",
+    "data": {
+      "success": false,
+      "message": "发送失败，请稍后重试"
+    }
+  },
+  "employeeList": {
+    "code": 200,
+    "msg": "操作成功",
+    "data": [
+      {
+        "id": 1,
+        "name": "Alice Chen",
+        "email": "alice.chen@company.com",
+        "department": "数据部",
+        "position": "数据操作人",
+        "status": "active"
+      },
+      {
+        "id": 2,
+        "name": "Bob Zhang",
+        "email": "bob.zhang@company.com",
+        "department": "数据部",
+        "position": "数据操作人",
+        "status": "active"
+      },
+      {
+        "id": 3,
+        "name": "Eve Liu",
+        "email": "eve.liu@company.com",
+        "department": "数据部",
+        "position": "数据操作人",
+        "status": "active"
+      },
+      {
+        "id": 4,
+        "name": "Frank Zhao",
+        "email": "frank.zhao@company.com",
+        "department": "数据部",
+        "position": "数据操作人",
+        "status": "active"
+      },
+      {
+        "id": 5,
+        "name": "Grace Wu",
+        "email": "grace.wu@company.com",
+        "department": "数据部",
+        "position": "数据操作人",
+        "status": "active"
+      },
+      {
+        "id": 6,
+        "name": "Iris Ma",
+        "email": "iris.ma@company.com",
+        "department": "数据部",
+        "position": "数据操作人",
+        "status": "active"
+      },
+      {
+        "id": 7,
+        "name": "Jack Zhou",
+        "email": "jack.zhou@company.com",
+        "department": "数据部",
+        "position": "数据操作人",
+        "status": "active"
+      },
+      {
+        "id": 8,
+        "name": "C360数据专员1",
+        "email": "c360_data1@company.com",
+        "department": "C360项目组",
+        "position": "数据专员",
+        "status": "active"
+      },
+      {
+        "id": 9,
+        "name": "C360数据专员2",
+        "email": "c360_data2@company.com",
+        "department": "C360项目组",
+        "position": "数据专员",
+        "status": "active"
+      }
+    ]
+  }
+}
+

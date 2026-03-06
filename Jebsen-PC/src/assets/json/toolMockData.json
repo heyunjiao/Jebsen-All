@@ -1,0 +1,166 @@
+{
+  "gen": {
+    "list": {
+      "code": "200",
+      "msg": "操作成功",
+      "rows": [
+        {
+          "tableId": 1,
+          "tableName": "sys_user",
+          "tableComment": "客户信息表",
+          "className": "SysUser",
+          "createTime": "2023-01-01 12:00:00",
+          "updateTime": "2023-01-01 12:00:00"
+        },
+        {
+          "tableId": 2,
+          "tableName": "sys_role",
+          "tableComment": "角色信息表",
+          "className": "SysRole",
+          "createTime": "2023-01-01 12:00:00",
+          "updateTime": "2023-01-01 12:00:00"
+        },
+        {
+          "tableId": 3,
+          "tableName": "sys_menu",
+          "tableComment": "菜单权限表",
+          "className": "SysMenu",
+          "createTime": "2023-01-01 12:00:00",
+          "updateTime": "2023-01-01 12:00:00"
+        }
+      ],
+      "total": 3
+    },
+    "dbList": {
+      "code": "200",
+      "msg": "操作成功",
+      "rows": [
+        {
+          "tableName": "sys_user",
+          "tableComment": "客户信息表",
+          "createTime": "2023-01-01 12:00:00",
+          "updateTime": "2023-01-01 12:00:00"
+        },
+        {
+          "tableName": "sys_role",
+          "tableComment": "角色信息表",
+          "createTime": "2023-01-01 12:00:00",
+          "updateTime": "2023-01-01 12:00:00"
+        }
+      ],
+      "total": 2
+    },
+    "detail": {
+      "code": "200",
+      "msg": "操作成功",
+      "data": {
+        "info": {
+          "tableId": 1,
+          "tableName": "sys_user",
+          "tableComment": "客户信息表",
+          "className": "SysUser",
+          "tplCategory": "crud",
+          "packageName": "com.ruoyi.system",
+          "moduleName": "system",
+          "businessName": "user",
+          "functionName": "客户管理",
+          "functionAuthor": "ruoyi",
+          "genType": "0",
+          "genPath": "/",
+          "options": "{}",
+          "createTime": "2023-01-01 12:00:00",
+          "updateTime": "2023-01-01 12:00:00"
+        },
+        "rows": [
+          {
+            "columnId": 1,
+            "tableId": 1,
+            "columnName": "user_id",
+            "columnComment": "客户ID",
+            "columnType": "bigint",
+            "javaType": "Long",
+            "javaField": "userId",
+            "isPk": "1",
+            "isIncrement": "1",
+            "isRequired": "1",
+            "isInsert": "1",
+            "isEdit": "1",
+            "isList": "1",
+            "isQuery": "1",
+            "queryType": "EQ",
+            "htmlType": "input",
+            "dictType": "",
+            "sort": 1
+          },
+          {
+            "columnId": 2,
+            "tableId": 1,
+            "columnName": "user_name",
+            "columnComment": "客户账号",
+            "columnType": "varchar(30)",
+            "javaType": "String",
+            "javaField": "userName",
+            "isPk": "0",
+            "isIncrement": "0",
+            "isRequired": "1",
+            "isInsert": "1",
+            "isEdit": "1",
+            "isList": "1",
+            "isQuery": "1",
+            "queryType": "LIKE",
+            "htmlType": "input",
+            "dictType": "",
+            "sort": 2
+          }
+        ],
+        "tables": [
+          {
+            "tableName": "sys_user",
+            "tableComment": "客户信息表"
+          },
+          {
+            "tableName": "sys_role",
+            "tableComment": "角色信息表"
+          }
+        ]
+      }
+    },
+    "preview": {
+      "code": "200",
+      "msg": "操作成功",
+      "data": {
+        "vm/java/domain.java.vm": "package com.ruoyi.system.domain;\n\nimport java.io.Serializable;\n\npublic class SysUser implements Serializable {\n    private Long userId;\n    private String userName;\n    // ... more code\n}",
+        "vm/java/mapper.xml.vm": "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n<mapper namespace=\"com.ruoyi.system.mapper.SysUserMapper\">\n    <!-- ... more code -->\n</mapper>",
+        "vm/java/service.java.vm": "package com.ruoyi.system.service;\n\npublic interface ISysUserService {\n    // ... more code\n}",
+        "vm/java/serviceImpl.java.vm": "package com.ruoyi.system.service.impl;\n\npublic class SysUserServiceImpl implements ISysUserService {\n    // ... more code\n}",
+        "vm/java/controller.java.vm": "package com.ruoyi.web.controller.system;\n\n@RestController\n@RequestMapping(\"/system/user\")\npublic class SysUserController {\n    // ... more code\n}",
+        "vm/vue/index.vue.vm": "<template>\n  <div class=\"app-container\">\n    <!-- ... more code -->\n  </div>\n</template>"
+      }
+    },
+    "import": {
+      "code": "200",
+      "msg": "导入成功"
+    },
+    "create": {
+      "code": "200",
+      "msg": "创建成功"
+    },
+    "update": {
+      "code": "200",
+      "msg": "修改成功"
+    },
+    "delete": {
+      "code": "200",
+      "msg": "删除成功"
+    },
+    "genCode": {
+      "code": "200",
+      "msg": "生成成功"
+    },
+    "synchDb": {
+      "code": "200",
+      "msg": "同步成功"
+    }
+  }
+}
+

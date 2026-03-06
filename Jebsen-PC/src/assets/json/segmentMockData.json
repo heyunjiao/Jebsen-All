@@ -1,0 +1,662 @@
+{
+  "list": {
+    "code": 200,
+    "msg": "操作成功",
+    "data": {
+      "list": [
+        {
+          "id": "SEG-001",
+          "name": "高意向热客户",
+          "category": "意向级别",
+          "status": "active",
+          "memberCount": 15230,
+          "snapshotCount": 5,
+          "lastExportAt": "2024-01-20 15:00:00",
+          "creator": "业务专员",
+          "createdAt": "2024-01-10 09:00:00",
+          "updatedAt": "2024-01-20 14:20:00",
+          "description": "意向级别为热且近30天有互动记录的客户",
+          "ruleConfig": {
+            "root": {
+              "id": "root",
+              "type": "group",
+              "operator": "AND",
+              "children": [
+                { "id": "c1", "type": "predicate", "field": "intentionLevel", "operatorType": "eq", "value": "热" },
+                { "id": "c2", "type": "predicate", "field": "interactionCount30Days", "operatorType": "gt", "value": 0 }
+              ]
+            }
+          }
+        },
+        {
+          "id": "SEG-002",
+          "name": "本市私牌车主",
+          "category": "所在城市",
+          "status": "active",
+          "memberCount": 45600,
+          "snapshotCount": 3,
+          "lastExportAt": "2024-01-19 10:30:00",
+          "creator": "系统管理员",
+          "createdAt": "2024-01-08 08:00:00",
+          "updatedAt": "2024-01-18 16:45:00",
+          "description": "所在城市为本市且车牌类型为私牌的客户",
+          "ruleConfig": {
+            "root": {
+              "id": "root",
+              "type": "group",
+              "operator": "AND",
+              "children": [
+                { "id": "c1", "type": "predicate", "field": "city", "operatorType": "eq", "value": "本市" },
+                { "id": "c2", "type": "predicate", "field": "licensePlateType", "operatorType": "eq", "value": "私牌" }
+              ]
+            }
+          }
+        },
+        {
+          "id": "SEG-003",
+          "name": "爱好亲子+自驾游客户",
+          "category": "爱好",
+          "status": "active",
+          "memberCount": 8900,
+          "snapshotCount": 2,
+          "lastExportAt": "2024-01-18 14:00:00",
+          "creator": "业务专员",
+          "createdAt": "2024-01-12 10:00:00",
+          "updatedAt": "2024-01-17 11:30:00",
+          "description": "爱好包含亲子且包含自驾游的客户",
+          "ruleConfig": {
+            "root": {
+              "id": "root",
+              "type": "group",
+              "operator": "AND",
+              "children": [
+                { "id": "c1", "type": "predicate", "field": "hobbies", "operatorType": "contains", "value": "亲子" },
+                { "id": "c2", "type": "predicate", "field": "hobbies", "operatorType": "contains", "value": "自驾游" }
+              ]
+            }
+          }
+        },
+        {
+          "id": "SEG-004",
+          "name": "免打扰车主",
+          "category": "特殊标识",
+          "status": "active",
+          "memberCount": 890,
+          "snapshotCount": 1,
+          "creator": "客服专员",
+          "createdAt": "2024-01-15 09:00:00",
+          "updatedAt": "2024-01-15 09:00:00",
+          "description": "标记为免打扰的车主",
+          "ruleConfig": {
+            "root": {
+              "id": "root",
+              "type": "group",
+              "operator": "AND",
+              "children": [
+                { "id": "c1", "type": "predicate", "field": "doNotDisturb", "operatorType": "eq", "value": true }
+              ]
+            }
+          }
+        },
+        {
+          "id": "SEG-005",
+          "name": "SC全款+新车客户",
+          "category": "SC",
+          "status": "active",
+          "memberCount": 34500,
+          "snapshotCount": 4,
+          "lastExportAt": "2024-01-20 11:00:00",
+          "creator": "销售顾问",
+          "createdAt": "2024-01-09 09:00:00",
+          "updatedAt": "2024-01-19 15:20:00",
+          "description": "支付方式为全款且购买新车的客户",
+          "ruleConfig": {
+            "root": {
+              "id": "root",
+              "type": "group",
+              "operator": "AND",
+              "children": [
+                { "id": "c1", "type": "predicate", "field": "paymentMethod", "operatorType": "eq", "value": "全款" },
+                { "id": "c2", "type": "predicate", "field": "vehicleSource", "operatorType": "eq", "value": "新车" }
+              ]
+            }
+          }
+        },
+        {
+          "id": "SEG-006",
+          "name": "SC老客介绍+高价值",
+          "category": "SC",
+          "status": "active",
+          "memberCount": 11200,
+          "snapshotCount": 3,
+          "lastExportAt": "2024-01-19 16:00:00",
+          "creator": "销售顾问",
+          "createdAt": "2024-01-10 10:00:00",
+          "updatedAt": "2024-01-18 14:30:00",
+          "description": "通过老客介绍且年消费>=3万的客户",
+          "ruleConfig": {
+            "root": {
+              "id": "root",
+              "type": "group",
+              "operator": "AND",
+              "children": [
+                { "id": "c1", "type": "predicate", "field": "sourceChannel", "operatorType": "eq", "value": "老客介绍" },
+                { "id": "c2", "type": "predicate", "field": "annualConsumption", "operatorType": "gte", "value": 30000 }
+              ]
+            }
+          }
+        },
+        {
+          "id": "SEG-007",
+          "name": "SC-PMP邀约客户",
+          "category": "SC",
+          "status": "active",
+          "memberCount": 12580,
+          "snapshotCount": 2,
+          "lastExportAt": "2024-01-18 10:00:00",
+          "creator": "销售顾问",
+          "createdAt": "2024-01-11 09:00:00",
+          "updatedAt": "2024-01-17 11:00:00",
+          "description": "通过PMP邀约的客户",
+          "ruleConfig": {
+            "root": {
+              "id": "root",
+              "type": "group",
+              "operator": "AND",
+              "children": [
+                { "id": "c1", "type": "predicate", "field": "sourceChannel", "operatorType": "eq", "value": "PMP邀约" }
+              ]
+            }
+          }
+        },
+        {
+          "id": "SEG-008",
+          "name": "续保-平安+即将到期",
+          "category": "续保",
+          "status": "active",
+          "memberCount": 18900,
+          "snapshotCount": 3,
+          "lastExportAt": "2024-01-20 09:00:00",
+          "creator": "续保专员",
+          "createdAt": "2024-01-12 08:00:00",
+          "updatedAt": "2024-01-19 10:20:00",
+          "description": "保险公司为平安且保险到期月份为1-3月的客户",
+          "ruleConfig": {
+            "root": {
+              "id": "root",
+              "type": "group",
+              "operator": "AND",
+              "children": [
+                { "id": "c1", "type": "predicate", "field": "insuranceCompany", "operatorType": "eq", "value": "平安" },
+                {
+                  "id": "c2",
+                  "type": "group",
+                  "operator": "OR",
+                  "children": [
+                    { "id": "c2-1", "type": "predicate", "field": "insuranceExpiryMonth", "operatorType": "eq", "value": 1 },
+                    { "id": "c2-2", "type": "predicate", "field": "insuranceExpiryMonth", "operatorType": "eq", "value": 2 },
+                    { "id": "c2-3", "type": "predicate", "field": "insuranceExpiryMonth", "operatorType": "eq", "value": 3 }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "SEG-009",
+          "name": "续保-人保客户",
+          "category": "续保",
+          "status": "active",
+          "memberCount": 23400,
+          "snapshotCount": 2,
+          "lastExportAt": "2024-01-19 14:00:00",
+          "creator": "续保专员",
+          "createdAt": "2024-01-13 09:00:00",
+          "updatedAt": "2024-01-18 15:00:00",
+          "description": "保险公司为人保的客户",
+          "ruleConfig": {
+            "root": {
+              "id": "root",
+              "type": "group",
+              "operator": "AND",
+              "children": [
+                { "id": "c1", "type": "predicate", "field": "insuranceCompany", "operatorType": "eq", "value": "人保" }
+              ]
+            }
+          }
+        },
+        {
+          "id": "SEG-010",
+          "name": "续保-新保客户",
+          "category": "续保",
+          "status": "active",
+          "memberCount": 12300,
+          "snapshotCount": 2,
+          "lastExportAt": "2024-01-18 11:00:00",
+          "creator": "续保专员",
+          "createdAt": "2024-01-14 08:00:00",
+          "updatedAt": "2024-01-17 13:00:00",
+          "description": "新购买保险的客户",
+          "ruleConfig": {
+            "root": {
+              "id": "root",
+              "type": "group",
+              "operator": "AND",
+              "children": [
+                { "id": "c1", "type": "predicate", "field": "insuranceType", "operatorType": "eq", "value": "新保" }
+              ]
+            }
+          }
+        },
+        {
+          "id": "SEG-011",
+          "name": "POC-精确报价+高意向",
+          "category": "POC",
+          "status": "active",
+          "memberCount": 15600,
+          "snapshotCount": 3,
+          "lastExportAt": "2024-01-20 10:00:00",
+          "creator": "评估专员",
+          "createdAt": "2024-01-11 10:00:00",
+          "updatedAt": "2024-01-19 14:30:00",
+          "description": "已进行精确报价且意向级别为热或暖的客户",
+          "ruleConfig": {
+            "root": {
+              "id": "root",
+              "type": "group",
+              "operator": "AND",
+              "children": [
+                { "id": "c1", "type": "predicate", "field": "pocType", "operatorType": "eq", "value": "精确报价" },
+                {
+                  "id": "c2",
+                  "type": "group",
+                  "operator": "OR",
+                  "children": [
+                    { "id": "c2-1", "type": "predicate", "field": "intentionLevel", "operatorType": "eq", "value": "热" },
+                    { "id": "c2-2", "type": "predicate", "field": "intentionLevel", "operatorType": "eq", "value": "暖" }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "SEG-012",
+          "name": "POC-销售评估客户",
+          "category": "POC",
+          "status": "active",
+          "memberCount": 34500,
+          "snapshotCount": 2,
+          "lastExportAt": "2024-01-19 15:00:00",
+          "creator": "销售顾问",
+          "createdAt": "2024-01-12 11:00:00",
+          "updatedAt": "2024-01-18 16:00:00",
+          "description": "已进行销售评估的客户",
+          "ruleConfig": {
+            "root": {
+              "id": "root",
+              "type": "group",
+              "operator": "AND",
+              "children": [
+                { "id": "c1", "type": "predicate", "field": "pocType", "operatorType": "eq", "value": "销售评估" }
+              ]
+            }
+          }
+        },
+        {
+          "id": "SEG-013",
+          "name": "线上活动-8月再购抽奖",
+          "category": "线上活动",
+          "status": "active",
+          "memberCount": 1230,
+          "snapshotCount": 1,
+          "lastExportAt": "2024-01-17 10:00:00",
+          "creator": "市场专员",
+          "createdAt": "2024-01-13 09:00:00",
+          "updatedAt": "2024-01-13 09:00:00",
+          "description": "参与8月再购活动抽奖的客户",
+          "ruleConfig": {
+            "root": {
+              "id": "root",
+              "type": "group",
+              "operator": "AND",
+              "children": [
+                { "id": "c1", "type": "predicate", "field": "onlineActivity", "operatorType": "contains", "value": "8月再购活动抽奖" }
+              ]
+            }
+          }
+        },
+        {
+          "id": "SEG-014",
+          "name": "保时捷911车主",
+          "category": "保时捷",
+          "status": "active",
+          "memberCount": 15230,
+          "snapshotCount": 4,
+          "lastExportAt": "2024-01-20 14:00:00",
+          "creator": "系统管理员",
+          "createdAt": "2024-01-08 09:00:00",
+          "updatedAt": "2024-01-19 15:30:00",
+          "description": "车型为保时捷911的客户",
+          "ruleConfig": {
+            "root": {
+              "id": "root",
+              "type": "group",
+              "operator": "AND",
+              "children": [
+                { "id": "c1", "type": "predicate", "field": "carSeriesModel", "operatorType": "contains", "value": "911" }
+              ]
+            }
+          }
+        },
+        {
+          "id": "SEG-015",
+          "name": "保时捷Cayenne车主",
+          "category": "保时捷",
+          "status": "active",
+          "memberCount": 28900,
+          "snapshotCount": 5,
+          "lastExportAt": "2024-01-20 13:00:00",
+          "creator": "系统管理员",
+          "createdAt": "2024-01-09 08:00:00",
+          "updatedAt": "2024-01-19 14:00:00",
+          "description": "车型为保时捷Cayenne的客户",
+          "ruleConfig": {
+            "root": {
+              "id": "root",
+              "type": "group",
+              "operator": "AND",
+              "children": [
+                { "id": "c1", "type": "predicate", "field": "carSeriesModel", "operatorType": "contains", "value": "Cayenne" }
+              ]
+            }
+          }
+        },
+        {
+          "id": "SEG-016",
+          "name": "保时捷Macan车主",
+          "category": "保时捷",
+          "status": "active",
+          "memberCount": 22300,
+          "snapshotCount": 3,
+          "lastExportAt": "2024-01-19 16:00:00",
+          "creator": "系统管理员",
+          "createdAt": "2024-01-10 09:00:00",
+          "updatedAt": "2024-01-18 15:00:00",
+          "description": "车型为保时捷Macan的客户",
+          "ruleConfig": {
+            "root": {
+              "id": "root",
+              "type": "group",
+              "operator": "AND",
+              "children": [
+                { "id": "c1", "type": "predicate", "field": "carSeriesModel", "operatorType": "contains", "value": "Macan" }
+              ]
+            }
+          }
+        },
+        {
+          "id": "SEG-017",
+          "name": "保时捷Panamera车主",
+          "category": "保时捷",
+          "status": "active",
+          "memberCount": 15600,
+          "snapshotCount": 2,
+          "lastExportAt": "2024-01-18 14:00:00",
+          "creator": "系统管理员",
+          "createdAt": "2024-01-11 10:00:00",
+          "updatedAt": "2024-01-17 11:00:00",
+          "description": "车型为保时捷Panamera的客户",
+          "ruleConfig": {
+            "root": {
+              "id": "root",
+              "type": "group",
+              "operator": "AND",
+              "children": [
+                { "id": "c1", "type": "predicate", "field": "carSeriesModel", "operatorType": "contains", "value": "Panamera" }
+              ]
+            }
+          }
+        },
+        {
+          "id": "SEG-018",
+          "name": "保时捷Taycan新能源车主",
+          "category": "保时捷",
+          "status": "active",
+          "memberCount": 11200,
+          "snapshotCount": 3,
+          "lastExportAt": "2024-01-20 12:00:00",
+          "creator": "系统管理员",
+          "createdAt": "2024-01-12 08:00:00",
+          "updatedAt": "2024-01-19 13:00:00",
+          "description": "车型为保时捷Taycan的新能源客户",
+          "ruleConfig": {
+            "root": {
+              "id": "root",
+              "type": "group",
+              "operator": "AND",
+              "children": [
+                { "id": "c1", "type": "predicate", "field": "carSeriesModel", "operatorType": "contains", "value": "Taycan" },
+                { "id": "c2", "type": "predicate", "field": "vehicleType", "operatorType": "eq", "value": "新能源" }
+              ]
+            }
+          }
+        },
+        {
+          "id": "SEG-019",
+          "name": "新能源车型客户",
+          "category": "新能源",
+          "status": "active",
+          "memberCount": 18900,
+          "snapshotCount": 2,
+          "lastExportAt": "2024-01-19 13:00:00",
+          "creator": "系统管理员",
+          "createdAt": "2024-01-13 09:00:00",
+          "updatedAt": "2024-01-18 14:00:00",
+          "description": "所有新能源车型的客户",
+          "ruleConfig": {
+            "root": {
+              "id": "root",
+              "type": "group",
+              "operator": "AND",
+              "children": [
+                { "id": "c1", "type": "predicate", "field": "vehicleType", "operatorType": "eq", "value": "新能源" }
+              ]
+            }
+          }
+        },
+        {
+          "id": "SEG-020",
+          "name": "高价值Cayenne车主",
+          "category": "保时捷",
+          "status": "active",
+          "memberCount": 8900,
+          "snapshotCount": 2,
+          "lastExportAt": "2024-01-18 15:00:00",
+          "creator": "业务专员",
+          "createdAt": "2024-01-14 10:00:00",
+          "updatedAt": "2024-01-17 12:00:00",
+          "description": "车型为Cayenne且年消费>=5万的客户",
+          "ruleConfig": {
+            "root": {
+              "id": "root",
+              "type": "group",
+              "operator": "AND",
+              "children": [
+                { "id": "c1", "type": "predicate", "field": "carSeriesModel", "operatorType": "contains", "value": "Cayenne" },
+                { "id": "c2", "type": "predicate", "field": "annualConsumption", "operatorType": "gte", "value": 50000 }
+              ]
+            }
+          }
+        },
+        {
+          "id": "SEG-021",
+          "name": "意向级别-暖",
+          "category": "意向级别",
+          "status": "draft",
+          "memberCount": 0,
+          "snapshotCount": 0,
+          "creator": "业务专员",
+          "createdAt": "2024-01-20 09:00:00",
+          "description": "意向级别为暖的客户分群",
+          "ruleConfig": {
+            "root": {
+              "id": "root",
+              "type": "group",
+              "operator": "AND",
+              "children": [
+                { "id": "c1", "type": "predicate", "field": "intentionLevel", "operatorType": "eq", "value": "暖" }
+              ]
+            }
+          }
+        },
+        {
+          "id": "SEG-022",
+          "name": "SC-贷款客户",
+          "category": "SC",
+          "status": "running",
+          "memberCount": 0,
+          "snapshotCount": 0,
+          "creator": "系统管理员",
+          "createdAt": "2024-01-20 10:00:00",
+          "description": "支付方式为贷款的客户",
+          "ruleConfig": {
+            "root": {
+              "id": "root",
+              "type": "group",
+              "operator": "AND",
+              "children": [
+                { "id": "c1", "type": "predicate", "field": "paymentMethod", "operatorType": "eq", "value": "贷款" }
+              ]
+            }
+          }
+        },
+        {
+          "id": "SEG-023",
+          "name": "70周年屏蔽客户",
+          "category": "特殊标识",
+          "status": "active",
+          "memberCount": 450,
+          "snapshotCount": 1,
+          "creator": "系统管理员",
+          "createdAt": "2024-01-15 08:00:00",
+          "updatedAt": "2024-01-15 08:00:00",
+          "description": "70周年活动屏蔽的客户",
+          "ruleConfig": {
+            "root": {
+              "id": "root",
+              "type": "group",
+              "operator": "AND",
+              "children": [
+                { "id": "c1", "type": "predicate", "field": "specialTag", "operatorType": "eq", "value": "70周年屏蔽" }
+              ]
+            }
+          }
+        },
+        {
+          "id": "SEG-024",
+          "name": "SC-市场活动客户",
+          "category": "SC",
+          "status": "active",
+          "memberCount": 15600,
+          "snapshotCount": 2,
+          "lastExportAt": "2024-01-19 11:00:00",
+          "creator": "市场专员",
+          "createdAt": "2024-01-16 09:00:00",
+          "updatedAt": "2024-01-18 10:00:00",
+          "description": "通过市场活动获得的客户",
+          "ruleConfig": {
+            "root": {
+              "id": "root",
+              "type": "group",
+              "operator": "AND",
+              "children": [
+                { "id": "c1", "type": "predicate", "field": "sourceChannel", "operatorType": "eq", "value": "市场活动" }
+              ]
+            }
+          }
+        }
+      ],
+      "total": 24
+    }
+  },
+  "detail": {
+    "code": 200,
+    "msg": "操作成功",
+    "data": {
+      "id": "SEG-001",
+      "name": "高意向热客户",
+      "category": "意向级别",
+      "status": "active",
+      "memberCount": 15230,
+      "snapshotCount": 5,
+      "lastExportAt": "2024-01-20 15:00:00",
+      "creator": "业务专员",
+      "createdAt": "2024-01-10 09:00:00",
+      "updatedAt": "2024-01-20 14:20:00",
+      "description": "意向级别为热且近30天有互动记录的客户",
+      "ruleConfig": {
+        "root": {
+          "id": "root",
+          "type": "group",
+          "operator": "AND",
+          "children": [
+            { "id": "c1", "type": "predicate", "field": "intentionLevel", "operatorType": "eq", "value": "热" },
+            { "id": "c2", "type": "predicate", "field": "interactionCount30Days", "operatorType": "gt", "value": 0 }
+          ]
+        }
+      },
+      "snapshots": [
+        { "id": "SS-1001", "createdAt": "2024-01-20 09:00:00", "memberCount": 15000, "remark": "T+1 盘点" },
+        { "id": "SS-1000", "createdAt": "2024-01-19 09:00:00", "memberCount": 14800, "remark": "历史快照" }
+      ],
+      "exports": [
+        { "id": "EXP-1", "createdAt": "2024-01-20 15:00:00", "operator": "业务专员", "fields": ["oneId","name","phone"], "fileUrl": "/mock/export/seg001.csv", "status": "success" }
+      ]
+    }
+  },
+  "estimate": {
+    "code": 200,
+    "msg": "操作成功",
+    "data": {
+      "estimatedCount": 15230,
+      "estimatedRate": "15.2%",
+      "sampleData": [
+        { "oneId": "ONEID00000001", "name": "陈建华", "matchReason": "意向级别: 热, 近30天互动: 3次" },
+        { "oneId": "ONEID00000002", "name": "王芳", "matchReason": "意向级别: 热, 近30天互动: 5次" }
+      ]
+    }
+  },
+  "add": {
+    "code": 200,
+    "msg": "操作成功",
+    "data": {
+      "id": "SEG-NEW"
+    }
+  },
+  "edit": {
+    "code": 200,
+    "msg": "操作成功",
+    "data": null
+  },
+  "snapshot": {
+    "code": 200,
+    "msg": "操作成功",
+    "data": null
+  },
+  "export": {
+    "code": 200,
+    "msg": "操作成功",
+    "data": null
+  },
+  "inactive": {
+    "code": 200,
+    "msg": "操作成功",
+    "data": null
+  },
+  "enable": {
+    "code": 200,
+    "msg": "操作成功",
+    "data": null
+  }
+}

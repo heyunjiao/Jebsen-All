@@ -1,0 +1,453 @@
+{
+  "config": {
+    "list": {
+      "code": 200,
+      "msg": "操作成功",
+      "rows": [
+        {
+          "configId": 1,
+          "configName": "主框架页-默认皮肤样式名称",
+          "configKey": "sys.index.skinName",
+          "configValue": "skin-blue",
+          "configType": "Y",
+          "remark": "蓝色 skin-blue、绿色 skin-green、紫色 skin-purple、红色 skin-red、黄色 skin-yellow",
+          "createTime": "2023-01-01 12:00:00"
+        },
+        {
+          "configId": 2,
+          "configName": "客户管理-账号初始密码",
+          "configKey": "sys.user.initPassword",
+          "configValue": "123456",
+          "configType": "Y",
+          "remark": "初始化密码 123456",
+          "createTime": "2023-01-01 12:00:00"
+        },
+        {
+          "configId": 3,
+          "configName": "主框架页-侧边栏主题",
+          "configKey": "sys.index.sideTheme",
+          "configValue": "theme-dark",
+          "configType": "Y",
+          "remark": "深色主题theme-dark，浅色主题theme-light",
+          "createTime": "2023-01-01 12:00:00"
+        },
+        {
+          "configId": 4,
+          "configName": "账号自助-验证码开关",
+          "configKey": "sys.account.captchaEnabled",
+          "configValue": "true",
+          "configType": "Y",
+          "remark": "是否开启验证码功能（true开启，false关闭）",
+          "createTime": "2023-01-01 12:00:00"
+        },
+        {
+          "configId": 5,
+          "configName": "账号自助-是否开启客户注册功能",
+          "configKey": "sys.account.registerUser",
+          "configValue": "false",
+          "configType": "Y",
+          "remark": "是否开启注册客户功能（true开启，false关闭）",
+          "createTime": "2023-01-01 12:00:00"
+        },
+        {
+          "configId": 6,
+          "configName": "文件上传-允许上传的文件类型",
+          "configKey": "sys.upload.allowFileType",
+          "configValue": "jpg,jpeg,png,gif,pdf,doc,docx,xls,xlsx",
+          "configType": "N",
+          "remark": "允许上传的文件类型，多个用逗号分隔",
+          "createTime": "2023-01-02 10:00:00"
+        },
+        {
+          "configId": 7,
+          "configName": "文件上传-允许上传的文件大小",
+          "configKey": "sys.upload.maxFileSize",
+          "configValue": "10",
+          "configType": "N",
+          "remark": "允许上传的文件大小，单位：MB",
+          "createTime": "2023-01-02 10:00:00"
+        },
+        {
+          "configId": 8,
+          "configName": "系统名称",
+          "configKey": "sys.name",
+          "configValue": "Jebsen",
+          "configType": "Y",
+          "remark": "系统名称",
+          "createTime": "2023-01-02 10:00:00"
+        }
+      ],
+      "total": 8
+    },
+    "detail": {
+      "code": 200,
+      "msg": "操作成功",
+      "data": {
+        "configId": 1,
+        "configName": "主框架页-默认皮肤样式名称",
+        "configKey": "sys.index.skinName",
+        "configValue": "skin-blue",
+        "configType": "Y",
+        "remark": "蓝色 skin-blue、绿色 skin-green、紫色 skin-purple、红色 skin-red、黄色 skin-yellow",
+        "createTime": "2023-01-01 12:00:00"
+      }
+    },
+    "add": {
+      "code": 200,
+      "msg": "新增成功"
+    },
+    "update": {
+      "code": 200,
+      "msg": "修改成功"
+    },
+    "delete": {
+      "code": 200,
+      "msg": "删除成功"
+    },
+    "refreshCache": {
+      "code": 200,
+      "msg": "刷新成功"
+    }
+  },
+  "notice": {
+    "list": {
+      "code": 200,
+      "msg": "操作成功",
+      "rows": [
+        {
+          "noticeId": 1,
+          "noticeTitle": "温馨提醒：2023年春节放假通知",
+          "noticeType": "1",
+          "noticeContent": "<p>各位同事：</p><p>根据国家法定节假日安排，2023年春节放假时间为1月21日至1月27日，共7天。1月28日（星期六）、1月29日（星期日）正常上班。</p><p>请各部门提前安排好工作，确保假期期间各项工作正常运转。</p><p>祝大家春节快乐！</p>",
+          "status": "0",
+          "createBy": "admin",
+          "createTime": "2023-01-15 10:00:00"
+        },
+        {
+          "noticeId": 2,
+          "noticeTitle": "系统维护通知",
+          "noticeType": "2",
+          "noticeContent": "<p>系统将于2023年2月1日晚上22:00至次日凌晨02:00进行系统维护升级，期间系统将暂停服务。</p><p>请各位客户提前安排好工作，避免影响业务。</p><p>感谢您的理解与支持！</p>",
+          "status": "0",
+          "createBy": "admin",
+          "createTime": "2023-01-20 14:00:00"
+        },
+        {
+          "noticeId": 3,
+          "noticeTitle": "关于新功能上线的通知",
+          "noticeType": "1",
+          "noticeContent": "<p>各位客户：</p><p>系统新版本已上线，新增了以下功能：</p><ul><li>数据导出功能</li><li>批量操作功能</li><li>报表统计功能</li></ul><p>欢迎大家使用并提出宝贵意见。</p>",
+          "status": "0",
+          "createBy": "admin",
+          "createTime": "2023-01-25 09:00:00"
+        },
+        {
+          "noticeId": 4,
+          "noticeTitle": "重要提醒：系统安全更新",
+          "noticeType": "2",
+          "noticeContent": "<p>各位客户：</p><p>为了保障系统安全，请及时更新您的密码，建议使用包含大小写字母、数字和特殊字符的强密码。</p><p>如有疑问，请联系系统管理员。</p>",
+          "status": "0",
+          "createBy": "admin",
+          "createTime": "2023-01-26 14:00:00"
+        },
+        {
+          "noticeId": 5,
+          "noticeTitle": "系统优化完成通知",
+          "noticeType": "1",
+          "noticeContent": "<p>各位客户：</p><p>系统优化已完成，主要优化内容：</p><ol><li>提升系统响应速度</li><li>优化数据库查询性能</li><li>修复已知问题</li></ol><p>感谢您的支持！</p>",
+          "status": "0",
+          "createBy": "admin",
+          "createTime": "2023-01-27 11:00:00"
+        }
+      ],
+      "total": 5
+    },
+    "detail": {
+      "code": 200,
+      "msg": "操作成功",
+      "data": {
+        "noticeId": 1,
+        "noticeTitle": "温馨提醒：2023年春节放假通知",
+        "noticeType": "1",
+        "noticeContent": "<p>各位同事：</p><p>根据国家法定节假日安排，2023年春节放假时间为1月21日至1月27日，共7天。1月28日（星期六）、1月29日（星期日）正常上班。</p><p>请各部门提前安排好工作，确保假期期间各项工作正常运转。</p><p>祝大家春节快乐！</p>",
+        "status": "0",
+        "createBy": "admin",
+        "createTime": "2023-01-15 10:00:00"
+      }
+    },
+    "add": {
+      "code": 200,
+      "msg": "新增成功"
+    },
+    "update": {
+      "code": 200,
+      "msg": "修改成功"
+    },
+    "delete": {
+      "code": 200,
+      "msg": "删除成功"
+    }
+  },
+  "operlog": {
+    "list": {
+      "code": 200,
+      "msg": "操作成功",
+      "rows": [
+        {
+          "operId": 1,
+          "title": "客户管理",
+          "businessType": "1",
+          "method": "com.ruoyi.web.controller.system.SysUserController.add()",
+          "requestMethod": "POST",
+          "operName": "admin",
+          "operUrl": "/system/user",
+          "operIp": "127.0.0.1",
+          "operLocation": "内网IP",
+          "operParam": "{\"userName\":\"test\",\"nickName\":\"测试客户\",\"email\":\"test@example.com\"}",
+          "jsonResult": "{\"code\":200,\"msg\":\"操作成功\"}",
+          "status": "0",
+          "errorMsg": "",
+          "operTime": "2023-01-01 12:00:00",
+          "costTime": 50
+        },
+        {
+          "operId": 2,
+          "title": "角色管理",
+          "businessType": "2",
+          "method": "com.ruoyi.web.controller.system.SysRoleController.edit()",
+          "requestMethod": "PUT",
+          "operName": "admin",
+          "operUrl": "/system/role",
+          "operIp": "127.0.0.1",
+          "operLocation": "内网IP",
+          "operParam": "{\"roleId\":1,\"roleName\":\"管理员\"}",
+          "jsonResult": "{\"code\":200,\"msg\":\"操作成功\"}",
+          "status": "0",
+          "errorMsg": "",
+          "operTime": "2023-01-01 11:00:00",
+          "costTime": 30
+        },
+        {
+          "operId": 3,
+          "title": "菜单管理",
+          "businessType": "3",
+          "method": "com.ruoyi.web.controller.system.SysMenuController.remove()",
+          "requestMethod": "DELETE",
+          "operName": "admin",
+          "operUrl": "/system/menu/1",
+          "operIp": "127.0.0.1",
+          "operLocation": "内网IP",
+          "operParam": "{\"menuId\":1}",
+          "jsonResult": "{\"code\":500,\"msg\":\"删除失败\"}",
+          "status": "1",
+          "errorMsg": "删除失败：菜单已被使用",
+          "operTime": "2023-01-01 10:00:00",
+          "costTime": 20
+        },
+        {
+          "operId": 4,
+          "title": "参数设置",
+          "businessType": "2",
+          "method": "com.ruoyi.web.controller.system.SysConfigController.edit()",
+          "requestMethod": "PUT",
+          "operName": "admin",
+          "operUrl": "/system/config",
+          "operIp": "192.168.1.100",
+          "operLocation": "XX省XX市",
+          "operParam": "{\"configId\":1,\"configValue\":\"skin-green\"}",
+          "jsonResult": "{\"code\":200,\"msg\":\"操作成功\"}",
+          "status": "0",
+          "errorMsg": "",
+          "operTime": "2023-01-01 09:00:00",
+          "costTime": 25
+        },
+        {
+          "operId": 5,
+          "title": "通知公告",
+          "businessType": "1",
+          "method": "com.ruoyi.web.controller.system.SysNoticeController.add()",
+          "requestMethod": "POST",
+          "operName": "admin",
+          "operUrl": "/system/notice",
+          "operIp": "127.0.0.1",
+          "operLocation": "内网IP",
+          "operParam": "{\"noticeTitle\":\"系统维护通知\",\"noticeType\":\"2\"}",
+          "jsonResult": "{\"code\":200,\"msg\":\"操作成功\"}",
+          "status": "0",
+          "errorMsg": "",
+          "operTime": "2023-01-01 08:00:00",
+          "costTime": 40
+        },
+        {
+          "operId": 6,
+          "title": "字典管理",
+          "businessType": "1",
+          "method": "com.ruoyi.web.controller.system.SysDictTypeController.add()",
+          "requestMethod": "POST",
+          "operName": "admin",
+          "operUrl": "/system/dict/type",
+          "operIp": "192.168.1.103",
+          "operLocation": "XX省XX市",
+          "operParam": "{\"dictName\":\"客户状态\",\"dictType\":\"sys_user_status\"}",
+          "jsonResult": "{\"code\":200,\"msg\":\"操作成功\"}",
+          "status": "0",
+          "errorMsg": "",
+          "operTime": "2023-01-01 07:00:00",
+          "costTime": 35
+        },
+        {
+          "operId": 7,
+          "title": "部门管理",
+          "businessType": "2",
+          "method": "com.ruoyi.web.controller.system.SysDeptController.edit()",
+          "requestMethod": "PUT",
+          "operName": "admin",
+          "operUrl": "/system/dept",
+          "operIp": "127.0.0.1",
+          "operLocation": "内网IP",
+          "operParam": "{\"deptId\":2,\"deptName\":\"研发部门\"}",
+          "jsonResult": "{\"code\":200,\"msg\":\"操作成功\"}",
+          "status": "0",
+          "errorMsg": "",
+          "operTime": "2023-01-01 06:00:00",
+          "costTime": 28
+        },
+        {
+          "operId": 8,
+          "title": "参数设置",
+          "businessType": "1",
+          "method": "com.ruoyi.web.controller.system.SysConfigController.add()",
+          "requestMethod": "POST",
+          "operName": "admin",
+          "operUrl": "/system/config",
+          "operIp": "127.0.0.1",
+          "operLocation": "内网IP",
+          "operParam": "{\"configName\":\"系统名称\",\"configKey\":\"sys.name\"}",
+          "jsonResult": "{\"code\":200,\"msg\":\"操作成功\"}",
+          "status": "0",
+          "errorMsg": "",
+          "operTime": "2023-01-01 05:00:00",
+          "costTime": 22
+        }
+      ],
+      "total": 8
+    },
+    "delete": {
+      "code": 200,
+      "msg": "删除成功"
+    },
+    "clean": {
+      "code": 200,
+      "msg": "清空成功"
+    }
+  },
+  "logininfor": {
+    "list": {
+      "code": 200,
+      "msg": "操作成功",
+      "rows": [
+        {
+          "infoId": 1,
+          "userName": "admin",
+          "ipaddr": "127.0.0.1",
+          "loginLocation": "内网IP",
+          "browser": "Chrome",
+          "os": "Windows 10",
+          "status": "0",
+          "msg": "登录成功",
+          "loginTime": "2023-01-01 12:00:00"
+        },
+        {
+          "infoId": 2,
+          "userName": "test",
+          "ipaddr": "192.168.1.100",
+          "loginLocation": "XX省XX市",
+          "browser": "Firefox",
+          "os": "Windows 11",
+          "status": "0",
+          "msg": "登录成功",
+          "loginTime": "2023-01-01 11:00:00"
+        },
+        {
+          "infoId": 3,
+          "userName": "user",
+          "ipaddr": "192.168.1.101",
+          "loginLocation": "XX省XX市",
+          "browser": "Edge",
+          "os": "macOS",
+          "status": "1",
+          "msg": "登录失败",
+          "loginTime": "2023-01-01 10:00:00"
+        },
+        {
+          "infoId": 4,
+          "userName": "admin",
+          "ipaddr": "127.0.0.1",
+          "loginLocation": "内网IP",
+          "browser": "Chrome",
+          "os": "Windows 10",
+          "status": "0",
+          "msg": "登录成功",
+          "loginTime": "2023-01-01 09:00:00"
+        },
+        {
+          "infoId": 5,
+          "userName": "test",
+          "ipaddr": "192.168.1.102",
+          "loginLocation": "XX省XX市",
+          "browser": "Safari",
+          "os": "macOS",
+          "status": "0",
+          "msg": "登录成功",
+          "loginTime": "2023-01-01 08:00:00"
+        },
+        {
+          "infoId": 6,
+          "userName": "admin",
+          "ipaddr": "127.0.0.1",
+          "loginLocation": "内网IP",
+          "browser": "Chrome",
+          "os": "Windows 10",
+          "status": "0",
+          "msg": "登录成功",
+          "loginTime": "2023-01-01 07:00:00"
+        },
+        {
+          "infoId": 7,
+          "userName": "user",
+          "ipaddr": "192.168.1.103",
+          "loginLocation": "XX省XX市",
+          "browser": "Firefox",
+          "os": "Linux",
+          "status": "1",
+          "msg": "登录失败：密码错误",
+          "loginTime": "2023-01-01 06:00:00"
+        },
+        {
+          "infoId": 8,
+          "userName": "test",
+          "ipaddr": "192.168.1.104",
+          "loginLocation": "XX省XX市",
+          "browser": "Chrome",
+          "os": "Windows 11",
+          "status": "0",
+          "msg": "登录成功",
+          "loginTime": "2023-01-01 05:00:00"
+        }
+      ],
+      "total": 8
+    },
+    "delete": {
+      "code": 200,
+      "msg": "删除成功"
+    },
+    "unlock": {
+      "code": 200,
+      "msg": "解锁成功"
+    },
+    "clean": {
+      "code": 200,
+      "msg": "清空成功"
+    }
+  }
+}

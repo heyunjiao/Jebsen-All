@@ -1,0 +1,1267 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>C360权限配置汇总表-树状版</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        max-width: 1600px;
+        padding: 20px;
+        margin: 0 auto;
+        font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+        line-height: 1.6;
+        color: #333333;
+        background: #f5f7fa;
+      }
+      .container {
+        padding: 30px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 12px rgb(0 0 0 / 10%);
+      }
+      .header {
+        padding-bottom: 20px;
+        margin-bottom: 30px;
+        text-align: center;
+        border-bottom: 2px solid #409eff;
+      }
+      h1 {
+        margin: 0 0 10px;
+        font-size: 28px;
+        color: #2c3e50;
+      }
+      .subtitle {
+        font-size: 14px;
+        color: #606266;
+      }
+      .edit-tip {
+        padding: 15px;
+        margin-bottom: 25px;
+        font-size: 14px;
+        color: #409eff;
+        background: #ecf5ff;
+        border-left: 4px solid #409eff;
+        border-radius: 6px;
+      }
+      .edit-tip b {
+        color: #303133;
+      }
+      h2 {
+        padding: 10px 0;
+        margin: 30px 0 15px;
+        font-size: 20px;
+        color: #303133;
+        border-bottom: 2px solid #e4e7ed;
+      }
+      table {
+        width: 100%;
+        margin-bottom: 30px;
+        font-size: 13px;
+        table-layout: auto;
+        border-collapse: collapse;
+        background: white;
+        box-shadow: 0 1px 4px rgb(0 0 0 / 8%);
+      }
+      th,
+      td {
+        padding: 10px 8px;
+        text-align: center;
+        word-wrap: break-word;
+        vertical-align: middle;
+        border: 1px solid #dcdfe6;
+      }
+      th {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        font-weight: 600;
+        color: #303133;
+        background: linear-gradient(to bottom, #f5f7fa, #e9ecef);
+      }
+
+      /* 树状结构样式 */
+      .tree-parent {
+        padding-left: 15px !important;
+        font-size: 14px;
+        font-weight: 600;
+        color: #303133;
+        text-align: left !important;
+        cursor: pointer;
+        background: #f0f2f5 !important;
+      }
+      .tree-child {
+        padding-left: 40px !important;
+        font-size: 13px;
+        color: #606266;
+        text-align: left !important;
+        background: #fafafa !important;
+      }
+      .tree-child::before {
+        margin-right: 5px;
+        color: #909399;
+        content: "└─ ";
+      }
+      .tree-section {
+        padding-left: 15px !important;
+        font-size: 14px;
+        font-weight: bold;
+        color: #303133;
+        text-align: left !important;
+        background: #e9ecef !important;
+      }
+      .role-header {
+        min-width: 90px;
+        font-weight: 600;
+        background: #f0f2f5;
+      }
+
+      /* 允许编辑的样式指示 */
+      [contenteditable="true"]:hover {
+        cursor: text;
+        background: #f0f9ff;
+        outline: 2px dashed #409eff;
+        outline-offset: -2px;
+      }
+
+      /* 权限标识样式 */
+      .permission-yes {
+        font-weight: bold;
+        color: #67c23a;
+      }
+      .permission-no {
+        color: #f56c6c;
+      }
+
+      /* 响应式设计 */
+      .table-wrapper {
+        margin-bottom: 20px;
+        overflow-x: auto;
+      }
+
+      @media (width <= 1200px) {
+        .table-wrapper {
+          overflow-x: scroll;
+        }
+        table {
+          min-width: 1200px;
+        }
+      }
+      .legend {
+        padding: 12px 15px;
+        margin-bottom: 20px;
+        font-size: 13px;
+        background: #f5f7fa;
+        border-radius: 4px;
+      }
+      .legend-item {
+        display: inline-block;
+        margin-right: 20px;
+      }
+      .legend-item::before {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        margin-right: 5px;
+        vertical-align: middle;
+        content: "";
+      }
+      .legend-yes::before {
+        background: #67c23a;
+        border-radius: 2px;
+      }
+      .legend-no::before {
+        background: #f56c6c;
+        border-radius: 2px;
+      }
+      .footer {
+        padding-top: 20px;
+        margin-top: 40px;
+        font-size: 12px;
+        color: #909399;
+        text-align: right;
+        border-top: 1px solid #e4e7ed;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1 contenteditable="true">C360 客户全景平台 - 权限配置汇总表（树状版）</h1>
+        <p class="subtitle">功能权限与操作权限一体化展示 | 支持在线编辑</p>
+      </div>
+
+      <div class="edit-tip">
+        <b>📝 编辑提示：</b
+        >下方表格内容已开启<b>直接编辑</b>模式。您可以直接点击单元格进行修改。表格采用树状结构，菜单下展开显示对应的操作按钮权限。
+      </div>
+
+      <div class="legend">
+        <span class="legend-item legend-yes">✅ 有权限</span>
+        <span class="legend-item legend-no">❌ 无权限</span>
+      </div>
+
+      <h2 contenteditable="true">功能权限与操作权限汇总表</h2>
+      <div class="table-wrapper">
+        <table contenteditable="true">
+          <thead>
+            <tr>
+              <th style="min-width: 250px">功能模块 / 操作权限</th>
+              <th class="role-header">系统管理员</th>
+              <th class="role-header">运营经理</th>
+              <th class="role-header">运营专员</th>
+              <th class="role-header">数据分析师</th>
+              <th class="role-header">营销经理</th>
+              <th class="role-header">营销专员</th>
+              <th class="role-header">销售经理</th>
+              <th class="role-header">销售人员</th>
+              <th class="role-header">客服人员</th>
+              <th class="role-header">审计人员</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- 概览与监控 -->
+            <tr>
+              <td class="tree-section" colspan="11">概览与监控</td>
+            </tr>
+            <tr>
+              <td class="tree-parent">欢迎页</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+            </tr>
+            <tr>
+              <td class="tree-parent">数据监控看板</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>✅</td>
+            </tr>
+
+            <!-- 数据处理与治理 -->
+            <tr>
+              <td class="tree-section" colspan="11">数据处理与治理</td>
+            </tr>
+            <tr>
+              <td class="tree-parent">异常中心</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>✅</td>
+            </tr>
+            <tr>
+              <td class="tree-child">处理异常</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-child">批量忽略</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-child">快速编辑</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-child">同步重试</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-child">合并OneID</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-child">拆分OneID</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-child">查看详情</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>✅</td>
+            </tr>
+            <tr>
+              <td class="tree-parent">审批中心</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>✅</td>
+            </tr>
+            <tr>
+              <td class="tree-child">批准</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-child">驳回</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-child">查看详情</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>✅</td>
+            </tr>
+            <tr>
+              <td class="tree-child">批量审批</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-parent">源数据采集与质量门禁工作台</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>✅</td>
+            </tr>
+
+            <!-- 客户管理 -->
+            <tr>
+              <td class="tree-section" colspan="11">客户管理</td>
+            </tr>
+            <tr>
+              <td class="tree-parent">客户列表</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+            </tr>
+            <tr>
+              <td class="tree-child">新增客户</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-child">编辑客户</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-child">删除客户</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-child">查看详情</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+            </tr>
+            <tr>
+              <td class="tree-child">导出数据</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>✅</td>
+            </tr>
+            <tr>
+              <td class="tree-child">导入数据</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-child">合并OneID</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-child">批量操作</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-child">纠错反馈</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-parent">客户批量操作</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-parent">客户筛选与分群</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-parent">H5 嵌入平台</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-child">勾选标签</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-child">处理合并电话号码</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-child">备注信息</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-child">数据流向平台</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-parent">标签管理</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-child">新增标签</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-child">编辑标签</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-child">删除标签</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-child">发布标签</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-child">停用标签</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-child">修改标签规则</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-child">查看详情</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+            </tr>
+            <tr>
+              <td class="tree-parent">分群管理</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-child">新建分群</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-child">编辑分群</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-child">删除分群</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-child">预览分群</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-child">推送商机</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-child">导出分群</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-child">查看详情</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+            </tr>
+
+            <!-- 业务运营 -->
+            <tr>
+              <td class="tree-section" colspan="11">业务运营</td>
+            </tr>
+            <tr>
+              <td class="tree-parent">商机看板</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-parent">商机列表</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-child">新增商机</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-child">编辑商机</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-child">删除商机</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-child">查看详情</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-child">导出商机</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-child">商机跟进</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-parent">商机规则配置</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td class="tree-parent">商机追踪</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+
+            <!-- 系统监控 -->
+            <tr>
+              <td class="tree-section" colspan="11">系统监控</td>
+            </tr>
+            <tr>
+              <td class="tree-parent">操作日志</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>✅</td>
+            </tr>
+            <tr>
+              <td class="tree-parent">登录日志</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>✅</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 contenteditable="true">数据权限配置</h2>
+      <div class="table-wrapper">
+        <table contenteditable="true">
+          <thead>
+            <tr>
+              <th style="width: 150px">角色名称</th>
+              <th style="width: 200px">数据范围类型</th>
+              <th>数据范围说明</th>
+              <th style="width: 250px">适用场景</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>系统管理员</td>
+              <td>全部数据权限</td>
+              <td>可访问系统内所有数据，无任何限制</td>
+              <td>系统配置、全局数据管理</td>
+            </tr>
+            <tr>
+              <td>运营经理</td>
+              <td>本部门及以下数据权限</td>
+              <td>可访问所在部门及下级部门的所有数据</td>
+              <td>运营部门经理管理团队数据</td>
+            </tr>
+            <tr>
+              <td>运营专员</td>
+              <td>本部门数据权限</td>
+              <td>仅可访问所在部门的数据</td>
+              <td>运营部门普通员工处理部门数据</td>
+            </tr>
+            <tr>
+              <td>数据分析师</td>
+              <td>全部数据权限</td>
+              <td>可访问系统内所有数据，用于数据分析</td>
+              <td>数据分析、报表生成</td>
+            </tr>
+            <tr>
+              <td>营销经理</td>
+              <td>本部门及以下数据权限</td>
+              <td>可访问所在部门及下级部门的所有数据</td>
+              <td>营销部门经理管理团队数据</td>
+            </tr>
+            <tr>
+              <td>营销专员</td>
+              <td>本部门数据权限</td>
+              <td>仅可访问所在部门的数据</td>
+              <td>营销部门普通员工处理部门数据</td>
+            </tr>
+            <tr>
+              <td>销售经理</td>
+              <td>本部门及以下数据权限</td>
+              <td>可访问所在部门及下级部门的所有数据</td>
+              <td>销售部门经理管理团队数据</td>
+            </tr>
+            <tr>
+              <td>销售人员</td>
+              <td>仅本人数据权限</td>
+              <td>仅可访问自己创建或分配的数据</td>
+              <td>销售人员查看自己的客户和商机</td>
+            </tr>
+            <tr>
+              <td>客服人员</td>
+              <td>仅本人数据权限</td>
+              <td>仅可访问自己处理的客户数据</td>
+              <td>客服人员查看自己处理的客户信息</td>
+            </tr>
+            <tr>
+              <td>审计人员</td>
+              <td>全部数据权限</td>
+              <td>可访问系统内所有数据，用于审计追溯</td>
+              <td>操作日志、登录日志审计</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 contenteditable="true">字段脱敏权限配置</h2>
+      <div class="table-wrapper">
+        <table contenteditable="true">
+          <thead>
+            <tr>
+              <th style="min-width: 120px">字段名称</th>
+              <th class="role-header">系统管理员</th>
+              <th class="role-header">运营经理</th>
+              <th class="role-header">运营专员</th>
+              <th class="role-header">数据分析师</th>
+              <th class="role-header">营销经理</th>
+              <th class="role-header">营销专员</th>
+              <th class="role-header">销售经理</th>
+              <th class="role-header">销售人员</th>
+              <th class="role-header">客服人员</th>
+              <th class="role-header">审计人员</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>姓名</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+            </tr>
+            <tr>
+              <td>手机号</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>掩码</td>
+              <td>掩码</td>
+              <td>掩码</td>
+              <td>掩码</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>掩码</td>
+              <td>掩码</td>
+            </tr>
+            <tr>
+              <td>身份证号</td>
+              <td>明文</td>
+              <td>掩码</td>
+              <td>掩码</td>
+              <td>掩码</td>
+              <td>掩码</td>
+              <td>掩码</td>
+              <td>掩码</td>
+              <td>掩码</td>
+              <td>掩码</td>
+              <td>掩码</td>
+            </tr>
+            <tr>
+              <td>邮箱</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+            </tr>
+            <tr>
+              <td>地址</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+            </tr>
+            <tr>
+              <td>VIN码</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>掩码</td>
+              <td>掩码</td>
+            </tr>
+            <tr>
+              <td>车牌号</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>掩码</td>
+              <td>掩码</td>
+            </tr>
+            <tr>
+              <td>年消费金额</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>明文</td>
+              <td>掩码</td>
+              <td>明文</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="padding: 15px; margin: 20px 0; background: #f0f9ff; border-left: 4px solid #409eff; border-radius: 6px">
+        <strong>说明：</strong>
+        <ul style="padding-left: 20px; margin: 10px 0 0; font-size: 13px">
+          <li>表格采用树状结构，菜单下展开显示对应的操作按钮权限</li>
+          <li><strong>明文：</strong>完整显示，不进行脱敏处理（如：13812345678）</li>
+          <li><strong>掩码：</strong>中间部分用*号替代（如：138****5678 或 320***********1234）</li>
+          <li>已去除系统管理相关菜单（账号管理、角色管理、菜单管理、部门管理、通知公告、数据催收配置）</li>
+          <li><strong>H5 嵌入平台：</strong>支持勾选标签、处理合并电话号码、备注信息，数据流向平台</li>
+        </ul>
+      </div>
+
+      <div class="footer">
+        <p>文档版本：v2.0（树状汇总版）| 创建日期：2024年 | 维护人员：产品团队</p>
+        <p style="margin-top: 5px; font-size: 11px; color: #c0c4cc">本表格支持在线编辑，修改后可直接保存或打印使用</p>
+      </div>
+    </div>
+  </body>
+</html>

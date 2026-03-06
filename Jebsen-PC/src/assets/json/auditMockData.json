@@ -1,0 +1,161 @@
+{
+  "list": {
+    "code": 200,
+    "msg": "操作成功",
+    "data": {
+      "rows": [
+        {
+          "id": "LOG-20260107-001",
+          "time": "2026-01-07 10:05:22",
+          "user": "Manager",
+          "module": "审批中心",
+          "action": "Approve Merge",
+          "target": "张伟",
+          "targetId": "C360-001",
+          "ip": "10.2.1.15",
+          "ua": "Chrome/120.0.0.0 Safari/537.36",
+          "changes": {
+            "name": { "old": "张伟", "new": "张伟先生" },
+            "address": { "old": "南京市鼓楼区...", "new": "北京市海淀区西二旗" },
+            "visit90d": { "old": 0, "new": 4 },
+            "hasComplaint": { "old": "否", "new": "是" },
+            "annualSpend": { "old": 1000, "new": 177246 },
+            "loyalty": { "old": "普卡", "new": "流失预警" },
+            "mileage": { "old": "147,275 km", "new": "148,000 km" }
+          }
+        },
+        {
+          "id": "LOG-20260107-002",
+          "time": "2026-01-07 09:50:11",
+          "user": "Kevin",
+          "module": "冲突治理",
+          "action": "Submit Merge",
+          "target": "张伟",
+          "targetId": "C360-001",
+          "ip": "10.2.1.88",
+          "ua": "Chrome/120.0.0.0 Safari/537.36",
+          "changes": {}
+        },
+        {
+          "id": "LOG-20260107-003",
+          "time": "2026-01-07 08:30:45",
+          "user": "Alice",
+          "module": "审批中心",
+          "action": "Reject Merge",
+          "target": "李娜",
+          "targetId": "C360-002",
+          "ip": "10.2.1.92",
+          "ua": "Chrome/120.0.0.0 Safari/537.36",
+          "changes": {
+            "name": { "old": "李娜", "new": "李小姐" },
+            "phone": { "old": "138****1234", "new": "139****5678" }
+          }
+        },
+        {
+          "id": "LOG-20260106-099",
+          "time": "2026-01-06 18:00:00",
+          "user": "Manager",
+          "module": "审批中心",
+          "action": "Approve Merge",
+          "target": "王强",
+          "targetId": "C360-003",
+          "ip": "10.2.1.15",
+          "ua": "Chrome/120.0.0.0 Safari/537.36",
+          "changes": {
+            "address": { "old": "上海市浦东新区", "new": "上海市黄浦区" },
+            "annualSpend": { "old": 5000, "new": 8500 }
+          }
+        },
+        {
+          "id": "LOG-20260106-098",
+          "time": "2026-01-06 17:30:22",
+          "user": "Bob",
+          "module": "冲突治理",
+          "action": "Submit Merge",
+          "target": "访客",
+          "targetId": "C360-004",
+          "ip": "10.2.1.77",
+          "ua": "Chrome/120.0.0.0 Safari/537.36",
+          "changes": {}
+        },
+        {
+          "id": "LOG-20260107-004",
+          "time": "2026-01-07 11:20:15",
+          "user": "David",
+          "module": "审批中心",
+          "action": "Approve Merge",
+          "target": "赵敏",
+          "targetId": "C360-005",
+          "ip": "10.2.1.66",
+          "ua": "Chrome/120.0.0.0 Safari/537.36",
+          "changes": {
+            "name": { "old": "赵敏", "new": "赵敏女士" },
+            "loyalty": { "old": "银卡", "new": "金卡" },
+            "annualSpend": { "old": 15000, "new": 25000 }
+          }
+        },
+        {
+          "id": "LOG-20260107-005",
+          "time": "2026-01-07 12:15:30",
+          "user": "Manager",
+          "module": "审批中心",
+          "action": "Approve Merge",
+          "target": "刘明",
+          "targetId": "C360-006",
+          "ip": "10.2.1.15",
+          "ua": "Chrome/120.0.0.0 Safari/537.36",
+          "changes": {
+            "address": { "old": "广州市天河区", "new": "广州市越秀区" },
+            "visit90d": { "old": 2, "new": 5 },
+            "hasComplaint": { "old": "是", "new": "否" }
+          }
+        },
+        {
+          "id": "LOG-20260107-006",
+          "time": "2026-01-07 13:45:18",
+          "user": "Kevin",
+          "module": "冲突治理",
+          "action": "Submit Merge",
+          "target": "陈静",
+          "targetId": "C360-007",
+          "ip": "10.2.1.88",
+          "ua": "Chrome/120.0.0.0 Safari/537.36",
+          "changes": {}
+        },
+        {
+          "id": "LOG-20260107-007",
+          "time": "2026-01-07 14:20:55",
+          "user": "Alice",
+          "module": "审批中心",
+          "action": "Reject Merge",
+          "target": "周杰",
+          "targetId": "C360-008",
+          "ip": "10.2.1.92",
+          "ua": "Chrome/120.0.0.0 Safari/537.36",
+          "changes": {
+            "name": { "old": "周杰", "new": "周先生" },
+            "phone": { "old": "150****1111", "new": "150****2222" }
+          }
+        },
+        {
+          "id": "LOG-20260107-008",
+          "time": "2026-01-07 15:10:42",
+          "user": "Manager",
+          "module": "审批中心",
+          "action": "Approve Merge",
+          "target": "孙丽",
+          "targetId": "C360-009",
+          "ip": "10.2.1.15",
+          "ua": "Chrome/120.0.0.0 Safari/537.36",
+          "changes": {
+            "loyalty": { "old": "普卡", "new": "银卡" },
+            "annualSpend": { "old": 3000, "new": 12000 },
+            "mileage": { "old": "50,000 km", "new": "52,000 km" }
+          }
+        }
+      ],
+      "total": 42
+    }
+  }
+}
+

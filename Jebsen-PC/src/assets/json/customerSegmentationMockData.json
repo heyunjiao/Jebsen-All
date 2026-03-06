@@ -1,0 +1,372 @@
+{
+  "fieldOptions": {
+    "code": 200,
+    "msg": "操作成功",
+    "data": [
+      {
+        "field": "ageGroup",
+        "label": "年龄段",
+        "operators": ["equals", "notEquals", "contains"],
+        "inputType": "checkbox",
+        "options": [
+          { "label": "20-30", "value": "20-30" },
+          { "label": "30-40", "value": "30-40" },
+          { "label": "40-50", "value": "40-50" },
+          { "label": "50+", "value": "50+" }
+        ]
+      },
+      {
+        "field": "gender",
+        "label": "性别",
+        "operators": ["equals", "notEquals"],
+        "inputType": "radio",
+        "options": [
+          { "label": "男", "value": "male" },
+          { "label": "女", "value": "female" },
+          { "label": "未知", "value": "unknown" }
+        ]
+      },
+      {
+        "field": "city",
+        "label": "所在城市",
+        "operators": ["equals", "contains", "notContains"],
+        "inputType": "cascader"
+      },
+      {
+        "field": "familyStatus",
+        "label": "家庭状态",
+        "operators": ["equals", "contains"],
+        "inputType": "checkbox",
+        "options": [
+          { "label": "1人", "value": "1" },
+          { "label": "2人", "value": "2" },
+          { "label": "3-5人", "value": "3-5" },
+          { "label": "5-7人", "value": "5-7" },
+          { "label": "7+", "value": "7+" }
+        ]
+      },
+      {
+        "field": "contactValidity",
+        "label": "联系方式有效性",
+        "operators": ["equals"],
+        "inputType": "radio",
+        "options": [
+          { "label": "已验证", "value": "verified" },
+          { "label": "未验证", "value": "unverified" }
+        ]
+      },
+      {
+        "field": "modelLine",
+        "label": "车系+车型",
+        "operators": ["belongsTo", "notBelongsTo", "contains"],
+        "inputType": "treeselect"
+      },
+      {
+        "field": "carAge",
+        "label": "车龄",
+        "operators": ["between", "greaterThan", "lessThan"],
+        "inputType": "numberrange"
+      },
+      {
+        "field": "usage",
+        "label": "使用强度",
+        "operators": ["equals"],
+        "inputType": "checkbox",
+        "options": [
+          { "label": "高", "value": "high" },
+          { "label": "中", "value": "medium" },
+          { "label": "低", "value": "low" }
+        ]
+      },
+      {
+        "field": "lastVisit",
+        "label": "最近到店时间",
+        "operators": ["before", "after", "between"],
+        "inputType": "daterange"
+      },
+      {
+        "field": "visits90D",
+        "label": "90天进店频次",
+        "operators": ["between", "greaterThan", "lessThan"],
+        "inputType": "numberrange"
+      },
+      {
+        "field": "annualSpend",
+        "label": "年均消费",
+        "operators": ["between", "greaterThan", "lessThan"],
+        "inputType": "numberrange"
+      },
+      {
+        "field": "segment",
+        "label": "现有客户分群",
+        "operators": ["belongsTo", "notBelongsTo"],
+        "inputType": "select",
+        "asyncSearch": true
+      },
+      {
+        "field": "systemTag",
+        "label": "系统标签",
+        "operators": ["contains", "notContains", "allMatch"],
+        "inputType": "tagselect"
+      },
+      {
+        "field": "oppLevel",
+        "label": "商机等级",
+        "operators": ["equals"],
+        "inputType": "checkbox",
+        "options": [
+          { "label": "钻石", "value": "diamond" },
+          { "label": "黄金", "value": "gold" },
+          { "label": "白银", "value": "silver" }
+        ]
+      },
+      {
+        "field": "loyalty",
+        "label": "忠诚度",
+        "operators": ["equals"],
+        "inputType": "checkbox",
+        "options": [
+          { "label": "沉睡", "value": "sleeping" },
+          { "label": "活跃", "value": "active" },
+          { "label": "流失", "value": "churn" }
+        ]
+      },
+      {
+        "field": "totalCarPrice",
+        "label": "总车价",
+        "operators": ["between", "greaterThan", "lessThan"],
+        "inputType": "numberrange",
+        "unit": "万元"
+      },
+      {
+        "field": "totalOptionPrice",
+        "label": "选配总价",
+        "operators": ["between", "greaterThan", "lessThan"],
+        "inputType": "numberrange",
+        "unit": "万元"
+      },
+      {
+        "field": "afterSalesSelfPayAmount",
+        "label": "售后自费金额",
+        "operators": ["between", "greaterThan", "lessThan"],
+        "inputType": "numberrange",
+        "unit": "元"
+      },
+      {
+        "field": "customerValueTier",
+        "label": "客户价值分层",
+        "operators": ["equals", "belongsTo"],
+        "inputType": "checkbox",
+        "options": [
+          { "label": "钻石", "value": "diamond" },
+          { "label": "白金", "value": "platinum" },
+          { "label": "黄金", "value": "gold" },
+          { "label": "白银", "value": "silver" }
+        ]
+      },
+      {
+        "field": "modelLines",
+        "label": "车型（多选）",
+        "operators": ["belongsTo", "notBelongsTo", "contains"],
+        "inputType": "select",
+        "multiple": true
+      },
+      {
+        "field": "completedOrderCount",
+        "label": "已成交订单数",
+        "operators": ["between", "greaterThan", "lessThan", "equals"],
+        "inputType": "numberrange",
+        "unit": "单"
+      },
+      {
+        "field": "visitsIn2Years",
+        "label": "两年内进场次数",
+        "operators": ["between", "greaterThan", "lessThan"],
+        "inputType": "numberrange",
+        "unit": "次"
+      },
+      {
+        "field": "selfPayAmountIn2Years",
+        "label": "两年内自费金额",
+        "operators": ["between", "greaterThan", "lessThan"],
+        "inputType": "numberrange",
+        "unit": "元"
+      },
+      {
+        "field": "lastServiceOrderDate",
+        "label": "最近进店订单日期",
+        "operators": ["before", "after", "between"],
+        "inputType": "daterange"
+      },
+      {
+        "field": "lastPurchaseDeliveryDate",
+        "label": "最后购车订单交车日期",
+        "operators": ["before", "after", "between"],
+        "inputType": "daterange"
+      }
+    ]
+  },
+  "estimate": {
+    "code": 200,
+    "msg": "操作成功",
+    "data": {
+      "estimatedCount": 15432,
+      "estimatedRate": "8.4%",
+      "changeFromLast": {
+        "count": 1200,
+        "rate": "+8.4%"
+      }
+    }
+  },
+  "sample": {
+    "code": 200,
+    "msg": "操作成功",
+    "data": {
+      "list": [
+        {
+          "oneId": "ONEID0001",
+          "name": "陈建华",
+          "phone": "138****5678",
+          "vin": "WBAMW1234567890123",
+          "gender": "男",
+          "ageGroup": "30-40",
+          "city": "北京市/北京市/朝阳区",
+          "carSeriesModel": "BMW 5系 530Li",
+          "lastVisitTime": "2024-01-15",
+          "annualSpend": 25000,
+          "tags": ["高价值客户", "活跃"]
+        },
+        {
+          "oneId": "ONEID0002",
+          "name": "王芳",
+          "phone": "139****4321",
+          "vin": "WBAMW9876543210987",
+          "gender": "女",
+          "ageGroup": "40-50",
+          "city": "上海市/上海市/浦东新区",
+          "carSeriesModel": "BMW 3系 325Li",
+          "lastVisitTime": "2024-01-10",
+          "annualSpend": 18000,
+          "tags": ["新能源", "高潜"]
+        },
+        {
+          "oneId": "ONEID0003",
+          "name": "周杰",
+          "phone": "137****2222",
+          "vin": "WBAMW1111222233334",
+          "gender": "男",
+          "ageGroup": "20-30",
+          "city": "广东省/广州市/天河区",
+          "carSeriesModel": "BMW X5 xDrive30i",
+          "lastVisitTime": "2024-01-20",
+          "annualSpend": 35000,
+          "tags": ["VIP", "忠诚"]
+        },
+        {
+          "oneId": "ONEID0004",
+          "name": "孙伟",
+          "phone": "136****4444",
+          "vin": "WBAMW3333444455556",
+          "gender": "女",
+          "ageGroup": "50+",
+          "city": "广东省/深圳市/南山区",
+          "carSeriesModel": "BMW 7系 740Li",
+          "lastVisitTime": "2023-12-25",
+          "annualSpend": 50000,
+          "tags": ["钻石", "高价值"]
+        },
+        {
+          "oneId": "ONEID0005",
+          "name": "钱七",
+          "phone": "135****6666",
+          "vin": "WBAMW5555666677778",
+          "gender": "男",
+          "ageGroup": "30-40",
+          "city": "浙江省/杭州市/西湖区",
+          "carSeriesModel": "BMW X3 xDrive25i",
+          "lastVisitTime": "2024-01-18",
+          "annualSpend": 22000,
+          "tags": ["活跃", "中价值"]
+        },
+        {
+          "oneId": "ONEID0006",
+          "name": "孙八",
+          "phone": "134****8888",
+          "vin": "WBAMW6666777788889",
+          "gender": "男",
+          "ageGroup": "25-30",
+          "city": "江苏省/苏州市/工业园区",
+          "carSeriesModel": "BMW X1 sDrive20Li",
+          "lastVisitTime": "2024-01-22",
+          "annualSpend": 15000,
+          "tags": ["新客户", "潜力"]
+        },
+        {
+          "oneId": "ONEID0007",
+          "name": "周九",
+          "phone": "133****9999",
+          "vin": "WBAMW7777888899990",
+          "gender": "女",
+          "ageGroup": "35-45",
+          "city": "四川省/成都市/锦江区",
+          "carSeriesModel": "BMW 3系 320Li",
+          "lastVisitTime": "2024-01-12",
+          "annualSpend": 19000,
+          "tags": ["活跃", "中价值"]
+        },
+        {
+          "oneId": "ONEID0008",
+          "name": "吴十",
+          "phone": "132****0000",
+          "vin": "WBAMW8888999900001",
+          "gender": "男",
+          "ageGroup": "45-55",
+          "city": "广东省/广州市/越秀区",
+          "carSeriesModel": "BMW 5系 525Li",
+          "lastVisitTime": "2023-11-30",
+          "annualSpend": 28000,
+          "tags": ["高价值", "忠诚"]
+        },
+        {
+          "oneId": "ONEID0009",
+          "name": "郑十一",
+          "phone": "131****1111",
+          "vin": "WBAMW9999000011112",
+          "gender": "女",
+          "ageGroup": "28-35",
+          "city": "浙江省/杭州市/余杭区",
+          "carSeriesModel": "BMW X3 xDrive28i",
+          "lastVisitTime": "2024-01-25",
+          "annualSpend": 24000,
+          "tags": ["活跃", "高潜"]
+        },
+        {
+          "oneId": "ONEID0010",
+          "name": "王十二",
+          "phone": "130****2222",
+          "vin": "WBAMW0000111122223",
+          "gender": "男",
+          "ageGroup": "50+",
+          "city": "北京市/北京市/海淀区",
+          "carSeriesModel": "BMW 7系 730Li",
+          "lastVisitTime": "2023-12-20",
+          "annualSpend": 45000,
+          "tags": ["VIP", "高价值"]
+        }
+      ],
+      "total": 15432,
+      "pageNum": 1,
+      "pageSize": 10
+    }
+  },
+  "draft": {
+    "code": 200,
+    "msg": "操作成功",
+    "data": null
+  },
+  "submit": {
+    "code": 200,
+    "msg": "操作成功",
+    "data": null
+  }
+}

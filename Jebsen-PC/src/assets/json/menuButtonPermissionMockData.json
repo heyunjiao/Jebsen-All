@@ -1,0 +1,341 @@
+{
+  "code": 200,
+  "data": {
+    "menuButtonConfig": {
+      "1": {
+        "menuId": 1,
+        "menuName": "首页",
+        "pageKey": null,
+        "buttons": []
+      },
+      "21": {
+        "menuId": 21,
+        "menuName": "批量导入",
+        "pageKey": "batchImport",
+        "buttons": [
+          { "key": "import", "label": "导入" },
+          { "key": "export", "label": "导出" },
+          { "key": "viewDetail", "label": "查看详情" },
+          { "key": "delete", "label": "删除" }
+        ]
+      },
+      "22": {
+        "menuId": 22,
+        "menuName": "任务管理",
+        "pageKey": "taskManagement",
+        "buttons": [
+          { "key": "add", "label": "新增" },
+          { "key": "edit", "label": "编辑" },
+          { "key": "delete", "label": "删除" },
+          { "key": "viewDetail", "label": "查看详情" },
+          { "key": "export", "label": "导出" },
+          { "key": "execute", "label": "执行" },
+          { "key": "pause", "label": "暂停" }
+        ]
+      },
+      "23": {
+        "menuId": 23,
+        "menuName": "问题处理",
+        "pageKey": "issueHandling",
+        "buttons": [
+          { "key": "viewDetail", "label": "查看详情" },
+          { "key": "resolve", "label": "处理" },
+          { "key": "ignore", "label": "忽略" },
+          { "key": "export", "label": "导出" }
+        ]
+      },
+      "31": {
+        "menuId": 31,
+        "menuName": "客户列表",
+        "pageKey": "customerList",
+        "buttons": [
+          { "key": "add", "label": "新增" },
+          { "key": "export", "label": "导出" },
+          { "key": "import", "label": "导入" },
+          { "key": "viewDetail", "label": "查看详情" },
+          { "key": "mergeOneId", "label": "合并OneID" },
+          { "key": "modifyTagRule", "label": "修改标签规则" },
+          { "key": "batchOperation", "label": "批量操作" }
+        ]
+      },
+      "32": {
+        "menuId": 32,
+        "menuName": "批量操作",
+        "pageKey": "batchOperation",
+        "buttons": [
+          { "key": "execute", "label": "执行" },
+          { "key": "viewDetail", "label": "查看详情" },
+          { "key": "export", "label": "导出" },
+          { "key": "delete", "label": "删除" }
+        ]
+      },
+      "33": {
+        "menuId": 33,
+        "menuName": "标签管理",
+        "pageKey": "tagManagement",
+        "buttons": [
+          { "key": "add", "label": "新增" },
+          { "key": "edit", "label": "编辑" },
+          { "key": "delete", "label": "删除" },
+          { "key": "viewDetail", "label": "查看详情" },
+          { "key": "publish", "label": "发布" },
+          { "key": "disable", "label": "停用" }
+        ]
+      },
+      "41": {
+        "menuId": 41,
+        "menuName": "商机查阅",
+        "pageKey": "leadManagement",
+        "buttons": [
+          { "key": "add", "label": "新增" },
+          { "key": "export", "label": "导出" },
+          { "key": "viewDetail", "label": "查看详情" },
+          { "key": "push", "label": "推送" }
+        ]
+      },
+      "42": {
+        "menuId": 42,
+        "menuName": "自动推送",
+        "pageKey": "autoPush",
+        "buttons": [
+          { "key": "add", "label": "新增规则" },
+          { "key": "edit", "label": "编辑规则" },
+          { "key": "delete", "label": "删除规则" },
+          { "key": "enable", "label": "启用" },
+          { "key": "disable", "label": "停用" },
+          { "key": "viewDetail", "label": "查看详情" }
+        ]
+      },
+      "5": {
+        "menuId": 5,
+        "menuName": "客户筛选",
+        "pageKey": "customerSegmentation",
+        "buttons": [
+          { "key": "add", "label": "新建分群" },
+          { "key": "edit", "label": "编辑" },
+          { "key": "delete", "label": "删除" },
+          { "key": "preview", "label": "预览" },
+          { "key": "pushOpportunity", "label": "推送商机" },
+          { "key": "export", "label": "导出" }
+        ]
+      },
+      "61": {
+        "menuId": 61,
+        "menuName": "数据质量",
+        "pageKey": "dataQuality",
+        "buttons": [
+          { "key": "viewDetail", "label": "查看详情" },
+          { "key": "export", "label": "导出" },
+          { "key": "resolve", "label": "处理" },
+          { "key": "ignore", "label": "忽略" }
+        ]
+      },
+      "62": {
+        "menuId": 62,
+        "menuName": "数据清洗",
+        "pageKey": "dataCleaning",
+        "buttons": [
+          { "key": "add", "label": "新增规则" },
+          { "key": "edit", "label": "编辑规则" },
+          { "key": "delete", "label": "删除规则" },
+          { "key": "execute", "label": "执行" },
+          { "key": "viewDetail", "label": "查看详情" }
+        ]
+      },
+      "63": {
+        "menuId": 63,
+        "menuName": "ETL工作流图",
+        "pageKey": "etlWorkflow",
+        "buttons": [
+          { "key": "add", "label": "新增工作流" },
+          { "key": "edit", "label": "编辑" },
+          { "key": "delete", "label": "删除" },
+          { "key": "execute", "label": "执行" },
+          { "key": "viewDetail", "label": "查看详情" }
+        ]
+      },
+      "7": {
+        "menuId": 7,
+        "menuName": "审计报告",
+        "pageKey": "auditReport",
+        "buttons": [
+          { "key": "viewDetail", "label": "查看详情" },
+          { "key": "export", "label": "导出" },
+          { "key": "download", "label": "下载" }
+        ]
+      },
+      "81": {
+        "menuId": 81,
+        "menuName": "权限管理",
+        "pageKey": "roleManagement",
+        "buttons": [
+          { "key": "add", "label": "新增" },
+          { "key": "edit", "label": "编辑" },
+          { "key": "delete", "label": "删除" },
+          { "key": "viewDetail", "label": "查看详情" },
+          { "key": "assignPermission", "label": "分配权限" }
+        ]
+      },
+      "82": {
+        "menuId": 82,
+        "menuName": "审批管理",
+        "pageKey": "approvalManagement",
+        "buttons": [
+          { "key": "viewDetail", "label": "查看详情" },
+          { "key": "approve", "label": "审批" },
+          { "key": "reject", "label": "驳回" },
+          { "key": "export", "label": "导出" }
+        ]
+      },
+      "errorCorrection": {
+        "menuId": "errorCorrection",
+        "menuName": "异常中心",
+        "pageKey": "errorCorrection",
+        "buttons": [
+          { "key": "viewDetail", "label": "查看详情" },
+          { "key": "resolve", "label": "处理" },
+          { "key": "ignore", "label": "忽略" },
+          { "key": "export", "label": "导出" },
+          { "key": "batchIgnore", "label": "批量忽略" }
+        ]
+      },
+      "segmentManage": {
+        "menuId": "segmentManage",
+        "menuName": "分群管理",
+        "pageKey": "segmentManage",
+        "buttons": [
+          { "key": "add", "label": "新建分群" },
+          { "key": "edit", "label": "编辑" },
+          { "key": "delete", "label": "删除" },
+          { "key": "preview", "label": "预览" },
+          { "key": "pushOpportunity", "label": "推送商机" },
+          { "key": "export", "label": "导出" }
+        ]
+      },
+      "userManage": {
+        "menuId": "userManage",
+        "menuName": "账号管理",
+        "pageKey": "userManage",
+        "buttons": [
+          { "key": "add", "label": "新增" },
+          { "key": "edit", "label": "编辑" },
+          { "key": "delete", "label": "删除" },
+          { "key": "viewDetail", "label": "查看详情" },
+          { "key": "resetPassword", "label": "重置密码" }
+        ]
+      },
+      "menuManage": {
+        "menuId": "menuManage",
+        "menuName": "菜单管理",
+        "pageKey": "menuManage",
+        "buttons": [
+          { "key": "add", "label": "新增" },
+          { "key": "edit", "label": "编辑" },
+          { "key": "delete", "label": "删除" },
+          { "key": "viewDetail", "label": "查看详情" }
+        ]
+      },
+      "deptManage": {
+        "menuId": "deptManage",
+        "menuName": "部门管理",
+        "pageKey": "deptManage",
+        "buttons": [
+          { "key": "add", "label": "新增" },
+          { "key": "edit", "label": "编辑" },
+          { "key": "delete", "label": "删除" },
+          { "key": "viewDetail", "label": "查看详情" }
+        ]
+      },
+      "noticeManage": {
+        "menuId": "noticeManage",
+        "menuName": "通知公告",
+        "pageKey": "noticeManage",
+        "buttons": [
+          { "key": "add", "label": "新增" },
+          { "key": "edit", "label": "编辑" },
+          { "key": "delete", "label": "删除" },
+          { "key": "viewDetail", "label": "查看详情" },
+          { "key": "publish", "label": "发布" }
+        ]
+      },
+      "operLog": {
+        "menuId": "operLog",
+        "menuName": "操作日志",
+        "pageKey": "operLog",
+        "buttons": [
+          { "key": "viewDetail", "label": "查看详情" },
+          { "key": "export", "label": "导出" },
+          { "key": "delete", "label": "删除" }
+        ]
+      },
+      "loginLog": {
+        "menuId": "loginLog",
+        "menuName": "登录日志",
+        "pageKey": "loginLog",
+        "buttons": [
+          { "key": "viewDetail", "label": "查看详情" },
+          { "key": "export", "label": "导出" },
+          { "key": "delete", "label": "删除" }
+        ]
+      }
+    },
+    "menuPageMapping": {
+      "customerList": 31,
+      "leadManagement": 41,
+      "dataQuality": 61,
+      "batchImport": 21,
+      "taskManagement": 22,
+      "issueHandling": 23,
+      "batchOperation": 32,
+      "tagManagement": 33,
+      "autoPush": 42,
+      "customerSegmentation": 5,
+      "dataCleaning": 62,
+      "etlWorkflow": 63,
+      "auditReport": 7,
+      "roleManagement": 81,
+      "approvalManagement": 82
+    },
+    "menuNameToPageKey": {
+      "欢迎页": null,
+      "首页": null,
+      "Dashboard": null,
+      "数据监控看板": null,
+      "数据处理": null,
+      "异常中心": "errorCorrection",
+      "审批中心": "approvalManagement",
+      "审批管理": "approvalManagement",
+      "客户管理": null,
+      "客户列表": "customerList",
+      "客户批量操作": "batchOperation",
+      "客户筛选": "customerSegmentation",
+      "客户筛选与分群": "customerSegmentation",
+      "标签管理": "tagManagement",
+      "分群管理": "segmentManage",
+      "商机管理": null,
+      "商机查阅": "leadManagement",
+      "商机列表": "leadManagement",
+      "商机看板": "leadManagement",
+      "分发配置": "autoPush",
+      "自动推送": "autoPush",
+      "数据质量": "dataQuality",
+      "数据清洗": "dataCleaning",
+      "ETL工作流图": "etlWorkflow",
+      "审计报告": "auditReport",
+      "权限管理": "roleManagement",
+      "账号管理": "userManage",
+      "角色管理": "roleManagement",
+      "菜单管理": "menuManage",
+      "系统管理": null,
+      "部门管理": "deptManage",
+      "通知公告": "noticeManage",
+      "系统监控": null,
+      "操作日志": "operLog",
+      "登录日志": "loginLog",
+      "批量导入": "batchImport",
+      "任务管理": "taskManagement",
+      "问题处理": "issueHandling"
+    }
+  }
+}
+

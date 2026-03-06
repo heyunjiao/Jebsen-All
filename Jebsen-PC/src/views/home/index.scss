@@ -1,0 +1,21 @@
+.home {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  .home-bg {
+    width: 70%;
+    max-width: 1200px;
+    margin-bottom: 20px;
+  }
+
+  /* 全屏滚动：占满视口高度，内容超出时可滚动 */
+  &.home-fullscreen {
+    box-sizing: border-box;
+    min-height: 100vh;
+    min-height: 100dvh; /* 移动端动态视口 */
+    overflow: hidden auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}

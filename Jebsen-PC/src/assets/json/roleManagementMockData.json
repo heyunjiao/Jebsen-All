@@ -1,0 +1,306 @@
+{
+  "roleList": {
+    "code": 200,
+    "data": {
+      "list": [
+        {
+          "roleId": 1,
+          "roleName": "超级管理员",
+          "roleKey": "admin",
+          "roleSort": 1,
+          "status": "0",
+          "roleLevel": "admin",
+          "roleDescription": "拥有系统所有权限",
+          "createTime": "2023-01-01 12:00:00",
+          "remark": "超级管理员",
+          "menuIds": [1, 2, 3, 11, 12, 13, 14, 21, 22, 23, 24, 31, 32],
+          "dataScope": "1",
+          "deptIds": [],
+          "functionalPermissions": {
+            "menuIds": [1, 2, 3, 11, 12, 13, 14, 21, 22, 23, 24, 31, 32],
+            "pageAccess": {
+              "customerList": true,
+              "leadManagement": true,
+              "dataQuality": true
+            },
+            "operationButtons": {
+              "customerList": {
+                "add": true,
+                "export": true,
+                "import": true,
+                "viewDetail": true,
+                "mergeOneId": true,
+                "modifyTagRule": true,
+                "batchOperation": true
+              },
+              "leadManagement": {
+                "add": true,
+                "export": true,
+                "viewDetail": true
+              }
+            }
+          },
+          "dataScopeConfig": {
+            "scopeType": "1",
+            "customDeptIds": []
+          },
+          "fieldMasking": {
+            "customerProfile": {
+              "phone": { "visibility": "display", "maskingRule": "plaintext", "decryptPermission": "enable" },
+              "idCard": { "visibility": "display", "maskingRule": "plaintext", "decryptPermission": "enable" },
+              "email": { "visibility": "display", "maskingRule": "plaintext", "decryptPermission": "enable" },
+              "address": { "visibility": "display", "maskingRule": "plaintext", "decryptPermission": "enable" }
+            },
+            "vehicleInfo": {
+              "vin": { "visibility": "display", "maskingRule": "plaintext", "decryptPermission": "enable" }
+            }
+          }
+        },
+        {
+          "roleId": 2,
+          "roleName": "普通员工",
+          "roleKey": "employee",
+          "roleSort": 2,
+          "status": "0",
+          "roleLevel": "employee",
+          "roleDescription": "普通员工角色，无OneID合并权限",
+          "createTime": "2023-01-02 12:00:00",
+          "remark": "普通员工",
+          "menuIds": [1, 11, 12],
+          "dataScope": "5",
+          "deptIds": [],
+          "functionalPermissions": {
+            "menuIds": [1, 11, 12],
+            "pageAccess": {
+              "customerList": true,
+              "leadManagement": false,
+              "dataQuality": false
+            },
+            "operationButtons": {
+              "customerList": {
+                "add": false,
+                "export": false,
+                "import": false,
+                "viewDetail": true,
+                "mergeOneId": false,
+                "modifyTagRule": false,
+                "batchOperation": false
+              }
+            }
+          },
+          "dataScopeConfig": {
+            "scopeType": "5",
+            "customDeptIds": []
+          },
+          "fieldMasking": {
+            "customerProfile": {
+              "phone": { "visibility": "display", "maskingRule": "mask", "decryptPermission": "disable" },
+              "idCard": { "visibility": "hide", "maskingRule": "mask", "decryptPermission": "disable" },
+              "email": { "visibility": "display", "maskingRule": "mask", "decryptPermission": "disable" },
+              "address": { "visibility": "display", "maskingRule": "plaintext", "decryptPermission": "disable" }
+            },
+            "vehicleInfo": {
+              "vin": { "visibility": "display", "maskingRule": "mask", "decryptPermission": "disable" }
+            }
+          }
+        },
+        {
+          "roleId": 3,
+          "roleName": "数据专员",
+          "roleKey": "dataSpecialist",
+          "roleSort": 3,
+          "status": "0",
+          "roleLevel": "dataSpecialist",
+          "roleDescription": "数据专员，可导出数据（需绑定审计策略）",
+          "createTime": "2023-01-03 12:00:00",
+          "remark": "数据专员",
+          "menuIds": [1, 2, 11, 12, 21, 22],
+          "dataScope": "2",
+          "deptIds": [101, 102],
+          "functionalPermissions": {
+            "menuIds": [1, 2, 11, 12, 21, 22],
+            "pageAccess": {
+              "customerList": true,
+              "leadManagement": true,
+              "dataQuality": false
+            },
+            "operationButtons": {
+              "customerList": {
+                "add": false,
+                "export": true,
+                "import": false,
+                "viewDetail": true,
+                "mergeOneId": false,
+                "modifyTagRule": false,
+                "batchOperation": false
+              },
+              "leadManagement": {
+                "add": false,
+                "export": true,
+                "viewDetail": true
+              }
+            }
+          },
+          "dataScopeConfig": {
+            "scopeType": "2",
+            "customDeptIds": [101, 102]
+          },
+          "fieldMasking": {
+            "customerProfile": {
+              "phone": { "visibility": "display", "maskingRule": "mask", "decryptPermission": "enable" },
+              "idCard": { "visibility": "display", "maskingRule": "mask", "decryptPermission": "enable" },
+              "email": { "visibility": "display", "maskingRule": "mask", "decryptPermission": "disable" },
+              "address": { "visibility": "display", "maskingRule": "plaintext", "decryptPermission": "disable" }
+            },
+            "vehicleInfo": {
+              "vin": { "visibility": "display", "maskingRule": "plaintext", "decryptPermission": "disable" }
+            }
+          }
+        }
+      ],
+      "total": 3
+    }
+  },
+  "menuTree": [
+    {
+      "id": 1,
+      "label": "首页",
+      "children": []
+    },
+    {
+      "id": 2,
+      "label": "数据同步",
+      "children": [
+        { "id": 21, "label": "批量导入" },
+        { "id": 22, "label": "任务管理" },
+        { "id": 23, "label": "问题处理" }
+      ]
+    },
+    {
+      "id": 3,
+      "label": "客户管理",
+      "children": [
+        { "id": 31, "label": "客户列表" },
+        { "id": 32, "label": "批量操作" },
+        { "id": 33, "label": "标签管理" }
+      ]
+    },
+    {
+      "id": 4,
+      "label": "商机管理",
+      "children": [
+        { "id": 41, "label": "商机查阅" },
+        { "id": 42, "label": "自动推送" }
+      ]
+    },
+    {
+      "id": 5,
+      "label": "客户筛选",
+      "children": []
+    },
+    {
+      "id": 6,
+      "label": "数据质量",
+      "children": [
+        { "id": 61, "label": "数据质量" },
+        { "id": 62, "label": "数据清洗" },
+        { "id": 63, "label": "ETL工作流图" }
+      ]
+    },
+    {
+      "id": 7,
+      "label": "审计报告",
+      "children": []
+    },
+    {
+      "id": 8,
+      "label": "系统管理",
+      "children": [
+        { "id": 81, "label": "权限管理" },
+        { "id": 82, "label": "审批管理" }
+      ]
+    }
+  ],
+  "deptTree": [
+    {
+      "id": 100,
+      "label": "Geeker 科技",
+      "children": [
+        {
+          "id": 101,
+          "label": "深圳总公司",
+          "children": [
+            { "id": 103, "label": "研发部门" },
+            { "id": 104, "label": "市场部门" },
+            { "id": 105, "label": "测试部门" },
+            { "id": 106, "label": "财务部门" },
+            { "id": 107, "label": "运维部门" }
+          ]
+        },
+        {
+          "id": 102,
+          "label": "长沙分公司",
+          "children": [
+            { "id": 108, "label": "市场部门" },
+            { "id": 109, "label": "财务部门" }
+          ]
+        }
+      ]
+    }
+  ],
+  "businessObjects": [
+    {
+      "id": "customerProfile",
+      "name": "客户客户",
+      "fields": [
+        { "id": "userId", "name": "客户ID", "dataType": "string", "tag": "", "sensitive": false },
+        { "id": "name", "name": "姓名", "dataType": "string", "tag": "", "sensitive": false },
+        { "id": "gender", "name": "性别", "dataType": "string", "tag": "", "sensitive": false },
+        { "id": "address", "name": "地址", "dataType": "string", "tag": "", "sensitive": true },
+        { "id": "phone", "name": "手机号码", "dataType": "string", "tag": "", "sensitive": true },
+        { "id": "idCard", "name": "身份证", "dataType": "string", "tag": "敏感", "sensitive": true },
+        { "id": "email", "name": "邮箱", "dataType": "string", "tag": "", "sensitive": true },
+        { "id": "avgConsumption", "name": "平均消费", "dataType": "number", "tag": "", "sensitive": false }
+      ]
+    },
+    {
+      "id": "vehicleInfo",
+      "name": "车辆信息",
+      "fields": [
+        { "id": "vin", "name": "VIN 信息", "dataType": "string", "tag": "敏感", "sensitive": true },
+        { "id": "licensePlate", "name": "车牌号", "dataType": "string", "tag": "", "sensitive": false },
+        { "id": "carSeriesModel", "name": "车系+车型", "dataType": "string", "tag": "", "sensitive": false },
+        { "id": "currentMileage", "name": "当前里程", "dataType": "number", "tag": "", "sensitive": false }
+      ]
+    },
+    {
+      "id": "opportunityRecord",
+      "name": "商机记录",
+      "fields": [
+        { "id": "opportunityId", "name": "商机ID", "dataType": "string", "tag": "主键", "sensitive": false },
+        { "id": "opportunityType", "name": "商机类型", "dataType": "string", "tag": "", "sensitive": false },
+        { "id": "opportunityLevel", "name": "商机等级", "dataType": "string", "tag": "", "sensitive": false }
+      ]
+    },
+    {
+      "id": "transactionHistory",
+      "name": "交易历史",
+      "fields": [
+        { "id": "transactionId", "name": "交易ID", "dataType": "string", "tag": "主键", "sensitive": false },
+        { "id": "transactionAmount", "name": "交易金额", "dataType": "number", "tag": "", "sensitive": false },
+        { "id": "transactionDate", "name": "交易日期", "dataType": "date", "tag": "", "sensitive": false }
+      ]
+    }
+  ],
+  "emptyList": {
+    "code": 200,
+    "data": {
+      "list": [],
+      "total": 0
+    }
+  },
+  "errorResponse": {
+    "code": 500,
+    "msg": "服务器错误"
+  }
+}

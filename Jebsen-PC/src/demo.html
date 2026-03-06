@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>C360 数据处理与治理监控看板 (Data Governance Dashboard)</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css" />
+    <script src="https://unpkg.com/element-plus/dist/index.full.js"></script>
+    <script src="https://unpkg.com/@element-plus/icons-vue"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+
+    <style>
+      :root {
+        --el-color-primary: #1f5db4; /* 匹配您架构图中阿里云/Jebsen 风格的深蓝 */
+        --bg-color: #f5f7fa;
+      }
+      body {
+        font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
+        margin: 0;
+        background-color: var(--bg-color);
+      }
+      .dashboard-container {
+        padding: 20px;
+        max-width: 1600px;
+        margin: 0 auto;
+      }
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
+      }
+      .header h1 {
+        margin: 0;
+        font-size: 24px;
+        color: #303133;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: bold;
+      }
+      .kpi-card {
+        text-align: center;
+      }
+      .kpi-value {
+        font-size: 28px;
+        font-weight: bold;
+        color: #303133;
+        margin: 10px 0;
+      }
+      .kpi-label {
+        font-size: 14px;
+        color: #909399;
+      }
+      .chart-container {
+        height: 300px;
+        width: 100%;
+      }
+      .status-badge {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 5px;
+      }
+      .status-normal {
+        background-color: #67c23a;
+      }
+      .status-warning {
+        background-color: #e6a23c;
+      }
+      .status-error {
+        background-color: #f56c6c;
+      }
+
+      /* 定义步骤条样式增强 */
+      .pipeline-card {
+        margin-bottom: 20px;
+        border-left: 5px solid var(--el-color-primary);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div class="dashboard-container">
+        <div class="header">
+          <h1>
+            <el-icon><Data_Analysis /></el-icon>
+            C360 数据治理监控驾驶舱
+            <el-tag type="success" effect="dark" round size="small">T+1 正常</el-tag>
+          </h1>
+          <div style="display: flex; gap: 15px; align-items: center">
+            <span style="font-size: 14px; color: #666">
+              SLA 截止: <span style="font-weight: bold">09:00</span> | 当前预估:
+              <span style="color: #67c23a; font-weight: bold">08:45</span>
+            </span>
+            <el-button type="primary" :loading="refreshing" @click="refreshData" circle>
+              <el-icon><Refresh /></el-icon>
+            </el-button>
+          </div>
+        </div>
+
+        <el-card class="pipeline-card" shadow="hover">
+          <template #header>
+            <div class="card-header">
+              <span>今日 T+1 跑批全链路进度 (Batch Pipeline)</span>
+              <el-tag>启动时间: 02:00:00</el-tag>
+            </div>
+          </template>
+          <el-steps :active="pipelineStep" finish-status="success" align-center>
+            <el-step title="数据接入 (Ingestion)" description="DMS/BDC/WeCom">
+              <template #icon
+                ><el-icon><Download /></el-icon
+              ></template>
+            </el-step>
+            <el-step title="数据清洗 (Cleaning)" description="去重/格式化">
+              <template #icon
+                ><el-icon><Filter /></el-icon
+              ></template>
+            </el-step>
+            <el-step title="OneID 标识 (Identify)" description="ID Mapping">
+              <template #icon
+                ><el-icon><User /></el-icon
+              ></template>
+            </el-step>
+            <el-step title="标签计算 (Tagging)" description="RFM/偏好计算">
+              <template #icon
+                ><el-icon><Cpu /></el-icon
+              ></template>
+            </el-step>
+            <el-step title="商机下发 (Dispatch)" description="Push to BDC/SF">
+              <template #icon
+                ><el-icon><Promotion /></el-icon
+              ></template>
+            </el-step>
+          </el-steps>
+
+          <div
+            style="
+              margin-top: 20px;
+              background: #f4f4f5;
+              padding: 10px;
+              border-radius: 4px;
+              font-size: 13px;
+              color: #606266;
+              display: flex;
+              justify-content: space-between;
+            "
+          >
+            <span
+              ><el-icon><Loading /></el-icon> 当前正在处理: <strong>OneID 跨渠道身份对齐 (Identity Alignment)</strong></span
+            >
+            <span>预计耗时剩余: 15分钟</span>
+          </div>
+        </el-card>
+
+        <el-row :gutter="20">
+          <el-col :span="8">
+            <el-card shadow="hover" style="height: 420px">
+              <template #header>
+                <div class="card-header">
+                  <span>数据流入与质量 (Ingestion & Quality)</span>
+                </div>
+              </template>
+              <div style="margin-bottom: 20px">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px">
+                  <span style="font-size: 14px">清洗合格率 (黄金记录)</span>
+                  <span style="font-weight: bold; color: #67c23a">92.5%</span>
+                </div>
+                <el-progress :percentage="92.5" status="success" :stroke-width="10"></el-progress>
+                <div style="font-size: 12px; color: #999; margin-top: 5px">* 已自动拦截 1,240 条手机号格式错误数据</div>
+              </div>
+              <div id="sourceChart" class="chart-container" style="height: 250px"></div>
+            </el-card>
+          </el-col>
+
+          <el-col :span="8">
+            <el-card shadow="hover" style="height: 420px">
+              <template #header>
+                <div class="card-header">
+                  <span>OneID 身份治理 (Identity Governance)</span>
+                  <el-button size="small" type="warning" plain>待处理冲突: 12</el-button>
+                </div>
+              </template>
+
+              <el-row :gutter="10" style="margin-bottom: 20px">
+                <el-col :span="12">
+                  <div class="kpi-card" style="background: #ecf5ff; padding: 15px; border-radius: 8px">
+                    <div class="kpi-value" style="color: #409eff">856</div>
+                    <div class="kpi-label">今日新增唯一客户</div>
+                  </div>
+                </el-col>
+                <el-col :span="12">
+                  <div class="kpi-card" style="background: #fdf6ec; padding: 15px; border-radius: 8px">
+                    <div class="kpi-value" style="color: #e6a23c">45</div>
+                    <div class="kpi-label">今日人工合并案卷</div>
+                  </div>
+                </el-col>
+              </el-row>
+
+              <div style="font-size: 14px; font-weight: bold; margin-bottom: 10px">最近人工治理记录 (Top 3):</div>
+              <el-timeline style="padding-left: 0">
+                <el-timeline-item color="#67C23A" timestamp="10:23">
+                  成功合并: [陈建华 138****] 与 [陈*华 138****] <br />
+                  <small style="color: #999">备注: 同一手机号，姓名录入差异</small>
+                </el-timeline-item>
+                <el-timeline-item color="#E6A23C" timestamp="09:45">
+                  待审核: [王芳] (微信) 与 [王*芳] (DMS) <br />
+                  <small style="color: #999">疑似家庭账号共享 (参考: 妻子合并案例)</small>
+                </el-timeline-item>
+              </el-timeline>
+            </el-card>
+          </el-col>
+
+          <el-col :span="8">
+            <el-card shadow="hover" style="height: 420px">
+              <template #header>
+                <div class="card-header">
+                  <span>商机价值转化 (Business Value)</span>
+                  <el-tag type="danger">Api 异常: 0</el-tag>
+                </div>
+              </template>
+
+              <div id="leadChart" class="chart-container" style="height: 180px; margin-bottom: 10px"></div>
+
+              <div style="border-top: 1px solid #ebeef5; padding-top: 15px">
+                <div style="font-size: 14px; font-weight: bold; margin-bottom: 10px">API 推送日志 (Downstream Push):</div>
+                <el-table :data="apiLogs" style="width: 100%" size="small" height="130">
+                  <el-table-column prop="time" label="时间" width="80"></el-table-column>
+                  <el-table-column prop="system" label="目标系统" width="80"></el-table-column>
+                  <el-table-column prop="type" label="类型"></el-table-column>
+                  <el-table-column label="状态" width="70">
+                    <template #default="scope">
+                      <el-tag size="small" :type="scope.row.status === 'Success' ? 'success' : 'danger'">
+                        {{ scope.row.status }}
+                      </el-tag>
+                    </template>
+                  </el-table-column>
+                </el-table>
+              </div>
+            </el-card>
+          </el-col>
+        </el-row>
+
+        <el-row style="margin-top: 20px">
+          <el-col :span="24">
+            <el-alert
+              title="系统健康提示：OSS 存储桶 usage-logs-2023 增长率超过阈值 (85%)，请注意扩容。"
+              type="warning"
+              show-icon
+              :closable="false"
+            >
+            </el-alert>
+          </el-col>
+        </el-row>
+      </div>
+    </div>
+
+    <script>
+      const { createApp, ref, onMounted } = Vue;
+
+      const app = createApp({
+        setup() {
+          const refreshing = ref(false);
+          const pipelineStep = ref(2); // 0-4
+
+          // 模拟 API 日志数据
+          const apiLogs = ref([
+            { time: "10:30", system: "BDC", type: "新转续商机", status: "Success" },
+            { time: "10:28", system: "WeCom", type: "生日关怀", status: "Success" },
+            { time: "10:25", system: "DMS", type: "保养提醒", status: "Success" },
+            { time: "10:20", system: "BDC", type: "潜客清洗", status: "Success" }
+          ]);
+
+          const refreshData = () => {
+            refreshing.value = true;
+            setTimeout(() => {
+              refreshing.value = false;
+              pipelineStep.value = pipelineStep.value < 4 ? pipelineStep.value + 1 : 0;
+              ElMessage.success("数据已刷新：最新 T+1 状态已同步");
+            }, 1000);
+          };
+
+          const initCharts = () => {
+            // 1. 数据源流入图表 (Bar Chart)
+            const sourceChart = echarts.init(document.getElementById("sourceChart"));
+            sourceChart.setOption({
+              tooltip: { trigger: "axis" },
+              grid: { top: "10%", bottom: "10%", left: "10%", right: "5%" },
+              xAxis: { type: "category", data: ["DMS", "BDC", "WeCom", "App", "MiniP", "Events", "3rd"] },
+              yAxis: { type: "value" },
+              series: [
+                {
+                  data: [1200, 932, 2013, 934, 1290, 430, 220],
+                  type: "bar",
+                  itemStyle: { color: "#409EFF", borderRadius: [4, 4, 0, 0] },
+                  name: "原始记录数"
+                }
+              ]
+            });
+
+            // 2. 商机饼图 (Pie Chart)
+            const leadChart = echarts.init(document.getElementById("leadChart"));
+            leadChart.setOption({
+              tooltip: { trigger: "item" },
+              legend: { orient: "vertical", left: "left", top: "center" },
+              series: [
+                {
+                  name: "商机类型",
+                  type: "pie",
+                  radius: ["40%", "70%"],
+                  center: ["65%", "50%"],
+                  avoidLabelOverlap: false,
+                  label: { show: false, position: "center" },
+                  emphasis: {
+                    label: { show: true, fontSize: 20, fontWeight: "bold" }
+                  },
+                  labelLine: { show: false },
+                  data: [
+                    { value: 345, name: "新转续", itemStyle: { color: "#67C23A" } },
+                    { value: 120, name: "在修不在保", itemStyle: { color: "#E6A23C" } },
+                    { value: 80, name: "流失召回", itemStyle: { color: "#F56C6C" } },
+                    { value: 210, name: "常规保养", itemStyle: { color: "#409EFF" } }
+                  ]
+                }
+              ]
+            });
+
+            // 响应式调整
+            window.addEventListener("resize", () => {
+              sourceChart.resize();
+              leadChart.resize();
+            });
+          };
+
+          onMounted(() => {
+            initCharts();
+          });
+
+          return {
+            refreshing,
+            pipelineStep,
+            apiLogs,
+            refreshData
+          };
+        }
+      });
+
+      // 注册图标
+      for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+        app.component(key, component);
+      }
+
+      app.use(ElementPlus);
+      app.mount("#app");
+    </script>
+  </body>
+</html>

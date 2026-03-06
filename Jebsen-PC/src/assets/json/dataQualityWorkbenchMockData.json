@@ -1,0 +1,582 @@
+{
+  "uploadSuccess": {
+    "code": 200,
+    "msg": "校验完成",
+    "data": {
+      "total": 156,
+      "success": 156,
+      "error": 0,
+      "hasErrors": false,
+      "errorRows": [],
+      "tableColumns": [
+        "VIN",
+        "Phone",
+        "Customer_Name",
+        "Model",
+        "Dealer_Code",
+        "Sales_Consultant",
+        "Order_Date",
+        "Delivery_Date",
+        "Amount",
+        "Payment_Method"
+      ]
+    }
+  },
+  "uploadWithErrors": {
+    "code": 200,
+    "msg": "校验完成，发现错误数据",
+    "data": {
+      "total": 156,
+      "success": 142,
+      "error": 14,
+      "hasErrors": true,
+      "errorRows": [
+        {
+          "rowIndex": 3,
+          "VIN": "LSGBF53M8DS123456",
+          "Phone": "1381234",
+          "Customer_Name": "张明",
+          "Model": "BMW 320Li",
+          "Dealer_Code": "BJ001",
+          "Sales_Consultant": "李华",
+          "Order_Date": "2024-01-15",
+          "Delivery_Date": "2024-02-20",
+          "Amount": "328000.00",
+          "Payment_Method": "全款",
+          "errors": [
+            {
+              "rowIndex": 3,
+              "column": "Phone",
+              "value": "1381234",
+              "errorMessage": "手机号格式错误：必须是11位数字"
+            }
+          ]
+        },
+        {
+          "rowIndex": 7,
+          "VIN": "",
+          "Phone": "13987654321",
+          "Customer_Name": "王芳",
+          "Model": "BMW X3",
+          "Dealer_Code": "SH002",
+          "Sales_Consultant": "陈强",
+          "Order_Date": "2024-01-16",
+          "Delivery_Date": "2024-02-25",
+          "Amount": "425000.00",
+          "Payment_Method": "分期",
+          "errors": [
+            {
+              "rowIndex": 7,
+              "column": "VIN",
+              "value": "",
+              "errorMessage": "VIN码不能为空"
+            }
+          ]
+        },
+        {
+          "rowIndex": 12,
+          "VIN": "LSGBF53M8DS789012",
+          "Phone": "",
+          "Customer_Name": "刘建国",
+          "Model": "BMW 525Li",
+          "Dealer_Code": "GZ003",
+          "Sales_Consultant": "赵敏",
+          "Order_Date": "2024-01-17",
+          "Delivery_Date": "2024-03-01",
+          "Amount": "468000.00",
+          "Payment_Method": "全款",
+          "errors": [
+            {
+              "rowIndex": 12,
+              "column": "Phone",
+              "value": "",
+              "errorMessage": "手机号不能为空"
+            }
+          ]
+        },
+        {
+          "rowIndex": 15,
+          "VIN": "LSGBF53M8DS345678",
+          "Phone": "13812345678",
+          "Customer_Name": "",
+          "Model": "BMW X5",
+          "Dealer_Code": "SZ004",
+          "Sales_Consultant": "周杰",
+          "Order_Date": "2024-01-18",
+          "Delivery_Date": "2024-03-05",
+          "Amount": "728000.00",
+          "Payment_Method": "分期",
+          "errors": [
+            {
+              "rowIndex": 15,
+              "column": "Customer_Name",
+              "value": "",
+              "errorMessage": "客户姓名不能为空"
+            }
+          ]
+        },
+        {
+          "rowIndex": 20,
+          "VIN": "LSGBF53M8DS901234",
+          "Phone": "138abc5678",
+          "Customer_Name": "陈丽",
+          "Model": "BMW 330i",
+          "Dealer_Code": "CD005",
+          "Sales_Consultant": "孙伟",
+          "Order_Date": "2024-01-19",
+          "Delivery_Date": "2024-02-28",
+          "Amount": "358000.00",
+          "Payment_Method": "全款",
+          "errors": [
+            {
+              "rowIndex": 20,
+              "column": "Phone",
+              "value": "138abc5678",
+              "errorMessage": "手机号格式错误：包含非数字字符"
+            }
+          ]
+        },
+        {
+          "rowIndex": 25,
+          "VIN": "LSGBF53M8DS567890",
+          "Phone": "15912345678",
+          "Customer_Name": "杨洋",
+          "Model": "BMW 740Li",
+          "Dealer_Code": "",
+          "Sales_Consultant": "吴刚",
+          "Order_Date": "2024-01-20",
+          "Delivery_Date": "2024-03-10",
+          "Amount": "968000.00",
+          "Payment_Method": "全款",
+          "errors": [
+            {
+              "rowIndex": 25,
+              "column": "Dealer_Code",
+              "value": "",
+              "errorMessage": "经销商代码不能为空"
+            }
+          ]
+        },
+        {
+          "rowIndex": 28,
+          "VIN": "LSGBF53M8DS111222",
+          "Phone": "18612345678",
+          "Customer_Name": "黄晓明",
+          "Model": "BMW X1",
+          "Dealer_Code": "NJ006",
+          "Sales_Consultant": "",
+          "Order_Date": "2024-01-21",
+          "Delivery_Date": "2024-02-15",
+          "Amount": "288000.00",
+          "Payment_Method": "分期",
+          "errors": [
+            {
+              "rowIndex": 28,
+              "column": "Sales_Consultant",
+              "value": "",
+              "errorMessage": "销售顾问不能为空"
+            }
+          ]
+        },
+        {
+          "rowIndex": 32,
+          "VIN": "LSGBF53M8DS333444",
+          "Phone": "13712345678",
+          "Customer_Name": "林心如",
+          "Model": "BMW 530Le",
+          "Dealer_Code": "HZ007",
+          "Sales_Consultant": "郑爽",
+          "Order_Date": "2024-01-22",
+          "Delivery_Date": "2024-03-08",
+          "Amount": "528000.00",
+          "Payment_Method": "全款",
+          "errors": [
+            {
+              "rowIndex": 32,
+              "column": "VIN",
+              "value": "LSGBF53M8DS333444",
+              "errorMessage": "VIN码格式错误：长度应为17位"
+            }
+          ]
+        },
+        {
+          "rowIndex": 35,
+          "VIN": "LSGBF53M8DS555666",
+          "Phone": "18812345678",
+          "Customer_Name": "罗志祥",
+          "Model": "BMW X7",
+          "Dealer_Code": "XA008",
+          "Sales_Consultant": "何炅",
+          "Order_Date": "2024-01-23",
+          "Delivery_Date": "2024-03-15",
+          "Amount": "1128000.00",
+          "Payment_Method": "分期",
+          "errors": [
+            {
+              "rowIndex": 35,
+              "column": "Order_Date",
+              "value": "2024-01-23",
+              "errorMessage": "订单日期不能晚于今天"
+            }
+          ]
+        },
+        {
+          "rowIndex": 40,
+          "VIN": "LSGBF53M8DS777888",
+          "Phone": "13512345678",
+          "Customer_Name": "范冰冰",
+          "Model": "BMW 730Li",
+          "Dealer_Code": "TJ009",
+          "Sales_Consultant": "谢娜",
+          "Order_Date": "2024-01-24",
+          "Delivery_Date": "2024-01-20",
+          "Amount": "888000.00",
+          "Payment_Method": "全款",
+          "errors": [
+            {
+              "rowIndex": 40,
+              "column": "Delivery_Date",
+              "value": "2024-01-20",
+              "errorMessage": "交车日期不能早于订单日期"
+            }
+          ]
+        },
+        {
+          "rowIndex": 45,
+          "VIN": "LSGBF53M8DS999000",
+          "Phone": "13612345678",
+          "Customer_Name": "邓超",
+          "Model": "BMW 540i",
+          "Dealer_Code": "DL010",
+          "Sales_Consultant": "汪涵",
+          "Order_Date": "2024-01-25",
+          "Delivery_Date": "2024-03-20",
+          "Amount": "0",
+          "Payment_Method": "全款",
+          "errors": [
+            {
+              "rowIndex": 45,
+              "column": "Amount",
+              "value": "0",
+              "errorMessage": "订单金额必须大于0"
+            }
+          ]
+        },
+        {
+          "rowIndex": 50,
+          "VIN": "LSGBF53M8DS111333",
+          "Phone": "15012345678",
+          "Customer_Name": "孙俪",
+          "Model": "BMW 118i",
+          "Dealer_Code": "QD011",
+          "Sales_Consultant": "撒贝宁",
+          "Order_Date": "2024-01-26",
+          "Delivery_Date": "2024-02-18",
+          "Amount": "218000.00",
+          "Payment_Method": "",
+          "errors": [
+            {
+              "rowIndex": 50,
+              "column": "Payment_Method",
+              "value": "",
+              "errorMessage": "付款方式不能为空"
+            }
+          ]
+        },
+        {
+          "rowIndex": 55,
+          "VIN": "LSGBF53M8DS222444",
+          "Phone": "15112345678",
+          "Customer_Name": "胡歌",
+          "Model": "BMW 840i",
+          "Dealer_Code": "WH012",
+          "Sales_Consultant": "何炅",
+          "Order_Date": "2024-01-27",
+          "Delivery_Date": "2024-03-25",
+          "Amount": "1288000.00",
+          "Payment_Method": "全款",
+          "errors": [
+            {
+              "rowIndex": 55,
+              "column": "Model",
+              "value": "BMW 840i",
+              "errorMessage": "车型代码不存在，请检查车型名称"
+            }
+          ]
+        },
+        {
+          "rowIndex": 60,
+          "VIN": "LSGBF53M8DS333555",
+          "Phone": "15212345678",
+          "Customer_Name": "刘诗诗",
+          "Model": "BMW 218i",
+          "Dealer_Code": "CS013",
+          "Sales_Consultant": "杜海涛",
+          "Order_Date": "2024-01-28",
+          "Delivery_Date": "2024-02-22",
+          "Amount": "238000.00",
+          "Payment_Method": "分期",
+          "errors": [
+            {
+              "rowIndex": 60,
+              "column": "Dealer_Code",
+              "value": "CS013",
+              "errorMessage": "经销商代码不存在，请检查经销商代码"
+            }
+          ]
+        }
+      ],
+      "tableColumns": [
+        "VIN",
+        "Phone",
+        "Customer_Name",
+        "Model",
+        "Dealer_Code",
+        "Sales_Consultant",
+        "Order_Date",
+        "Delivery_Date",
+        "Amount",
+        "Payment_Method"
+      ]
+    }
+  },
+  "uploadHeaderMismatch": {
+    "code": 400,
+    "msg": "表头不匹配：缺少必填列 VIN, Phone, Customer_Name。上传文件的表头与标准模板不一致，请下载标准模板后重新填写",
+    "data": null
+  },
+  "uploadFileEmpty": {
+    "code": 400,
+    "msg": "文件为空：上传的Excel文件不包含任何数据行，请检查文件内容",
+    "data": null
+  },
+  "auditLog": {
+    "code": 200,
+    "msg": "操作成功",
+    "data": {
+      "list": [
+        {
+          "uploadTime": "2024-01-20 14:32:15",
+          "dataSource": "DMS",
+          "fileName": "DMS_每日销售台账_20240120.xlsx",
+          "operator": "zhang.san@jebsen.com",
+          "validationResult": "passed",
+          "uploadStatus": "success",
+          "totalRows": 156,
+          "successRows": 156,
+          "errorRows": 0
+        },
+        {
+          "uploadTime": "2024-01-20 10:18:42",
+          "dataSource": "POAS",
+          "fileName": "POAS_配件订单_20240120.xlsx",
+          "operator": "li.si@jebsen.com",
+          "validationResult": "failed",
+          "uploadStatus": "failed",
+          "totalRows": 89,
+          "successRows": 0,
+          "errorRows": 89
+        },
+        {
+          "uploadTime": "2024-01-20 08:45:23",
+          "dataSource": "DMS",
+          "fileName": "DMS_每日销售台账_20240120_上午.xlsx",
+          "operator": "chen.wei@jebsen.com",
+          "validationResult": "passed",
+          "uploadStatus": "success",
+          "totalRows": 98,
+          "successRows": 98,
+          "errorRows": 0
+        },
+        {
+          "uploadTime": "2024-01-19 16:45:28",
+          "dataSource": "WWS",
+          "fileName": "WWS_索赔单_20240119.xlsx",
+          "operator": "wang.wu@jebsen.com",
+          "validationResult": "passed",
+          "uploadStatus": "success",
+          "totalRows": 234,
+          "successRows": 234,
+          "errorRows": 0
+        },
+        {
+          "uploadTime": "2024-01-19 14:20:11",
+          "dataSource": "POAS",
+          "fileName": "POAS_配件订单_20240119_下午.xlsx",
+          "operator": "liu.ming@jebsen.com",
+          "validationResult": "passed",
+          "uploadStatus": "success",
+          "totalRows": 167,
+          "successRows": 167,
+          "errorRows": 0
+        },
+        {
+          "uploadTime": "2024-01-19 09:23:56",
+          "dataSource": "C@P",
+          "fileName": "CAP_新车线索_20240119.xlsx",
+          "operator": "zhao.liu@jebsen.com",
+          "validationResult": "passed",
+          "uploadStatus": "success",
+          "totalRows": 67,
+          "successRows": 67,
+          "errorRows": 0
+        },
+        {
+          "uploadTime": "2024-01-19 08:15:30",
+          "dataSource": "DMS",
+          "fileName": "DMS_每日销售台账_20240119.xlsx",
+          "operator": "sun.qi@jebsen.com",
+          "validationResult": "failed",
+          "uploadStatus": "failed",
+          "totalRows": 142,
+          "successRows": 0,
+          "errorRows": 142
+        },
+        {
+          "uploadTime": "2024-01-18 17:30:45",
+          "dataSource": "WWS",
+          "fileName": "WWS_索赔单_20240118.xlsx",
+          "operator": "zhou.jie@jebsen.com",
+          "validationResult": "passed",
+          "uploadStatus": "success",
+          "totalRows": 189,
+          "successRows": 189,
+          "errorRows": 0
+        },
+        {
+          "uploadTime": "2024-01-18 15:12:33",
+          "dataSource": "DMS",
+          "fileName": "DMS_每日销售台账_20240118.xlsx",
+          "operator": "wu.gang@jebsen.com",
+          "validationResult": "failed",
+          "uploadStatus": "failed",
+          "totalRows": 203,
+          "successRows": 45,
+          "errorRows": 158
+        },
+        {
+          "uploadTime": "2024-01-18 11:25:18",
+          "dataSource": "POAS",
+          "fileName": "POAS_配件订单_20240118.xlsx",
+          "operator": "zheng.shuang@jebsen.com",
+          "validationResult": "passed",
+          "uploadStatus": "success",
+          "totalRows": 124,
+          "successRows": 124,
+          "errorRows": 0
+        },
+        {
+          "uploadTime": "2024-01-18 09:40:52",
+          "dataSource": "C@P",
+          "fileName": "CAP_新车线索_20240118.xlsx",
+          "operator": "he.jiong@jebsen.com",
+          "validationResult": "passed",
+          "uploadStatus": "success",
+          "totalRows": 89,
+          "successRows": 89,
+          "errorRows": 0
+        },
+        {
+          "uploadTime": "2024-01-17 16:55:27",
+          "dataSource": "WWS",
+          "fileName": "WWS_索赔单_20240117.xlsx",
+          "operator": "xie.na@jebsen.com",
+          "validationResult": "failed",
+          "uploadStatus": "failed",
+          "totalRows": 156,
+          "successRows": 0,
+          "errorRows": 156
+        },
+        {
+          "uploadTime": "2024-01-17 13:18:39",
+          "dataSource": "DMS",
+          "fileName": "DMS_每日销售台账_20240117.xlsx",
+          "operator": "fan.bingbing@jebsen.com",
+          "validationResult": "passed",
+          "uploadStatus": "success",
+          "totalRows": 178,
+          "successRows": 178,
+          "errorRows": 0
+        },
+        {
+          "uploadTime": "2024-01-17 10:05:14",
+          "dataSource": "POAS",
+          "fileName": "POAS_配件订单_20240117.xlsx",
+          "operator": "deng.chao@jebsen.com",
+          "validationResult": "passed",
+          "uploadStatus": "success",
+          "totalRows": 145,
+          "successRows": 145,
+          "errorRows": 0
+        },
+        {
+          "uploadTime": "2024-01-16 15:30:22",
+          "dataSource": "C@P",
+          "fileName": "CAP_新车线索_20240116.xlsx",
+          "operator": "sun.li@jebsen.com",
+          "validationResult": "passed",
+          "uploadStatus": "success",
+          "totalRows": 112,
+          "successRows": 112,
+          "errorRows": 0
+        },
+        {
+          "uploadTime": "2024-01-16 11:20:35",
+          "dataSource": "DMS",
+          "fileName": "DMS_每日销售台账_20240116.xlsx",
+          "operator": "liu.yifei@jebsen.com",
+          "validationResult": "passed",
+          "uploadStatus": "success",
+          "totalRows": 201,
+          "successRows": 201,
+          "errorRows": 0
+        },
+        {
+          "uploadTime": "2024-01-16 09:15:48",
+          "dataSource": "WWS",
+          "fileName": "WWS_索赔单_20240116.xlsx",
+          "operator": "hu.ge@jebsen.com",
+          "validationResult": "pending",
+          "uploadStatus": "processing",
+          "totalRows": 178,
+          "successRows": 0,
+          "errorRows": 0
+        },
+        {
+          "uploadTime": "2024-01-15 17:45:12",
+          "dataSource": "POAS",
+          "fileName": "POAS_配件订单_20240115.xlsx",
+          "operator": "yang.mi@jebsen.com",
+          "validationResult": "passed",
+          "uploadStatus": "success",
+          "totalRows": 156,
+          "successRows": 156,
+          "errorRows": 0
+        },
+        {
+          "uploadTime": "2024-01-15 14:30:25",
+          "dataSource": "C@P",
+          "fileName": "CAP_新车线索_20240115.xlsx",
+          "operator": "tang.yan@jebsen.com",
+          "validationResult": "failed",
+          "uploadStatus": "failed",
+          "totalRows": 94,
+          "successRows": 23,
+          "errorRows": 71
+        },
+        {
+          "uploadTime": "2024-01-15 10:22:18",
+          "dataSource": "DMS",
+          "fileName": "DMS_每日销售台账_20240115.xlsx",
+          "operator": "liu.shishi@jebsen.com",
+          "validationResult": "passed",
+          "uploadStatus": "success",
+          "totalRows": 189,
+          "successRows": 189,
+          "errorRows": 0
+        }
+      ],
+      "total": 20
+    }
+  }
+}

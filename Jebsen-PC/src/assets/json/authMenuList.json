@@ -1,0 +1,590 @@
+{
+  "code": 200,
+  "data": [
+    {
+      "path": "/home/index",
+      "name": "home",
+      "component": "/welcome/index",
+      "meta": {
+        "icon": "HomeFilled",
+        "title": "欢迎页",
+        "isLink": "",
+        "isHide": false,
+        "isFull": false,
+        "isAffix": true,
+        "isKeepAlive": true
+      }
+    },
+
+    {
+      "path": "/dashboard/dataMonitor",
+      "name": "dataMonitor",
+      "component": "/dashboard/dataMonitor/index",
+      "meta": {
+        "icon": "Monitor",
+        "title": "源数据采集看板",
+        "isLink": "",
+        "isHide": false,
+        "isFull": false,
+        "isAffix": false,
+        "isKeepAlive": true
+      }
+    },
+    {
+      "path": "/dataProcess",
+      "name": "dataProcess",
+      "redirect": "/dataProcess/errorCorrection",
+      "meta": {
+        "icon": "Connection",
+        "title": "数据处理",
+        "isLink": "",
+        "isHide": false,
+        "isFull": false,
+        "isAffix": false,
+        "isKeepAlive": true
+      },
+      "children": [
+        {
+          "path": "/dataProcess/errorCorrection",
+          "name": "errorCorrection",
+          "component": "/errorCorrection/index",
+          "meta": {
+            "icon": "WarningFilled",
+            "title": "异常中心",
+            "isLink": "",
+            "isHide": false,
+            "isFull": false,
+            "isAffix": false,
+            "isKeepAlive": true
+          }
+        },
+        {
+          "path": "/dataProcess/approval",
+          "name": "approval",
+          "component": "/approval/index",
+          "meta": {
+            "icon": "Stamp",
+            "title": "审批中心",
+            "isLink": "",
+            "isHide": true,
+            "isFull": false,
+            "isAffix": false,
+            "isKeepAlive": true
+          }
+        },
+        {
+          "path": "/dataProcess/dataQualityWorkbench",
+          "name": "dataQualityWorkbench",
+          "component": "/dataQualityWorkbench/index",
+          "meta": {
+            "icon": "DocumentChecked",
+            "title": "数据文件上传",
+            "isLink": "",
+            "isHide": false,
+            "isFull": false,
+            "isAffix": false,
+            "isKeepAlive": true
+          }
+        }
+      ]
+    },
+    {
+      "path": "/proTable",
+      "name": "proTable",
+      "redirect": "/proTable/useProTable",
+      "meta": {
+        "icon": "MessageBox",
+        "title": "超级表格",
+        "isLink": "",
+        "isHide": false,
+        "isFull": false,
+        "isAffix": false,
+        "isKeepAlive": true
+      },
+      "children": [
+        {
+          "path": "/proTable/useProTable",
+          "name": "useProTable",
+          "component": "/proTable/useProTable/index",
+          "meta": {
+            "icon": "Menu",
+            "title": "使用 ProTable",
+            "isLink": "",
+            "isHide": false,
+            "isFull": false,
+            "isAffix": false,
+            "isKeepAlive": true
+          },
+          "children": [
+            {
+              "path": "/proTable/useProTable/detail/:id",
+              "name": "useProTableDetail",
+              "component": "/proTable/useProTable/detail",
+              "meta": {
+                "icon": "Menu",
+                "title": "ProTable 详情",
+                "activeMenu": "/proTable/useProTable",
+                "isLink": "",
+                "isHide": true,
+                "isFull": false,
+                "isAffix": false,
+                "isKeepAlive": true
+              }
+            }
+          ]
+        },
+        {
+          "path": "/proTable/useTreeFilter",
+          "name": "useTreeFilter",
+          "component": "/proTable/useTreeFilter/index",
+          "meta": {
+            "icon": "Menu",
+            "title": "使用 TreeFilter",
+            "isLink": "",
+            "isHide": false,
+            "isFull": false,
+            "isAffix": false,
+            "isKeepAlive": true
+          }
+        },
+        {
+          "path": "/proTable/useTreeFilter/detail/:id",
+          "name": "useTreeFilterDetail",
+          "component": "/proTable/useTreeFilter/detail",
+          "meta": {
+            "icon": "Menu",
+            "title": "TreeFilter 详情",
+            "activeMenu": "/proTable/useTreeFilter",
+            "isLink": "",
+            "isHide": true,
+            "isFull": false,
+            "isAffix": false,
+            "isKeepAlive": true
+          }
+        },
+        {
+          "path": "/proTable/useSelectFilter",
+          "name": "useSelectFilter",
+          "component": "/proTable/useSelectFilter/index",
+          "meta": {
+            "icon": "Menu",
+            "title": "使用 SelectFilter",
+            "isLink": "",
+            "isHide": false,
+            "isFull": false,
+            "isAffix": false,
+            "isKeepAlive": true
+          }
+        },
+        {
+          "path": "/proTable/treeProTable",
+          "name": "treeProTable",
+          "component": "/proTable/treeProTable/index",
+          "meta": {
+            "icon": "Menu",
+            "title": "树形 ProTable",
+            "isLink": "",
+            "isHide": false,
+            "isFull": false,
+            "isAffix": false,
+            "isKeepAlive": true
+          }
+        },
+        {
+          "path": "/proTable/complexProTable",
+          "name": "complexProTable",
+          "component": "/proTable/complexProTable/index",
+          "meta": {
+            "icon": "Menu",
+            "title": "复杂 ProTable",
+            "isLink": "",
+            "isHide": false,
+            "isFull": false,
+            "isAffix": false,
+            "isKeepAlive": true
+          }
+        },
+        {
+          "path": "/proTable/document",
+          "name": "proTableDocument",
+          "component": "/proTable/document/index",
+          "meta": {
+            "icon": "Menu",
+            "title": "ProTable 文档",
+            "isLink": "https://juejin.cn/post/7166068828202336263/#heading-14",
+            "isHide": false,
+            "isFull": false,
+            "isAffix": false,
+            "isKeepAlive": true
+          }
+        }
+      ]
+    },
+    {
+      "path": "/customer",
+      "name": "customer",
+      "redirect": "/customer/list",
+      "meta": {
+        "icon": "UserFilled",
+        "title": "客户管理",
+        "isLink": "",
+        "isHide": false,
+        "isFull": false,
+        "isAffix": false,
+        "isKeepAlive": true
+      },
+      "children": [
+        {
+          "path": "/customer/list",
+          "name": "customerList",
+          "component": "/customerList/index",
+          "meta": {
+            "icon": "List",
+            "title": "客户列表",
+            "isLink": "",
+            "isHide": false,
+            "isFull": false,
+            "isAffix": false,
+            "isKeepAlive": true
+          }
+        },
+        {
+          "path": "/customer/batchOperation",
+          "name": "customerBatchOperation",
+          "component": "/customerList/batchOperation",
+          "meta": {
+            "icon": "Operation",
+            "title": "客户批量操作",
+            "isLink": "",
+            "isHide": true,
+            "isFull": false,
+            "isAffix": false,
+            "isKeepAlive": true
+          }
+        },
+        {
+          "path": "/customer/segmentation",
+          "name": "customerSegmentation",
+          "component": "/customerSegmentation/index",
+          "meta": {
+            "icon": "Filter",
+            "title": "客户筛选与分群",
+            "isLink": "",
+            "isHide": false,
+            "isFull": false,
+            "isAffix": false,
+            "isKeepAlive": true
+          }
+        }
+      ]
+    },
+    {
+      "path": "/tagManage",
+      "name": "tagManage",
+      "component": "/tagManage/index",
+      "meta": {
+        "icon": "PriceTag",
+        "title": "标签管理",
+        "isLink": "",
+        "isHide": false,
+        "isFull": false,
+        "isAffix": false,
+        "isKeepAlive": true
+      }
+    },
+    {
+      "path": "/segmentManage",
+      "name": "segmentManage",
+      "component": "/segmentManage/index",
+      "meta": {
+        "icon": "User",
+        "title": "分群管理",
+        "isLink": "",
+        "isHide": false,
+        "isFull": false,
+        "isAffix": false,
+        "isKeepAlive": true
+      }
+    },
+    {
+      "path": "/leadManagement",
+      "name": "leadManagement",
+      "redirect": "/leadManagement/dashboard",
+      "component": "/leadManagement/index",
+      "meta": {
+        "icon": "Opportunity",
+        "title": "商机管理",
+        "isLink": "",
+        "isHide": false,
+        "isFull": false,
+        "isAffix": false,
+        "isKeepAlive": true
+      },
+      "children": [
+        {
+          "path": "/leadManagement/dashboard",
+          "name": "leadManagementDashboard",
+          "component": "/leadManagement/DashboardPage",
+          "meta": {
+            "icon": "TrendCharts",
+            "title": "商机看板",
+            "isLink": "",
+            "isHide": false,
+            "isFull": false,
+            "isAffix": false,
+            "isKeepAlive": true
+          }
+        },
+        {
+          "path": "/leadManagement/list",
+          "name": "leadManagementList",
+          "component": "/leadManagement/ListPage",
+          "meta": {
+            "icon": "Tickets",
+            "title": "商机列表",
+            "isLink": "",
+            "isHide": false,
+            "isFull": false,
+            "isAffix": false,
+            "isKeepAlive": true
+          }
+        },
+        {
+          "path": "/leadManagement/rule",
+          "name": "leadManagementRule",
+          "component": "/leadManagement/RuleConfigPage",
+          "meta": {
+            "icon": "Tools",
+            "title": "分发配置",
+            "isLink": "",
+            "isHide": false,
+            "isFull": false,
+            "isAffix": false,
+            "isKeepAlive": true
+          }
+        },
+        {
+          "path": "/leadManagement/tracking",
+          "name": "leadManagementTracking",
+          "component": "/leadManagement/TrackingPage",
+          "meta": {
+            "icon": "DataAnalysis",
+            "title": "商机追踪",
+            "isLink": "",
+            "isHide": false,
+            "isFull": false,
+            "isAffix": false,
+            "isKeepAlive": true
+          }
+        }
+      ]
+    },
+
+    {
+      "path": "/auth",
+      "name": "auth",
+      "redirect": "/auth/menu",
+      "meta": {
+        "icon": "Lock",
+        "title": "权限管理",
+        "isLink": "",
+        "isHide": false,
+        "isFull": false,
+        "isAffix": false,
+        "isKeepAlive": true
+      },
+      "children": [
+        {
+          "path": "/system/accountManage",
+          "name": "accountManage",
+          "component": "/system/accountManage/index",
+          "meta": {
+            "icon": "Avatar",
+            "title": "账号管理",
+            "isLink": "",
+            "isHide": false,
+            "isFull": false,
+            "isAffix": false,
+            "isKeepAlive": true
+          }
+        },
+        {
+          "path": "/system/roleManage",
+          "name": "roleManage",
+          "component": "/system/roleManage/index",
+          "meta": {
+            "icon": "Avatar",
+            "title": "角色管理",
+            "isLink": "",
+            "isHide": false,
+            "isFull": false,
+            "isAffix": false,
+            "isKeepAlive": true
+          }
+        },
+        {
+          "path": "/system/menuMange",
+          "name": "menuMange",
+          "component": "/system/menuMange/index",
+          "meta": {
+            "icon": "Grid",
+            "title": "菜单管理",
+            "isLink": "",
+            "isHide": true,
+            "isFull": false,
+            "isAffix": false,
+            "isKeepAlive": true
+          }
+        }
+      ]
+    },
+    {
+      "path": "/operation",
+      "name": "operation",
+      "redirect": "/operation/storeAnalysis",
+      "meta": {
+        "icon": "DataAnalysis",
+        "title": "运营分析",
+        "isLink": "",
+        "isHide": false,
+        "isFull": false,
+        "isAffix": false,
+        "isKeepAlive": true
+      },
+      "children": [
+        {
+          "path": "/operation/storeAnalysis",
+          "name": "storeAnalysis",
+          "component": "/operation/storeAnalysis/index",
+          "meta": {
+            "icon": "TrendCharts",
+            "title": "门店经营分析",
+            "isLink": "",
+            "isHide": false,
+            "isFull": false,
+            "isAffix": false,
+            "isKeepAlive": true
+          }
+        }
+      ]
+    },
+    {
+      "path": "/system",
+      "name": "system",
+      "redirect": "/system/accountManage",
+      "meta": {
+        "icon": "Setting",
+        "title": "系统管理",
+        "isLink": "",
+        "isHide": false,
+        "isFull": false,
+        "isAffix": false,
+        "isKeepAlive": true
+      },
+      "children": [
+        {
+          "path": "/system/departmentManage",
+          "name": "departmentManage",
+          "component": "/system/departmentManage/index",
+          "meta": {
+            "icon": "OfficeBuilding",
+            "title": "部门管理",
+            "isLink": "",
+            "isHide": false,
+            "isFull": false,
+            "isAffix": false,
+            "isKeepAlive": true
+          }
+        },
+
+        {
+          "path": "/system/noticeManage",
+          "name": "noticeManage",
+          "component": "/system/noticeManage/index",
+          "meta": {
+            "icon": "Bell",
+            "title": "通知公告",
+            "isLink": "",
+            "isHide": false,
+            "isFull": false,
+            "isAffix": false,
+            "isKeepAlive": true
+          }
+        },
+        {
+          "path": "/collection/config",
+          "name": "collectionConfig",
+          "component": "/collection/config/index",
+          "meta": {
+            "icon": "Setting",
+            "title": "数据催收配置",
+            "isLink": "",
+            "isHide": false,
+            "isFull": false,
+            "isAffix": false,
+            "isKeepAlive": true
+          }
+        },
+        {
+          "path": "/collection/globalRulesConfig",
+          "name": "collectionGlobalRulesConfig",
+          "component": "/collection/GlobalRulesConfig",
+          "meta": {
+            "icon": "Bell",
+            "title": "全局监控规则配置",
+            "isLink": "",
+            "isHide": false,
+            "isFull": false,
+            "isAffix": false,
+            "isKeepAlive": true
+          }
+        }
+      ]
+    },
+    {
+      "path": "/monitor",
+      "name": "monitor",
+      "redirect": "/monitor/online",
+      "meta": {
+        "icon": "Monitor",
+        "title": "系统监控",
+        "isLink": "",
+        "isHide": false,
+        "isFull": false,
+        "isAffix": false,
+        "isKeepAlive": true
+      },
+      "children": [
+        {
+          "path": "/system/operlogManage",
+          "name": "operlogManage",
+          "component": "/system/operlogManage/index",
+          "meta": {
+            "icon": "Notebook",
+            "title": "操作日志",
+            "isLink": "",
+            "isHide": false,
+            "isFull": false,
+            "isAffix": false,
+            "isKeepAlive": true
+          }
+        },
+        {
+          "path": "/system/loginlogManage",
+          "name": "loginlogManage",
+          "component": "/system/loginlogManage/index",
+          "meta": {
+            "icon": "Key",
+            "title": "登录日志",
+            "isLink": "",
+            "isHide": false,
+            "isFull": false,
+            "isAffix": false,
+            "isKeepAlive": true
+          }
+        }
+      ]
+    }
+  ],
+  "msg": "成功"
+}

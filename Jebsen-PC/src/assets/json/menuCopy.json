@@ -1,0 +1,75 @@
+{
+    "path": "/tool",
+    "name": "tool",
+    "redirect": "/tool/build",
+    "meta": {
+      "icon": "Briefcase",
+      "title": "系统工具",
+      "isLink": "",
+      "isHide": false,
+      "isFull": false,
+      "isAffix": false,
+      "isKeepAlive": true
+    },
+    "children": [
+      {
+        "path": "/tool/build",
+        "name": "toolBuild",
+        "component": "/tool/build/index",
+        "meta": {
+          "icon": "Grid",
+          "title": "表单构建",
+          "isLink": "",
+          "isHide": false,
+          "isFull": false,
+          "isAffix": false,
+          "isKeepAlive": true
+        }
+      },
+      {
+        "path": "/tool/gen",
+        "name": "toolGen",
+        "component": "/tool/gen/index",
+        "meta": {
+          "icon": "Document",
+          "title": "代码生成",
+          "isLink": "",
+          "isHide": false,
+          "isFull": false,
+          "isAffix": false,
+          "isKeepAlive": true
+        },
+        "children": [
+          {
+            "path": "/tool/gen-edit/index/:tableId",
+            "name": "toolGenEdit",
+            "component": "/tool/gen-edit/index",
+            "meta": {
+              "icon": "Edit",
+              "title": "修改生成配置",
+              "activeMenu": "/tool/gen",
+              "isLink": "",
+              "isHide": true,
+              "isFull": false,
+              "isAffix": false,
+              "isKeepAlive": true
+            }
+          }
+        ]
+      },
+      {
+        "path": "/tool/swagger",
+        "name": "toolSwagger",
+        "component": "/tool/swagger/index",
+        "meta": {
+          "icon": "Operation",
+          "title": "系统接口",
+          "isLink": "",
+          "isHide": false,
+          "isFull": false,
+          "isAffix": false,
+          "isKeepAlive": true
+        }
+      }
+    ]
+  }

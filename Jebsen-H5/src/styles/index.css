@@ -1,0 +1,96 @@
+/* 全局样式重置 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: auto;
+  min-height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #f7f8fa;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+#app {
+  width: 100%;
+  min-height: 100vh;
+  height: auto;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* 统一弹出层按钮字体大小 */
+.van-popup {
+  .van-button {
+    &[size="large"] {
+      font-size: 14px !important;
+      height: 40px;
+    }
+    
+    &[size="normal"],
+    &[size="default"] {
+      font-size: 14px !important;
+    }
+    
+    &[size="small"] {
+      font-size: 12px !important;
+    }
+    
+    &[size="mini"] {
+      font-size: 12px !important;
+      height: 32px;
+    }
+  }
+}
+
+/* Vant 主题定制（保时捷美学风格 - 琥珀金主题） */
+:root {
+  /* Vant 组件主题色 - 使用琥珀金替代深蓝色 */
+  --van-primary-color: var(--accent-gold);
+  --van-success-color: #00a870;
+  --van-warning-color: #ed7b2f;
+  --van-danger-color: #e34d59;
+  --van-text-color: var(--text-main);
+  --van-text-color-2: var(--text-sub);
+  --van-text-color-3: var(--text-sub);
+  --van-border-color: var(--border-color);
+  --van-background-color: var(--bg-slate);
+  
+  /* C360 Elite Dashboard 设计规范颜色变量 */
+  --porsche-black: #0F1113;
+  --accent-gold: #94724A;
+  --bg-slate: #F8FAFC;
+  --text-main: #1E293B;
+  --text-sub: #64748B;
+  --border-color: #E2E8F0;
+  --alert-blue: #2563EB;
+  --alert-orange: #B45309;
+}
+

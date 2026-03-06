@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C360 多级独立表头视图</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { margin: 0; padding: 20px; background: #f0f2f5; font-family: -apple-system, sans-serif; }
+        .app-container { background: #fff; padding: 20px; border-radius: 4px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+
+        /* --- 核心样式黑科技：消除展开行的内边距，让嵌套表格无缝衔接 --- */
+        .el-table__expanded-cell {
+            padding: 0 !important; /* 关键：去掉默认padding */
+        }
+        
+        /* Level 2 (经办人) 表格样式 */
+        .level-2-table {
+            background-color: #f8fafc !important; /* 浅蓝灰背景 */
+            --el-table-tr-bg-color: #f8fafc;
+            --el-table-header-bg-color: #f0f4f8;
+        }
+        /* Level 2 的左侧留白，制造缩进感 */
+        .level-2-table .el-table__body-wrapper {
+            padding-left: 48px; 
+        }
+        .level-2-table th {
+            padding-left: 48px !important; /* 表头也要缩进 */
+            color: #606266;
+            font-size: 12px;
+        }
+
+        /* Level 3 (车辆) 表格样式 */
+        .level-3-table {
+            background-color: #fff !important;
+            --el-table-tr-bg-color: #fff;
+            --el-table-header-bg-color: #fffbe6; /* 暖色调表头区分 */
+        }
+        .level-3-table .el-table__body-wrapper {
+            padding-left: 96px; /* 更深的缩进 */
+        }
+        .level-3-table th {
+            padding-left: 96px !important;
+            color: #e6a23c; /* 表头文字颜色 */
+            font-size: 12px;
+        }
+
+        /* 状态标签 */
+        .tag-company { background: #e6f7ff; color: #1890ff; border: 1px solid #91d5ff; padding: 0 4px; border-radius: 2px; font-size: 12px; }
+        .tag-agent { background: #e6a23c; color: #fff; padding: 0 4px; border-radius: 2px; font-size: 10px; margin-left: 5px;}
+        
+        /* 车辆标签 */
+        .plate-tag { background: #ecf5ff; color: #409eff; font-weight: bold; border: 1px solid #d9ecff; padding: 2px 6px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <div class="app-container">
+        
+        <!-- 搜索栏 (略) -->
+        <div style="margin-bottom: 15px; font-weight: bold; border-left: 4px solid #1890ff; padding-left: 10px;">
+            多层级客户档案列表 (独立表头版)
+        </div>
+
+        <!-- LEVEL 1: 公司/个人列表 -->
+        <el-table :data="companyData" style="width: 100%" border>
+            
+            <!-- 展开行：里面放 Level 2 表格 -->
+            <el-table-column type="expand">
+                <template #default="props">
+                    
+                    <!-- LEVEL 2: 经办人列表 (独立表头) -->
+                    <el-table :data="props.row.agents" class="level-2-table" :show-header="true" style="width: 100%">
+                        
+                        <!-- Level 2 展开：里面放 Level 3 表格 -->
+                        <el-table-column type="expand">
+                            <template #default="subProps">
+                                
+                                <!-- LEVEL 3: 车辆列表 (独立表头) -->
+                                <el-table :data="subProps.row.cars" class="level-3-table" :show-header="true" border>
+                                    <el-table-column label="车辆型号" prop="model" width="200">
+                                        <template #default="carScope">
+                                            <span style="font-weight: bold;">{{ carScope.row.model }}</span>
+                                        </template>
+                                    </el-table-column>
+                                    <el-table-column label="车牌号" width="150">
+                                        <template #default="carScope">
+                                            <span class="plate-tag">{{ carScope.row.plate }}</span>
+                                        </template>
+                                    </el-table-column>
+                                    <el-table-column label="VIN 码 (车架号)" prop="vin" width="220"></el-table-column>
+                                    <el-table-column label="最近进店" prop="lastVisit" width="150"></el-table-column>
+                                    <el-table-column label="车辆状态" width="100">
+                                        <template #default="carScope">
+                                            <el-tag size="small" type="success">正常</el-tag>
+                                        </template>
+                                    </el-table-column>
+                                    <el-table-column label="资产归属" prop="ownership"></el-table-column>
+                                </el-table>
+
+                            </template>
+                        </el-table-column>
+
+                        <!-- Level 2 的表头定义 -->
+                        <el-table-column label="经办人姓名" width="200">
+                            <template #default="agentScope">
+                                <i class="fas fa-user-tie" style="margin-right: 5px; color: #606266;"></i>
+                                {{ agentScope.row.name }}
+                                <span class="tag-agent">{{ agentScope.row.role }}</span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="联系电话" prop="phone" width="150"></el-table-column>
+                        <el-table-column label="性别" prop="gender" width="80"></el-table-column>
+                        <el-table-column label="年龄段" prop="age" width="100"></el-table-column>
+                        <el-table-column label="偏好联系时间" prop="contactTime"></el-table-column>
+                        <el-table-column label="名下车辆数" width="120" align="center">
+                            <template #default="agentScope">
+                                <b>{{ agentScope.row.cars.length }}</b> 辆
+                            </template>
+                        </el-table-column>
+                    </el-table>
+
+                </template>
+            </el-table-column>
+
+            <!-- Level 1 的表头定义 (完全对应第一张图) -->
+            <el-table-column prop="oneId" label="OneID" width="160"></el-table-column>
+            <el-table-column label="生命周期" width="100">
+                <template #default="scope">
+                    <el-tag size="small" type="success">活跃</el-tag>
+                </template>
+            </el-table-column>
+            <el-table-column prop="userId" label="客户ID" width="100"></el-table-column>
+            <el-table-column label="客户姓名/主体" min-width="200">
+                <template #default="scope">
+                    <span v-if="scope.row.type==='company'"><i class="fas fa-building" style="color:#1890ff; margin-right:5px;"></i> {{ scope.row.name }}</span>
+                    <span v-else><i class="fas fa-user" style="color:#67c23a; margin-right:5px;"></i> {{ scope.row.name }}</span>
+                </template>
+            </el-table-column>
+            <el-table-column prop="typeLabel" label="客户类型" width="120"></el-table-column>
+            <el-table-column prop="address" label="地址" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="segment" label="分群名称" width="120"></el-table-column>
+            <el-table-column label="汇总数据" width="150">
+                <template #default="scope">
+                    <span style="font-size: 12px; color: #909399;">
+                        {{ scope.row.agents.length }} 经办人 | {{ scope.row.totalCars }} 车
+                    </span>
+                </template>
+            </el-table-column>
+            <el-table-column label="操作" width="100" fixed="right">
+                <template #default="scope">
+                    <el-button link type="primary" size="small">360视图</el-button>
+                </template>
+            </el-table-column>
+
+        </el-table>
+        
+        <div style="margin-top: 15px; text-align: right;">
+            <el-pagination background layout="prev, pager, next" :total="100"></el-pagination>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://unpkg.com/element-plus"></script>
+
+<script>
+    const { createApp, ref } = Vue;
+
+    createApp({
+        setup() {
+            const companyData = ref([
+                {
+                    id: 1,
+                    oneId: 'ONE-882910',
+                    userId: 'C001',
+                    name: '上海喜茶餐饮管理有限公司',
+                    type: 'company',
+                    typeLabel: '公司客户',
+                    address: '上海市长宁区...',
+                    segment: '高价值',
+                    totalCars: 5,
+                    agents: [
+                        {
+                            id: 101, 
+                            name: '张三', 
+                            role: '采购经理', 
+                            phone: '138****4423', 
+                            gender: '男', 
+                            age: '35-40', 
+                            contactTime: '工作日 09:00',
+                            cars: [
+                                { model: 'Porsche Cayenne', plate: '沪A66666', vin: 'WP0ZZZ92...', lastVisit: '2023-12-01', ownership: '公司自用' },
+                                { model: 'Taycan 4S', plate: '沪AD12345', vin: 'WP0AAA2Y...', lastVisit: '2023-11-15', ownership: '公司自用' }
+                            ]
+                        },
+                        {
+                            id: 102, 
+                            name: '李四', 
+                            role: '行政', 
+                            phone: '139****8888', 
+                            gender: '女', 
+                            age: '25-30', 
+                            contactTime: '任意时间',
+                            cars: [
+                                { model: 'Panamera', plate: '沪B88888', vin: 'WP0AA297...', lastVisit: '2024-01-10', ownership: '高管配车' }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    id: 2,
+                    oneId: 'ONE-882911',
+                    userId: 'C002',
+                    name: '王小二',
+                    type: 'individual',
+                    typeLabel: '个人客户',
+                    address: '北京市朝阳区...',
+                    segment: '普通',
+                    totalCars: 1,
+                    agents: [
+                        {
+                            id: 201,
+                            name: '王小二 (本人)',
+                            role: '车主',
+                            phone: '136****1234',
+                            gender: '男',
+                            age: '20-25',
+                            contactTime: '周末',
+                            cars: [
+                                { model: 'Macan S', plate: '京N88888', vin: 'WP0CCC...', lastVisit: '2023-05-20', ownership: '私人' }
+                            ]
+                        }
+                    ]
+                }
+            ]);
+
+            return { companyData };
+        }
+    }).use(ElementPlus).mount('#app');
+</script>
+
+</body>
+</html>

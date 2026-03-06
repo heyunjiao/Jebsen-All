@@ -1,0 +1,587 @@
+{
+  "job": {
+    "list": {
+      "total": 3,
+      "rows": [
+        {
+          "createBy": "admin",
+          "createTime": "2025-05-26 10:09:46",
+          "updateBy": null,
+          "updateTime": null,
+          "remark": "",
+          "jobId": 1,
+          "jobName": "系统默认（无参）",
+          "jobGroup": "DEFAULT",
+          "invokeTarget": "ryTask.ryNoParams",
+          "cronExpression": "0/10 * * * * ?",
+          "misfirePolicy": "3",
+          "concurrent": "1",
+          "status": "1",
+          "nextValidTime": "2026-01-06 12:26:20"
+        },
+        {
+          "createBy": "admin",
+          "createTime": "2025-05-26 10:09:46",
+          "updateBy": null,
+          "updateTime": null,
+          "remark": "",
+          "jobId": 2,
+          "jobName": "系统默认（有参）",
+          "jobGroup": "DEFAULT",
+          "invokeTarget": "ryTask.ryParams('ry')",
+          "cronExpression": "0/15 * * * * ?",
+          "misfirePolicy": "3",
+          "concurrent": "1",
+          "status": "1",
+          "nextValidTime": "2026-01-06 12:26:30"
+        },
+        {
+          "createBy": "admin",
+          "createTime": "2025-05-26 10:09:46",
+          "updateBy": null,
+          "updateTime": null,
+          "remark": "",
+          "jobId": 3,
+          "jobName": "系统默认（多参）",
+          "jobGroup": "DEFAULT",
+          "invokeTarget": "ryTask.ryMultipleParams('ry', true, 2000L, 316.50D, 100)",
+          "cronExpression": "0/20 * * * * ?",
+          "misfirePolicy": "3",
+          "concurrent": "1",
+          "status": "1",
+          "nextValidTime": "2026-01-06 12:26:20"
+        }
+      ],
+      "code": 200,
+      "msg": "查询成功"
+    },
+    "detail": {
+      "code": "200",
+      "msg": "操作成功",
+      "data": {
+        "jobId": 1,
+        "jobName": "系统默认（无参）",
+        "jobGroup": "DEFAULT",
+        "invokeTarget": "ryTask.ryNoParams",
+        "cronExpression": "0/10 * * * * ?",
+        "misfirePolicy": "1",
+        "concurrent": "1",
+        "status": "0",
+        "createTime": "2023-01-01 12:00:00",
+        "nextValidTime": "2023-01-01 12:00:10"
+      }
+    },
+    "add": {
+      "code": "200",
+      "msg": "新增成功"
+    },
+    "update": {
+      "code": "200",
+      "msg": "修改成功"
+    },
+    "delete": {
+      "code": "200",
+      "msg": "删除成功"
+    },
+    "changeStatus": {
+      "code": "200",
+      "msg": "操作成功"
+    },
+    "run": {
+      "code": "200",
+      "msg": "执行成功"
+    }
+  },
+  "jobLog": {
+    "list": {
+      "code": "200",
+      "msg": "操作成功",
+      "rows": [
+        {
+          "jobLogId": 1,
+          "jobName": "系统默认（无参）",
+          "jobGroup": "DEFAULT",
+          "invokeTarget": "ryTask.ryNoParams",
+          "jobMessage": "执行成功",
+          "status": "0",
+          "exceptionInfo": "",
+          "createTime": "2023-01-01 12:00:10"
+        },
+        {
+          "jobLogId": 2,
+          "jobName": "系统默认（有参）",
+          "jobGroup": "DEFAULT",
+          "invokeTarget": "ryTask.ryParams('ry')",
+          "jobMessage": "执行成功",
+          "status": "0",
+          "exceptionInfo": "",
+          "createTime": "2023-01-01 12:00:15"
+        },
+        {
+          "jobLogId": 3,
+          "jobName": "系统默认（多参）",
+          "jobGroup": "DEFAULT",
+          "invokeTarget": "ryTask.ryMultipleParams",
+          "jobMessage": "执行失败",
+          "status": "1",
+          "exceptionInfo": "java.lang.Exception: 测试异常",
+          "createTime": "2023-01-01 12:00:20"
+        }
+      ],
+      "total": 3
+    },
+    "delete": {
+      "code": "200",
+      "msg": "删除成功"
+    },
+    "clean": {
+      "code": "200",
+      "msg": "清空成功"
+    }
+  },
+  "cache": {
+    "info": {
+      "code": "200",
+      "msg": "操作成功",
+      "data": {
+        "info": {
+          "redis_version": "6.2.6",
+          "redis_mode": "standalone",
+          "tcp_port": "6379",
+          "connected_clients": "10",
+          "uptime_in_days": "365",
+          "used_memory_human": "128M",
+          "used_cpu_user_children": "0.5",
+          "maxmemory_human": "2G",
+          "aof_enabled": "0",
+          "rdb_last_bgsave_status": "ok",
+          "dbSize": "1000",
+          "instantaneous_input_kbps": "1.5",
+          "instantaneous_output_kbps": "2.3"
+        },
+        "commandStats": [
+          { "name": "get", "value": 500 },
+          { "name": "set", "value": 300 },
+          { "name": "del", "value": 100 },
+          { "name": "expire", "value": 80 },
+          { "name": "keys", "value": 20 }
+        ]
+      }
+    },
+    "names": {
+      "code": "200",
+      "msg": "操作成功",
+      "data": [
+        {
+          "cacheName": "user_cache",
+          "remark": "客户缓存"
+        },
+        {
+          "cacheName": "menu_cache",
+          "remark": "菜单缓存"
+        },
+        {
+          "cacheName": "dict_cache",
+          "remark": "字典缓存"
+        }
+      ]
+    },
+    "keys": {
+      "code": "200",
+      "msg": "操作成功",
+      "data": [
+        "user_cache:user:1",
+        "user_cache:user:2",
+        "user_cache:user:3"
+      ]
+    },
+    "value": {
+      "code": "200",
+      "msg": "操作成功",
+      "data": {
+        "cacheName": "user_cache",
+        "cacheKey": "user_cache:user:1",
+        "cacheValue": "{\"id\":1,\"username\":\"admin\",\"nickname\":\"管理员\"}"
+      }
+    },
+    "clearName": {
+      "code": "200",
+      "msg": "清理成功"
+    },
+    "clearKey": {
+      "code": "200",
+      "msg": "清理成功"
+    },
+    "clearAll": {
+      "code": "200",
+      "msg": "清理全部缓存成功"
+    }
+  },
+  "logininfor": {
+    "list": {
+      "code": "200",
+      "msg": "操作成功",
+      "rows": [
+        {
+          "infoId": 1,
+          "userName": "admin",
+          "ipaddr": "127.0.0.1",
+          "loginLocation": "内网IP",
+          "browser": "Chrome",
+          "os": "Windows 10",
+          "status": "0",
+          "msg": "登录成功",
+          "loginTime": "2023-01-01 12:00:00"
+        },
+        {
+          "infoId": 2,
+          "userName": "test",
+          "ipaddr": "192.168.1.100",
+          "loginLocation": "XX省XX市",
+          "browser": "Firefox",
+          "os": "Windows 11",
+          "status": "0",
+          "msg": "登录成功",
+          "loginTime": "2023-01-01 11:00:00"
+        },
+        {
+          "infoId": 3,
+          "userName": "user",
+          "ipaddr": "192.168.1.101",
+          "loginLocation": "XX省XX市",
+          "browser": "Edge",
+          "os": "macOS",
+          "status": "1",
+          "msg": "登录失败",
+          "loginTime": "2023-01-01 10:00:00"
+        }
+      ],
+      "total": 3
+    },
+    "delete": {
+      "code": "200",
+      "msg": "删除成功"
+    },
+    "unlock": {
+      "code": "200",
+      "msg": "解锁成功"
+    },
+    "clean": {
+      "code": "200",
+      "msg": "清空成功"
+    }
+  },
+  "online": {
+    "list": {
+      "code": "200",
+      "msg": "操作成功",
+      "rows": [
+        {
+          "tokenId": "token_001",
+          "userName": "admin",
+          "deptName": "总公司",
+          "ipaddr": "127.0.0.1",
+          "loginLocation": "内网IP",
+          "browser": "Chrome",
+          "os": "Windows 10",
+          "loginTime": "2023-01-01 12:00:00"
+        },
+        {
+          "tokenId": "token_002",
+          "userName": "test",
+          "deptName": "研发部门",
+          "ipaddr": "192.168.1.100",
+          "loginLocation": "XX省XX市",
+          "browser": "Firefox",
+          "os": "Windows 11",
+          "loginTime": "2023-01-01 11:00:00"
+        },
+        {
+          "tokenId": "token_003",
+          "userName": "user",
+          "deptName": "测试部门",
+          "ipaddr": "192.168.1.101",
+          "loginLocation": "XX省XX市",
+          "browser": "Edge",
+          "os": "macOS",
+          "loginTime": "2023-01-01 10:00:00"
+        }
+      ],
+      "total": 3
+    },
+    "forceLogout": {
+      "code": "200",
+      "msg": "强退成功"
+    }
+  },
+  "operlog": {
+    "list": {
+      "code": "200",
+      "msg": "操作成功",
+      "rows": [
+        {
+          "operId": 1,
+          "title": "客户管理",
+          "businessType": "1",
+          "method": "com.ruoyi.web.controller.system.SysUserController.add()",
+          "requestMethod": "POST",
+          "operName": "admin",
+          "operUrl": "/system/user",
+          "operIp": "127.0.0.1",
+          "operLocation": "内网IP",
+          "operParam": "{\"userName\":\"test\"}",
+          "jsonResult": "{\"code\":200}",
+          "status": "0",
+          "errorMsg": "",
+          "operTime": "2023-01-01 12:00:00",
+          "costTime": 50
+        },
+        {
+          "operId": 2,
+          "title": "角色管理",
+          "businessType": "2",
+          "method": "com.ruoyi.web.controller.system.SysRoleController.edit()",
+          "requestMethod": "PUT",
+          "operName": "admin",
+          "operUrl": "/system/role",
+          "operIp": "127.0.0.1",
+          "operLocation": "内网IP",
+          "operParam": "{\"roleId\":1}",
+          "jsonResult": "{\"code\":200}",
+          "status": "0",
+          "errorMsg": "",
+          "operTime": "2023-01-01 11:00:00",
+          "costTime": 30
+        },
+        {
+          "operId": 3,
+          "title": "菜单管理",
+          "businessType": "3",
+          "method": "com.ruoyi.web.controller.system.SysMenuController.remove()",
+          "requestMethod": "DELETE",
+          "operName": "admin",
+          "operUrl": "/system/menu/1",
+          "operIp": "127.0.0.1",
+          "operLocation": "内网IP",
+          "operParam": "{\"menuId\":1}",
+          "jsonResult": "{\"code\":500}",
+          "status": "1",
+          "errorMsg": "删除失败：菜单已被使用",
+          "operTime": "2023-01-01 10:00:00",
+          "costTime": 20
+        }
+      ],
+      "total": 3
+    },
+    "delete": {
+      "code": "200",
+      "msg": "删除成功"
+    },
+    "clean": {
+      "code": "200",
+      "msg": "清空成功"
+    }
+  },
+  "server": {
+    "info": {
+      "code": "200",
+      "msg": "操作成功",
+      "data": {
+        "cpu": {
+          "cpuNum": 8,
+          "used": 25.5,
+          "sys": 10.2,
+          "free": 64.3
+        },
+        "mem": {
+          "total": 16,
+          "used": 8,
+          "free": 8,
+          "usage": 50
+        },
+        "jvm": {
+          "total": 512,
+          "used": 256,
+          "free": 256,
+          "usage": 50,
+          "name": "OpenJDK 64-Bit Server VM",
+          "version": "1.8.0_312",
+          "startTime": "2023-01-01 08:00:00",
+          "runTime": "4小时",
+          "home": "/usr/lib/jvm/java-8-openjdk",
+          "inputArgs": "-Xms512m -Xmx1024m"
+        },
+        "sys": {
+          "computerName": "server-01",
+          "computerIp": "192.168.1.10",
+          "osName": "Linux",
+          "osArch": "amd64",
+          "userDir": "/opt/app"
+        },
+        "sysFiles": [
+          {
+            "dirName": "/",
+            "sysTypeName": "ext4",
+            "typeName": "本地磁盘",
+            "total": "500G",
+            "free": "300G",
+            "used": "200G",
+            "usage": 40
+          },
+          {
+            "dirName": "/data",
+            "sysTypeName": "ext4",
+            "typeName": "本地磁盘",
+            "total": "1T",
+            "free": "800G",
+            "used": "200G",
+            "usage": 20
+          }
+        ]
+      }
+    }
+  },
+  "dataMonitor": {
+    "pipelineStatus": {
+      "code": "200",
+      "msg": "操作成功",
+      "data": {
+        "currentStep": 2,
+        "startTime": "02:00:00",
+        "currentProcess": "OneID 跨渠道身份对齐 (Identity Alignment)",
+        "remainingTime": "15分钟",
+        "status": "normal",
+        "slaDeadline": "09:00",
+        "slaEstimate": "08:45"
+      }
+    },
+    "dataQuality": {
+      "code": "200",
+      "msg": "操作成功",
+      "data": {
+        "rate": 92.5,
+        "errorCount": 1240,
+        "sourceData": [1200, 932, 2013, 934, 1290, 430, 220]
+      }
+    },
+    "identityGovernance": {
+      "code": "200",
+      "msg": "操作成功",
+      "data": {
+        "newCustomers": 856,
+        "manualMerges": 45,
+        "conflictCount": 12,
+        "records": [
+          {
+            "time": "10:23",
+            "color": "#67C23A",
+            "content": "成功合并: [陈建华 138****] 与 [陈*华 138****]",
+            "note": "备注: 同一手机号，姓名录入差异"
+          },
+          {
+            "time": "09:45",
+            "color": "#E6A23C",
+            "content": "待审核: [王芳] (微信) 与 [王*芳] (DMS)",
+            "note": "疑似家庭账号共享 (参考: 妻子合并案例)"
+          },
+          {
+            "time": "08:30",
+            "color": "#67C23A",
+            "content": "成功合并: [周杰 139****] 与 [周杰 139****]",
+            "note": "备注: 同一手机号，姓名完全一致"
+          }
+        ]
+      }
+    },
+    "businessValue": {
+      "code": "200",
+      "msg": "操作成功",
+      "data": {
+        "apiErrorCount": 0,
+        "apiLogs": [
+          {
+            "time": "10:30",
+            "system": "BDC",
+            "type": "售后满意度回访",
+            "status": "Success"
+          },
+          {
+            "time": "10:28",
+            "system": "WeCom",
+            "type": "生日关怀",
+            "status": "Success"
+          },
+          {
+            "time": "10:25",
+            "system": "DMS",
+            "type": "保养提醒",
+            "status": "Success"
+          },
+          {
+            "time": "10:20",
+            "system": "BDC",
+            "type": "潜客清洗",
+            "status": "Success"
+          },
+          {
+            "time": "10:15",
+            "system": "SF",
+            "type": "流失召回",
+            "status": "Success"
+          }
+        ],
+        "leadTypes": [
+          {
+            "value": 345,
+            "name": "售后满意度回访"
+          },
+          {
+            "value": 120,
+            "name": "新车满意度回访"
+          },
+          {
+            "value": 80,
+            "name": "BDC Campaign"
+          },
+          {
+            "value": 210,
+            "name": "BDC售后商机招揽"
+          },
+          {
+            "value": 150,
+            "name": "BDC续保商机"
+          },
+          {
+            "value": 95,
+            "name": "CM 自定义"
+          },
+          {
+            "value": 88,
+            "name": "PCN售后 Campaign"
+          },
+          {
+            "value": 72,
+            "name": "TTR调研"
+          }
+        ]
+      }
+    },
+    "systemHealth": {
+      "code": "200",
+      "msg": "操作成功",
+      "data": {
+        "alerts": [
+          {
+            "type": "warning",
+            "title": "系统健康提示：OSS 存储桶 usage-logs-2023 增长率超过阈值 (85%)，请注意扩容。"
+          }
+        ]
+      }
+    },
+    "refresh": {
+      "code": "200",
+      "msg": "刷新成功"
+    }
+  }
+}
+

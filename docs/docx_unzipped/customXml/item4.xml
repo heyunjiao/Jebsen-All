@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<p:properties xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://schemas.microsoft.com/office/2006/metadata/properties" xmlns:pc="http://schemas.microsoft.com/office/infopath/2007/PartnerControls">
+ <documentManagement>
+  <TaxCatchAll xsi:nil="true" xmlns="bb898510-3ea7-4a81-86ee-8e486b012de5"/>
+  <ProjectStatus xsi:nil="true" xmlns="edf7c40f-1bd5-4aa4-9bc8-4f6ecf6671fe"/>
+  <ProjectID xsi:nil="true" xmlns="edf7c40f-1bd5-4aa4-9bc8-4f6ecf6671fe"/>
+  <Remarks xsi:nil="true" xmlns="edf7c40f-1bd5-4aa4-9bc8-4f6ecf6671fe"/>
+  <lcf76f155ced4ddcb4097134ff3c332f xmlns="edf7c40f-1bd5-4aa4-9bc8-4f6ecf6671fe">
+   <Terms xmlns="http://schemas.microsoft.com/office/infopath/2007/PartnerControls"/>
+  </lcf76f155ced4ddcb4097134ff3c332f>
+ </documentManagement>
+</p:properties>

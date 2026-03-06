@@ -688,8 +688,8 @@ const handleRecordClick = (record: any) => {
 };
 
 const loadMoreRecords = () => {
-  // 查看更多记录跳转到审计日志
-  router.push("/dataProcess/audit");
+  // 查看更多记录跳转到异常中心（原审计页已合并至异常中心）
+  router.push("/errorCorrection");
 };
 
 const updateQualityChart = () => {

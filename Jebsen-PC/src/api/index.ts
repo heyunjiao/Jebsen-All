@@ -12,8 +12,7 @@ import authMenuList from "@/assets/json/authMenuList.json";
 import monitorMockData from "@/assets/json/monitorMockData.json";
 import toolMockData from "@/assets/json/toolMockData.json";
 import systemMockData from "@/assets/json/systemMockData.json";
-import approvalMockData from "@/assets/json/approvalMockData.json";
-import auditMockData from "@/assets/json/auditMockData.json";
+
 import segmentMockData from "@/assets/json/segmentMockData.json";
 import tagManageMockData from "@/assets/json/tagManageMockData.json";
 import leadManagementMockData from "@/assets/json/leadManagementMockData.json";
@@ -380,137 +379,9 @@ function getToolMockData(url: string, method: string, params: any) {
   return { code: "200", msg: "操作成功", data: null };
 }
 
-/**
- * @description 获取 Approval 模块的 mock 数据
- */
-function getApprovalMockData(url: string, method: string, params: any) {
-  // 审批列表接口
-  if (url.includes("/approval/list")) {
-    return approvalMockData.list;
-  }
-  // 审批详情接口
-  if (url.includes("/approval/detail/")) {
-    const reqId = url.split("/approval/detail/")[1];
-    const detailData = JSON.parse(JSON.stringify(approvalMockData.detail));
-    if (detailData.data) {
-      detailData.data.reqId = reqId;
-    }
-    return detailData;
-  }
-  // 批准接口
-  if (url.includes("/approval/approve/") && method === "post") {
-    return approvalMockData.approve;
-  }
-  // 驳回接口
-  if (url.includes("/approval/reject/") && method === "post") {
-    return approvalMockData.reject;
-  }
-  // 规则列表接口
-  if (url.includes("/approval/rule/list") && method === "get") {
-    // 从localStorage读取保存的数据，如果没有则使用默认数据
-    const savedRules = localStorage.getItem("approval_rules");
-    let ruleListData = JSON.parse(JSON.stringify(approvalMockData.ruleList));
 
-    if (savedRules) {
-      try {
-        const saved = JSON.parse(savedRules);
-        // 确保每个规则都有 savedThreshold，如果没有则初始化为 threshold
-        saved.forEach((rule: any) => {
-          if (rule.savedThreshold === undefined) {
-            rule.savedThreshold = rule.threshold;
-          }
-        });
-        ruleListData.data.list = saved;
-        ruleListData.data.total = saved.length;
-      } catch (e) {
-        console.error("解析保存的规则数据失败:", e);
-      }
-    } else {
-      // 如果是首次加载，初始化 savedThreshold
-      ruleListData.data.list.forEach((rule: any) => {
-        if (rule.savedThreshold === undefined) {
-          rule.savedThreshold = rule.threshold;
-        }
-      });
-    }
 
-    // 前端筛选
-    if (params && (params.ruleName || params.enabled !== undefined)) {
-      let filteredList = [...ruleListData.data.list];
-      if (params.ruleName) {
-        filteredList = filteredList.filter((item: any) => item.ruleName.includes(params.ruleName));
-      }
-      if (params.enabled !== undefined && params.enabled !== "" && params.enabled !== null) {
-        filteredList = filteredList.filter(
-          (item: any) => item.enabled === (params.enabled === true || params.enabled === "true")
-        );
-      }
-      ruleListData.data.list = filteredList;
-      ruleListData.data.total = filteredList.length;
-    }
 
-    return ruleListData;
-  }
-  // 保存规则配置接口
-  if (url.includes("/approval/rule/save/") && method === "post") {
-    const ruleId = parseInt(url.split("/approval/rule/save/")[1]);
-    const threshold = params?.threshold;
-
-    // 从localStorage读取数据
-    const savedRules = localStorage.getItem("approval_rules");
-    let rules = savedRules ? JSON.parse(savedRules) : JSON.parse(JSON.stringify(approvalMockData.ruleList.data.list));
-
-    // 更新规则
-    const ruleIndex = rules.findIndex((r: any) => r.id === ruleId);
-    if (ruleIndex !== -1) {
-      rules[ruleIndex].threshold = threshold;
-      rules[ruleIndex].savedThreshold = threshold; // 保存时更新已保存的阈值
-      rules[ruleIndex].lastUpdate = new Date().toISOString().slice(0, 16).replace("T", " ");
-      rules[ruleIndex].operator = "当前客户";
-      // 保存到localStorage
-      localStorage.setItem("approval_rules", JSON.stringify(rules));
-    }
-
-    return approvalMockData.ruleSave;
-  }
-  // 启用/停用规则接口
-  if (url.includes("/approval/rule/toggle/") && method === "post") {
-    const ruleId = parseInt(url.split("/approval/rule/toggle/")[1]);
-    const enabled = params?.enabled;
-
-    // 从localStorage读取数据
-    const savedRules = localStorage.getItem("approval_rules");
-    let rules = savedRules ? JSON.parse(savedRules) : JSON.parse(JSON.stringify(approvalMockData.ruleList.data.list));
-
-    // 更新规则状态
-    const ruleIndex = rules.findIndex((r: any) => r.id === ruleId);
-    if (ruleIndex !== -1) {
-      rules[ruleIndex].enabled = enabled;
-      rules[ruleIndex].lastUpdate = new Date().toISOString().slice(0, 16).replace("T", " ");
-      rules[ruleIndex].operator = "当前客户";
-      // 保存到localStorage
-      localStorage.setItem("approval_rules", JSON.stringify(rules));
-    }
-
-    return approvalMockData.ruleToggle;
-  }
-
-  // 默认返回空数据
-  return { code: "200", msg: "操作成功", data: null };
-}
-
-/**
- * @description 获取 Audit 模块的 mock 数据
- */
-function getAuditMockData(url: string, method: string, params: any) {
-  // 审计日志列表接口
-  if (url.includes("/audit/log/list")) {
-    return auditMockData.list;
-  }
-
-  // 默认返回空数据
-  return { code: "200", msg: "操作成功", data: null };
-}
 
 /**
  * @description 获取 Segment 模块的 mock 数据
@@ -1009,6 +880,95 @@ function getCustomerSegmentationMockData(url: string, method: string, params: an
 }
 
 /**
+ * @description 合并规则 mock 数据（OneID 合并阈值配置）
+ */
+const mergeRuleMockData = {
+  list: [
+    {
+      id: "1",
+      ruleName: "姓名+手机号完全一致",
+      desc: "当姓名与手机号完全匹配时自动合并",
+      threshold: 98,
+      savedThreshold: 98,
+      enabled: true,
+      lastUpdate: "2024-01-15 10:30:00",
+      operator: "Admin"
+    },
+    {
+      id: "2",
+      ruleName: "手机号+身份证一致",
+      desc: "当手机号与身份证号一致时自动合并",
+      threshold: 95,
+      savedThreshold: 95,
+      enabled: true,
+      lastUpdate: "2024-01-14 14:20:00",
+      operator: "Admin"
+    },
+    {
+      id: "3",
+      ruleName: "VIN码+手机号一致",
+      desc: "当 VIN 码与手机号一致时自动合并",
+      threshold: 92,
+      savedThreshold: 92,
+      enabled: true,
+      lastUpdate: "2024-01-13 09:15:00",
+      operator: "Operator"
+    },
+    {
+      id: "4",
+      ruleName: "姓名模糊+手机号一致",
+      desc: "姓名模糊匹配且手机号一致（需人工复核）",
+      threshold: 85,
+      savedThreshold: 85,
+      enabled: false,
+      lastUpdate: "2024-01-12 16:45:00",
+      operator: "Operator"
+    }
+  ]
+};
+
+function getMergeRuleMockData(url: string, method: string, params: any) {
+  // 规则列表
+  if (url.includes("/merge/rule/list") && method === "post") {
+    return {
+      code: 200,
+      msg: "操作成功",
+      data: {
+        list: JSON.parse(JSON.stringify(mergeRuleMockData.list)),
+        total: mergeRuleMockData.list.length
+      }
+    };
+  }
+
+  // 保存阈值
+  if (url.includes("/merge/rule/saveThreshold/") && method === "put") {
+    const ruleId = url.split("/saveThreshold/")[1]?.replace(/\?.*$/, "") || "";
+    const rule = mergeRuleMockData.list.find(r => r.id === ruleId);
+    if (rule) {
+      rule.threshold = params?.threshold ?? rule.threshold;
+      rule.savedThreshold = rule.threshold;
+      rule.lastUpdate = new Date().toISOString().slice(0, 16).replace("T", " ");
+      rule.operator = "当前用户";
+    }
+    return { code: 200, msg: "操作成功" };
+  }
+
+  // 启用/停用
+  if (url.includes("/merge/rule/toggle/") && method === "put") {
+    const ruleId = url.split("/toggle/")[1]?.replace(/\?.*$/, "") || "";
+    const rule = mergeRuleMockData.list.find(r => r.id === ruleId);
+    if (rule) {
+      rule.enabled = params?.enabled ?? !rule.enabled;
+      rule.lastUpdate = new Date().toISOString().slice(0, 16).replace("T", " ");
+      rule.operator = "当前用户";
+    }
+    return { code: 200, msg: "操作成功" };
+  }
+
+  return { code: 200, msg: "操作成功", data: null };
+}
+
+/**
  * @description 获取 Collection 模块的 mock 数据
  */
 function getCollectionMockData(url: string, method: string, params: any) {
@@ -1202,21 +1162,9 @@ class RequestHttp {
           return Promise.reject({ isMock: true, mockData, config });
         }
 
-        // Approval 模块 mock 数据处理 - 在请求拦截器中拦截，直接返回 mock 数据
-        if (requestUrl.includes("/approval/")) {
-          // get请求的params在config.params中，post请求的params在config.data中
-          const requestParams = (config.method || "get").toLowerCase() === "get" ? config.params || {} : config.data || {};
-          const mockData = getApprovalMockData(requestUrl, config.method || "get", requestParams);
-          // 抛出特殊错误，在响应拦截器中捕获并返回 mock 数据
-          return Promise.reject({ isMock: true, mockData, config });
-        }
 
-        // Audit 模块 mock 数据处理 - 排除 lead 下的审计接口，避免与 LeadManagement 冲突
-        if (requestUrl.includes("/audit/") && !requestUrl.includes("/lead/audit/")) {
-          const mockData = getAuditMockData(requestUrl, config.method || "get", config.params || {});
-          // 抛出特殊错误，在响应拦截器中捕获并返回 mock 数据
-          return Promise.reject({ isMock: true, mockData, config });
-        }
+
+
 
         // Segment 模块 mock 数据处理
         if (requestUrl.includes("/segment/")) {
@@ -1261,6 +1209,13 @@ class RequestHttp {
         if (requestUrl.includes("/dataQuality/")) {
           const requestParams = (config.method || "get").toLowerCase() === "get" ? config.params || {} : config.data || {};
           const mockData = getDataQualityWorkbenchMockData(requestUrl, config.method || "get", requestParams);
+          return Promise.reject({ isMock: true, mockData, config });
+        }
+
+        // Merge 合并规则模块 mock 数据处理
+        if (requestUrl.includes("/merge/")) {
+          const requestParams = (config.method || "get").toLowerCase() === "get" ? config.params || {} : config.data || {};
+          const mockData = getMergeRuleMockData(requestUrl, config.method || "get", requestParams);
           return Promise.reject({ isMock: true, mockData, config });
         }
 

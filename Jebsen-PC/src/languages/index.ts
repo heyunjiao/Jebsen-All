@@ -2,13 +2,7 @@ import { createI18n } from "vue-i18n";
 import { getBrowserLang } from "@/utils";
 
 // 导入所有模块的翻译文件
-import approvalZh from "./modules/approval/zh";
-import approvalZhTW from "./modules/approval/zh-TW";
-import approvalEn from "./modules/approval/en";
 
-import auditZh from "./modules/audit/zh";
-import auditZhTW from "./modules/audit/zh-TW";
-import auditEn from "./modules/audit/en";
 
 import authZh from "./modules/auth/zh";
 import authZhTW from "./modules/auth/zh-TW";
@@ -112,8 +106,6 @@ const mergeMessages = (...modules: any[]) => {
 // 构建多语言消息对象
 const messages = {
   zh: mergeMessages(
-    approvalZh,
-    auditZh,
     authZh,
     collectionZh,
     commonZh,
@@ -139,8 +131,6 @@ const messages = {
     operationZh
   ),
   "zh-TW": mergeMessages(
-    approvalZhTW,
-    auditZhTW,
     authZhTW,
     collectionZhTW,
     commonZhTW,
@@ -166,8 +156,6 @@ const messages = {
     operationZhTW
   ),
   en: mergeMessages(
-    approvalEn,
-    auditEn,
     authEn,
     collectionEn,
     commonEn,

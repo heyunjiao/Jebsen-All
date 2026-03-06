@@ -1981,29 +1981,14 @@ const handleSubmitBasicInfo = async () => {
       (originalStatus === "inactive" && targetStatus === "active");
 
     if (isSupportStatusChange) {
-      await ElMessageBox.confirm(
-        t("customer.maintenance.lifecycleChangeWarning"),
-        t("customer.maintenance.lifecycleChangeTitle"),
-        {
-          type: "warning",
-          confirmButtonText: t("customer.profile360.submit"),
-          cancelButtonText: t("customer.profile360.cancel")
-        }
-      );
-      // 这里仅模拟：实际应调用数据异常 / 审批中心接口，提交客户支持状态变更工单
-      console.log("提交客户支持状态变更（数据异常申请）:", {
+      console.log("提交客户支持状态变更:", {
         oneId: props.profileData.customer.oneId,
         from: originalStatus,
         to: targetStatus
       });
-      ElMessage.success(t("errorCorrection.messages.submitForApproval"));
+      ElMessage.success("状态变更已提交");
     } else {
-      await ElMessageBox.confirm(t("customer.maintenance.submitWarning"), t("customer.maintenance.submitTitle"), {
-        type: "warning",
-        confirmButtonText: t("customer.profile360.submit"),
-        cancelButtonText: t("customer.profile360.cancel")
-      });
-      ElMessage.success(t("customer.maintenance.submitSuccess"));
+      ElMessage.success("保存成功");
     }
 
     const phonePayload = basicInfoForm.value.phoneList
@@ -2043,28 +2028,14 @@ const handleSubmitCompanyInfo = async () => {
       (originalStatus === "inactive" && targetStatus === "active");
 
     if (isSupportStatusChange) {
-      await ElMessageBox.confirm(
-        t("customer.maintenance.lifecycleChangeWarning"),
-        t("customer.maintenance.lifecycleChangeTitle"),
-        {
-          type: "warning",
-          confirmButtonText: t("customer.profile360.submit"),
-          cancelButtonText: t("customer.profile360.cancel")
-        }
-      );
-      console.log("提交公司生命周期状态变更（数据异常申请）:", {
+      console.log("提交公司生命周期状态变更:", {
         companyOneId: props.profileData.company.oneId,
         from: originalStatus,
         to: targetStatus
       });
-      ElMessage.success(t("errorCorrection.messages.submitForApproval"));
+      ElMessage.success("状态变更已提交");
     } else {
-      await ElMessageBox.confirm(t("customer.maintenance.submitWarning"), t("customer.maintenance.submitTitle"), {
-        type: "warning",
-        confirmButtonText: t("customer.profile360.submit"),
-        cancelButtonText: t("customer.profile360.cancel")
-      });
-      ElMessage.success(t("customer.maintenance.submitSuccess"));
+      ElMessage.success("保存成功");
     }
 
     console.log("提交公司信息修改:", {

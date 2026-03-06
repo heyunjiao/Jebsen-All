@@ -44,24 +44,6 @@ export const staticRouter: RouteRecordRaw[] = [
         }
       },
       {
-        path: "/dataProcess/approval",
-        name: "approval",
-        component: () => import("@/views/approval/index.vue"),
-        meta: {
-          title: "审批中心",
-          isKeepAlive: true
-        }
-      },
-      {
-        path: "/system/mergeManage/index",
-        name: "systemMergeManage",
-        component: () => import("@/views/system/mergeManage/index.vue"),
-        meta: {
-          title: "合并规则配置",
-          isKeepAlive: true
-        }
-      },
-      {
         path: "/segmentManage",
         name: "segmentManage",
         component: () => import("@/views/segmentManage/index.vue"),
@@ -76,15 +58,6 @@ export const staticRouter: RouteRecordRaw[] = [
         component: () => import("@/views/customerSegmentation/index.vue"),
         meta: {
           title: "客户筛选与分群",
-          isKeepAlive: true
-        }
-      },
-      {
-        path: "/dataProcess/audit",
-        name: "audit",
-        component: () => import("@/views/audit/index.vue"),
-        meta: {
-          title: "审计日志",
           isKeepAlive: true
         }
       },

@@ -627,7 +627,6 @@ const quickNavItems = computed(() => {
     "/dashboard/dataMonitor",
     "/dataProcess/dataQualityWorkbench",
     "/dataProcess/errorCorrection",
-    "/dataProcess/approval",
     "/system/accountManage",
     "/system/roleManage",
     "/system/menuMange",

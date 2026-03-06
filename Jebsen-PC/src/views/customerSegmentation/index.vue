@@ -155,23 +155,12 @@
           >
             {{ $t("customerSegmentation.actionBar.export") }}
           </el-button>
-          <el-button type="primary" :icon="FolderAdd" size="large" :disabled="!canSubmit" @click="handleOpenApprovalModal">
+          <el-button type="primary" :icon="FolderAdd" size="large" :disabled="!canSubmit" @click="handleSaveSegment">
             保存为分群
           </el-button>
         </div>
       </div>
     </div>
-
-    <!-- 审批弹窗 -->
-    <ApprovalModal
-      v-model="approvalModalVisible"
-      :rule-tree="ruleTree"
-      :quick-filters="quickFilters"
-      :estimated-count="estimateResult?.estimatedCount"
-      :initial-name="form.name"
-      :initial-reason="form.businessReason"
-      @submit="handleApprovalSubmit"
-    />
   </div>
 </template>
 
@@ -193,10 +182,6 @@ import {
 } from "@element-plus/icons-vue";
 import QuickFilters from "./components/QuickFilters.vue";
 import type { FilterFormType } from "./components/QuickFilters.vue";
-import RuleBuilder from "./components/RuleBuilder.vue";
-import InsightPanel from "./components/InsightPanel.vue";
-import ApprovalModal from "./components/ApprovalModal.vue";
-import type { SubmitData } from "./components/ApprovalModal.vue";
 import type { CustomerSegmentation } from "@/api/modules/customerSegmentation";
 import { getFieldOptions, estimateCount } from "@/api/modules/customerSegmentation";
 import type { RuleNode } from "@/views/tagManage/components/RuleEditor.vue";
@@ -225,7 +210,6 @@ const formRef = ref<FormInstance>();
 const fieldOptions = ref<CustomerSegmentation.FieldOption[]>([]);
 const estimateLoading = ref(false);
 const exporting = ref(false);
-const approvalModalVisible = ref(false);
 const isCalculationTimeout = ref(false);
 const ruleBuilderKey = ref(0); // 用于强制重新渲染 RuleBuilder 组件
 
@@ -1175,8 +1159,8 @@ const handleExport = async () => {
   }
 };
 
-// 打开审批弹窗
-const handleOpenApprovalModal = () => {
+// 保存分群
+const handleSaveSegment = () => {
   if (!rulePayload.value) {
     ElMessage.warning(t("customerSegmentation.messages.ruleRequired"));
     return;
@@ -1185,29 +1169,21 @@ const handleOpenApprovalModal = () => {
     ElMessage.warning("存在逻辑冲突，请先解决冲突后再提交");
     return;
   }
-  approvalModalVisible.value = true;
-};
-
-// 审批提交
-const handleApprovalSubmit = async (data: SubmitData) => {
-  form.name = data.name;
-  form.businessReason = data.businessReason;
-
-  try {
-    // 使用 mock 数据模拟提交
-    await import("@/assets/json/customerSegmentationMockData.json");
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    ElMessage.success(t("customerSegmentation.messages.submitSuccess"));
-    approvalModalVisible.value = false;
-    // 实际项目中这里会调用真实 API
-    // await submitForApproval({
-    //   ...form,
-    //   rulePayload: data.rulePayload
-    // });
-  } catch (error) {
-    console.error("提交失败:", error);
-    ElMessage.error("提交失败，请稍后重试");
-  }
+  ElMessageBox.prompt("请输入分群名称", "保存为分群", {
+    confirmButtonText: "保存",
+    cancelButtonText: "取消",
+    inputPattern: /\S+/,
+    inputErrorMessage: "请输入有效的分群名称"
+  }).then(async ({ value }) => {
+    form.name = value;
+    try {
+      // 模拟直接保存
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      ElMessage.success("保存成功");
+    } catch (error) {
+      ElMessage.error("保存失败");
+    }
+  });
 };
 
 // 加载字段选项

@@ -73,7 +73,6 @@ export default {
     lifecycleStatusOptions: {
       active: "活躍",
       inactive: "停用",
-      pending: "審核中",
       conflict: "衝突"
     },
     placeholder: {
@@ -216,10 +215,7 @@ export default {
       oneIdRequired: "OneID不能為空",
       nameRequired: "姓名不能為空",
       phoneRequired: "手機號不能為空",
-      phoneFormat: "手機號格式不正確",
-      submitTitle: "提交審核",
-      submitWarning: "您的修改已提交申請。為確保持續的數據準確性，該變更需經審批中心核准，預計 T+1 生效。",
-      submitSuccess: "維護申請已提交，等待審核"
+      phoneFormat: "手機號格式不正確"
     },
     feedback: {
       title: "糾錯反饋",
@@ -232,11 +228,10 @@ export default {
       reason: "反饋原因",
       reasonPlaceholder: "請詳細說明反饋原因",
       status: "狀態",
-      statusPending: "待審核",
       statusApproved: "已批准",
       statusRejected: "已駁回",
       submit: "提交反饋",
-      submitSuccess: "反饋已成功送達後台。管理員將結合源系統血緣進行審核，感謝您的糾錯！",
+      submitSuccess: "反饋已成功送達後台。感謝您的糾錯！",
       fieldRequired: "請選擇字段",
       reportedValueRequired: "請輸入反饋值",
       reasonRequired: "請輸入反饋原因"
@@ -385,60 +380,14 @@ export default {
       deleteSuccess: "刪除成功",
       operationFailed: "操作失敗",
       submitSuccess: "提交成功",
-      submittedToApproval: "已提交審批",
-      approvalMessage: "請求已提交至<b>審批中心</b>。<br>審批通過後，分發預計在 5-10 分鐘內生效。",
       confirmTitle: "提示",
       confirmDisable: "確定要禁用該分發嗎？",
-      confirmEnable: "確定要啟用該分發嗎？",
-      auditNotice: "<br>此操作將提交至<b>審計中心</b>，預計 5-10 分鐘後生效。"
+      confirmEnable: "確定要啟用該分發嗎？"
     }
   },
 
   pagination: {
     total: "共 {total} 條"
-  },
-  audit: {
-    conflictGovernance: "衝突治理",
-    approvalCenter: "審批中心",
-    ruleEngine: "規則引擎",
-    customerProfile: "客戶檔案",
-    systemConfiguration: "系統配置",
-    wechatBdc: "企微/BDC",
-    operator: "操作人",
-    manager: "管理員",
-    action: "動作",
-    payload: "記錄核心",
-    riskLevel: "風險等級",
-    module: "模塊",
-    status: "狀態",
-    operation: "操作",
-    viewSnapshot: "查看快照",
-    allFields: "全量字段",
-    onlyChanges: "僅看變更",
-    success: "成功",
-    approve: "批准",
-    reject: "駁回",
-    submit: "提交",
-    merge: "合併",
-    correction: "修正",
-    split: "拆分",
-    autoMerge: "自動合併",
-    autoClean: "自動清洗",
-    viewPhone: "查看明文手機號",
-    export: "導出",
-    modifyRule: "修改合併規則",
-    adjustThreshold: "調整閾值",
-    modifyRemark: "修改備註",
-    addRecord: "新增記錄",
-    target: "變更對象",
-    time: "操作時間",
-    clientIp: "客戶端IP",
-    userAgent: "用戶代理",
-    logId: "日誌ID",
-    approveMerge: "批准合併",
-    rejectMerge: "駁回合併",
-    submitMerge: "提交合併",
-    manualCorrection: "手動修正"
   },
   welcome: {
     morning: "早上好",

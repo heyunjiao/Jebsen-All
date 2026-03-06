@@ -13,7 +13,7 @@
   ></el-pagination>
 </template>
 
-<script setup lang="ts" name="Pagination">
+<script setup lang="ts">
 import { useGlobalStore } from "@/stores/modules/global";
 const globalStore = useGlobalStore();
 

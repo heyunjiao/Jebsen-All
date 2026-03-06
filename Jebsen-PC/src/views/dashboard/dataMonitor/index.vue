@@ -281,7 +281,7 @@
               </el-button>
             </div>
             <div class="records-list-enhanced">
-              <transition-group name="list-fade" tag="div">
+              <transition-group tag="div">
                 <div v-for="(rec, i) in identityData.records" :key="rec.id || i" class="record-item-enhanced list-fade-item">
                   <div class="record-status-bar" :style="{ background: rec.color }"></div>
                   <div class="record-content">
@@ -307,7 +307,7 @@
   </div>
 </template>
 
-<script setup lang="ts" name="dataMonitor">
+<script setup lang="ts">
 import { ref, reactive, computed, onMounted, onBeforeUnmount } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";

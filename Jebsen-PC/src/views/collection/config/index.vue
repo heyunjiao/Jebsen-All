@@ -91,7 +91,7 @@
   </div>
 </template>
 
-<script setup lang="ts" name="CollectionConfig">
+<script setup lang="ts">
 import { ref, reactive, onMounted, computed } from "vue";
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from "element-plus";
 import { Message, Check, Refresh, InfoFilled, Shop } from "@element-plus/icons-vue";

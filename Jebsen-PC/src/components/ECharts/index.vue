@@ -2,7 +2,7 @@
   <div id="echarts" ref="chartRef" :style="echartsStyle" />
 </template>
 
-<script setup lang="ts" name="ECharts">
+<script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch, computed, markRaw, nextTick, onActivated } from "vue";
 import { EChartsType, ECElementEvent } from "echarts/core";
 import echarts, { ECOption } from "./config";

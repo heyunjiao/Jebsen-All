@@ -6,19 +6,14 @@
       <div class="tabs-layer">
         <span class="tabs-layer-label">{{ t("customer.store.label") }}</span>
         <el-tabs v-model="selectedStoreId" class="layer-tabs store-tabs" @tab-change="onTopStoreChange">
-          <el-tab-pane
-            v-for="opt in storeSearchOptions"
-            :key="opt.value"
-            :name="opt.value"
-            :label="opt.label"
-          />
+          <el-tab-pane v-for="opt in storeSearchOptions" :key="opt.value" :name="opt.value" :label="opt.label" />
         </el-tabs>
       </div>
       <!-- 第二层：客户类型 -->
       <div class="tabs-layer">
         <span class="tabs-layer-label">{{ t("customer.customerType.label") }}</span>
         <el-tabs v-model="activeCustomerTypeTab" class="layer-tabs type-tabs" @tab-change="handleCustomerTypeTabChange">
-          <el-tab-pane name="all">
+          <el-tab-pane>
             <template #label>
               <span class="tab-label">
                 {{ t("customer.customerTypeTabs.all") }}
@@ -26,7 +21,7 @@
               </span>
             </template>
           </el-tab-pane>
-          <el-tab-pane name="individual">
+          <el-tab-pane>
             <template #label>
               <span class="tab-label">
                 {{ t("customer.customerTypeTabs.individual") }}
@@ -34,7 +29,7 @@
               </span>
             </template>
           </el-tab-pane>
-          <el-tab-pane name="company">
+          <el-tab-pane>
             <template #label>
               <span class="tab-label">
                 {{ t("customer.customerTypeTabs.company") }}
@@ -203,7 +198,7 @@
   </div>
 </template>
 
-<script setup lang="ts" name="customerList">
+<script setup lang="ts">
 import { ref, reactive, h, onMounted, watch, computed } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Download, View, Warning, User, Top, Select, Medal, Connection, Refresh } from "@element-plus/icons-vue";

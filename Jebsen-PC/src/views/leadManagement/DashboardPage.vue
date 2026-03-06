@@ -20,7 +20,7 @@
   </div>
 </template>
 
-<script setup lang="ts" name="LeadManagementDashboard">
+<script setup lang="ts">
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import DashboardLifecycle from "./components/DashboardLifecycle.vue";

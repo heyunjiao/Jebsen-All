@@ -4,4 +4,4 @@
   </div>
 </template>
 
-<script setup lang="ts" name="systemLog"></script>
+<script setup lang="ts"></script>

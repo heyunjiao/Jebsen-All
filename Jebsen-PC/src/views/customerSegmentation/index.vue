@@ -175,7 +175,7 @@
   </div>
 </template>
 
-<script setup lang="ts" name="customerSegmentation">
+<script setup lang="ts">
 import { ref, reactive, computed, onMounted, onUnmounted, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { ElMessage, ElMessageBox } from "element-plus";

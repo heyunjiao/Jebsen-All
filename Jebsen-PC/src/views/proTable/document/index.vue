@@ -10,4 +10,4 @@
   </div>
 </template>
 
-<script setup lang="ts" name="proTableDocument"></script>
+<script setup lang="ts"></script>

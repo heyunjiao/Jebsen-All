@@ -22,10 +22,10 @@
       </el-form-item>
       <el-form-item label="Activity type :">
         <el-checkbox-group v-model="formData.type">
-          <el-checkbox value="Online activities" name="type"> Online activities </el-checkbox>
-          <el-checkbox value="Promotion activities" name="type"> Promotion activities </el-checkbox>
-          <el-checkbox value="Offline activities" name="type"> Offline activities </el-checkbox>
-          <el-checkbox value="Simple brand exposure" name="type"> Simple brand exposure </el-checkbox>
+          <el-checkbox value="Online activities"> Online activities </el-checkbox>
+          <el-checkbox value="Promotion activities"> Promotion activities </el-checkbox>
+          <el-checkbox value="Offline activities"> Offline activities </el-checkbox>
+          <el-checkbox value="Simple brand exposure"> Simple brand exposure </el-checkbox>
         </el-checkbox-group>
       </el-form-item>
       <el-form-item label="Resources :">
@@ -45,7 +45,7 @@
   </div>
 </template>
 
-<script setup lang="ts" name="basicForm">
+<script setup lang="ts">
 import { ElMessage } from "element-plus";
 import { reactive } from "vue";
 

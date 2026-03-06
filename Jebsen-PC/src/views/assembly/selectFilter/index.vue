@@ -10,7 +10,7 @@
   </div>
 </template>
 
-<script setup lang="ts" name="selectFilter">
+<script setup lang="ts">
 import { ref } from "vue";
 import SelectFilter from "@/components/SelectFilter/index.vue";
 

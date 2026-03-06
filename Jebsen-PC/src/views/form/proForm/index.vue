@@ -12,13 +12,13 @@
         </component>
       </template>
       <el-form-item>
-        <slot name="operation"></slot>
+        <slot></slot>
       </el-form-item>
     </component>
   </div>
 </template>
 
-<script setup lang="ts" name="proForm">
+<script setup lang="ts">
 import { ref } from "vue";
 
 let model = ref<any>({});

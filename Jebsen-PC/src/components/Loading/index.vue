@@ -6,7 +6,7 @@
   </div>
 </template>
 
-<script setup lang="ts" name="Loading"></script>
+<script setup lang="ts"></script>
 
 <style scoped lang="scss">
 @import "./index.scss";

@@ -46,7 +46,7 @@
   </div>
 </template>
 
-<script setup lang="tsx" name="systemRuleConfig">
+<script setup lang="tsx">
 import { reactive, ref, nextTick, computed } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Setting, Check, Close, InfoFilled } from "@element-plus/icons-vue";

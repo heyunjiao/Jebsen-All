@@ -17,10 +17,10 @@
     <!-- 表格头部 操作按钮 -->
     <div class="table-header">
       <div class="header-button-lf">
-        <slot name="tableHeader" :selected-list="selectedList" :selected-list-ids="selectedListIds" :is-selected="isSelected" />
+        <slot :selected-list="selectedList" :selected-list-ids="selectedListIds" :is-selected="isSelected" />
       </div>
       <div v-if="toolButton" class="header-button-ri">
-        <slot name="toolButton">
+        <slot>
           <el-button v-if="showToolButton('refresh')" :icon="Refresh" circle @click="getTableList" />
           <el-button v-if="showToolButton('setting') && columns.length" :icon="Operation" circle @click="openColSetting" />
           <el-button
@@ -77,12 +77,12 @@
       </template>
       <!-- 插入表格最后一行之后的插槽 -->
       <template #append>
-        <slot name="append" />
+        <slot />
       </template>
       <!-- 无数据 -->
       <template #empty>
         <div class="table-empty">
-          <slot name="empty">
+          <slot>
             <img src="@/assets/images/notData.png" alt="notData" />
             <div>暂无数据</div>
           </slot>
@@ -90,7 +90,7 @@
       </template>
     </el-table>
     <!-- 分页组件 -->
-    <slot name="pagination">
+    <slot>
       <Pagination
         v-if="pagination"
         :pageable="pageable"
@@ -103,7 +103,7 @@
   <ColSetting v-if="toolButton" ref="colRef" v-model:col-setting="colSetting" />
 </template>
 
-<script setup lang="ts" name="ProTable">
+<script setup lang="ts">
 import { ref, watch, provide, onMounted, unref, computed, reactive } from "vue";
 import { ElTable } from "element-plus";
 import { useTable } from "@/hooks/useTable";

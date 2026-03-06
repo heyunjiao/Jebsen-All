@@ -6,7 +6,7 @@
   </div>
 </template>
 
-<script setup lang="ts" name="useProTableDetail">
+<script setup lang="ts">
 import { useRoute } from "vue-router";
 const route = useRoute();
 </script>

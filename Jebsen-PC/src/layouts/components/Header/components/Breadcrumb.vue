@@ -2,16 +2,17 @@
   <div :class="['breadcrumb-box mask-image', !globalStore.breadcrumbIcon && 'no-icon']">
     <el-breadcrumb :separator-icon="ArrowRight">
       <transition-group name="breadcrumb">
-        <el-breadcrumb-item v-for="(item, index) in breadcrumbList" :key="item.path">
+        <el-breadcrumb-item v-for="(item, index) in breadcrumbList" :key="item?.path ?? index">
           <div
+            v-if="item"
             class="el-breadcrumb__inner is-link"
-            :class="{ 'item-no-icon': !item.meta.icon }"
+            :class="{ 'item-no-icon': !item.meta?.icon }"
             @click="onBreadcrumbClick(item, index)"
           >
-            <el-icon v-if="item.meta.icon && globalStore.breadcrumbIcon" class="breadcrumb-icon">
+            <el-icon v-if="item.meta?.icon && globalStore.breadcrumbIcon" class="breadcrumb-icon">
               <component :is="item.meta.icon"></component>
             </el-icon>
-            <span class="breadcrumb-title">{{ item.meta.title }}</span>
+            <span class="breadcrumb-title">{{ item.meta?.title ?? '' }}</span>
           </div>
         </el-breadcrumb-item>
       </transition-group>
@@ -44,7 +45,9 @@ const breadcrumbList = computed(() => {
     return [{ path: HOME_URL, meta: { icon: "HomeFilled", title: "首页" } }];
   }
 
-  let breadcrumbData = authStore.breadcrumbListGet[lastMatched.path] ?? [];
+  let breadcrumbData = (authStore.breadcrumbListGet[lastMatched.path] ?? []).filter(
+    (item: Menu.MenuOptions) => item != null
+  );
 
   // 🙅‍♀️不需要首页面包屑可删除以下判断
   if (breadcrumbData.length > 0 && breadcrumbData[0].path !== HOME_URL) {

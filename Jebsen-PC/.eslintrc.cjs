@@ -21,6 +21,23 @@ module.exports = {
   },
   // 继承某些已有的规则
   extends: ["plugin:vue/vue3-recommended", "plugin:@typescript-eslint/recommended", "plugin:prettier/recommended"],
+  overrides: [
+    {
+      files: ["**/*.js", "**/*.cjs", "**/*.mjs"],
+      parser: "espree",
+      parserOptions: { ecmaVersion: 2020, sourceType: "module" },
+      rules: {
+        "@typescript-eslint/no-var-requires": "off",
+        "@typescript-eslint/no-require-imports": "off",
+        "@typescript-eslint/no-unsafe-assignment": "off",
+        "@typescript-eslint/no-unsafe-member-access": "off",
+        "@typescript-eslint/no-unsafe-call": "off",
+        "@typescript-eslint/no-unsafe-return": "off",
+        "@typescript-eslint/prefer-ts-expect-error": "off",
+        "@typescript-eslint/ban-ts-comment": "off"
+      }
+    }
+  ],
   /**
    * "off" 或 0    ==>  关闭规则
    * "warn" 或 1   ==>  打开的规则作为警告（不影响代码执行）

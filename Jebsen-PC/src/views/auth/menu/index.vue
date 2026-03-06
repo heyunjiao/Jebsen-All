@@ -10,7 +10,7 @@
   </div>
 </template>
 
-<script setup lang="ts" name="authMenu">
+<script setup lang="ts">
 import { useRouter } from "vue-router";
 import { LOGIN_URL } from "@/config";
 import { useUserStore } from "@/stores/modules/user";

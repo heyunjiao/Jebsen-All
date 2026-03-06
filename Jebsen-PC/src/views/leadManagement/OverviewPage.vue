@@ -4,7 +4,7 @@
   </div>
 </template>
 
-<script setup lang="ts" name="LeadManagementOverview">
+<script setup lang="ts">
 import DashboardOverview from "./components/DashboardOverview.vue";
 </script>
 

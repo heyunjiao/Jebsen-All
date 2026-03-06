@@ -4,7 +4,7 @@
   </div>
 </template>
 
-<script setup lang="ts" name="LeadManagementAudit">
+<script setup lang="ts">
 import AuditCenter from "./components/AuditCenter.vue";
 </script>
 

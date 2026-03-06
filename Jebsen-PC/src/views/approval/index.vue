@@ -2,7 +2,7 @@
   <div class="approval-container">
     <!-- 1. 标签页切换 -->
     <el-tabs v-model="activeTab" @tab-change="handleTabChange" class="approval-tabs">
-      <el-tab-pane name="pending">
+      <el-tab-pane>
         <template #label>
           <span class="tab-label">
             <el-icon class="tab-icon"><Clock /></el-icon>
@@ -11,7 +11,7 @@
           </span>
         </template>
       </el-tab-pane>
-      <el-tab-pane name="history">
+      <el-tab-pane>
         <template #label>
           <span class="tab-label">已处理历史</span>
         </template>
@@ -298,7 +298,7 @@
   </div>
 </template>
 
-<script setup lang="tsx" name="Approval">
+<script setup lang="tsx">
 import { ref, reactive, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";

@@ -100,7 +100,7 @@
   </div>
 </template>
 
-<script setup lang="tsx" name="departmentManage">
+<script setup lang="tsx">
 import { ref, reactive, onMounted, nextTick } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Plus, Edit, Delete, Fold, Expand } from "@element-plus/icons-vue";

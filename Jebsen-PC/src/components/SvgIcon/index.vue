@@ -4,7 +4,7 @@
   </svg>
 </template>
 
-<script setup lang="ts" name="SvgIcon">
+<script setup lang="ts">
 import { computed, CSSProperties } from "vue";
 
 interface SvgProps {

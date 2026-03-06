@@ -45,7 +45,7 @@
   </div>
 </template>
 
-<script setup lang="ts" name="TreeFilter">
+<script setup lang="ts">
 import { ref, watch, onBeforeMount, nextTick } from "vue";
 import { ElTree } from "element-plus";
 

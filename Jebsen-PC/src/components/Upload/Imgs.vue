@@ -17,7 +17,7 @@
       :accept="fileType.join(',')"
     >
       <div class="upload-empty">
-        <slot name="empty">
+        <slot>
           <el-icon><Plus /></el-icon>
           <!-- <span>请上传图片</span> -->
         </slot>
@@ -37,13 +37,13 @@
       </template>
     </el-upload>
     <div class="el-upload__tip">
-      <slot name="tip"></slot>
+      <slot></slot>
     </div>
     <el-image-viewer v-if="imgViewVisible" :url-list="[viewImageUrl]" @close="imgViewVisible = false" />
   </div>
 </template>
 
-<script setup lang="ts" name="UploadImgs">
+<script setup lang="ts">
 import { ref, computed, inject, watch } from "vue";
 import { Plus } from "@element-plus/icons-vue";
 import { uploadImg } from "@/api/modules/upload";

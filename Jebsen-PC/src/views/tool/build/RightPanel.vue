@@ -715,35 +715,27 @@ export default {
     },
     renderContent(h, { node, data }) {
       // 使用 render 函数避免 JSX 语法，兼容当前构建配置
-      return h(
-        "div",
-        { class: "custom-tree-node" },
-        [
-          h("span", node.label),
+      return h("div", { class: "custom-tree-node" }, [
+        h("span", node.label),
+        h("span", { class: "node-operation" }, [
           h(
-            "span",
-            { class: "node-operation" },
-            [
-              h(
-                "el-icon",
-                {
-                  attrs: { title: "添加" },
-                  on: { click: () => this.append(data) }
-                },
-                [h(Plus)]
-              ),
-              h(
-                "el-icon",
-                {
-                  attrs: { title: "删除" },
-                  on: { click: () => this.remove(node, data) }
-                },
-                [h(Delete)]
-              )
-            ]
+            "el-icon",
+            {
+              attrs: { title: "添加" },
+              on: { click: () => this.append(data) }
+            },
+            [h(Plus)]
+          ),
+          h(
+            "el-icon",
+            {
+              attrs: { title: "删除" },
+              on: { click: () => this.remove(node, data) }
+            },
+            [h(Delete)]
           )
-        ]
-      );
+        ])
+      ]);
     },
     append(data) {
       if (!data.children) {

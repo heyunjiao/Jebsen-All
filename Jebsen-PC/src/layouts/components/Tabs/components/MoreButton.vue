@@ -49,10 +49,10 @@ const keepAliveStore = useKeepAliveStore();
 const refreshCurrentPage: Function = inject("refresh") as Function;
 const refresh = () => {
   setTimeout(() => {
-    route.meta.isKeepAlive && keepAliveStore.removeKeepAliveName(route.fullPath as string);
+    route.meta?.isKeepAlive && keepAliveStore.removeKeepAliveName(route.fullPath as string);
     refreshCurrentPage(false);
     nextTick(() => {
-      route.meta.isKeepAlive && keepAliveStore.addKeepAliveName(route.fullPath as string);
+      route.meta?.isKeepAlive && keepAliveStore.addKeepAliveName(route.fullPath as string);
       refreshCurrentPage(true);
     });
   }, 0);
@@ -65,7 +65,7 @@ const maximize = () => {
 
 // Close Current
 const closeCurrentTab = () => {
-  if (route.meta.isAffix) return;
+  if (route.meta?.isAffix) return;
   tabStore.removeTabs(route.fullPath);
 };
 

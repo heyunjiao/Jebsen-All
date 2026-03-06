@@ -99,7 +99,7 @@
   </div>
 </template>
 
-<script setup lang="tsx" name="dictData">
+<script setup lang="tsx">
 import { ref, reactive, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";

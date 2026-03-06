@@ -44,7 +44,7 @@
     <el-dialog :title="title" v-model="open" width="1200px" append-to-body top="3vh" class="role-config-dialog">
       <el-tabs v-model="activeTab" class="role-tabs">
         <!-- Tab 1: 基础信息 -->
-        <el-tab-pane :label="$t('system.roleManagement.basicInfo')" name="basic">
+        <el-tab-pane :label="$t('system.roleManagement.basicInfo')">
           <BasicInfo
             ref="basicInfoRef"
             :form="form"
@@ -55,7 +55,7 @@
         </el-tab-pane>
 
         <!-- Tab 2: 功能权限 -->
-        <el-tab-pane :label="$t('system.roleManagement.functionalPermission')" name="functional">
+        <el-tab-pane :label="$t('system.roleManagement.functionalPermission')">
           <FunctionalPermission
             ref="functionalPermissionRef"
             :menu-options="menuOptions"
@@ -68,7 +68,7 @@
         </el-tab-pane>
 
         <!-- Tab 3: 字段脱敏 -->
-        <el-tab-pane :label="$t('system.roleManagement.fieldMaskingTab')" name="fieldMasking">
+        <el-tab-pane :label="$t('system.roleManagement.fieldMaskingTab')">
           <FieldMasking
             ref="fieldMaskingRef"
             :business-objects="businessObjects"
@@ -103,7 +103,7 @@
   </div>
 </template>
 
-<script setup lang="tsx" name="roleManage">
+<script setup lang="tsx">
 import { ref, reactive, onMounted, nextTick } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Plus, Edit, Delete, Download, More, Setting, User } from "@element-plus/icons-vue";

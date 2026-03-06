@@ -11,7 +11,7 @@
   </div>
 </template>
 
-<script setup lang="ts" name="copyDirect">
+<script setup lang="ts">
 import { ref } from "vue";
 
 const data = ref<string>("我是被复制的内容 🍒 🍉 🍊");

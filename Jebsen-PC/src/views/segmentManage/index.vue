@@ -170,7 +170,7 @@
   </div>
 </template>
 
-<script setup lang="ts" name="segmentManage">
+<script setup lang="ts">
 import { ref, reactive, watch } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Plus, Edit, View, Check, Download, UserFilled, User, Close } from "@element-plus/icons-vue";

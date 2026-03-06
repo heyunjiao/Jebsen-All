@@ -91,7 +91,7 @@
   </div>
 </template>
 
-<script setup lang="ts" name="CollectionMonitor">
+<script setup lang="ts">
 import { ref, reactive, computed } from "vue";
 import { ElMessage, type FormInstance, type FormRules } from "element-plus";
 import { Refresh, Bell, Message, WarningFilled } from "@element-plus/icons-vue";

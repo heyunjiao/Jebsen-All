@@ -45,7 +45,7 @@
   </div>
 </template>
 
-<script setup lang="ts" name="dynamicForm">
+<script setup lang="ts">
 import { reactive, ref } from "vue";
 import type { FormInstance } from "element-plus";
 

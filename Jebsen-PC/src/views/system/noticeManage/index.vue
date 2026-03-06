@@ -84,7 +84,7 @@
   </div>
 </template>
 
-<script setup lang="tsx" name="noticeManage">
+<script setup lang="tsx">
 import { ref, reactive, onMounted } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Plus, Edit, Delete } from "@element-plus/icons-vue";

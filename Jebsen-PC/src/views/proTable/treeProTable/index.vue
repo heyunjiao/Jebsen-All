@@ -35,7 +35,7 @@
   </div>
 </template>
 
-<script setup lang="tsx" name="treeProTable">
+<script setup lang="tsx">
 import { onMounted, reactive, ref } from "vue";
 import { User } from "@/api/interface";
 import { genderType } from "@/utils/dict";

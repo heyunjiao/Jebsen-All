@@ -109,7 +109,7 @@
   </div>
 </template>
 
-<script setup lang="ts" name="dataScreen">
+<script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from "vue";
 import { HOME_URL } from "@/config";
 import { useRouter } from "vue-router";

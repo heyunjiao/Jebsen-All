@@ -2,4 +2,4 @@
   <router-view />
 </template>
 
-<script setup lang="ts" name="LeadManagementLayout"></script>
+<script setup lang="ts"></script>

@@ -11,7 +11,7 @@
   </div>
 </template>
 
-<script setup lang="ts" name="storeAnalysis">
+<script setup lang="ts">
 import { ref, h } from "vue";
 import { ProTableInstance, ColumnProps } from "@/components/ProTable/interface";
 import ProTable from "@/components/ProTable/index.vue";

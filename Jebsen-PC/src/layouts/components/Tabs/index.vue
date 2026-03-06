@@ -45,15 +45,16 @@ onMounted(() => {
 watch(
   () => route.fullPath,
   () => {
-    if (route.meta.isFull) return;
+    const meta = route.meta;
+    if (!meta || meta.isFull) return;
     tabsMenuValue.value = route.fullPath;
     const tabsParams = {
-      icon: route.meta.icon as string,
-      title: route.meta.title as string,
+      icon: meta.icon as string,
+      title: meta.title as string,
       path: route.fullPath,
       name: route.name as string,
-      close: !route.meta.isAffix,
-      isKeepAlive: route.meta.isKeepAlive as boolean
+      close: !meta.isAffix,
+      isKeepAlive: meta.isKeepAlive as boolean
     };
     tabStore.addTabs(tabsParams);
   },
@@ -63,17 +64,17 @@ watch(
 // 初始化需要固定的 tabs
 const initTabs = () => {
   authStore.flatMenuListGet.forEach(item => {
-    if (item.meta.isAffix && !item.meta.isHide && !item.meta.isFull) {
-      const tabsParams = {
-        icon: item.meta.icon,
-        title: item.meta.title,
-        path: item.path,
-        name: item.name,
-        close: !item.meta.isAffix,
-        isKeepAlive: item.meta.isKeepAlive
-      };
-      tabStore.addTabs(tabsParams);
-    }
+    const meta = item?.meta;
+    if (!meta || !meta.isAffix || meta.isHide || meta.isFull) return;
+    const tabsParams = {
+      icon: meta.icon,
+      title: meta.title,
+      path: item.path,
+      name: item.name,
+      close: !meta.isAffix,
+      isKeepAlive: meta.isKeepAlive
+    };
+    tabStore.addTabs(tabsParams);
   });
 };
 

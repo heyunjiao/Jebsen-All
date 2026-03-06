@@ -30,7 +30,7 @@
         </GridItem>
       </Grid>
       <div class="search-footer">
-        <slot name="footer" />
+        <slot />
       </div>
     </el-form>
 
@@ -45,7 +45,7 @@
     </div>
   </div>
 </template>
-<script setup lang="ts" name="SearchForm">
+<script setup lang="ts">
 import { computed, ref } from "vue";
 import { ColumnProps } from "@/components/ProTable/interface";
 import { BreakPoint } from "@/components/Grid/interface";

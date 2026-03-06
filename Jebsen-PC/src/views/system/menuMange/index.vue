@@ -225,7 +225,7 @@
   </div>
 </template>
 
-<script setup lang="tsx" name="menuMange">
+<script setup lang="tsx">
 import { ref, reactive, onMounted, nextTick } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { QuestionFilled, Plus, Edit, Delete, Fold, Expand, Search } from "@element-plus/icons-vue";

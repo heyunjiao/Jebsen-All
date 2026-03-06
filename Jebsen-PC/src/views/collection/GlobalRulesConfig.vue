@@ -82,7 +82,7 @@
   </div>
 </template>
 
-<script setup lang="ts" name="GlobalRulesConfig">
+<script setup lang="ts">
 import { reactive, ref, computed, onMounted } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { InfoFilled } from "@element-plus/icons-vue";

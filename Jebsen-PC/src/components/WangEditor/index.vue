@@ -13,7 +13,7 @@
   </div>
 </template>
 
-<script setup lang="ts" name="WangEditor">
+<script setup lang="ts">
 import { nextTick, computed, inject, shallowRef, onBeforeUnmount } from "vue";
 import { IToolbarConfig, IEditorConfig } from "@wangeditor/editor";
 import { Editor, Toolbar } from "@wangeditor/editor-for-vue";

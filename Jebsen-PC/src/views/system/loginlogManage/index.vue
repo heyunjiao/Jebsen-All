@@ -34,7 +34,7 @@
   </div>
 </template>
 
-<script setup lang="tsx" name="loginlogManage">
+<script setup lang="tsx">
 import { ref, reactive, onMounted } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Delete, Download, Unlock } from "@element-plus/icons-vue";

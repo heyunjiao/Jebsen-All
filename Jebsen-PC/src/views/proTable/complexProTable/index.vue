@@ -36,7 +36,7 @@
   </div>
 </template>
 
-<script setup lang="tsx" name="complexProTable">
+<script setup lang="tsx">
 import { reactive, ref } from "vue";
 import { ElMessage } from "element-plus";
 import { User } from "@/api/interface";

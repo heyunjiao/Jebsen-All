@@ -79,7 +79,7 @@
   </div>
 </template>
 
-<script setup lang="tsx" name="operlogManage">
+<script setup lang="tsx">
 import { ref, reactive, onMounted } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Delete, Download, View } from "@element-plus/icons-vue";

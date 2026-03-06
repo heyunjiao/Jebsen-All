@@ -4,7 +4,7 @@
   </div>
 </template>
 
-<script setup lang="ts" name="LeadManagementRule">
+<script setup lang="ts">
 import RuleConfig from "./components/RuleConfig.vue";
 </script>
 

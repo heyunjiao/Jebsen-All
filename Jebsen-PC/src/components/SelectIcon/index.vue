@@ -28,7 +28,7 @@
   </div>
 </template>
 
-<script setup lang="ts" name="SelectIcon">
+<script setup lang="ts">
 import { ref, computed } from "vue";
 import * as Icons from "@element-plus/icons-vue";
 

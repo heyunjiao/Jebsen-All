@@ -4,7 +4,7 @@
   </div>
 </template>
 
-<script setup lang="ts" name="home"></script>
+<script setup lang="ts"></script>
 
 <style scoped lang="scss">
 @import "./index";

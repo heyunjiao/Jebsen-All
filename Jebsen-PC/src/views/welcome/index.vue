@@ -308,7 +308,7 @@
   </div>
 </template>
 
-<script setup lang="ts" name="welcome">
+<script setup lang="ts">
 import { ref, computed, onMounted, h } from "vue";
 import { useRouter } from "vue-router";
 import { useUserStore } from "@/stores/modules/user";

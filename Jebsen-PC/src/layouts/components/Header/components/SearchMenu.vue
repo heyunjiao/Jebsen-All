@@ -42,7 +42,9 @@ import { useDebounceFn } from "@vueuse/core";
 
 const router = useRouter();
 const authStore = useAuthStore();
-const menuList = computed(() => authStore.flatMenuListGet.filter(item => !item.meta.isHide));
+const menuList = computed(() =>
+  authStore.flatMenuListGet.filter(item => item && !item.meta?.isHide)
+);
 
 const activePath = ref("");
 const mouseoverMenuItem = (menu: Menu.MenuOptions) => {
@@ -75,8 +77,9 @@ const updateSearchList = () => {
   searchList.value = searchMenu.value
     ? menuList.value.filter(
         item =>
-          (item.path.toLowerCase().includes(searchMenu.value.toLowerCase()) ||
-            item.meta.title.toLowerCase().includes(searchMenu.value.toLowerCase())) &&
+          item &&
+          (item.path?.toLowerCase().includes(searchMenu.value.toLowerCase()) ||
+            item.meta?.title?.toLowerCase().includes(searchMenu.value.toLowerCase())) &&
           !item.meta?.isHide
       )
     : [];

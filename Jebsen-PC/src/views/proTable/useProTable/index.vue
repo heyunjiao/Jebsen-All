@@ -47,7 +47,7 @@
   </div>
 </template>
 
-<script setup lang="tsx" name="useProTable">
+<script setup lang="tsx">
 import { ref, reactive } from "vue";
 import { useRouter } from "vue-router";
 import { User } from "@/api/interface";

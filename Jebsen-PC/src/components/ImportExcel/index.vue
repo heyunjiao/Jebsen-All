@@ -19,14 +19,14 @@
           :on-error="excelUploadError"
           :accept="parameter.fileType!.join(',')"
         >
-          <slot name="empty">
+          <slot>
             <el-icon class="el-icon--upload">
               <upload-filled />
             </el-icon>
             <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
           </slot>
           <template #tip>
-            <slot name="tip">
+            <slot>
               <div class="el-upload__tip">请上传 .xls , .xlsx 标准格式文件，文件最大为 {{ parameter.fileSize }}M</div>
             </slot>
           </template>
@@ -39,7 +39,7 @@
   </el-dialog>
 </template>
 
-<script setup lang="ts" name="ImportExcel">
+<script setup lang="ts">
 import { ref } from "vue";
 import { useDownload } from "@/hooks/useDownload";
 import { Download } from "@element-plus/icons-vue";

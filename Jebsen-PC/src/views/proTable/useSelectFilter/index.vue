@@ -39,7 +39,7 @@
     </div>
   </div>
 </template>
-<script setup lang="ts" name="useSelectFilter">
+<script setup lang="ts">
 import { ref, reactive, onMounted, watch } from "vue";
 import { User } from "@/api/interface";
 import { ElMessage, ElMessageBox } from "element-plus";

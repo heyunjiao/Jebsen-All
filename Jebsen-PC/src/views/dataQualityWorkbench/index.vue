@@ -363,7 +363,7 @@
   </div>
 </template>
 
-<script setup lang="ts" name="DataQualityWorkbench">
+<script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
 import { ElMessage, ElMessageBox, type UploadFile, type UploadFiles } from "element-plus";
 import { useI18n } from "vue-i18n";

@@ -5,6 +5,8 @@
     "module": "ESNext",
     "moduleResolution": "Node",
     "types": ["vite/client", "element-plus/global", "vue"],
+    "allowJs": true,
+    "checkJs": false,
 
     /* Strict Type-Checking Options */
     "strict": true /* Enable all strict type-checking options. */,
@@ -31,12 +33,14 @@
   },
   "include": [
     "src/**/*.ts",
+    "src/**/*.js",
     "src/**/*.d.ts",
     "src/**/*.tsx",
     "src/**/*.vue",
     "build/**/*.ts",
+    "build/**/*.js",
     "build/**/*.d.ts",
     "vite.config.ts"
   ],
-  "exclude": ["node_modules", "dist", "**/*.js"]
+  "exclude": ["node_modules", "dist"]
 }

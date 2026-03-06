@@ -10,8 +10,8 @@
     <!-- 一级导航 (L1) - PageHeader -->
     <div class="page-header">
       <el-tabs v-model="activeStatusTab" class="l1-tabs" @tab-change="handleStatusTabChange">
-        <el-tab-pane :label="t('errorCorrection.tabs.pending')" name="pending" />
-        <el-tab-pane :label="t('errorCorrection.tabs.processed')" name="processed" />
+        <el-tab-pane :label="t('errorCorrection.tabs.pending')" />
+        <el-tab-pane :label="t('errorCorrection.tabs.processed')" />
       </el-tabs>
     </div>
 
@@ -428,7 +428,7 @@
   </div>
 </template>
 
-<script setup lang="tsx" name="ErrorCorrection">
+<script setup lang="tsx">
 import { reactive, ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
 import ProTable from "@/components/ProTable/index.vue";

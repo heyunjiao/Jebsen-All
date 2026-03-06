@@ -56,6 +56,53 @@ export function isType(val: any) {
 }
 
 /**
+ * @description 判断是否为数字字符串
+ * @param {*} val 待判断的值
+ * @returns {Boolean}
+ */
+export function isNumberStr(val: any): boolean {
+  if (typeof val === "number" && !isNaN(val)) return true;
+  if (typeof val !== "string") return false;
+  return /^-?\d+(\.\d+)?$/.test(val.trim());
+}
+
+/**
+ * @description 首字母大写（驼峰）
+ * @param {String} str 字符串
+ * @returns {String}
+ */
+export function titleCase(str: string): string {
+  if (!str || typeof str !== "string") return str;
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+/** 代码格式化配置（供 js-beautify 使用） */
+export const beautifierConf = {
+  html: {
+    indent_size: 2,
+    indent_char: " ",
+    max_preserve_newlines: 1,
+    preserve_newlines: true,
+    keep_array_indentation: false,
+    break_chained_methods: false,
+    indent_scripts: "keep",
+    brace_style: "collapse",
+    space_before_conditional: true,
+    unescape_strings: false,
+    jslint_happy: false,
+    end_with_newline: false,
+    wrap_line_length: 0,
+    indent_inner_html: false,
+    comma_first: false,
+    e4x: false,
+    indent_empty_lines: false
+  }
+};
+
+/** 生成器导出默认声明（export default ） */
+export const exportDefault = "export default ";
+
+/**
  * @description 生成唯一 uuid
  * @returns {String}
  */
@@ -181,6 +228,7 @@ export function getShowMenuList(menuList: Menu.MenuOptions[]) {
  */
 export const getAllBreadcrumbList = (menuList: Menu.MenuOptions[], parent = [], result: { [key: string]: any } = {}) => {
   for (const item of menuList) {
+    if (!item || item.path == null) continue;
     result[item.path] = [...parent, item];
     if (item.children) getAllBreadcrumbList(item.children, result[item.path], result);
   }
@@ -226,7 +274,8 @@ export function findMenuByPath(menuList: Menu.MenuOptions[], path: string): Menu
  * */
 export function getKeepAliveRouterName(menuList: Menu.MenuOptions[], keepAliveNameArr: string[] = []) {
   menuList.forEach(item => {
-    item.meta.isKeepAlive && item.name && keepAliveNameArr.push(item.name);
+    if (!item) return;
+    item.meta?.isKeepAlive && item.name && keepAliveNameArr.push(item.name);
     item.children?.length && getKeepAliveRouterName(item.children, keepAliveNameArr);
   });
   return keepAliveNameArr;
@@ -375,7 +424,7 @@ export function parseTime(time: any, pattern?: string): string {
  * @param {Object} context Vue 组件实例的 this 上下文
  */
 export function resetForm(refName: string, context?: any) {
-  const ctx = context || this;
+  const ctx = context || (this as any);
   if (ctx && ctx.$refs && ctx.$refs[refName]) {
     ctx.$refs[refName].resetFields();
   }

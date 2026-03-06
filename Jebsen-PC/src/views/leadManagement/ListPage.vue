@@ -4,7 +4,7 @@
   </div>
 </template>
 
-<script setup lang="ts" name="LeadManagementList">
+<script setup lang="ts">
 import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import LeadList from "./components/LeadList.vue";

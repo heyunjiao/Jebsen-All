@@ -14,10 +14,10 @@
             :class="{ 'split-active': splitActive === item.path || `/${splitActive.split('/')[1]}` === item.path }"
             @click="changeSubMenu(item)"
           >
-            <el-icon>
+            <el-icon v-if="item.meta?.icon">
               <component :is="item.meta.icon"></component>
             </el-icon>
-            <span class="title">{{ item.meta.title }}</span>
+            <span class="title">{{ item.meta?.title ?? '' }}</span>
           </div>
         </div>
       </el-scrollbar>
@@ -48,7 +48,7 @@
   </el-container>
 </template>
 
-<script setup lang="ts" name="layoutColumns">
+<script setup lang="ts">
 import { ref, computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/modules/auth";
@@ -67,7 +67,7 @@ const globalStore = useGlobalStore();
 const accordion = computed(() => globalStore.accordion);
 const isCollapse = computed(() => globalStore.isCollapse);
 const menuList = computed(() => authStore.showMenuListGet);
-const activeMenu = computed(() => (route.meta.activeMenu ? route.meta.activeMenu : route.path) as string);
+const activeMenu = computed(() => (route.meta?.activeMenu ? route.meta.activeMenu : route.path) as string);
 
 const subMenuList = ref<Menu.MenuOptions[]>([]);
 const splitActive = ref("");

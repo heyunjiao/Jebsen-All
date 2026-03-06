@@ -6,17 +6,17 @@
       :closable="false"
     />
     <div class="icon-list">
-      <SvgIcon name="xianxingdaoyu" />
-      <SvgIcon name="xianxingdiqiu" />
-      <SvgIcon name="xianxingditu" />
-      <SvgIcon name="xianxingfanchuan" />
-      <SvgIcon name="xianxingfeiji" />
-      <SvgIcon name="xianxinglvhangriji" />
-      <SvgIcon name="xianxingtianqiyubao" />
-      <SvgIcon name="xianxingxiangjipaizhao" />
-      <SvgIcon name="xianxingxiarilengyin" />
-      <SvgIcon name="xianxingyoulun" />
-      <SvgIcon name="xianxingxiarilengyin" />
+      <SvgIcon />
+      <SvgIcon />
+      <SvgIcon />
+      <SvgIcon />
+      <SvgIcon />
+      <SvgIcon />
+      <SvgIcon />
+      <SvgIcon />
+      <SvgIcon />
+      <SvgIcon />
+      <SvgIcon />
     </div>
     <el-descriptions title="配置项 📚" :column="1" border>
       <el-descriptions-item label="name"> 图标的名称，svg 图标必须存储在 src/assets/icons 目录下 </el-descriptions-item>
@@ -26,7 +26,7 @@
   </div>
 </template>
 
-<script setup lang="ts" name="svgIcon">
+<script setup lang="ts">
 import SvgIcon from "@/components/SvgIcon/index.vue";
 </script>
 

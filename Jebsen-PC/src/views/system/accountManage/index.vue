@@ -185,7 +185,7 @@
   </div>
 </template>
 
-<script setup lang="tsx" name="accountManage">
+<script setup lang="tsx">
 import { ref, reactive, onMounted } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { UploadFilled, Plus, Edit, Delete, Upload, Download, More, Key, User } from "@element-plus/icons-vue";

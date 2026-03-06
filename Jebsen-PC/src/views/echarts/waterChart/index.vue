@@ -4,7 +4,7 @@
   </div>
 </template>
 
-<script setup lang="ts" name="waterChart">
+<script setup lang="ts">
 import echarts, { ECOption } from "@/components/ECharts/config";
 import ECharts from "@/components/ECharts/index.vue";
 

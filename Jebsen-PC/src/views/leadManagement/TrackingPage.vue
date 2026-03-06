@@ -243,7 +243,7 @@
   </div>
 </template>
 
-<script setup lang="ts" name="LeadTrackingPage">
+<script setup lang="ts">
 import { ref, reactive, onMounted, computed } from "vue";
 import { View, Refresh, Upload, CircleCheck, ShoppingCart, Money, TrendCharts, Document } from "@element-plus/icons-vue";
 import { useI18n } from "vue-i18n";

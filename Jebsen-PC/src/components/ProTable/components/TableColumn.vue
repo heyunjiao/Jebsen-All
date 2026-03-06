@@ -2,7 +2,7 @@
   <RenderTableColumn v-bind="column" />
 </template>
 
-<script setup lang="tsx" name="TableColumn">
+<script setup lang="tsx">
 import { inject, ref, useSlots } from "vue";
 import { ColumnProps, RenderScope, HeaderRenderScope } from "@/components/ProTable/interface";
 import { filterEnum, formatValue, handleProp, handleRowAccordingToProp, TABLE_EMPTY_PLACEHOLDER } from "@/utils";

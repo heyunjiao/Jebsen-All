@@ -3,7 +3,7 @@
     <template v-for="(item, index) in topMenus">
       <el-menu-item :style="{ '--theme': theme }" :index="item.path" :key="index" v-if="index < visibleNumber">
         <svg-icon v-if="item.meta && item.meta.icon && item.meta.icon !== '#'" :icon-class="item.meta.icon" />
-        {{ item.meta.title }}
+        {{ item.meta?.title ?? '' }}
       </el-menu-item>
     </template>
 
@@ -13,7 +13,7 @@
       <template v-for="(item, index) in topMenus">
         <el-menu-item :index="item.path" :key="index" v-if="index >= visibleNumber">
           <svg-icon v-if="item.meta && item.meta.icon && item.meta.icon !== '#'" :icon-class="item.meta.icon" />
-          {{ item.meta.title }}
+          {{ item.meta?.title ?? '' }}
         </el-menu-item>
       </template>
     </el-submenu>
@@ -85,7 +85,7 @@ export default {
       let activePath = path;
       if (path !== undefined && path.lastIndexOf("/") > 0 && hideList.indexOf(path) === -1) {
         const tmpPath = path.substring(1, path.length);
-        if (!this.$route.meta.link) {
+        if (!this.$route.meta?.link) {
           activePath = "/" + tmpPath.substring(0, tmpPath.indexOf("/"));
           this.$store.dispatch("app/toggleSideBarHide", false);
         }

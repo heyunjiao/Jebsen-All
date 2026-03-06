@@ -73,7 +73,7 @@
   </div>
 </template>
 
-<script setup lang="ts" name="dataVisualize">
+<script setup lang="ts">
 import { ref } from "vue";
 import Pie from "./components/pie.vue";
 import Curve from "./components/curve.vue";

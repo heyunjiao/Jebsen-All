@@ -11,8 +11,18 @@
       <el-table-column v-for="(system, idx) in sourceSystems" :key="system.code" width="160" align="center">
         <template #header>
           <div class="header-with-id">
-            <span v-if="system.id" class="system-id">{{ system.id }}</span>
-            <span class="system-name">（{{ system.name }}）</span>
+            <div class="system-main-info">
+              <span v-if="system.id" class="system-id">{{ system.id }}</span>
+              <span class="system-name">（{{ system.name }}）</span>
+            </div>
+            <!-- 分组选择器 -->
+            <div class="group-selector-mini" v-if="!props.readonly">
+              <el-select v-model="systemGroupMap[system.code]" size="small" class="mini-select" @change="handleGroupChange">
+                <el-option label="分组 1" value="1" />
+                <el-option label="分组 2" value="2" />
+                <el-option label="不合并" value="none" />
+              </el-select>
+            </div>
           </div>
         </template>
         <template #default="scope">
@@ -37,10 +47,20 @@
               <el-icon v-if="isSelected(scope.row, system.code)" class="selected-icon"><Check /></el-icon>
             </div>
             <el-tooltip
-              :content="getTooltipContent(scope.row.sourceValues[system.code] || '(空)', scope.row)"
+              v-if="scope.row.sourceValues[system.code]"
               placement="top"
               :disabled="!shouldShowTooltip(scope.row.sourceValues[system.code])"
             >
+              <template #content>
+                <div class="field-tooltip-content">
+                  <div class="tooltip-main-val">{{ getTooltipContent(scope.row.sourceValues[system.code], scope.row) }}</div>
+                  <div class="tooltip-source-info" v-if="system.id">ID: {{ system.id }} ({{ system.name }})</div>
+                  <div class="tooltip-source-info" v-else>{{ system.name }}</div>
+                  <div class="tooltip-time" v-if="scope.row.sourceValueTimes?.[system.code]">
+                    {{ scope.row.sourceValueTimes[system.code] }}
+                  </div>
+                </div>
+              </template>
               <div
                 class="value-content"
                 @click="scope.row.sourceValues[system.code] ? toggleSource(scope.row, system.code) : null"
@@ -59,30 +79,37 @@
                 <span v-else class="empty-text">(空)</span>
               </div>
             </el-tooltip>
-            <el-tooltip
-              v-if="scope.row.sourceValueTimes?.[system.code] && scope.row.sourceValues[system.code]"
-              :content="scope.row.sourceValueTimes[system.code]"
-              placement="top"
-            >
-              <div class="value-time">
-                {{ scope.row.sourceValueTimes[system.code] }}
+            <div class="value-footer" v-if="scope.row.sourceValues[system.code]">
+              <div class="source-label-mini">
+                <span class="source-sys">{{ system.name }}</span>
+                <span v-if="system.id" class="source-id">{{ system.id }}</span>
               </div>
-            </el-tooltip>
+              <div v-if="scope.row.sourceValueTimes?.[system.code]" class="value-time">
+                {{ scope.row.sourceValueTimes[system.code].split(" ")[0] }}
+              </div>
+            </div>
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="合并采纳值" min-width="300" align="center" fixed="right">
+      <el-table-column
+        v-for="groupId in activeGroups"
+        :key="groupId"
+        :label="activeGroups.length > 1 ? `分组 ${groupId} 采纳值` : '合并采纳值'"
+        min-width="300"
+        align="center"
+        fixed="right"
+      >
         <template #default="scope">
           <div v-if="scope.row.locked || props.readonly" class="text-muted suggested-value-display">
             <!-- 只读模式：显示合并后的值列表 -->
             <div class="merged-values-list readonly">
               <div
-                v-for="(val, idx) in getMergedValues(scope.row)"
-                :key="idx"
-                class="merged-value-item readonly"
-                :class="{ 'is-primary': isPrimaryValue(scope.row, val) }"
+                v-for="(val, vIdx) in getMergedValues(scope.row, groupId)"
+                :key="vIdx"
+                class="merged-value-item"
+                :class="{ 'is-primary': isPrimaryValue(scope.row, val, groupId) }"
               >
-                <el-tag v-if="isPrimaryValue(scope.row, val)" type="warning" size="small" class="primary-badge">主值</el-tag>
+                <el-tag v-if="isPrimaryValue(scope.row, val, groupId)" type="warning" size="small" class="primary-badge">主值</el-tag>
                 <SensitiveFieldViewer
                   v-if="isSensitiveField(scope.row.key)"
                   :value="val"
@@ -91,28 +118,29 @@
                   :one-id="props.oneId || ''"
                 />
                 <span v-else>{{ val }}</span>
-                <span class="value-source-link">({{ getSourceLabel(scope.row, val) }})</span>
+                <span class="value-source-link">({{ getSourceLabel(scope.row, val, groupId) }})</span>
               </div>
             </div>
-            <el-tag v-if="props.readonly && getMergedValues(scope.row).length > 0" type="warning" size="small" class="ml-6">专员建议</el-tag
-            >
           </div>
           <div v-else class="final-editor">
             <!-- 多值合并展示区域 -->
             <div class="merged-values-container">
               <!-- 显示已选中的值（支持拖拽） -->
               <draggable
-                v-if="getMergedValues(scope.row).length > 0"
-                v-model="scope.row.suggestedValue"
+                v-if="getMergedValues(scope.row, groupId).length > 0"
+                :model-value="getMergedValues(scope.row, groupId)"
+                @update:model-value="val => updateGroupSuggestedValue(scope.row, groupId, val)"
                 class="merged-values-list"
                 item-key="index"
                 :disabled="props.readonly || scope.row.locked"
-                @change="handleDragChange(scope.row)"
               >
                 <template #item="{ element: val, index: idx }">
-                  <div class="merged-value-item draggable-item" :class="{ 'is-primary': isPrimaryValue(scope.row, val) }">
+                  <div
+                    class="merged-value-item draggable-item"
+                    :class="{ 'is-primary': isPrimaryValue(scope.row, val, groupId) }"
+                  >
                     <el-icon class="drag-handle" v-if="!props.readonly && !scope.row.locked"><Rank /></el-icon>
-                    <el-tag v-if="isPrimaryValue(scope.row, val)" type="warning" size="small" class="primary-badge">主值</el-tag>
+                    <el-tag v-if="isPrimaryValue(scope.row, val, groupId)" type="warning" size="small" class="primary-badge">主值</el-tag>
                     <SensitiveFieldViewer
                       v-if="isSensitiveField(scope.row.key)"
                       :value="val"
@@ -121,11 +149,11 @@
                       :one-id="props.oneId || ''"
                     />
                     <span v-else>{{ val }}</span>
-                    <span class="value-source-link">({{ getSourceLabel(scope.row, val) }})</span>
+                    <span class="value-source-link">({{ getSourceLabel(scope.row, val, groupId) }})</span>
                     <el-icon
                       v-if="!props.readonly && !scope.row.locked"
                       class="remove-icon"
-                      @click="removeMergedValue(scope.row, val)"
+                      @click="removeMergedValue(scope.row, val, groupId)"
                     >
                       <Close />
                     </el-icon>
@@ -135,52 +163,38 @@
               <!-- 手动输入区域 -->
               <div v-if="!props.readonly && !scope.row.locked" class="manual-input-section">
                 <!-- 手动输入框（点击添加按钮后一直显示） -->
-                <div v-if="isAddingManual(scope.row)" class="manual-input-item">
+                <div v-if="isAddingManual(scope.row, groupId)" class="manual-input-item">
                   <el-input
-                    :ref="el => setManualInputRef(scope.row, el)"
-                    :model-value="getTempManualValue(scope.row)"
-                    @update:model-value="val => handleManualInputChange(scope.row, val)"
+                    :ref="el => setManualInputRef(scope.row, el, groupId)"
+                    :model-value="getTempManualValue(scope.row, groupId)"
+                    @update:model-value="val => handleManualInputChange(scope.row, val, groupId)"
                     size="small"
-                    placeholder="请输入..."
-                    @keyup.enter.prevent="confirmManualValue(scope.row)"
-                    @focus="handleManualInputFocus(scope.row)"
-                    @keyup.esc="cancelManualInput(scope.row)"
+                    :placeholder="scope.row.singleSelect ? '请输入最终保留值...' : '请输入...'"
+                    @keyup.enter.prevent="confirmManualValue(scope.row, groupId)"
+                    @keyup.esc="cancelManualInput(scope.row, groupId)"
                   />
-                  <!-- 确认和取消按钮（只在有内容时显示） -->
-                  <template v-if="shouldShowManualButtons(scope.row)">
-                    <el-button
-                      link
-                      type="primary"
-                      size="small"
-                      :icon="Check"
-                      @mousedown.prevent
-                      @click="confirmManualValue(scope.row)"
-                    />
-                    <el-button
-                      link
-                      type="danger"
-                      size="small"
-                      :icon="Close"
-                      @mousedown.prevent
-                      @click="cancelManualInput(scope.row)"
-                    />
+                  <template v-if="shouldShowManualButtons(scope.row, groupId)">
+                    <el-button link type="primary" size="small" :icon="Check" @click="confirmManualValue(scope.row, groupId)" />
+                    <el-button link type="danger" size="small" :icon="Close" @click="cancelManualInput(scope.row, groupId)" />
                   </template>
                 </div>
-                <!-- 添加按钮 -->
+                <!-- 添加按钮（单选模式下，如果已有值则可以点击修改，或者隐藏） -->
                 <el-button
-                  v-if="!isAddingManual(scope.row)"
+                  v-if="
+                    !isAddingManual(scope.row, groupId) &&
+                    (!scope.row.singleSelect || getMergedValues(scope.row, groupId).length === 0)
+                  "
                   link
                   type="primary"
                   size="small"
                   :icon="Plus"
-                  @click="startManualInput(scope.row)"
+                  @click="startManualInput(scope.row, groupId)"
                   class="add-manual-btn"
                 >
                   添加手动输入
                 </el-button>
               </div>
             </div>
-            <el-tag v-if="scope.row.isManual" type="warning" size="small" class="ml-6">人工</el-tag>
           </div>
         </template>
       </el-table-column>
@@ -208,15 +222,20 @@ export interface ComparisonField {
   goldValueTime?: string; // 黄金记录更新时间
   sourceValues: Record<string, string>; // 各源系统的值
   sourceValueTimes?: Record<string, string>; // 各源系统值的更新时间
-  suggestedValue?: string | string[]; // 建议更正值（支持数组）
-  selectedSources?: string[]; // 选中的源系统（多选：'gold' | 源系统代码数组）
-  primarySource?: string; // 主值标记（'gold' | 源系统代码）
+  suggestedValue?: string | string[]; // 建议更正值（多选：数组）- 默认给分组1使用
+  groupSuggestedValues?: Record<string, string[]>; // 按分组存储的建议值
+  selectedSources?: string[]; // 选中的源系统（旧逻辑保留兼容）
+  groupSelectedSources?: Record<string, string[]>; // 按分组存储选中的源系统
+  primarySource?: string; // 旧逻辑主值
+  groupPrimarySource?: Record<string, string>; // 按分组存储的主值
   hasConflict?: boolean; // 是否有冲突
   locked?: boolean; // 是否锁定
   type?: "money" | "bool" | "tags" | "number" | undefined;
   isManual?: boolean; // 是否手动编辑
   isEditing?: boolean; // 是否正在编辑（用于敏感字段）
-  manualValues?: string[]; // 手动输入的多条值
+  manualValues?: string[]; // 旧逻辑手动输入
+  groupManualValues?: Record<string, string[]>; // 按分组存储的手动输入
+  singleSelect?: boolean; // 新增：是否只能单选（用于姓名/性别）
 }
 
 interface Props {
@@ -243,57 +262,210 @@ const formatValue = (row: ComparisonField, val?: string) => {
   return val;
 };
 
-// 判断是否选中
-const isSelected = (row: ComparisonField, source: string): boolean => {
-  if (!row.selectedSources) {
-    row.selectedSources = [];
-  }
-  return row.selectedSources.includes(source);
+// 记录各系统的分组
+const systemGroupMap = ref<Record<string, string>>({});
+
+// --- 核心工具函数 (已移至上方以避免 ReferenceError) ---
+
+// 获取合并后的值列表
+const getMergedValues = (row: ComparisonField, groupId: string): string[] => {
+  return row.groupSuggestedValues?.[groupId] || [];
 };
 
-// 切换选中状态（多选）
+// 判断是否选中
+const isSelected = (row: ComparisonField, source: string): boolean => {
+  const groupId = systemGroupMap.value[source];
+  if (groupId === "none") return false;
+
+  if (!row.groupSelectedSources) row.groupSelectedSources = {};
+  if (!row.groupSelectedSources[groupId]) row.groupSelectedSources[groupId] = [];
+
+  return row.groupSelectedSources[groupId].includes(source);
+};
+
+// 更新建议值（按分组）
+const updateSuggestedValue = (row: ComparisonField, groupId: string) => {
+  const values: string[] = [];
+  const sources = row.groupSelectedSources?.[groupId] || [];
+
+  sources.forEach(source => {
+    let value = source === "gold" ? row.goldValue : row.sourceValues[source] || "";
+    if (value && value !== "(空)") {
+      if (!values.includes(value)) {
+        values.push(value);
+      }
+    }
+  });
+
+  // 添加该分组的手动输入
+  const manual = row.groupManualValues?.[groupId] || [];
+  manual.forEach(val => {
+    if (val && val.trim() && !values.includes(val.trim())) {
+      values.push(val.trim());
+    }
+  });
+
+  if (!row.groupSuggestedValues) row.groupSuggestedValues = {};
+  if (values.length > 0) {
+    row.groupSuggestedValues[groupId] = values;
+  } else {
+    row.groupSuggestedValues[groupId] = [];
+  }
+
+  // 为保持兼容性，将分组1的值也赋给 suggestedValue (旧逻辑)
+  if (groupId === "1") {
+    row.suggestedValue = row.groupSuggestedValues[groupId];
+    row.selectedSources = sources;
+    row.primarySource = row.groupPrimarySource?.["1"];
+  }
+};
+
+// 直接更新分组的建议值（拖拽后）
+const updateGroupSuggestedValue = (row: ComparisonField, groupId: string, newValues: string[]) => {
+  if (!row.groupSuggestedValues) row.groupSuggestedValues = {};
+  row.groupSuggestedValues[groupId] = newValues;
+  if (groupId === "1") row.suggestedValue = newValues;
+  emit("field-change", row);
+};
+
+// 判断是否是主值
+const isPrimaryValue = (row: ComparisonField, value: string, groupId: string): boolean => {
+  const primarySource = row.groupPrimarySource?.[groupId];
+  if (!primarySource) return false;
+
+  const primaryValue = primarySource === "gold" ? row.goldValue : row.sourceValues[primarySource];
+  return value === primaryValue;
+};
+
+// 将旧格式数据同步到分组格式
+const syncSelectedToGroups = () => {
+  props.fields.forEach(field => {
+    if (field.selectedSources && (!field.groupSelectedSources || Object.keys(field.groupSelectedSources).length === 0)) {
+      if (!field.groupSelectedSources) field.groupSelectedSources = {};
+      // 默认同步到第一组
+      const sources = [...(field.selectedSources || [])];
+      field.groupSelectedSources["1"] = field.singleSelect ? sources.slice(0, 1) : sources;
+
+      if (!field.groupPrimarySource) field.groupPrimarySource = {};
+      if (field.primarySource) field.groupPrimarySource["1"] = field.primarySource;
+
+      if (!field.groupManualValues) field.groupManualValues = {};
+      if (field.manualValues) {
+        const manual = [...field.manualValues];
+        field.groupManualValues["1"] = field.singleSelect ? manual.slice(0, 1) : manual;
+      }
+
+      updateSuggestedValue(field, "1");
+    }
+  });
+};
+
+// --- 重置位置结束 ---
+
+// 初始化分组，默认全为组1
+watch(
+  () => props.sourceSystems,
+  newVal => {
+    if (newVal) {
+      newVal.forEach(s => {
+        if (!systemGroupMap.value[s.code]) {
+          systemGroupMap.value[s.code] = "1";
+        }
+      });
+      syncSelectedToGroups();
+    }
+  },
+  { immediate: true }
+);
+
+watch(
+  () => props.fields,
+  () => {
+    syncSelectedToGroups();
+  },
+  { deep: true }
+);
+
+// 当前活跃的分组列表
+const activeGroups = computed(() => {
+  const groups = new Set<string>();
+  Object.values(systemGroupMap.value).forEach(g => {
+    if (g !== "none") groups.add(g);
+  });
+  return Array.from(groups).sort();
+});
+
+// 处理分组变更
+const handleGroupChange = () => {
+  props.fields.forEach(field => {
+    recalculateAllGroups(field);
+  });
+};
+
+// 重新计算字段在所有分组下的合并值
+const recalculateAllGroups = (row: ComparisonField) => {
+  activeGroups.value.forEach(groupId => {
+    updateSuggestedValue(row, groupId);
+  });
+  emit("field-change", row);
+};
+
+// 切换选中状态（考虑分组和单选限制）
 const toggleSource = (row: ComparisonField, source: string) => {
   if (props.readonly || row.locked) return;
 
-  if (!row.selectedSources) {
-    row.selectedSources = [];
-  }
+  const groupId = systemGroupMap.value[source];
+  if (groupId === "none") return;
 
-  const index = row.selectedSources.indexOf(source);
+  if (!row.groupSelectedSources) row.groupSelectedSources = {};
+  if (!row.groupSelectedSources[groupId]) row.groupSelectedSources[groupId] = [];
+
+  const sources = row.groupSelectedSources[groupId];
+  const index = sources.indexOf(source);
+
   if (index > -1) {
     // 取消选中
-    row.selectedSources.splice(index, 1);
-    // 如果取消的是主值，清除主值标记
-    if (row.primarySource === source) {
-      row.primarySource = row.selectedSources.length > 0 ? row.selectedSources[0] : undefined;
+    sources.splice(index, 1);
+    if (row.groupPrimarySource?.[groupId] === source) {
+      row.groupPrimarySource[groupId] = sources.length > 0 ? sources[0] : "";
     }
   } else {
     // 选中
-    row.selectedSources.push(source);
-    // 如果还没有主值，自动设置为第一个选中的
-    if (!row.primarySource) {
-      row.primarySource = source;
+    if (row.singleSelect) {
+      // 单选限制：清空该分组其他选中项和手动输入项
+      sources.splice(0, sources.length, source);
+      if (row.groupManualValues) {
+        row.groupManualValues[groupId] = [];
+      }
+    } else {
+      sources.push(source);
+    }
+
+    if (!row.groupPrimarySource) row.groupPrimarySource = {};
+    if (!row.groupPrimarySource[groupId]) {
+      row.groupPrimarySource[groupId] = source;
     }
   }
 
-  updateSuggestedValue(row);
+  updateSuggestedValue(row, groupId);
   emit("field-change", row);
 };
 
 // 设置主值
-const setPrimary = (row: ComparisonField, source: string) => {
+const setPrimary = (row: ComparisonField, source: string, groupId: string) => {
   if (props.readonly || row.locked) return;
-  row.primarySource = source;
+  if (!row.groupPrimarySource) row.groupPrimarySource = {};
+  row.groupPrimarySource[groupId] = source;
   emit("field-change", row);
 };
 
 // 获取值的来源标签
-const getSourceLabel = (row: ComparisonField, value: string) => {
-  if (!row.selectedSources || row.selectedSources.length === 0) return "";
+const getSourceLabel = (row: ComparisonField, value: string, groupId: string) => {
+  const sources = row.groupSelectedSources?.[groupId] || [];
+  if (sources.length === 0) return "手动";
 
-  // 查找最后一个拥有此值的来源（最后勾选的为准）
-  for (let i = row.selectedSources.length - 1; i >= 0; i--) {
-    const sourceCode = row.selectedSources[i];
+  for (let i = sources.length - 1; i >= 0; i--) {
+    const sourceCode = sources[i];
     const sourceVal = sourceCode === "gold" ? row.goldValue : row.sourceValues[sourceCode];
     if (sourceVal === value) {
       const system = props.sourceSystems.find(s => s.code === sourceCode);
@@ -303,113 +475,31 @@ const getSourceLabel = (row: ComparisonField, value: string) => {
   return "手动";
 };
 
-// 更新建议值（合并所有选中的值）
-const updateSuggestedValue = (row: ComparisonField) => {
-  const values: string[] = [];
-
-  // 按照勾选顺序收集值，如果值重复，最后勾选的覆盖前面的（在显示上由 getSourceLabel 处理）
-  // 实际上这里只需要保证值唯一，且顺序正确
-  if (row.selectedSources && row.selectedSources.length > 0) {
-    row.selectedSources.forEach(source => {
-      let value: string;
-      if (source === "gold") {
-        value = row.goldValue;
-      } else {
-        value = row.sourceValues[source] || "";
-      }
-      if (value && value !== "(空)") {
-        const existingIdx = values.indexOf(value);
-        if (existingIdx > -1) {
-          // 如果值已存在，先移除旧的，把新的（最后勾选的）放到最后
-          values.splice(existingIdx, 1);
-        }
-        values.push(value);
-      }
-    });
-  }
-
-  // 添加手动输入的值
-  if (row.manualValues && row.manualValues.length > 0) {
-    row.manualValues.forEach(val => {
-      if (val && val.trim() && !values.includes(val.trim())) {
-        values.push(val.trim());
-      }
-    });
-  }
-
-  // 更新建议值（数组形式）
-  if (values.length > 0) {
-    row.suggestedValue = values;
-  } else {
-    // 如果没有选中任何值，使用黄金记录值
-    row.suggestedValue = row.goldValue ? [row.goldValue] : [];
-  }
-};
-
-// 获取合并后的值列表（去重且保持顺序）
-const getMergedValues = (row: ComparisonField): string[] => {
-  // 优先使用建议值数组，如果没有则返回空
-  if (Array.isArray(row.suggestedValue)) {
-    return row.suggestedValue;
-  }
-  if (row.suggestedValue) {
-    return [row.suggestedValue];
-  }
-  return [];
-};
-
-// 判断是否是主值
-const isPrimaryValue = (row: ComparisonField, value: string): boolean => {
-  if (!row.primarySource) return false;
-
-  if (row.primarySource === "gold") {
-    return value === row.goldValue;
-  }
-  return value === row.sourceValues[row.primarySource];
-};
-
 // 移除合并值
-const removeMergedValue = (row: ComparisonField, value: string) => {
+const removeMergedValue = (row: ComparisonField, value: string, groupId: string) => {
   if (props.readonly || row.locked) return;
 
-  let removed = false;
+  const sources = row.groupSelectedSources?.[groupId] || [];
+  const sourceIdx = sources.findIndex(s => {
+    const val = s === "gold" ? row.goldValue : row.sourceValues[s];
+    return val === value;
+  });
 
-  // 先尝试从选中的源中移除
-  if (row.selectedSources) {
-    const sourceToRemove = row.selectedSources.find(source => {
-      if (source === "gold") return value === row.goldValue;
-      return value === row.sourceValues[source];
-    });
-    if (sourceToRemove) {
-      const index = row.selectedSources.indexOf(sourceToRemove);
-      if (index > -1) {
-        row.selectedSources.splice(index, 1);
-        removed = true;
-        if (row.primarySource === sourceToRemove) {
-          row.primarySource = row.selectedSources.length > 0 ? row.selectedSources[0] : undefined;
-        }
-      }
+  if (sourceIdx > -1) {
+    const removedSource = sources.splice(sourceIdx, 1)[0];
+    if (row.groupPrimarySource?.[groupId] === removedSource) {
+      row.groupPrimarySource[groupId] = sources.length > 0 ? sources[0] : "";
+    }
+  } else {
+    // 尝试从手动输入中移除
+    const manuals = row.groupManualValues?.[groupId] || [];
+    const manualIdx = manuals.findIndex(v => v.trim() === value);
+    if (manualIdx > -1) {
+      manuals.splice(manualIdx, 1);
     }
   }
 
-  // 如果没从源中移除，尝试从手动输入中移除
-  if (!removed && row.manualValues) {
-    const index = row.manualValues.findIndex(val => val && val.trim() === value);
-    if (index > -1) {
-      row.manualValues.splice(index, 1);
-      removed = true;
-    }
-  }
-
-  if (removed) {
-    updateSuggestedValue(row);
-    emit("field-change", row);
-  }
-};
-
-// 处理拖拽变更
-const handleDragChange = (row: ComparisonField) => {
-  // 确保 suggestedValue 保持同步
+  updateSuggestedValue(row, groupId);
   emit("field-change", row);
 };
 
@@ -428,41 +518,23 @@ const getManualValues = (row: ComparisonField): string[] => {
   return row.manualValues.filter(val => val && val.trim());
 };
 
-// 判断是否正在添加手动输入
-const isAddingManual = (row: ComparisonField): boolean => {
-  const key = `${row.key}`;
-  return tempManualInputs.value.has(key);
-};
-
 // 获取临时输入值
-const getTempManualValue = (row: ComparisonField): string => {
-  const key = `${row.key}`;
+const getTempManualValue = (row: ComparisonField, groupId: string): string => {
+  const key = `${row.key}_${groupId}`;
   return tempManualInputs.value.get(key) || "";
 };
 
-// 设置临时输入值
-const setTempManualValue = (row: ComparisonField, value: string) => {
-  const key = `${row.key}`;
-  tempManualInputs.value.set(key, value);
-};
-
 // 设置输入框引用
-const setManualInputRef = (row: ComparisonField, el: any) => {
+const setManualInputRef = (row: ComparisonField, el: any, groupId: string) => {
   if (!el) return;
-
-  const fieldKey = `${row.key}`;
+  const fieldKey = `${row.key}_${groupId}`;
   manualInputRefs.value.set(fieldKey, el);
-
-  // 只有在当前字段刚被激活时才自动聚焦
   if (focusingFieldKey.value === fieldKey) {
     nextTick(() => {
-      focusingFieldKey.value = null; // 清除标记
-      // Element Plus 的 el-input 组件，需要访问内部的 input 元素
+      focusingFieldKey.value = null;
       if (el && el.$el) {
         const input = el.$el.querySelector("input");
-        if (input) {
-          input.focus();
-        }
+        if (input) input.focus();
       } else if (el && typeof el.focus === "function") {
         el.focus();
       }
@@ -471,99 +543,73 @@ const setManualInputRef = (row: ComparisonField, el: any) => {
 };
 
 // 开始手动输入
-const startManualInput = (row: ComparisonField) => {
+const startManualInput = (row: ComparisonField, groupId: string) => {
   if (props.readonly || row.locked) return;
-  const key = `${row.key}`;
-
-  // 清除其他字段的聚焦状态
-  focusingFieldKey.value = key; // 标记当前字段需要聚焦
-
+  const key = `${row.key}_${groupId}`;
+  focusingFieldKey.value = key;
   tempManualInputs.value.set(key, "");
-  showButtonsForFields.value.set(key, false); // 初始不显示按钮
+  showButtonsForFields.value.set(key, false);
   row.isManual = true;
 };
 
 // 处理手动输入值变化
-const handleManualInputChange = (row: ComparisonField, value: string) => {
-  const key = `${row.key}`;
+const handleManualInputChange = (row: ComparisonField, value: string, groupId: string) => {
+  const key = `${row.key}_${groupId}`;
   tempManualInputs.value.set(key, value);
-  // 如果有内容，显示按钮
-  if (value && value.trim()) {
-    showButtonsForFields.value.set(key, true);
-  } else {
-    showButtonsForFields.value.set(key, false);
-  }
+  showButtonsForFields.value.set(key, !!(value && value.trim()));
 };
 
-// 处理手动输入框获得焦点
-const handleManualInputFocus = (row: ComparisonField) => {
-  const key = `${row.key}`;
-  focusingFieldKey.value = key; // 标记当前字段正在聚焦
-
-  const value = tempManualInputs.value.get(key) || "";
-  // 如果有内容，显示按钮
-  if (value && value.trim()) {
-    showButtonsForFields.value.set(key, true);
-  }
+// 判断是否正在添加手动输入
+const isAddingManual = (row: ComparisonField, groupId: string): boolean => {
+  return tempManualInputs.value.has(`${row.key}_${groupId}`);
 };
 
 // 判断是否应该显示按钮
-const shouldShowManualButtons = (row: ComparisonField): boolean => {
-  const key = `${row.key}`;
-  return showButtonsForFields.value.get(key) || false;
+const shouldShowManualButtons = (row: ComparisonField, groupId: string): boolean => {
+  return showButtonsForFields.value.get(`${row.key}_${groupId}`) || false;
 };
 
 // 确认手动输入值
-const confirmManualValue = (row: ComparisonField) => {
-  // 如果正在确认中，直接返回，避免重复执行
-  if (isConfirmingManual.value) {
-    return;
-  }
+const confirmManualValue = (row: ComparisonField, groupId: string) => {
+  if (isConfirmingManual.value) return;
 
   isConfirmingManual.value = true;
-  const key = `${row.key}`;
-  const value = tempManualInputs.value.get(key) || "";
+  const key = `${row.key}_${groupId}`;
+  const value = (tempManualInputs.value.get(key) || "").trim();
 
-  if (value && value.trim()) {
-    // 添加到手动输入列表
-    if (!row.manualValues) {
-      row.manualValues = [];
+  if (value) {
+    if (!row.groupManualValues) row.groupManualValues = {};
+    if (!row.groupManualValues[groupId]) row.groupManualValues[groupId] = [];
+
+    if (row.singleSelect) {
+      // 单选模式：清空源选择和其他手动输入
+      if (row.groupSelectedSources?.[groupId]) {
+        row.groupSelectedSources[groupId] = [];
+      }
+      row.groupManualValues[groupId] = [value];
+      if (row.groupPrimarySource) {
+        row.groupPrimarySource[groupId] = "";
+      }
+    } else if (!row.groupManualValues[groupId].includes(value)) {
+      row.groupManualValues[groupId].push(value);
     }
-    const trimmedValue = value.trim();
-    // 检查是否已存在，避免重复添加
-    if (!row.manualValues.includes(trimmedValue)) {
-      row.manualValues.push(trimmedValue);
-      updateSuggestedValue(row);
-      emit("field-change", row);
-    }
+
+    updateSuggestedValue(row, groupId);
+    emit("field-change", row);
   }
 
-  // 清空输入框内容，但保留输入框
   tempManualInputs.value.set(key, "");
-  // 隐藏按钮
   showButtonsForFields.value.set(key, false);
-  // 清除聚焦标记
-  if (focusingFieldKey.value === key) {
-    focusingFieldKey.value = null;
-  }
-
-  // 延迟重置标记
   setTimeout(() => {
     isConfirmingManual.value = false;
   }, 100);
 };
 
 // 取消手动输入
-const cancelManualInput = (row: ComparisonField) => {
-  const key = `${row.key}`;
-  // 清空输入框内容，但保留输入框
+const cancelManualInput = (row: ComparisonField, groupId: string) => {
+  const key = `${row.key}_${groupId}`;
   tempManualInputs.value.set(key, "");
-  // 隐藏按钮
   showButtonsForFields.value.set(key, false);
-  // 清除聚焦标记
-  if (focusingFieldKey.value === key) {
-    focusingFieldKey.value = null;
-  }
 };
 
 // 移除手动输入值
@@ -619,6 +665,49 @@ const getTooltipContent = (value: string, row: ComparisonField): string => {
 
 <style scoped lang="scss">
 .comparison-matrix {
+  .header-with-id {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 0;
+
+    .system-main-info {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      line-height: 1.2;
+    }
+
+    .group-selector-mini {
+      width: 100%;
+      padding: 0 8px;
+
+      :deep(.el-select.mini-select) {
+        .el-input__wrapper {
+          padding: 0 4px;
+          background-color: var(--el-fill-color-light);
+          box-shadow: none !important;
+          border: 1px solid var(--el-border-color);
+
+          &:hover {
+            border-color: var(--el-color-primary);
+          }
+        }
+        .el-input__inner {
+          font-size: 11px;
+          height: 22px;
+          color: var(--el-color-primary);
+          font-weight: bold;
+          text-align: center;
+        }
+        .el-input__suffix {
+          display: none;
+        }
+      }
+    }
+  }
+
   .field-label {
     font-weight: 600;
   }
@@ -1030,11 +1119,78 @@ const getTooltipContent = (value: string, row: ComparisonField): string => {
     }
   }
 
+  .value-footer {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 4px;
+    padding-top: 4px;
+    border-top: 1px solid var(--el-border-color-lighter);
+    gap: 4px;
+
+    .source-label-mini {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      overflow: hidden;
+      flex: 1;
+
+      .source-sys {
+        font-size: 10px;
+        color: var(--el-color-primary);
+        font-weight: bold;
+        white-space: nowrap;
+      }
+
+      .source-id {
+        font-size: 10px;
+        color: var(--el-text-color-secondary);
+        font-family: monospace;
+        background: var(--el-fill-color-light);
+        padding: 0 4px;
+        border-radius: 2px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+
+    .value-time {
+      font-size: 10px;
+      color: var(--el-text-color-placeholder);
+      white-space: nowrap;
+    }
+  }
+
+  .field-tooltip-content {
+    padding: 4px;
+    .tooltip-main-val {
+      font-weight: bold;
+      margin-bottom: 4px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      padding-bottom: 4px;
+    }
+    .tooltip-source-info {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+    .tooltip-time {
+      font-size: 11px;
+      opacity: 0.7;
+      margin-top: 2px;
+    }
+  }
+
   .value-source-link {
     font-size: 11px;
     color: var(--el-text-color-secondary);
     margin-left: auto;
     white-space: nowrap;
+    background: var(--el-fill-color);
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid var(--el-border-color-lighter);
   }
 }
 </style>

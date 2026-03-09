@@ -1,5 +1,8 @@
 <template>
   <div class="rule-config-container table-box">
+    <el-alert type="info" :closable="false" show-icon class="sync-notice-alert" style="margin-bottom: 16px">
+      <template #title> 分发规则提示：规则更新后即时生效，商机匹配逻辑基于源平台 T+1 同步数据。 </template>
+    </el-alert>
     <pro-table
       ref="proTableRef"
       :columns="columns"
@@ -10,6 +13,7 @@
       :border="true"
       row-key="id"
     >
+      <!-- 表格 header 按钮（新增分发不设权限，始终显示） -->
       <template #tableHeader>
         <el-button type="primary" @click="handleAdd">
           <el-icon><Plus /></el-icon>
@@ -412,11 +416,7 @@ const handleDelete = async () => {
     dialogVisible.value = false;
     proTableRef.value?.getTableList();
 
-    ElMessageBox.alert(t("ruleConfig.messages.approvalMessage"), t("ruleConfig.messages.submittedToApproval"), {
-      confirmButtonText: t("ruleConfig.buttons.iKnow"),
-      type: "success",
-      dangerouslyUseHTMLString: true
-    });
+    ElMessage.success(t("ruleConfig.messages.operationSuccess") || "操作成功");
   } catch (error: any) {
     if ((error as any) !== "cancel") {
       ElMessage.error(error.message || t("ruleConfig.messages.operationFailed"));

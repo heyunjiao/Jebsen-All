@@ -115,6 +115,9 @@
           <div class="field-hint">
             {{ t("errorCorrection.quickEdit.currentValue") }}:
             <code>{{ getFieldValue(field) }}</code>
+            <span class="source-tag-inline" v-if="task?.sourceSystem">
+              Source: {{ task.sourceSystem }} <template v-if="task.sourceId"> (ID: {{ task.sourceId }})</template>
+            </span>
           </div>
           <div class="field-hint" v-if="task?.suggestedFix && field === task?.errorField">
             <el-text type="info" size="small">
@@ -158,6 +161,8 @@ export interface QuickEditTask {
   readonly?: boolean; // 是否只读模式
   suggestedFix?: string; // 修复建议
   valueMapping?: Record<string, string>; // 值映射关系
+  sourceSystem?: string; // 源系统
+  sourceId?: string; // 源系统ID
   // 处理历史信息（只读模式使用）
   status?: string; // 处理状态
   handler?: string; // 处理人
@@ -368,6 +373,10 @@ const handleIgnore = async () => {
   font-size: 12px;
   color: #909399;
   line-height: 1.5;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 
   code {
     background: #f5f7fa;
@@ -375,6 +384,15 @@ const handleIgnore = async () => {
     border-radius: 4px;
     font-family: monospace;
     color: #606266;
+  }
+
+  .source-tag-inline {
+    font-size: 11px;
+    color: var(--el-color-primary);
+    background: var(--el-color-primary-light-9);
+    padding: 0 6px;
+    border-radius: 4px;
+    border: 1px solid var(--el-color-primary-light-8);
   }
 }
 

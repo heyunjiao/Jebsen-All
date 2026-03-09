@@ -48,25 +48,24 @@
       <el-tab-pane :label="t('errorCorrection.mergeWorkbench.tabs.reference')" name="reference">
         <CustomerReferencePanel
           :customer-info="customerReferenceInfo"
-          :vehicle-info="vehicleReferenceInfo"
+          :company-info="companyReferenceInfo"
           :consumption-stats="consumptionStats"
-          :value-info="valueInfo"
           :opportunity-info-list="opportunityInfoList"
           :preferences="preferences"
-          :category-tags="categoryTags"
           :selected-tags="selectedTags"
-          :one-id="task?.oneId || ''"
           :transactions="transactionsData"
           :insurance-data="insuranceData"
-          :assets-data="assetsData"
           :vehicles-data="vehiclesData"
           :interactions-data="interactionsData"
+          :offline-activities="offlineActivities"
+          :financial-loans="financialLoans"
+          :assets-data="assetsData"
         />
       </el-tab-pane>
     </el-tabs>
 
-    <!-- 更正理由输入（仅执行模式） -->
-    <div v-if="isExecuteMode && task?.status !== 'draft'" class="reason-section mt20">
+    <!-- 更正理由输入（仅执行模式 & 仅在对比矩阵 Tab 显示） -->
+    <div v-if="activeTab === 'comparison' && isExecuteMode && task?.status !== 'draft'" class="reason-section mt20">
       <el-form-item :label="t('errorCorrection.mergeWorkbench.correctionReason')">
         <el-input
           v-model="correctionReason"
@@ -93,7 +92,7 @@
       </el-form-item>
     </div>
 
-    <template #footer>
+    <template #footer v-if="activeTab === 'comparison'">
       <div class="dialog-footer">
         <!-- 数据专员操作（执行模式） -->
         <!-- 数据处理操作 -->
@@ -127,16 +126,9 @@ import LineageTrace, { type LineageItem } from "./components/LineageTrace.vue";
 
 import CustomerReferencePanel, {
   type CustomerInfo,
-  type VehicleInfo,
+  type CompanyInfo,
   type ConsumptionStats,
-  type ValueInfo,
   type OpportunityInfo,
-  type CategoryTags,
-  type SelectedTags,
-  type Transaction,
-  type Insurance,
-  type Assets,
-  type Vehicle,
   type Interaction
 } from "./components/CustomerReferencePanel.vue";
 
@@ -218,7 +210,8 @@ const comparisonFields = ref<ComparisonField[]>([
     },
     hasConflict: true,
     suggestedValue: ["张伟"],
-    selectedSources: ["DMS_1"]
+    selectedSources: ["DMS_1"],
+    singleSelect: true
   },
   {
     key: "phone",
@@ -258,7 +251,8 @@ const comparisonFields = ref<ComparisonField[]>([
     },
     hasConflict: true,
     suggestedValue: ["男"],
-    selectedSources: ["DMS_1"]
+    selectedSources: ["DMS_1"],
+    singleSelect: true
   },
   {
     key: "address",
@@ -326,147 +320,86 @@ const comparisonFields = ref<ComparisonField[]>([
 // 身份血缘数据
 const lineageData = ref<LineageItem[]>([
   {
-    system: "DMS",
-    systemId: "DMS-88291",
-    isPrimary: true,
-    mergeTime: "2023-06-15 10:30:00",
-    mergeHistory: "与CRM-991合并",
-    credibility: 95,
-    fields: [
-      { label: "姓名", value: "张伟", category: "basic", isPrimary: true, updateTime: "2023-06-15 10:30:00" },
-      { label: "性别", value: "男", category: "basic", updateTime: "2023-06-15 10:30:00" },
-      { label: "出生日期", value: "1985-05-20", category: "basic", updateTime: "2023-06-15 10:30:00" },
-      { label: "身份证号", value: "320***********1234", category: "basic", updateTime: "2023-06-15 10:30:00" },
-      { label: "手机号", value: "13812345678", category: "contact", isPrimary: true, updateTime: "2023-06-15 10:30:00" },
-      { label: "固定电话", value: "010-12345678", category: "contact", updateTime: "2023-06-15 10:30:00" },
-      { label: "邮箱", value: "zhangwei@example.com", category: "contact", updateTime: "2023-06-15 10:30:00" },
-      {
-        label: "地址",
-        value: "北京市朝阳区建国路88号SOHO现代城A座1001室",
-        category: "contact",
-        updateTime: "2023-06-15 10:30:00"
-      },
-      { label: "邮编", value: "100025", category: "contact", updateTime: "2023-06-15 10:30:00" },
-      { label: "职业", value: "软件工程师", category: "business", updateTime: "2023-06-15 10:30:00" },
-      { label: "公司", value: "北京科技有限公司", category: "business", updateTime: "2023-06-15 10:30:00" },
-      { label: "职位", value: "高级工程师", category: "business", updateTime: "2023-06-15 10:30:00" },
-      { label: "年收入", value: "500000", category: "business", updateTime: "2023-06-15 10:30:00" },
-      { label: "购车意向", value: "SUV", category: "business", updateTime: "2023-06-15 10:30:00" },
-      { label: "预算范围", value: "30-50万", category: "business", updateTime: "2023-06-15 10:30:00" },
-      { label: "备注", value: "VIP客户，重点关注", category: "other", updateTime: "2023-06-15 10:30:00" }
-    ]
+    mergeTime: "2024-01-05 09:30:00",
+    mergePerson: "数据治理管理员",
+    systemName: "DMS",
+    field: "姓名",
+    oldValue: "张伟（CRM）",
+    newValue: "上汽通用汽车销售有限公司客户1",
+    reason: "对齐客户基本信息，合并 DMS 与 CRM..."
   },
   {
-    system: "BDC",
-    systemId: "BDC-12345",
-    mergeTime: "2023-08-20 14:20:00",
-    credibility: 88,
-    fields: [
-      { label: "姓名", value: "张伟", category: "basic", updateTime: "2023-08-20 14:20:00" },
-      { label: "性别", value: "男", category: "basic", updateTime: "2023-08-20 14:20:00" },
-      { label: "手机号", value: "13987654321", category: "contact", isConflict: true, updateTime: "2023-08-20 14:20:00" },
-      { label: "邮箱", value: "zw@example.com", category: "contact", isConflict: true, updateTime: "2023-08-20 14:20:00" },
-      {
-        label: "地址",
-        value: "北京市海淀区中关村大街1号",
-        category: "contact",
-        isConflict: true,
-        updateTime: "2023-08-20 14:20:00"
-      },
-      { label: "购车历史", value: "已购车：2020款宝马X5", category: "business", updateTime: "2023-08-20 14:20:00" },
-      { label: "保养记录", value: "最近一次保养：2023-07-15", category: "business", updateTime: "2023-08-20 14:20:00" },
-      { label: "维修记录", value: "无重大维修记录", category: "business", updateTime: "2023-08-20 14:20:00" },
-      { label: "保险到期", value: "2024-08-20", category: "business", updateTime: "2023-08-20 14:20:00" },
-      { label: "客户等级", value: "黄金会员", category: "business", updateTime: "2023-08-20 14:20:00" },
-      { label: "积分", value: "12500", category: "business", updateTime: "2023-08-20 14:20:00" },
-      { label: "标签", value: "高价值客户,活跃客户", category: "other", updateTime: "2023-08-20 14:20:00" }
-    ]
+    mergeTime: "2024-01-05 09:30:00",
+    mergePerson: "数据治理管理员",
+    systemName: "DMS",
+    field: "性别",
+    oldValue: "未知",
+    newValue: "其他",
+    reason: "对齐客户基本信息，合并 DMS 与 CRM..."
   },
   {
-    system: "CRM",
-    systemId: "CRM-991",
-    mergeTime: "2023-06-15 10:30:00",
-    credibility: 82,
-    fields: [
-      { label: "姓名", value: "张伟", category: "basic", updateTime: "2023-06-15 10:30:00" },
-      { label: "手机号", value: "13812345678", category: "contact", updateTime: "2023-06-15 10:30:00" },
-      { label: "邮箱", value: "zhang.wei@wechat.com", category: "contact", isConflict: true, updateTime: "2023-06-15 10:30:00" },
-      { label: "微信ID", value: "wx_zhangwei", category: "contact", updateTime: "2023-06-15 10:30:00" },
-      { label: "微信昵称", value: "张伟", category: "contact", updateTime: "2023-06-15 10:30:00" },
-      { label: "关注时间", value: "2022-03-15", category: "business", updateTime: "2023-06-15 10:30:00" },
-      { label: "互动次数", value: "156", category: "business", updateTime: "2023-06-15 10:30:00" },
-      { label: "最后互动", value: "2023-08-25 15:30:00", category: "business", updateTime: "2023-06-15 10:30:00" },
-      { label: "意向车型", value: "宝马X5", category: "business", updateTime: "2023-06-15 10:30:00" },
-      { label: "意向颜色", value: "白色", category: "business", updateTime: "2023-06-15 10:30:00" },
-      { label: "预计购车时间", value: "2024年Q1", category: "business", updateTime: "2023-06-15 10:30:00" },
-      { label: "备注", value: "通过微信小程序咨询", category: "other", updateTime: "2023-06-15 10:30:00" }
-    ]
+    mergeTime: "2024-01-05 09:30:00",
+    mergePerson: "数据治理管理员",
+    systemName: "DMS",
+    field: "地址",
+    oldValue: "上海市浦东新区世纪大道 1 号",
+    newValue: "地址1号街道71号",
+    reason: "对齐客户基本信息，合并 DMS 与 CRM..."
   },
   {
-    system: "WECHAT",
-    systemId: "WECHAT-5566",
-    mergeTime: "2023-09-10 09:15:00",
-    credibility: 75,
-    fields: [
-      { label: "姓名", value: "张伟", category: "basic", updateTime: "2023-09-10 09:15:00" },
-      { label: "手机号", value: "13812345678", category: "contact", updateTime: "2023-09-10 09:15:00" },
-      { label: "微信ID", value: "wx_zhangwei_2023", category: "contact", updateTime: "2023-09-10 09:15:00" },
-      { label: "微信昵称", value: "张伟", category: "contact", updateTime: "2023-09-10 09:15:00" },
-      {
-        label: "头像URL",
-        value: "https://example.com/avatar/zhangwei.jpg",
-        category: "contact",
-        updateTime: "2023-09-10 09:15:00"
-      },
-      { label: "关注公众号时间", value: "2022-03-15 10:00:00", category: "business", updateTime: "2023-09-10 09:15:00" },
-      { label: "消息数", value: "89", category: "business", updateTime: "2023-09-10 09:15:00" },
-      { label: "最后消息时间", value: "2023-09-05 14:20:00", category: "business", updateTime: "2023-09-10 09:15:00" },
-      { label: "标签", value: "意向客户,高活跃", category: "other", updateTime: "2023-09-10 09:15:00" }
-    ]
+    mergeTime: "2024-02-01 16:20:00",
+    mergePerson: "门店前台",
+    systemName: "DMS",
+    field: "车牌号",
+    oldValue: "沪A·00000",
+    newValue: "京A46972",
+    reason: "客户到店更新车牌和当前里程"
+  },
+  {
+    mergeTime: "2024-02-01 16:20:00",
+    mergePerson: "门店前台",
+    systemName: "DMS",
+    field: "当前里程",
+    oldValue: "12000",
+    newValue: "46219.43",
+    reason: "客户到店更新车牌和当前里程"
   }
 ]);
 
 // 客户信息参考数据
 const customerReferenceInfo = ref<CustomerInfo>({
-  oneId: "ONE-88291",
+  oneId: "ONEID00000001",
   name: "张伟",
-  phone: "138****5678",
+  phone: "13800138000",
   gender: "男",
   ageGroup: "30-35岁",
   familyStatus: "已婚",
-  address: "北京市朝阳区建国路88号",
-  tags: [
-    { name: "流失预警", type: "warning" },
-    { name: "黄金会员", type: "success" },
-    { name: "高价值客户", type: "info" }
-  ],
-  remarks: "客户偏好下午联系，习惯微信沟通。最近一次到店时间为2025-01-06，对服务满意度较高。"
+  address: "上海市浦东新区世纪大道1号",
+  city: "上海"
 });
 
-const vehicleReferenceInfo = ref<VehicleInfo>({
-  vin: "",
-  plate: "京A88888",
-  brand: "保时捷",
-  model: "911 Carrera S",
-  purchaseDate: "2021-03-15",
-  mileage: 147275,
-  warrantyStatus: "过保"
+const companyReferenceInfo = ref<CompanyInfo>({
+  id: "CO0001",
+  oneId: "ONEID_CO_0001",
+  name: "上汽通用汽车销售有限公司",
+  address: "上海市浦东新区宁桥路1299号",
+  phone: "021-12345678",
+  lifecycleStatus: "active"
 });
 
 const consumptionStats = ref<ConsumptionStats>({
-  totalSpend: 177000,
-  avgSpend: 10000,
+  totalSpend: 158000,
+  avgSpend: 13166.67,
   orderCount: 12,
-  visit90d: 2,
-  lastVisit: "2025-01-06"
+  lastVisit: "2024-02-20"
 });
 
-const valueInfo = ref<ValueInfo>({
-  loyaltyLevel: "Gold (金牌)",
-  opportunityLevel: "H (高热)",
-  lifecycle: "活跃",
-  customerValue: "高价值"
-});
+const offlineActivities = ref([
+  { activityName: "2023 保时捷冰雪体验", activityTime: "2023-01-15", attendanceStatus: "已参加" },
+  { activityName: "春季私享品鉴会", activityTime: "2024-03-20", attendanceStatus: "预报名" }
+]);
+
+const financialLoans = ref([{ loanType: "汽车金融贷款", amount: "500,000", status: "正常" }]);
 
 const opportunityInfoList = ref<OpportunityInfo[]>([
   {
@@ -568,48 +501,36 @@ const selectedTags = ref<SelectedTags>({
 const transactionsData = ref<Transaction[]>([
   {
     id: "1",
-    type: "service",
-    date: "2024-02-20",
+    serviceType: "售后保养",
+    serviceTime: "2024-02-20",
     amount: 2000,
-    description: "保养",
-    orderNo: "ORD20240220001",
-    storeName: "上海浦东店"
+    description: "定期保养",
+    serviceStore: "上海浦东店",
+    vehicleModel: "911 Carrera S",
+    status: "已完成",
+    source: "DMS"
   },
   {
     id: "2",
-    type: "service",
-    date: "2024-03-15",
+    serviceType: "售后维修",
+    serviceTime: "2024-03-15",
     amount: 1500,
-    description: "维修",
-    orderNo: "ORD20240315001",
-    storeName: "上海浦东店"
+    description: "更换雨刮片",
+    serviceStore: "上海浦东店",
+    vehicleModel: "911 Carrera S",
+    status: "已完成",
+    source: "DMS"
   },
   {
     id: "3",
-    type: "sale",
-    date: "2021-03-15",
+    serviceType: "整车销售",
+    serviceTime: "2021-03-15",
     amount: 1500000,
-    description: "购车",
-    orderNo: "ORD20210315001",
-    storeName: "上海浦东店"
-  },
-  {
-    id: "4",
-    type: "service",
-    date: "2024-05-10",
-    amount: 3200,
-    description: "保养+维修",
-    orderNo: "ORD20240510001",
-    storeName: "上海浦东店"
-  },
-  {
-    id: "5",
-    type: "service",
-    date: "2024-08-22",
-    amount: 2800,
-    description: "保养",
-    orderNo: "ORD20240822001",
-    storeName: "上海浦东店"
+    description: "新车交付",
+    serviceStore: "上海浦东店",
+    vehicleModel: "911 Carrera S",
+    status: "已完成",
+    source: "DMS"
   }
 ]);
 
@@ -617,33 +538,25 @@ const transactionsData = ref<Transaction[]>([
 const insuranceData = ref<Insurance[]>([
   {
     id: "1",
-    policyName: "商业险",
+    type: "商业险",
     policyNo: "POL20240101001",
     company: "平安保险",
     startDate: "2024-01-01",
     endDate: "2025-01-01",
     amount: 12000,
-    status: "valid"
+    status: "已生效",
+    source: "续保系统"
   },
   {
     id: "2",
-    policyName: "交强险",
+    type: "交强险",
     policyNo: "POL20240101002",
     company: "平安保险",
     startDate: "2024-01-01",
     endDate: "2025-01-01",
     amount: 950,
-    status: "valid"
-  },
-  {
-    id: "3",
-    policyName: "商业险",
-    policyNo: "POL20230101001",
-    company: "人保",
-    startDate: "2023-01-01",
-    endDate: "2024-01-01",
-    amount: 11000,
-    status: "expired"
+    status: "已生效",
+    source: "续保系统"
   }
 ]);
 
@@ -826,7 +739,38 @@ const initComparisonFields = () => {
       selectedSources: ["gold"], // 默认选中黄金记录（多选数组）
       primarySource: "gold", // 主值标记
       hasConflict: true,
-      type: undefined
+      type: undefined,
+      singleSelect: true
+    },
+    {
+      key: "gender",
+      label: "性别",
+      goldValue: "男",
+      goldValueTime: "2024-12-15 10:30:00",
+      sourceValues: {
+        DMS: "男",
+        BDC: "男",
+        CRM: "未知",
+        WECHAT: "男",
+        APP: "男",
+        WEBSITE: "男",
+        ERP: "男"
+      },
+      sourceValueTimes: {
+        DMS: "2024-12-15 10:30:00",
+        BDC: "2025-01-06 14:20:00",
+        CRM: "2024-11-20 09:15:00",
+        WECHAT: "2024-12-20 16:45:00",
+        APP: "2024-12-10 11:00:00",
+        WEBSITE: "2024-12-05 13:30:00",
+        ERP: "2024-12-18 15:20:00"
+      },
+      suggestedValue: ["男"],
+      selectedSources: ["gold"],
+      primarySource: "gold",
+      hasConflict: true,
+      type: undefined,
+      singleSelect: true
     },
     {
       key: "mobile",
@@ -1048,19 +992,23 @@ const handleFieldChange = (field: ComparisonField) => {
 };
 
 const handleConfirmMerge = async () => {
-  // 统计合并后的号码数量（用于T+1同步提示）
-  const mobileField = comparisonFields.value.find(f => f.key === "mobile" || f.key === "phone");
-  const mergedMobileCount =
-    mobileField && Array.isArray(mobileField.suggestedValue)
-      ? mobileField.suggestedValue.length
-      : mobileField?.suggestedValue
-        ? 1
-        : 0;
+  // 检查是否有多个活跃分组
+  const activeGroupIds = new Set<string>();
+  comparisonFields.value.forEach(f => {
+    if (f.groupSuggestedValues) {
+      Object.keys(f.groupSuggestedValues).forEach(id => activeGroupIds.add(id));
+    }
+  });
+  const hasMultipleGroups = activeGroupIds.size > 1;
 
-  const confirmMessage =
+  let confirmMessage =
     mergedMobileCount > 0
       ? t("errorCorrection.mergeWorkbench.messages.mergeConfirmWithSync", { count: mergedMobileCount })
       : t("errorCorrection.mergeWorkbench.messages.mergeConfirm");
+
+  if (hasMultipleGroups) {
+    confirmMessage = `检测到记录将被拆分为 ${activeGroupIds.size} 个独立条目。${confirmMessage}`;
+  }
 
   try {
     await ElMessageBox.confirm(confirmMessage, t("errorCorrection.mergeWorkbench.messages.mergeConfirmTitle"), {

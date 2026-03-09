@@ -477,14 +477,18 @@ interface ExceptionTask {
   sourceSystem: string;
   targetSystem?: string;
   status: TaskStatus;
-  severity: Severity;
-  slaDeadline: string;
-  handler: string;
-  createTime: string;
   updateTime: string;
+  sourceId?: string; // 源系统ID
   // 原始数据和错误字段
   originalData?: Record<string, any>;
   errorFields?: string[];
+  // H5 提交的纠错明细（与 H5 submitFieldCorrection 一致）
+  correction?: {
+    field: string;
+    currentValue: string | number;
+    correctValue: string | number;
+    note?: string;
+  };
   // 修复建议
   suggestedFix?: string;
   valueMapping?: Record<string, string>;
@@ -887,12 +891,19 @@ const openTaskDialog = (task: ExceptionTask) => {
           time: task.createTime
         },
         feedbackText: task.errorMessage || "",
+        correction: task.correction,
         goldenRecord: {
-          name: task.sourceName || "",
+          name: task.originalData?.name ?? task.sourceName ?? "",
           phone: task.originalData?.phone || "",
           title: task.originalData?.title || "",
           company: task.originalData?.company || "",
-          tags: task.originalData?.tags || []
+          tags: task.originalData?.tags || [],
+          sources: task.originalData?.fieldSources || {
+            name: { system: task.sourceSystem, id: task.sourceId },
+            phone: { system: task.sourceSystem, id: task.sourceId },
+            title: { system: task.sourceSystem, id: task.sourceId },
+            company: { system: task.sourceSystem, id: task.sourceId }
+          }
         },
         slaDeadline: task.slaDeadline
       };
@@ -986,7 +997,9 @@ const openTaskDialog = (task: ExceptionTask) => {
         createTime: task.createTime,
         updateTime: task.updateTime,
         conflictInfo: task.conflictInfo,
-        statusConflict: task.statusConflict
+        statusConflict: task.statusConflict,
+        sourceSystem: task.sourceSystem,
+        sourceId: task.sourceId
       };
       quickEditVisible.value = true;
       break;
@@ -1040,6 +1053,7 @@ const openTaskDialog = (task: ExceptionTask) => {
         // H5 提交的数据纠错反馈：使用 FeedbackResolutionDrawer
         currentFeedbackTask.value = {
           taskId: task.taskNo,
+          oneId: task.oneId,
           status: (() => {
             const statusMap: Record<TaskStatus, "pending" | "inProgress" | "resolved" | "rejected"> = {
               pending: "pending",
@@ -1057,12 +1071,19 @@ const openTaskDialog = (task: ExceptionTask) => {
             time: task.createTime
           },
           feedbackText: task.errorMessage || "客户张伟手机号错了，应该是 13912345678，而且他现在是采购经理了。",
+          correction: task.correction,
           goldenRecord: {
-            name: task.sourceName || "",
+            name: task.originalData?.name ?? task.sourceName ?? "",
             phone: task.originalData?.phone || "",
             title: task.originalData?.title || "",
             company: task.originalData?.company || "",
-            tags: task.originalData?.tags || []
+            tags: task.originalData?.tags || [],
+            sources: task.originalData?.fieldSources || {
+              name: { system: task.sourceSystem, id: task.sourceId },
+              phone: { system: task.sourceSystem, id: task.sourceId },
+              title: { system: task.sourceSystem, id: task.sourceId },
+              company: { system: task.sourceSystem, id: task.sourceId }
+            }
           },
           slaDeadline: task.slaDeadline
         };
@@ -1223,10 +1244,14 @@ const handleFeedbackConfirm = (taskId: string, corrections: Record<string, any>,
       baseTasks[idx].status = "processed";
       baseTasks[idx].updateTime = new Date().toLocaleString("zh-CN");
       // 更新原始数据
-      if (corrections.name) baseTasks[idx].originalData = { ...baseTasks[idx].originalData, name: corrections.name };
-      if (corrections.phone) baseTasks[idx].originalData = { ...baseTasks[idx].originalData, phone: corrections.phone };
-      if (corrections.title) baseTasks[idx].originalData = { ...baseTasks[idx].originalData, title: corrections.title };
-      if (corrections.company) baseTasks[idx].originalData = { ...baseTasks[idx].originalData, company: corrections.company };
+      const o = { ...(baseTasks[idx].originalData || {}) };
+      if (corrections.name !== undefined) o.name = corrections.name;
+      if (corrections.phone !== undefined) o.phone = corrections.phone;
+      if (corrections.title !== undefined) o.title = corrections.title;
+      if (corrections.company !== undefined) o.company = corrections.company;
+      if (corrections.tags !== undefined) o.tags = corrections.tags;
+      if (corrections.address !== undefined) o.address = corrections.address;
+      baseTasks[idx].originalData = o;
       tableRef.value?.getTableList();
     }
   }

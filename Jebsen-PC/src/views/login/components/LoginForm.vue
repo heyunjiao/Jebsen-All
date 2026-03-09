@@ -1,13 +1,12 @@
 <template>
   <div class="modern-login-form">
-    <!-- SSO Login -->
-    <div class="sso-section">
+    <div class="local-section">
       <div class="sso-description">
         <p class="sso-text">{{ $t("login.sso.title") }}</p>
         <p class="sso-subtext">{{ $t("login.sso.subtitle") }}</p>
       </div>
 
-      <button class="sso-login-btn" @click="handleSSOLogin" :disabled="ssoLoading">
+      <button class="sso-login-btn" @click="handleLogin" :disabled="ssoLoading">
         <span v-if="!ssoLoading" class="sso-btn-content">
           <svg class="sso-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path
@@ -56,7 +55,7 @@ const keepAliveStore = useKeepAliveStore();
 const { t } = useI18n();
 
 const ssoLoading = ref(false);
-const agreementChecked = ref(true); // 默认自动勾选
+const agreementChecked = ref(true);
 
 // Open Terms/Policy
 const openTerms = () => window.open("https://example.com/terms", "_blank");
@@ -71,11 +70,10 @@ const validateAgreement = () => {
   return true;
 };
 
-// Login Handler
-const handleSSOLogin = async () => {
+// 直接以 admin 角色登录（无输入框）
+const handleLogin = async () => {
   if (!validateAgreement()) return;
   ssoLoading.value = true;
-
   try {
     const { data } = await loginApi({ username: "admin", password: md5("123456") });
     userStore.setToken(data.access_token);
@@ -85,6 +83,7 @@ const handleSSOLogin = async () => {
     tabsStore.setTabs([]);
     keepAliveStore.setKeepAliveName([]);
 
+    ssoLoading.value = false;
     router.push(HOME_URL);
     ElNotification({
       title: getTimeState(),
@@ -115,12 +114,9 @@ const handleSSOLogin = async () => {
 };
 
 onMounted(() => {
-  // 监听 enter 事件（调用登录）
   document.onkeydown = (e: KeyboardEvent) => {
     if (e.code === "Enter" || e.code === "enter" || e.code === "NumpadEnter") {
-      if (!ssoLoading.value) {
-        handleSSOLogin();
-      }
+      if (!ssoLoading.value) handleLogin();
     }
   };
 });
@@ -163,7 +159,8 @@ onBeforeUnmount(() => {
     }
   }
 
-  // SSO Section
+  // Local login section
+  .local-section,
   .sso-section {
     .sso-description {
       margin-bottom: 24px;

@@ -1,5 +1,20 @@
 <template>
-  <div class="communication-container">
+  <div class="communication-records-container">
+    <van-nav-bar
+      :title="$t('customer.communicationRecords.title') || '沟通记录'"
+      left-arrow
+      fixed
+      placeholder
+      @click-left="$router.back()"
+    />
+
+    <!-- 数据同步提示 -->
+    <van-notice-bar
+      left-icon="info-o"
+      text="数据由业务系统 T+1 同步，本平台仅供查看。"
+      class="sync-notice-bar"
+    />
+
     <!-- 沟通记录列表（使用 van-list 实现滚动加载） -->
     <van-list
       v-model:loading="loading"

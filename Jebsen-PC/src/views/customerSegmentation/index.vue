@@ -1166,7 +1166,7 @@ const handleSaveSegment = () => {
     return;
   }
   if (hasConflict.value) {
-    ElMessage.warning("存在逻辑冲突，请先解决冲突后再提交");
+    ElMessage.warning("存在逻辑冲突，请先解决冲突后再保存");
     return;
   }
   ElMessageBox.prompt("请输入分群名称", "保存为分群", {

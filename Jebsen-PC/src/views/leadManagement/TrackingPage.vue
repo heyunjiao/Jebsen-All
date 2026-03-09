@@ -1,5 +1,8 @@
 <template>
   <div class="lead-tracking-page">
+    <el-alert type="info" :closable="false" show-icon class="sync-notice-alert" style="margin-bottom: 16px">
+      <template #title> 数据同步提示：本模块数据为只读状态，通过源平台 T+1 同步，若与源平台有差异属正常现象。 </template>
+    </el-alert>
     <!-- 商机类型 Tab -->
     <el-card shadow="hover" class="type-tabs-card" style="margin-bottom: 20px">
       <el-tabs v-model="activeTypeTab" @tab-change="handleTypeTabChange" class="type-tabs">

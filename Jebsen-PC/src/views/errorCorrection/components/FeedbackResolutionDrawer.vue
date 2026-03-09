@@ -11,196 +11,278 @@
     <template #header>
       <div class="dialog-header-row">
         <span class="dialog-title">{{ t("errorCorrection.feedbackResolution.title") }}</span>
+        <el-tag v-if="task?.oneId" type="success" size="small" class="ml-12">OneID: {{ task.oneId }}</el-tag>
       </div>
     </template>
     <div v-if="task" class="drawer-content">
-      <!-- 主体内容：左右分栏比对 -->
-      <div class="comparison-section">
-        <!-- 左侧：黄金记录 -->
-        <div class="left-panel">
-          <el-card shadow="hover" class="panel-card">
-            <template #header>
-              <div class="card-header">
-                <span class="card-title">{{ t("errorCorrection.feedbackResolution.goldenRecord.title") }}</span>
-                <el-tag type="info" size="small">{{ t("errorCorrection.feedbackResolution.taskNo") }}: {{ task.taskId }}</el-tag>
-              </div>
-            </template>
-
-            <el-form :model="goldenRecordForm" label-width="100px" label-position="right" class="golden-record-form">
-              <el-form-item :label="t('errorCorrection.feedbackResolution.goldenRecord.name')">
-                <div class="form-item-wrapper">
-                  <el-input
-                    v-model="goldenRecordForm.name"
-                    :placeholder="t('errorCorrection.feedbackResolution.goldenRecord.name')"
-                    @input="handleFieldChange('name')"
-                  />
-                  <el-tooltip
-                    v-if="lockedFields.name"
-                    :content="t('errorCorrection.feedbackResolution.goldenRecord.lockTooltip')"
-                    placement="top"
-                  >
-                    <el-icon class="lock-icon"><Lock /></el-icon>
-                  </el-tooltip>
-                </div>
-                <div v-if="lockedFields.name" class="lock-hint">
-                  {{ t("errorCorrection.feedbackResolution.goldenRecord.locked") }}
-                </div>
-              </el-form-item>
-
-              <el-form-item :label="t('errorCorrection.feedbackResolution.goldenRecord.phone')">
-                <div class="form-item-wrapper">
-                  <el-input
-                    v-model="goldenRecordForm.phone"
-                    :placeholder="t('errorCorrection.feedbackResolution.goldenRecord.phone')"
-                    @input="handleFieldChange('phone')"
-                  />
-                  <el-tooltip
-                    v-if="lockedFields.phone"
-                    :content="t('errorCorrection.feedbackResolution.goldenRecord.lockTooltip')"
-                    placement="top"
-                  >
-                    <el-icon class="lock-icon"><Lock /></el-icon>
-                  </el-tooltip>
-                </div>
-                <div v-if="lockedFields.phone" class="lock-hint">
-                  {{ t("errorCorrection.feedbackResolution.goldenRecord.locked") }}
-                </div>
-              </el-form-item>
-
-              <el-form-item :label="t('errorCorrection.feedbackResolution.goldenRecord.jobTitle')">
-                <div class="form-item-wrapper">
-                  <el-input
-                    v-model="goldenRecordForm.title"
-                    :placeholder="t('errorCorrection.feedbackResolution.goldenRecord.jobTitle')"
-                    @input="handleFieldChange('title')"
-                  />
-                  <el-tooltip
-                    v-if="lockedFields.title"
-                    :content="t('errorCorrection.feedbackResolution.goldenRecord.lockTooltip')"
-                    placement="top"
-                  >
-                    <el-icon class="lock-icon"><Lock /></el-icon>
-                  </el-tooltip>
-                </div>
-                <div v-if="lockedFields.title" class="lock-hint">
-                  {{ t("errorCorrection.feedbackResolution.goldenRecord.locked") }}
-                </div>
-              </el-form-item>
-
-              <el-form-item :label="t('errorCorrection.feedbackResolution.goldenRecord.company')">
-                <div class="form-item-wrapper">
-                  <el-input
-                    v-model="goldenRecordForm.company"
-                    :placeholder="t('errorCorrection.feedbackResolution.goldenRecord.company')"
-                    @input="handleFieldChange('company')"
-                  />
-                  <el-tooltip
-                    v-if="lockedFields.company"
-                    :content="t('errorCorrection.feedbackResolution.goldenRecord.lockTooltip')"
-                    placement="top"
-                  >
-                    <el-icon class="lock-icon"><Lock /></el-icon>
-                  </el-tooltip>
-                </div>
-                <div v-if="lockedFields.company" class="lock-hint">
-                  {{ t("errorCorrection.feedbackResolution.goldenRecord.locked") }}
-                </div>
-              </el-form-item>
-
-              <el-form-item :label="t('errorCorrection.feedbackResolution.goldenRecord.tags')">
-                <el-select
-                  v-model="goldenRecordForm.tags"
-                  multiple
-                  filterable
-                  allow-create
-                  :placeholder="t('errorCorrection.feedbackResolution.goldenRecord.tags')"
-                  style="width: 100%"
-                  @change="handleFieldChange('tags')"
-                >
-                  <el-option v-for="tag in availableTags" :key="tag" :label="tag" :value="tag" />
-                </el-select>
-              </el-form-item>
-            </el-form>
-          </el-card>
-        </div>
-
-        <!-- 右侧：反馈与核实 -->
-        <div class="right-panel">
-          <el-card shadow="hover" class="panel-card">
-            <template #header>
-              <div class="card-header">
-                <span class="card-title">{{ t("errorCorrection.feedbackResolution.feedback.title") }}</span>
-              </div>
-            </template>
-
-            <!-- 区域 A：原始反馈 -->
-            <div class="feedback-section">
-              <div class="section-title">{{ t("errorCorrection.feedbackResolution.feedback.rawInput.title") }}</div>
-              <el-alert type="info" :closable="false" class="feedback-alert">
-                <template #default>
-                  <div class="feedback-content">
-                    <div class="feedback-text">{{ task.feedbackText }}</div>
-                    <div class="feedback-meta">
-                      <el-avatar :size="24" :src="task.reporter.avatar" class="reporter-avatar" />
-                      <span class="reporter-name">{{ task.reporter.name }}</span>
-                      <span class="reporter-time">{{ task.reporter.time }}</span>
-                    </div>
+      <el-tabs v-model="activeTab" class="feedback-tabs">
+        <el-tab-pane :label="t('errorCorrection.feedbackResolution.tabs.resolution')" name="resolution">
+          <!-- 主体内容：左右分栏比对 -->
+          <div class="comparison-section">
+            <!-- 左侧：黄金记录 -->
+            <div class="left-panel">
+              <el-card shadow="hover" class="panel-card">
+                <template #header>
+                  <div class="card-header">
+                    <span class="card-title">{{ t("errorCorrection.feedbackResolution.goldenRecord.title") }}</span>
+                    <el-tag type="info" size="small">{{ t("errorCorrection.feedbackResolution.taskNo") }}: {{ task.taskId }}</el-tag>
                   </div>
                 </template>
-              </el-alert>
+
+                <el-form :model="goldenRecordForm" label-width="100px" label-position="right" class="golden-record-form">
+                  <el-form-item>
+                    <template #label>
+                      <div class="label-with-source">
+                        <span class="label-text">{{ t("errorCorrection.feedbackResolution.goldenRecord.name") }}</span>
+                        <el-tooltip v-if="task?.goldenRecord?.sources?.name" placement="top">
+                          <template #content>
+                            Source: {{ task.goldenRecord.sources.name.system }}
+                            <template v-if="task.goldenRecord.sources.name.id">
+                              (ID: {{ task.goldenRecord.sources.name.id }})</template>
+                          </template>
+                          <span class="source-tag-mini">{{ task.goldenRecord.sources.name.system }}</span>
+                        </el-tooltip>
+                      </div>
+                    </template>
+                    <div class="form-item-wrapper">
+                      <el-input
+                        v-model="goldenRecordForm.name"
+                        :placeholder="t('errorCorrection.feedbackResolution.goldenRecord.name')"
+                        @input="handleFieldChange('name')"
+                      />
+                      <el-tooltip
+                        v-if="lockedFields.name"
+                        :content="t('errorCorrection.feedbackResolution.goldenRecord.lockTooltip')"
+                        placement="top"
+                      >
+                        <el-icon class="lock-icon"><Lock /></el-icon>
+                      </el-tooltip>
+                    </div>
+                    <div v-if="lockedFields.name" class="lock-hint">
+                      {{ t("errorCorrection.feedbackResolution.goldenRecord.locked") }}
+                    </div>
+                  </el-form-item>
+
+                  <el-form-item>
+                    <template #label>
+                      <div class="label-with-source">
+                        <span class="label-text">{{ t("errorCorrection.feedbackResolution.goldenRecord.phone") }}</span>
+                        <el-tooltip v-if="task?.goldenRecord?.sources?.phone" placement="top">
+                          <template #content>
+                            Source: {{ task.goldenRecord.sources.phone.system }}
+                            <template v-if="task.goldenRecord.sources.phone.id">
+                              (ID: {{ task.goldenRecord.sources.phone.id }})</template>
+                          </template>
+                          <span class="source-tag-mini">{{ task.goldenRecord.sources.phone.system }}</span>
+                        </el-tooltip>
+                      </div>
+                    </template>
+                    <div class="form-item-wrapper">
+                      <el-input
+                        v-model="goldenRecordForm.phone"
+                        :placeholder="t('errorCorrection.feedbackResolution.goldenRecord.phone')"
+                        @input="handleFieldChange('phone')"
+                      />
+                      <el-tooltip
+                        v-if="lockedFields.phone"
+                        :content="t('errorCorrection.feedbackResolution.goldenRecord.lockTooltip')"
+                        placement="top"
+                      >
+                        <el-icon class="lock-icon"><Lock /></el-icon>
+                      </el-tooltip>
+                    </div>
+                    <div v-if="lockedFields.phone" class="lock-hint">
+                      {{ t("errorCorrection.feedbackResolution.goldenRecord.locked") }}
+                    </div>
+                  </el-form-item>
+
+                  <el-form-item>
+                    <template #label>
+                      <div class="label-with-source">
+                        <span class="label-text">{{ t("errorCorrection.feedbackResolution.goldenRecord.jobTitle") }}</span>
+                        <el-tooltip v-if="task?.goldenRecord?.sources?.title" placement="top">
+                          <template #content>
+                            Source: {{ task.goldenRecord.sources.title.system }}
+                            <template v-if="task.goldenRecord.sources.title.id">
+                              (ID: {{ task.goldenRecord.sources.title.id }})</template>
+                          </template>
+                          <span class="source-tag-mini">{{ task.goldenRecord.sources.title.system }}</span>
+                        </el-tooltip>
+                      </div>
+                    </template>
+                    <div class="form-item-wrapper">
+                      <el-input
+                        v-model="goldenRecordForm.title"
+                        :placeholder="t('errorCorrection.feedbackResolution.goldenRecord.jobTitle')"
+                        @input="handleFieldChange('title')"
+                      />
+                      <el-tooltip
+                        v-if="lockedFields.title"
+                        :content="t('errorCorrection.feedbackResolution.goldenRecord.lockTooltip')"
+                        placement="top"
+                      >
+                        <el-icon class="lock-icon"><Lock /></el-icon>
+                      </el-tooltip>
+                    </div>
+                    <div v-if="lockedFields.title" class="lock-hint">
+                      {{ t("errorCorrection.feedbackResolution.goldenRecord.locked") }}
+                    </div>
+                  </el-form-item>
+
+                  <el-form-item>
+                    <template #label>
+                      <div class="label-with-source">
+                        <span class="label-text">{{ t("errorCorrection.feedbackResolution.goldenRecord.company") }}</span>
+                        <el-tooltip v-if="task?.goldenRecord?.sources?.company" placement="top">
+                          <template #content>
+                            Source: {{ task.goldenRecord.sources.company.system }}
+                            <template v-if="task.goldenRecord.sources.company.id">
+                              (ID: {{ task.goldenRecord.sources.company.id }})</template>
+                          </template>
+                          <span class="source-tag-mini">{{ task.goldenRecord.sources.company.system }}</span>
+                        </el-tooltip>
+                      </div>
+                    </template>
+                    <div class="form-item-wrapper">
+                      <el-input
+                        v-model="goldenRecordForm.company"
+                        :placeholder="t('errorCorrection.feedbackResolution.goldenRecord.company')"
+                        @input="handleFieldChange('company')"
+                      />
+                      <el-tooltip
+                        v-if="lockedFields.company"
+                        :content="t('errorCorrection.feedbackResolution.goldenRecord.lockTooltip')"
+                        placement="top"
+                      >
+                        <el-icon class="lock-icon"><Lock /></el-icon>
+                      </el-tooltip>
+                    </div>
+                    <div v-if="lockedFields.company" class="lock-hint">
+                      {{ t("errorCorrection.feedbackResolution.goldenRecord.locked") }}
+                    </div>
+                  </el-form-item>
+
+                  <el-form-item :label="t('errorCorrection.feedbackResolution.goldenRecord.tags')">
+                    <el-select
+                      v-model="goldenRecordForm.tags"
+                      multiple
+                      filterable
+                      allow-create
+                      :placeholder="t('errorCorrection.feedbackResolution.goldenRecord.tags')"
+                      style="width: 100%"
+                      @change="handleFieldChange('tags')"
+                    >
+                      <el-option v-for="tag in availableTags" :key="tag" :label="tag" :value="tag" />
+                    </el-select>
+                  </el-form-item>
+                </el-form>
+              </el-card>
             </div>
 
-            <!-- 区域 B：智能辅助 -->
-            <div class="suggestion-section">
-              <div class="section-title">{{ t("errorCorrection.feedbackResolution.feedback.smartSuggestion.title") }}</div>
-              <div class="suggestion-tags">
-                <el-tag
-                  v-for="(phone, index) in extractedPhones"
-                  :key="`phone-${index}`"
-                  type="warning"
-                  class="suggestion-tag"
-                  @click="fillField('phone', phone)"
-                >
-                  {{ t("errorCorrection.feedbackResolution.feedback.smartSuggestion.extractedPhone") }}: {{ phone }}
-                  <el-icon class="tag-icon"><ArrowRight /></el-icon>
-                </el-tag>
-                <el-tag
-                  v-for="(name, index) in extractedNames"
-                  :key="`name-${index}`"
-                  type="primary"
-                  class="suggestion-tag"
-                  @click="fillField('name', name)"
-                >
-                  {{ t("errorCorrection.feedbackResolution.feedback.smartSuggestion.extractedName") }}: {{ name }}
-                  <el-icon class="tag-icon"><ArrowRight /></el-icon>
-                </el-tag>
-                <div v-if="extractedPhones.length === 0 && extractedNames.length === 0" class="no-suggestion">
-                  <el-text type="info" size="small">{{
-                    t("errorCorrection.feedbackResolution.feedback.smartSuggestion.clickToFill")
-                  }}</el-text>
+            <!-- 右侧：反馈与核实 -->
+            <div class="right-panel">
+              <el-card shadow="hover" class="panel-card">
+                <template #header>
+                  <div class="card-header">
+                    <span class="card-title">{{ t("errorCorrection.feedbackResolution.feedback.title") }}</span>
+                  </div>
+                </template>
+
+                <!-- 区域 A：原始反馈 -->
+                <div class="feedback-section">
+                  <div class="section-title">{{ t("errorCorrection.feedbackResolution.feedback.rawInput.title") }}</div>
+                  <el-alert type="info" :closable="false" class="feedback-alert">
+                    <template #default>
+                      <div class="feedback-content">
+                        <div class="feedback-text">{{ task.feedbackText }}</div>
+                        <div class="feedback-meta">
+                          <span class="reporter-label">{{ t("errorCorrection.feedbackResolution.feedback.rawInput.submittedBy") }}：</span>
+                          <el-avatar :size="24" :src="task.reporter.avatar" class="reporter-avatar" />
+                          <span class="reporter-name">{{ task.reporter.name }}</span>
+                          <span class="reporter-time">{{ task.reporter.time }}</span>
+                        </div>
+                      </div>
+                    </template>
+                  </el-alert>
                 </div>
-              </div>
-            </div>
 
-            <!-- 区域 C：核实记录 -->
-            <div class="verification-section">
-              <div class="section-title">{{ t("errorCorrection.feedbackResolution.feedback.verification.title") }}</div>
-              <el-input
-                v-model="verificationRecord"
-                type="textarea"
-                :rows="4"
-                :placeholder="t('errorCorrection.feedbackResolution.feedback.verification.placeholder')"
-                maxlength="500"
-                show-word-limit
-              />
+                <!-- H5 纠错明细（结构化字段） -->
+                <div v-if="task.correction" class="feedback-section correction-detail-section">
+                  <div class="section-title">{{ t("errorCorrection.feedbackResolution.feedback.correctionDetail.title") }}</div>
+                  <el-descriptions :column="1" border size="small" class="correction-detail-desc">
+                    <el-descriptions-item :label="t('errorCorrection.feedbackResolution.feedback.correctionDetail.field')">
+                      {{ task.correction.field }}
+                    </el-descriptions-item>
+                    <el-descriptions-item :label="t('errorCorrection.feedbackResolution.feedback.correctionDetail.currentValue')">
+                      {{ task.correction.currentValue }}
+                    </el-descriptions-item>
+                    <el-descriptions-item :label="t('errorCorrection.feedbackResolution.feedback.correctionDetail.correctValue')">
+                      <span class="correct-value">{{ task.correction.correctValue }}</span>
+                    </el-descriptions-item>
+                    <el-descriptions-item v-if="task.correction.note" :label="t('errorCorrection.feedbackResolution.feedback.correctionDetail.note')">
+                      {{ task.correction.note }}
+                    </el-descriptions-item>
+                  </el-descriptions>
+                </div>
+
+                <!-- 区域 B：智能辅助 -->
+                <div class="suggestion-section">
+                  <div class="section-title">{{ t("errorCorrection.feedbackResolution.feedback.smartSuggestion.title") }}</div>
+                  <div class="suggestion-tags">
+                    <el-tag
+                      v-for="(phone, index) in extractedPhones"
+                      :key="`phone-${index}`"
+                      type="warning"
+                      class="suggestion-tag"
+                      @click="fillField('phone', phone)"
+                    >
+                      {{ t("errorCorrection.feedbackResolution.feedback.smartSuggestion.extractedPhone") }}: {{ phone }}
+                      <el-icon class="tag-icon"><ArrowRight /></el-icon>
+                    </el-tag>
+                    <el-tag
+                      v-for="(name, index) in extractedNames"
+                      :key="`name-${index}`"
+                      type="primary"
+                      class="suggestion-tag"
+                      @click="fillField('name', name)"
+                    >
+                      {{ t("errorCorrection.feedbackResolution.feedback.smartSuggestion.extractedName") }}: {{ name }}
+                      <el-icon class="tag-icon"><ArrowRight /></el-icon>
+                    </el-tag>
+                    <div v-if="extractedPhones.length === 0 && extractedNames.length === 0" class="no-suggestion">
+                      <el-text type="info" size="small">{{
+                        t("errorCorrection.feedbackResolution.feedback.smartSuggestion.clickToFill")
+                      }}</el-text>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 区域 C：核实记录 -->
+                <div class="verification-section">
+                  <div class="section-title">{{ t("errorCorrection.feedbackResolution.feedback.verification.title") }}</div>
+                  <el-input
+                    v-model="verificationRecord"
+                    type="textarea"
+                    :rows="4"
+                    :placeholder="t('errorCorrection.feedbackResolution.feedback.verification.placeholder')"
+                    maxlength="500"
+                    show-word-limit
+                  />
+                </div>
+              </el-card>
             </div>
-          </el-card>
-        </div>
-      </div>
+          </div>
+        </el-tab-pane>
+
+        <!-- 身份血缘溯源 -->
+        <el-tab-pane :label="t('errorCorrection.mergeWorkbench.tabs.lineage')" name="lineage">
+          <LineageTrace :lineage-data="lineageData" :one-id="task.oneId" />
+        </el-tab-pane>
+      </el-tabs>
     </div>
 
     <!-- 底部：决策操作栏 -->
-    <template #footer>
+    <template #footer v-if="activeTab === 'resolution'">
       <div class="drawer-footer">
         <div class="footer-right">
           <el-button type="danger" :loading="ignoring" @click="handleIgnore">
@@ -253,12 +335,22 @@ import { ref, reactive, computed, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Lock, ArrowRight } from "@element-plus/icons-vue";
+import LineageTrace, { type LineageItem } from "./LineageTrace.vue";
 
 const { t } = useI18n();
 
 // ==================== Props & Emits ====================
+/** H5 提交的纠错明细（与 H5 submitFieldCorrection 一致） */
+export interface CorrectionDetail {
+  field: string;
+  currentValue: string | number;
+  correctValue: string | number;
+  note?: string;
+}
+
 export interface FeedbackTask {
   taskId: string;
+  oneId?: string;
   status: "pending" | "inProgress" | "resolved" | "rejected";
   reporter: {
     name: string;
@@ -266,12 +358,15 @@ export interface FeedbackTask {
     time: string;
   };
   feedbackText: string;
+  /** H5 提交的结构化纠错信息（字段、当前值、纠错值、备注） */
+  correction?: CorrectionDetail;
   goldenRecord: {
     name: string;
     phone: string;
     title: string;
     company?: string;
     tags?: string[];
+    sources?: Record<string, { system: string; id?: string }>; // 各字段来源
   };
   slaDeadline?: string;
 }
@@ -320,6 +415,57 @@ const rejectForm = reactive({
 });
 
 const availableTags = ref(["VIP", "高价值客户", "流失预警", "黄金会员"]);
+
+const activeTab = ref("resolution");
+
+// 身份血缘数据
+const lineageData = ref<LineageItem[]>([
+  {
+    mergeTime: "2024-01-05 09:30:00",
+    mergePerson: "数据治理管理员",
+    systemName: "DMS",
+    field: "姓名",
+    oldValue: "张伟（CRM）",
+    newValue: "上汽通用汽车销售有限公司客户1",
+    reason: "对齐客户基本信息，合并 DMS 与 CRM..."
+  },
+  {
+    mergeTime: "2024-01-05 09:30:00",
+    mergePerson: "数据治理管理员",
+    systemName: "DMS",
+    field: "性别",
+    oldValue: "未知",
+    newValue: "其他",
+    reason: "对齐客户基本信息，合并 DMS 与 CRM..."
+  },
+  {
+    mergeTime: "2024-01-05 09:30:00",
+    mergePerson: "数据治理管理员",
+    systemName: "DMS",
+    field: "地址",
+    oldValue: "上海市浦东新区世纪大道 1 号",
+    newValue: "地址1号街道71号",
+    reason: "对齐客户基本信息，合并 DMS 与 CRM..."
+  },
+  {
+    mergeTime: "2024-02-01 16:20:00",
+    mergePerson: "门店前台",
+    systemName: "DMS",
+    field: "车牌号",
+    oldValue: "沪A·00000",
+    newValue: "京A46972",
+    reason: "客户到店更新车牌和当前里程"
+  },
+  {
+    mergeTime: "2024-02-01 16:20:00",
+    mergePerson: "门店前台",
+    systemName: "DMS",
+    field: "当前里程",
+    oldValue: "12000",
+    newValue: "46219.43",
+    reason: "客户到店更新车牌和当前里程"
+  }
+]);
 
 // ==================== 计算属性 ====================
 // 智能提取：从反馈文本中提取疑似电话和姓名
@@ -541,12 +687,40 @@ watch(
         font-size: 12px;
         color: #909399;
         margin-top: 4px;
-        padding-left: 100px;
+      }
+
+      .label-with-source {
+        display: inline-flex;
+        align-items: center;
+        justify-content: flex-end;
+        width: 100%;
+        gap: 4px;
+
+        .label-text {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .source-tag-mini {
+          font-size: 10px;
+          color: var(--el-color-primary);
+          background: var(--el-color-primary-light-9);
+          padding: 0 4px;
+          height: 16px;
+          line-height: 14px;
+          border-radius: 4px;
+          border: 1px solid var(--el-color-primary-light-8);
+          font-weight: normal;
+          cursor: help;
+          flex-shrink: 0;
+        }
       }
     }
 
     // 右侧：反馈与核实
     .feedback-section,
+    .correction-detail-section,
     .suggestion-section,
     .verification-section {
       margin-bottom: 24px;
@@ -584,6 +758,11 @@ watch(
           font-size: 12px;
           color: #909399;
 
+          .reporter-label {
+            color: #909399;
+            flex-shrink: 0;
+          }
+
           .reporter-avatar {
             flex-shrink: 0;
           }
@@ -597,6 +776,16 @@ watch(
             margin-left: auto;
           }
         }
+      }
+    }
+
+    .correction-detail-section {
+      .correction-detail-desc {
+        margin-top: 8px;
+      }
+      .correct-value {
+        color: var(--el-color-success);
+        font-weight: 500;
       }
     }
 

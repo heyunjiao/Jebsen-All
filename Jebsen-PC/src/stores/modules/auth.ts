@@ -28,8 +28,14 @@ export const useAuthStore = defineStore({
   actions: {
     // Get AuthButtonList
     async getAuthButtonList() {
-      const { data } = await getAuthButtonListApi();
-      this.authButtonList = data;
+      const res = await getAuthButtonListApi();
+      const data = (res as { data?: Record<string, string[]> })?.data ?? (res as Record<string, string[]>);
+      // 兼容：后端可能返回 data 或 data.authButton
+      const raw = (data as { authButton?: Record<string, string[]> }).authButton ?? data;
+      const list = { ...raw } as Record<string, string[]>;
+      // 兼容：角色配置的 pageKey 为 tagManagement，路由名为 tagManage
+      if (list.tagManagement && !list.tagManage) list.tagManage = list.tagManagement;
+      this.authButtonList = list;
     },
     // Get AuthMenuList
     async getAuthMenuList() {

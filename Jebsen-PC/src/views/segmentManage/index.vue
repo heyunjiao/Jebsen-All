@@ -48,6 +48,7 @@
       row-key="id"
       :tool-button="['refresh', 'setting', 'search']"
     >
+      <!-- 表格 header 按钮（新建分群不设权限，始终显示） -->
       <template #tableHeader>
         <el-button type="primary" :icon="Plus" @click="handleAdd">{{ t("segmentManage.createSegment") }}</el-button>
       </template>

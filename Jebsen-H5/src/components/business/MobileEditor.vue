@@ -2,20 +2,100 @@
   <van-popup
     v-model:show="show"
     position="bottom"
-    :style="{ height: '80%' }"
+    :style="showOnlyForm ? { height: 'auto', maxHeight: '70%' } : { height: '80%' }"
     round
     lock-scroll
     @close="handleClose"
   >
     <div class="mobile-editor">
-      <div class="popup-header">
-        <h3>管理电话号码</h3>
-        <van-icon name="cross" @click="handleClose" />
-      </div>
+      <!-- 从当前 tab 点编辑进入：只显示红框内容（号码+主副号+姓名+关系+取消保存） -->
+      <template v-if="showOnlyForm">
+        <div class="popup-header">
+          <h3>编辑号码</h3>
+          <van-icon name="cross" @click="handleClose" />
+        </div>
+        <div class="popup-content form-only-content">
+          <div class="mobile-item form-only-card">
+            <div class="mobile-item-content">
+              <div class="form-only-number-row">
+                <van-field
+                  v-model="editForm.mobile"
+                  placeholder="请输入手机号"
+                  :rules="mobileRules"
+                  clearable
+                  class="form-only-mobile-field"
+                  :border="false"
+                />
+                <div class="number-type-selector-compact">
+                  <van-radio-group v-model="editForm.isPrimary" direction="horizontal">
+                    <van-radio
+                      name="primary"
+                      :disabled="mobileItems.some(i => i.isPrimary && i.id !== editingItem?.id)"
+                    >主号</van-radio>
+                    <van-radio name="secondary">副号</van-radio>
+                  </van-radio-group>
+                </div>
+              </div>
+              <div class="contact-name-section">
+                <div class="section-label">联系人姓名：</div>
+                <van-field
+                  v-model="editForm.contactName"
+                  placeholder="请输入联系人姓名"
+                  clearable
+                  class="contact-name-field"
+                  :border="false"
+                />
+              </div>
+              <div class="relation-tag-section">
+                <div class="section-label">联系人标签（关系）：</div>
+                <div v-if="tagPool.length === 0" class="tag-empty">
+                  <span class="empty-text">暂无标签数据</span>
+                </div>
+                <div v-else class="tag-options">
+                  <van-tag
+                    v-for="tag in tagPool"
+                    :key="tag.id"
+                    :type="editForm.relationTagId === tag.id ? 'primary' : 'default'"
+                    size="small"
+                    plain
+                    class="tag-option"
+                    :class="{ 'tag-selected': editForm.relationTagId === tag.id }"
+                    @click="handleSelectRelationTag(tag.id)"
+                  >
+                    {{ tag.name }}
+                    <van-icon
+                      v-if="editForm.relationTagId === tag.id"
+                      name="success"
+                      class="tag-check-icon"
+                    />
+                  </van-tag>
+                </div>
+              </div>
+              <div class="mobile-actions-bottom">
+                <van-button type="default" size="small" @click="handleCancelEdit">取消</van-button>
+                <van-button
+                  type="primary"
+                  size="small"
+                  :loading="saving"
+                  @click="handleSaveEdit"
+                >
+                  保存
+                </van-button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </template>
+      <!-- 完整管理弹窗：列表 + 新增（从默认 tab 进入时为「查看全部」） -->
+      <template v-else>
+        <div class="popup-header">
+          <h3>查看全部联系电话</h3>
+          <van-icon name="cross" @click="handleClose" />
+        </div>
 
-      <div class="popup-content">
-        <!-- 号码列表视图 -->
-        <div v-if="currentView === 'list'" class="view-content">
+        <div class="popup-content">
+          <!-- 号码列表视图 -->
+          <div v-if="currentView === 'list'" class="view-content">
           <!-- 电话号码列表 -->
           <div class="mobile-list">
             <div
@@ -230,7 +310,8 @@
             </van-button>
           </div>
         </div>
-      </div>
+        </div>
+      </template>
     </div>
   </van-popup>
 </template>
@@ -243,9 +324,13 @@ import { customerApi } from '@/api/customer'
 interface Props {
   modelValue: boolean
   mobileData: MobileData
+  /** 打开弹窗时直接进入该条号码的编辑（与当前 tab/行 关联） */
+  initialEditItemId?: string | null
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  initialEditItemId: null,
+})
 
 // 关系标签池
 const relationTagPool = ref<TagPool[]>([])
@@ -297,6 +382,11 @@ const show = computed({
   get: () => props.modelValue,
   set: (val) => emit('update:modelValue', val),
 })
+
+/** 从当前 tab 点编辑进入时只显示红框表单（号码+主副号+姓名+关系+取消保存），不显示完整列表 */
+const showOnlyForm = computed(
+  () => !!show.value && !!props.initialEditItemId && editingItemId.value === props.initialEditItemId
+)
 
 const mobileItems = ref<MobileItem[]>([...props.mobileData.items])
 const currentView = ref<'list'>('list')
@@ -370,7 +460,6 @@ const toggleRelationTag = async (item: MobileItem, tagId: string) => {
 
 // 选择关系标签（编辑表单，单选）
 const handleSelectRelationTag = (tagId: string) => {
-  // 如果点击的是已选中的标签，则取消选择；否则选择新标签
   editForm.value.relationTagId = editForm.value.relationTagId === tagId ? '' : tagId
 }
 
@@ -383,12 +472,17 @@ watch(
   { deep: true }
 )
 
-// 监听 show 变化，当弹窗打开时如果没有关系标签池则获取
+// 监听 show 变化：打开时拉取关系标签池；若传入 initialEditItemId 则直接展开该条编辑
 watch(
   () => show.value,
   (isShow) => {
-    if (isShow && relationTagPool.value.length === 0) {
-      fetchRelationTagPool()
+    if (isShow) {
+      if (relationTagPool.value.length === 0) fetchRelationTagPool()
+      const id = props.initialEditItemId
+      if (id && mobileItems.value.some((i) => i.id === id)) {
+        const item = mobileItems.value.find((i) => i.id === id)!
+        handleEditItem(item)
+      }
     }
   }
 )
@@ -434,6 +528,9 @@ const handleEditItem = (item: MobileItem) => {
 
 // 取消编辑
 const handleCancelEdit = () => {
+  if (props.initialEditItemId) {
+    emit('update:modelValue', false)
+  }
   editingItemId.value = null
   editingItem.value = null
   editForm.value = {
@@ -445,7 +542,7 @@ const handleCancelEdit = () => {
   }
 }
 
-// 保存编辑
+// 保存编辑（联系电话只维护号码+联系人+关系；人-车关联在「车辆信息」弹窗里设置，更新时保留原有关联）
 const handleSaveEdit = async () => {
   const raw = (editForm.value.mobile || '').trim().replace(/[\s-]/g, '')
   if (!raw || !isPhoneOrLandline(editForm.value.mobile)) {
@@ -481,6 +578,7 @@ const handleSaveEdit = async () => {
           relationTagId: currentPrimary.relationTagId,
           relationTagName: currentPrimary.relationTagName,
           businessTags: currentPrimary.businessTags,
+          vehicleLabel: currentPrimary.vehicleLabel,
           isPrimary: false,
         })
       }
@@ -494,7 +592,8 @@ const handleSaveEdit = async () => {
         contactName: contactNameToSave || undefined,
         relationTagId: editForm.value.relationTagId || undefined,
         relationTagName: selectedTag?.name,
-        businessTags: editForm.value.businessTags,
+        businessTags: editingItem.value.businessTags,
+        vehicleLabel: editingItem.value.vehicleLabel,
         isPrimary,
       })
       
@@ -516,6 +615,7 @@ const handleSaveEdit = async () => {
         showToast('更新成功')
         editingItemId.value = null
         editingItem.value = null
+        if (props.initialEditItemId) emit('update:modelValue', false)
         emitUpdate()
       }
     } else {
@@ -525,7 +625,6 @@ const handleSaveEdit = async () => {
         contactName: contactNameToSave,
         relationTagId: editForm.value.relationTagId || undefined,
         relationTagName: selectedTag?.name,
-        businessTags: editForm.value.businessTags,
         isPrimary,
       })
       
@@ -551,6 +650,7 @@ const handleSaveEdit = async () => {
           businessTags: [],
           isPrimary: 'secondary',
         }
+        if (props.initialEditItemId) emit('update:modelValue', false)
         emitUpdate()
       }
     }
@@ -694,6 +794,175 @@ const emitUpdate = () => {
       opacity: 0.7;
     }
   }
+}
+
+/* 仅红框表单模式：与参考图样式统一（白底、棕色边框、主号/标签/按钮品牌色一致） */
+.form-only-content {
+  padding: 16px;
+  background: var(--bg-slate);
+}
+.form-only-content .form-only-card {
+  margin: 0;
+  padding: 14px 16px 18px;
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid var(--accent-gold);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+.form-only-content .mobile-item-content {
+  margin-top: 0;
+  padding-top: 0;
+}
+.form-only-number-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.form-only-content .form-only-mobile-field {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  background: #f5f6f7;
+  border-radius: 6px;
+  margin: 0;
+}
+.form-only-content .form-only-mobile-field :deep(.van-cell) {
+  padding: 0;
+  background: transparent;
+}
+.form-only-content .form-only-mobile-field :deep(.van-field__control) {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-main);
+}
+.form-only-content .number-type-selector-compact {
+  flex-shrink: 0;
+}
+.form-only-content .number-type-selector-compact .van-radio-group {
+  display: flex;
+  gap: 16px;
+}
+.form-only-content .number-type-selector-compact :deep(.van-radio__label) {
+  font-size: 14px;
+  color: var(--text-main);
+}
+/* 主号/副号单选与参考图一致：选中为棕色 */
+.form-only-content .number-type-selector-compact :deep(.van-radio__icon--checked .van-icon) {
+  color: var(--accent-gold);
+}
+.form-only-content .number-type-selector-compact :deep(.van-radio__icon--checked) {
+  background-color: var(--accent-gold);
+  border-color: var(--accent-gold);
+}
+.form-only-content .contact-name-section {
+  margin-bottom: 14px;
+  display: block;
+}
+.form-only-content .contact-name-section .section-label {
+  font-size: 14px;
+  color: var(--text-main);
+  font-weight: 500;
+  margin-bottom: 8px;
+  display: block;
+}
+.form-only-content .contact-name-section .contact-name-field {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  background: #f5f6f7;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+.form-only-content .contact-name-section .contact-name-field :deep(.van-cell) {
+  padding: 0;
+  background: transparent;
+}
+.form-only-content .contact-name-section .contact-name-field :deep(.van-field__control) {
+  font-size: 14px;
+  color: var(--text-main);
+}
+.form-only-content .relation-tag-section {
+  margin-bottom: 16px;
+}
+.form-only-content .relation-tag-section .section-label {
+  font-size: 14px;
+  color: var(--text-main);
+  font-weight: 500;
+  margin-bottom: 10px;
+  display: block;
+}
+.form-only-content .vehicle-role-section {
+  margin-bottom: 14px;
+}
+.form-only-content .vehicle-role-section .section-label {
+  font-size: 14px;
+  color: var(--text-main);
+  font-weight: 500;
+  margin-bottom: 8px;
+  display: block;
+}
+.form-only-content .vehicle-field :deep(.van-cell__value) {
+  color: var(--text-main);
+}
+.form-only-content .tag-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+/* 关系标签与参考图统一：未选浅灰底+灰框，选中棕色底+白字+勾选图标 */
+.form-only-content .tag-options .tag-option {
+  cursor: pointer;
+  transition: all 0.2s;
+  margin: 0 !important;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 4px;
+  font-size: 12px;
+  padding: 4px 10px;
+  border: 1px solid var(--border-color, #e0e0e0) !important;
+  background: #f0f0f0 !important;
+  color: var(--text-main, #333) !important;
+}
+.form-only-content .tag-options .tag-option.tag-selected {
+  background: var(--accent-gold) !important;
+  border-color: var(--accent-gold) !important;
+  color: #fff !important;
+  font-weight: 500;
+}
+.form-only-content .tag-options .tag-option .tag-check-icon {
+  margin-left: 3px;
+  font-size: 12px;
+  color: #fff;
+}
+.form-only-content .tag-options .tag-option :deep(.van-tag__text) {
+  color: inherit;
+  font-size: 12px;
+}
+.form-only-content .mobile-actions-bottom {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+/* 取消：白底灰框灰字；保存：棕色底白字 */
+.form-only-content .mobile-actions-bottom .van-button--default {
+  background: #fff;
+  border: 1px solid var(--border-color, #dcdee0);
+  color: var(--text-main, #323233);
+}
+.form-only-content .mobile-actions-bottom .van-button--primary {
+  background: var(--accent-gold) !important;
+  border-color: var(--accent-gold) !important;
+  color: #fff !important;
+}
+.form-only-content .mobile-actions-bottom .van-button {
+  min-width: 80px;
+  height: 36px;
+  font-size: 14px;
 }
 
 .view-content {
@@ -885,23 +1154,24 @@ const emitUpdate = () => {
     }
     
     .relation-tag-section,
+    .vehicle-role-section,
     .business-tag-section,
     .vehicle-tag-section {
-      margin-bottom: 4px;
-      display: flex;
-      align-items: center;
+      margin-bottom: 10px;
+      display: block;
 
       &:last-child {
         margin-bottom: 0;
       }
 
       .section-label {
-        font-size: 11px;
+        font-size: 12px;
         color: var(--text-sub);
         font-weight: 500;
-        margin-right: 6px;
+        margin-bottom: 6px;
+        margin-right: 0;
         white-space: nowrap;
-        flex-shrink: 0;
+        display: block;
       }
 
       .tag-empty {
@@ -971,6 +1241,11 @@ const emitUpdate = () => {
     border: 1px dashed var(--accent-gold);
     background: white;
   }
+}
+
+.add-vehicle-binding {
+  margin-top: 10px;
+  margin-bottom: 4px;
 }
 
 .mobile-actions-bottom {

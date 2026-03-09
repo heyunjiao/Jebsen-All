@@ -59,7 +59,7 @@
       row-key="tagId"
       :tool-button="['refresh', 'setting', 'search']"
     >
-      <!-- 表格 header 按钮 -->
+      <!-- 表格 header 按钮（新增标签不设权限，始终显示） -->
       <template #tableHeader="scope">
         <el-button type="primary" :icon="Plus" @click="handleAdd">新增标签</el-button>
         <!-- <el-button

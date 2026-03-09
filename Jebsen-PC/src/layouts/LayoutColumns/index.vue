@@ -17,7 +17,7 @@
             <el-icon v-if="item.meta?.icon">
               <component :is="item.meta.icon"></component>
             </el-icon>
-            <span class="title">{{ item.meta?.title ?? '' }}</span>
+            <span class="title">{{ item.meta?.title ?? "" }}</span>
           </div>
         </div>
       </el-scrollbar>

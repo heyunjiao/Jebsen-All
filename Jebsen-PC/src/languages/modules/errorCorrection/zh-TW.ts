@@ -312,7 +312,7 @@ export default {
       },
       // 左側：黃金記錄
       goldenRecord: {
-        title: "當前系統檔案",
+        title: "被糾錯客戶檔案",
         name: "姓名",
         phone: "手機號",
         jobTitle: "職位",
@@ -328,6 +328,13 @@ export default {
           title: "原始反饋",
           submittedBy: "提交人",
           submittedAt: "提交時間"
+        },
+        correctionDetail: {
+          title: "H5 糾錯明細",
+          field: "糾錯欄位",
+          currentValue: "當前值",
+          correctValue: "糾錯值",
+          note: "備註"
         },
         smartSuggestion: {
           title: "智能輔助",

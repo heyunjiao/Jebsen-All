@@ -15,7 +15,7 @@
                 <el-icon v-if="subItem.meta?.icon">
                   <component :is="subItem.meta.icon"></component>
                 </el-icon>
-                <span>{{ subItem.meta?.title ?? '' }}</span>
+                <span>{{ subItem.meta?.title ?? "" }}</span>
               </template>
               <SubMenu :menu-list="subItem.children" />
             </el-sub-menu>
@@ -24,7 +24,7 @@
                 <component :is="subItem.meta.icon"></component>
               </el-icon>
               <template #title>
-                <span>{{ subItem.meta?.title ?? '' }}</span>
+                <span>{{ subItem.meta?.title ?? "" }}</span>
               </template>
             </el-menu-item>
           </template>

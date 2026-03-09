@@ -29,6 +29,7 @@ export const mockCustomerProfile: CustomerProfile = {
         id: 'mobile1',
         mobile: '13800138000',
         isPrimary: true,
+        contactName: '张明',
         relationTagId: 'relation1',
         relationTagName: '本人',
         businessTags: ['车主'],
@@ -39,6 +40,7 @@ export const mockCustomerProfile: CustomerProfile = {
         id: 'mobile2',
         mobile: '13900139000',
         isPrimary: false,
+        contactName: '李芳',
         relationTagId: 'relation2',
         relationTagName: '配偶',
         businessTags: ['送修人'],
@@ -64,6 +66,18 @@ export const mockCustomerProfile: CustomerProfile = {
     sources: [
       { origin: 'DMS', value: '上海', time: '2025-10-01 10:30:00' },
       { origin: 'BDC', value: '上海', time: '2025-09-15 14:20:00' },
+    ],
+  },
+  addresses: {
+    items: [
+      { id: 'addr1', address: '上海市浦东新区陆家嘴环路1000号', label: '家庭', isPrimary: true },
+      { id: 'addr2', address: '上海市静安区南京西路1788号', label: '公司', isPrimary: false },
+    ],
+  },
+  emails: {
+    items: [
+      { id: 'email1', email: 'zhangming@example.com', label: '个人', isPrimary: true },
+      { id: 'email2', email: 'zm.work@company.com', label: '工作', isPrimary: false },
     ],
   },
   preferredCarModel: {
@@ -540,6 +554,18 @@ export const mockCompanyProfile: CustomerProfile = {
   id: 'COMP001',
   name: { value: '深圳市望昕实业有限公司', isConflict: false },
   customerType: { value: '公司', isConflict: false },
+  addresses: {
+    items: [
+      { id: 'c_addr1', address: '深圳市南山区科技园南区深南大道9988号', label: '注册地址', isPrimary: true },
+      { id: 'c_addr2', address: '上海市浦东新区世纪大道100号', label: '办公地址', isPrimary: false },
+    ],
+  },
+  emails: {
+    items: [
+      { id: 'c_email1', email: 'contact@wangxin.com', label: '公司邮箱', isPrimary: true },
+      { id: 'c_email2', email: 'hr@wangxin.com', label: '人事', isPrimary: false },
+    ],
+  },
   latestOperation: { operator: 'Rebecca Z.', operationType: '人工更新', operationTime: '2025-01-15 10:00:00' },
   handlers: [
     {
@@ -756,7 +782,9 @@ export const mockCompanyProfile: CustomerProfile = {
   mobile: {
     items: [
       { id: 'c_m1', mobile: '021-66668888', isPrimary: true, relationTagName: '公司电话', updateTime: '2025-01-15 10:00:00' },
-      { id: 'c_m2', mobile: '13811112222', isPrimary: false, relationTagName: '汪洁', businessTags: ['使用人'], vehicleLabel: 'Cayenne Turbo', updateTime: '2025-01-20 09:00:00' },
+      { id: 'c_m2', mobile: '13811112222', isPrimary: false, relationTagName: '汪洁', contactName: '汪洁', businessTags: ['使用人'], vehicleLabel: 'Cayenne Turbo', updateTime: '2025-01-20 09:00:00' },
+      { id: 'c_m3', mobile: '13833334444', isPrimary: false, relationTagName: '张雪', contactName: '张雪', businessTags: ['联系人'], vehicleLabel: 'Macan 企业版', updateTime: '2025-01-22 15:30:00' },
+      { id: 'c_m4', mobile: '13855556666', isPrimary: false, relationTagName: '周杰', contactName: '周杰', businessTags: ['送修人'], vehicleLabel: 'Taycan Turbo S', updateTime: '2025-01-25 11:15:00' },
     ],
     isConflict: true,
     editable: true,

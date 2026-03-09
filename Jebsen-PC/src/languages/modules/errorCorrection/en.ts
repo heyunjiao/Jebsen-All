@@ -484,6 +484,10 @@ export default {
     feedbackResolution: {
       title: "Data Correction Feedback Resolution",
       taskNo: "Task No.",
+      tabs: {
+        resolution: "Feedback Resolution",
+        lineage: "Identity Lineage Trace"
+      },
       // SLA Countdown
       sla: {
         remaining: "Remaining {time}",
@@ -493,7 +497,7 @@ export default {
       },
       // Left: Golden Record
       goldenRecord: {
-        title: "Current System Record",
+        title: "Customer Record (Under Correction)",
         name: "Name",
         phone: "Phone",
         jobTitle: "Job Title",
@@ -509,6 +513,13 @@ export default {
           title: "Raw Feedback",
           submittedBy: "Submitted By",
           submittedAt: "Submitted At"
+        },
+        correctionDetail: {
+          title: "H5 Correction Detail",
+          field: "Field",
+          currentValue: "Current Value",
+          correctValue: "Correct Value",
+          note: "Note"
         },
         smartSuggestion: {
           title: "Smart Suggestion",

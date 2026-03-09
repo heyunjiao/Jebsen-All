@@ -35,6 +35,7 @@
       "errorField": "phone",
       "errorMessage": "手机号格式错误：138-1234-5678（含横杠）",
       "sourceSystem": "BDC",
+      "sourceId": "BDC-00123",
       "status": "pending",
       "severity": "medium",
       "slaDeadline": "2025-01-09 18:00:00",
@@ -47,7 +48,9 @@
         "email": "liming@test.com",
         "address": "北京市朝阳区"
       },
-      "errorFields": ["phone"],
+      "errorFields": [
+        "phone"
+      ],
       "suggestedFix": "13812345678"
     },
     {
@@ -72,7 +75,9 @@
         "email": "wangfang#163.com",
         "address": "上海市浦东新区"
       },
-      "errorFields": ["email"],
+      "errorFields": [
+        "email"
+      ],
       "suggestedFix": "wangfang@163.com"
     },
     {
@@ -97,7 +102,9 @@
         "idCard": "320123456789012",
         "plate": "沪A12345"
       },
-      "errorFields": ["idCard"]
+      "errorFields": [
+        "idCard"
+      ]
     },
     {
       "id": "T_1005",
@@ -121,18 +128,21 @@
         "carAge": 200,
         "purchaseDate": "2020-01-01"
       },
-      "errorFields": ["carAge"]
+      "errorFields": [
+        "carAge"
+      ]
     },
     {
       "id": "T_1005_H5",
       "taskNo": "TASK-2025-008",
       "oneId": "ONE-88298",
-      "sourceName": "张伟",
+      "sourceName": "陈建华",
       "category": "compliance",
       "subType": "authorization_missing",
       "errorField": "H5_FEEDBACK",
       "errorMessage": "客户陈建华手机号错了，应该是 13912345678，而且他现在是采购经理了。",
       "sourceSystem": "H5",
+      "sourceId": "H5-USER-789",
       "status": "pending",
       "severity": "high",
       "slaDeadline": "2025-01-08 18:00:00",
@@ -144,9 +154,21 @@
         "phone": "13800000000",
         "title": "采购专员",
         "company": "北京科技有限公司",
-        "tags": ["VIP", "高价值客户"]
+        "tags": [
+          "VIP",
+          "高价值客户"
+        ]
       },
-      "errorFields": ["phone", "title"]
+      "errorFields": [
+        "phone",
+        "title"
+      ],
+      "correction": {
+        "field": "phone",
+        "currentValue": "13800000000",
+        "correctValue": "13912345678",
+        "note": "客户本人反馈手机号已更换"
+      }
     },
     {
       "id": "T_1006_H5",
@@ -169,9 +191,21 @@
         "phone": "13812345678",
         "title": "销售经理",
         "company": "上海贸易有限公司",
-        "tags": ["高价值客户"]
+        "tags": [
+          "高价值客户"
+        ]
       },
-      "errorFields": ["name", "phone", "title"]
+      "errorFields": [
+        "name",
+        "phone",
+        "title"
+      ],
+      "correction": {
+        "field": "title",
+        "currentValue": "销售经理",
+        "correctValue": "销售总监",
+        "note": "联系人已改为王芳，电话 15012345678"
+      }
     },
     {
       "id": "T_1007_H5",
@@ -194,9 +228,19 @@
         "phone": "13612345678",
         "title": "财务经理",
         "company": "北京科技有限公司",
-        "tags": ["VIP"]
+        "tags": [
+          "VIP"
+        ]
       },
-      "errorFields": ["address"]
+      "errorFields": [
+        "address"
+      ],
+      "correction": {
+        "field": "address",
+        "currentValue": "北京市海淀区",
+        "correctValue": "北京市朝阳区建国路88号",
+        "note": "客户反馈地址有误，已搬迁至朝阳区"
+      }
     },
     {
       "id": "T_1008_H5",
@@ -219,9 +263,14 @@
         "phone": "13987654321",
         "title": "市场总监",
         "company": "深圳创新科技有限公司",
-        "tags": ["高价值客户", "VIP"]
+        "tags": [
+          "高价值客户",
+          "VIP"
+        ]
       },
-      "errorFields": ["phone"]
+      "errorFields": [
+        "phone"
+      ]
     },
     {
       "id": "T_1006",
@@ -245,7 +294,9 @@
         "birthday": "2026-01-15",
         "vehicleModel": "保时捷 Cayenne"
       },
-      "errorFields": ["birthday"]
+      "errorFields": [
+        "birthday"
+      ]
     },
     {
       "id": "T_1007",
@@ -269,7 +320,9 @@
         "price": -5000,
         "address": "广州市天河区"
       },
-      "errorFields": ["price"]
+      "errorFields": [
+        "price"
+      ]
     },
     {
       "id": "T_1008",
@@ -293,7 +346,9 @@
         "gender": "M",
         "email": "liuyang@test.com"
       },
-      "errorFields": ["gender"],
+      "errorFields": [
+        "gender"
+      ],
       "valueMapping": {
         "M": "1",
         "F": "0"
@@ -382,7 +437,10 @@
         "email": "",
         "address": "北京市朝阳区"
       },
-      "errorFields": ["phone", "email"]
+      "errorFields": [
+        "phone",
+        "email"
+      ]
     },
     {
       "id": "T_1012",
@@ -406,7 +464,9 @@
         "amount": 50000,
         "orderDate": "2025-01-06"
       },
-      "errorFields": ["customerId"]
+      "errorFields": [
+        "customerId"
+      ]
     },
     {
       "id": "T_1013",
@@ -430,7 +490,10 @@
         "idCard": "320123199001011234",
         "phone": "13812345678"
       },
-      "errorFields": ["gender", "idCard"],
+      "errorFields": [
+        "gender",
+        "idCard"
+      ],
       "conflictInfo": {
         "idCardGender": "女",
         "fieldGender": "男"
@@ -459,7 +522,9 @@
         "dmsStatus": "已交车",
         "crmStatus": "未成交"
       },
-      "errorFields": ["orderStatus"],
+      "errorFields": [
+        "orderStatus"
+      ],
       "statusConflict": {
         "dms": "已交车",
         "crm": "未成交"
@@ -487,7 +552,9 @@
         "privacyAgreement": false,
         "marketingConsent": false
       },
-      "errorFields": ["privacyAgreement"]
+      "errorFields": [
+        "privacyAgreement"
+      ]
     },
     {
       "id": "T_2001",
@@ -535,7 +602,9 @@
         "phone": "13800000000",
         "email": "liuyang@test.com"
       },
-      "errorFields": ["phone"]
+      "errorFields": [
+        "phone"
+      ]
     },
     {
       "id": "T_2003",
@@ -581,7 +650,9 @@
         "phone": "13612345678",
         "email": "zhangqiang#163.com"
       },
-      "errorFields": ["email"],
+      "errorFields": [
+        "email"
+      ],
       "suggestedFix": "zhangqiang@163.com"
     },
     {
@@ -606,7 +677,9 @@
         "carAge": 200,
         "purchaseDate": "2020-01-01"
       },
-      "errorFields": ["carAge"]
+      "errorFields": [
+        "carAge"
+      ]
     },
     {
       "id": "T_2006",
@@ -630,7 +703,9 @@
         "gender": "M",
         "email": "zhoumin@test.com"
       },
-      "errorFields": ["gender"],
+      "errorFields": [
+        "gender"
+      ],
       "valueMapping": {
         "M": "1",
         "F": "0"
@@ -696,7 +771,10 @@
         "email": "",
         "address": "北京市朝阳区"
       },
-      "errorFields": ["phone", "email"]
+      "errorFields": [
+        "phone",
+        "email"
+      ]
     },
     {
       "id": "T_2009",
@@ -720,7 +798,9 @@
         "amount": 30000,
         "orderDate": "2024-12-20"
       },
-      "errorFields": ["customerId"]
+      "errorFields": [
+        "customerId"
+      ]
     },
     {
       "id": "T_2010",
@@ -744,7 +824,10 @@
         "email": "",
         "address": "上海市浦东新区"
       },
-      "errorFields": ["phone", "email"]
+      "errorFields": [
+        "phone",
+        "email"
+      ]
     },
     {
       "id": "T_2011",
@@ -768,7 +851,10 @@
         "idCard": "320123199001011234",
         "phone": "13812345678"
       },
-      "errorFields": ["gender", "idCard"],
+      "errorFields": [
+        "gender",
+        "idCard"
+      ],
       "conflictInfo": {
         "idCardGender": "女",
         "fieldGender": "男",
@@ -798,7 +884,9 @@
         "dmsStatus": "已交车",
         "crmStatus": "未成交"
       },
-      "errorFields": ["orderStatus"],
+      "errorFields": [
+        "orderStatus"
+      ],
       "statusConflict": {
         "dms": "已交车",
         "crm": "未成交",
@@ -827,7 +915,9 @@
         "privacyAgreement": false,
         "marketingConsent": false
       },
-      "errorFields": ["privacyAgreement"]
+      "errorFields": [
+        "privacyAgreement"
+      ]
     },
     {
       "id": "T_2014",
@@ -851,7 +941,9 @@
         "idCard": "320123456789012",
         "plate": "沪A12345"
       },
-      "errorFields": ["idCard"]
+      "errorFields": [
+        "idCard"
+      ]
     },
     {
       "id": "T_2015",
@@ -890,4 +982,3 @@
     "autoMergedCount": 8560
   }
 }
-

@@ -1,5 +1,5 @@
 import { MockMethod } from 'vite-plugin-mock'
-import type { CustomerProfile, TagPool, MobileData, MobileItem, MaintenanceRecord, TransactionRecord, VehicleRelation, Asset, NameMobileConflict, Appointment, PlatformSource, InsuranceInfo, Opportunity, OperationLog, InsuranceRecord, FinancialLoanRecord } from '@/types/customer'
+import type { CustomerProfile, TagPool, MobileData, MobileItem, AddressData, EmailData, MaintenanceRecord, TransactionRecord, VehicleRelation, Asset, NameMobileConflict, Appointment, PlatformSource, InsuranceInfo, Opportunity, OperationLog, InsuranceRecord, FinancialLoanRecord } from '@/types/customer'
 import { validateInsuranceRecords, normalizeInsuranceRecords } from './rules'
 
 // Mock 客户画像数据（包含冲突数据）
@@ -65,6 +65,18 @@ const mockCustomerProfile: CustomerProfile = {
       { origin: 'BDC', value: '上海', time: '2025-09-15 14:20:00' },
     ],
   },
+  addresses: {
+    items: [
+      { id: 'addr1', address: '上海市浦东新区陆家嘴环路1000号', label: '家庭', isPrimary: true, source: 'DMS', updateTime: '2025-10-01 10:30:00' },
+      { id: 'addr2', address: '上海市静安区南京西路1788号', label: '公司', isPrimary: false, source: 'BDC', updateTime: '2025-09-15 14:20:00' },
+    ],
+  } as AddressData,
+  emails: {
+    items: [
+      { id: 'email1', email: 'zhangming@example.com', label: '个人', isPrimary: true, source: 'DMS', updateTime: '2025-10-01 10:30:00' },
+      { id: 'email2', email: 'zm.work@company.com', label: '工作', isPrimary: false, source: 'BDC', updateTime: '2025-09-15 14:20:00' },
+    ],
+  } as EmailData,
   preferredCarModel: {
     value: '911',
     isConflict: true,
@@ -485,6 +497,18 @@ const mockCompanyProfile: CustomerProfile = {
     value: '上海',
     isConflict: false,
   },
+  addresses: {
+    items: [
+      { id: 'c_addr1', address: '深圳市南山区科技园南区深南大道9988号', label: '注册地址', isPrimary: true, source: 'CRM' },
+      { id: 'c_addr2', address: '上海市浦东新区世纪大道100号', label: '办公地址', isPrimary: false, source: 'CRM' },
+    ],
+  } as AddressData,
+  emails: {
+    items: [
+      { id: 'c_email1', email: 'contact@wangxin.com', label: '公司邮箱', isPrimary: true, source: 'CRM' },
+      { id: 'c_email2', email: 'hr@wangxin.com', label: '人事', isPrimary: false, source: 'CRM' },
+    ],
+  } as EmailData,
   preferredCarModel: {
     value: 'Taycan',
     isConflict: false,

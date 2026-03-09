@@ -49,6 +49,15 @@ export const useCustomerStore = defineStore('customer', () => {
         console.log('[Store] segmentType:', res.data.segmentType)
         console.log('[Store] totalConsumption:', res.data.totalConsumption)
         profile.value = res.data
+        // 公司类型若接口未返回经办人列表，补全默认经办人，否则车辆相关人员只能选「公司电话」
+        if (profile.value?.customerType?.value === '公司' && (!profile.value.handlers || profile.value.handlers.length === 0)) {
+          (profile.value as any).handlers = [
+            { id: 'H001', name: '汪洁', role: '使用人', mobile: '' },
+            { id: 'H002', name: '张雪', role: '联系人', mobile: '' },
+            { id: 'H003', name: '周杰', role: '送修人', mobile: '' },
+          ]
+          if (!profile.value.selectedHandlerId) (profile.value as any).selectedHandlerId = 'H001'
+        }
         console.log('[Store] 设置后的 profile.value:', profile.value)
         console.log('[Store] profile.value.vehicles:', profile.value?.vehicles)
         console.log('[Store] profile.value.assets:', profile.value?.assets)

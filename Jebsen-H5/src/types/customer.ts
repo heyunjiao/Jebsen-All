@@ -57,6 +57,36 @@ export interface MobileData {
   editable?: boolean // 是否可编辑
 }
 
+// 地址项类型（支持多个地址）
+export interface AddressItem {
+  id: string
+  address: string // 完整地址
+  label?: string // 标签：家庭、公司、其他等
+  isPrimary?: boolean // 是否为主地址
+  source?: string
+  updateTime?: string
+}
+
+// 地址数据类型（多个地址）
+export interface AddressData {
+  items: AddressItem[]
+}
+
+// 邮箱项类型（支持多个邮箱）
+export interface EmailItem {
+  id: string
+  email: string
+  label?: string // 标签：个人、工作等
+  isPrimary?: boolean // 是否为主邮箱
+  source?: string
+  updateTime?: string
+}
+
+// 邮箱数据类型（多个邮箱）
+export interface EmailData {
+  items: EmailItem[]
+}
+
 // 交易记录类型
 export interface TransactionRecord {
   id: string
@@ -313,6 +343,9 @@ export interface CustomerProfile {
   preferredCarModel: FieldData & { tags?: string[] } // 意向车型（支持标签）
   maintenanceRecords: FieldData // 维保记录（旧版，保留兼容）
   tags: string[] // 用户标签
+  // 地址（多个）、邮箱（多个）
+  addresses?: AddressData
+  emails?: EmailData
   // 新增字段
   opportunityType?: FieldData // 商机类型
   segmentType?: FieldData // 分群类型
@@ -339,6 +372,10 @@ export interface CustomerProfile {
   transactions?: TransactionRecord[] // 交易记录（已废弃，使用独立接口）
   vehicles?: VehicleRelation[] // 车辆关联（已废弃，使用独立接口）
   assets?: Asset[] // 资产中心（已废弃，使用独立接口）
+  /** 车（多）-角色-人：vehicleId -> role -> mobileItemId，不占用 mobile.items 条数，同一人可关联多车多角色 */
+  vehicleRoleAssignments?: Record<string, Record<string, string>>
+  /** 公司类型：车-角色-经办人 vehicleKey -> role -> handlerId，支持一人多车多角色 */
+  companyVehicleRoleAssignments?: Record<string, Record<string, string>>
 }
 
 

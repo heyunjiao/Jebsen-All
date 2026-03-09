@@ -600,8 +600,10 @@
           <el-empty v-else :description="$t('common.noData')" />
         </el-tab-pane>
 
-        <!-- 沟通记录（与 H5 第3个 Tab） -->
         <el-tab-pane :label="$t('customer.profile360.communicationRecords')" name="interactions">
+          <el-alert type="info" :closable="false" show-icon class="sync-notice-alert" style="margin-bottom: 16px">
+            <template #title> 数据同步提示：沟通记录由各业务系统 T+1 同步，暂不支持在本平台直接记录。 </template>
+          </el-alert>
           <el-timeline v-if="profileData.interactions && profileData.interactions.length > 0">
             <el-timeline-item
               v-for="item in profileData.interactions"

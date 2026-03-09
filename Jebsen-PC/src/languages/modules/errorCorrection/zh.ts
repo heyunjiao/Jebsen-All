@@ -323,6 +323,10 @@ export default {
     feedbackResolution: {
       title: "数据修正",
       taskNo: "任务编号",
+      tabs: {
+        resolution: "人工反馈",
+        lineage: "身份血缘溯源"
+      },
       // SLA 倒计时
       sla: {
         remaining: "剩余 {time}",
@@ -332,7 +336,7 @@ export default {
       },
       // 左侧：黄金记录
       goldenRecord: {
-        title: "当前系统客户",
+        title: "被纠错客户档案",
         name: "姓名",
         phone: "手机号",
         jobTitle: "职位",
@@ -348,6 +352,13 @@ export default {
           title: "原始反馈",
           submittedBy: "提交人",
           submittedAt: "提交时间"
+        },
+        correctionDetail: {
+          title: "H5 纠错明细",
+          field: "纠错字段",
+          currentValue: "当前值",
+          correctValue: "纠错值",
+          note: "备注"
         },
         smartSuggestion: {
           title: "智能辅助",

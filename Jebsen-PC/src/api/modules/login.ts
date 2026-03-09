@@ -23,11 +23,10 @@ export const getAuthMenuListApi = () => {
   return Promise.resolve(authMenuList);
 };
 
-// 获取按钮权限
+// 获取按钮权限（当前使用本地数据，保证标签管理「新增」等按钮可见；接后端时改回 http.get）
 export const getAuthButtonListApi = () => {
-  return http.get<Login.ResAuthButtons>(PORT1 + `/auth/buttons`, {}, { loading: false });
-  // 如果想让按钮权限变为本地数据，注释上一行代码，并引入本地 authButtonList.json 数据
-  return authButtonList;
+  return Promise.resolve(authButtonList);
+  // return http.get<Login.ResAuthButtons>(PORT1 + `/auth/buttons`, {}, { loading: false });
 };
 
 // 客户退出登录

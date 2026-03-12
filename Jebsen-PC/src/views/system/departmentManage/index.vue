@@ -30,7 +30,6 @@
       <template #operation="scope">
         <el-button type="primary" link :icon="Edit" @click="handleUpdate(scope.row)">修改</el-button>
         <el-button type="primary" link :icon="Plus" @click="handleAdd(scope.row)">新增</el-button>
-        <el-button v-if="scope.row.parentId != 0" type="primary" link :icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
       </template>
     </ProTable>
 

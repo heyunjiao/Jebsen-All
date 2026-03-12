@@ -51,11 +51,13 @@
       </div>
     </div>
 
+
     <ProTable
       ref="proTable"
       :columns="columns"
       :request-api="getTableList"
       :data-callback="dataCallback"
+      :init-param="tableInitParam"
       row-key="tagId"
       :tool-button="['refresh', 'setting', 'search']"
     >
@@ -89,11 +91,9 @@
         </el-link>
       </template>
 
-      <!-- 分类列（多级别展示完整路径） -->
+      <!-- 分类列（直接使用完整路径文案，不额外缩小字体/变色） -->
       <template #category="scope">
-        <el-tag :type="getCategoryType(scope.row.category) as any" size="small">
-          {{ getCategoryFullPath(categoryOptions, scope.row.category) || scope.row.category }}
-        </el-tag>
+        {{ getDisplayCategoryPath(scope.row.category) || "未归类" }}
       </template>
 
       <!-- 标签类型列 -->
@@ -150,15 +150,15 @@
           <el-input v-model="form.tagName" placeholder="请输入标签名称" maxlength="50" show-word-limit :disabled="!!form.tagId" />
         </el-form-item>
         <el-form-item :label="t('tagManage.category')" prop="category">
-          <el-cascader
+          <el-tree-select
             v-model="form.category"
-            :options="categoryOptions"
-            :props="{ checkStrictly: true, emitPath: false }"
-            :placeholder="t('tagManage.categoryPlaceholder')"
+            :data="categoryOptions"
+            :props="{ value: 'value', label: 'label', children: 'children' }"
             :disabled="!!form.tagId"
-            style="width: 100%"
+            placeholder="请选择标签分类"
+            check-strictly
             filterable
-            clearable
+            style="width: 100%"
           />
         </el-form-item>
         <el-form-item label="标签类型" prop="tagType">
@@ -220,7 +220,7 @@
           <el-descriptions-item label="标签名称">{{ currentTag.tagName }}</el-descriptions-item>
           <el-descriptions-item label="标签分类">
             <el-tag :type="getCategoryType(currentTag.category) as any" size="small">
-              {{ getCategoryFullPath(categoryOptions, currentTag.category) || currentTag.category }}
+              {{ getDisplayCategoryPath(currentTag.category) || "未归类" }}
             </el-tag>
           </el-descriptions-item>
           <el-descriptions-item label="标签类型">
@@ -270,7 +270,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from "vue";
+import { ref, reactive, computed, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Plus, Edit, View, Check, Close, CollectionTag, UserFilled } from "@element-plus/icons-vue";
@@ -279,7 +279,13 @@ import { ProTableInstance, ColumnProps } from "@/components/ProTable/interface";
 import type { TagManage } from "@/api/modules/tagManage";
 import RuleEditor, { type RuleNode } from "./components/RuleEditor.vue";
 import { getTagList, getTagDetail, addTag, editTag, publishTag, disableTag, simulateRule } from "@/api/modules/tagManage";
-import { TAG_CATEGORY_OPTIONS, getCategoryFullPath, getCategoryType } from "@/constants/tagCategory";
+import {
+  TAG_CATEGORY_OPTIONS,
+  buildCategoryExplorer,
+  getCategoryFullPath,
+  getCategoryMeta,
+  getCategoryType
+} from "@/constants/tagCategory";
 
 // ProTable 实例
 const proTable = ref<ProTableInstance>();
@@ -322,6 +328,64 @@ const form = reactive<TagManage.ReqTagForm & { description: string; status: TagM
 });
 
 const categoryOptions = TAG_CATEGORY_OPTIONS;
+const categoryExplorer = buildCategoryExplorer(categoryOptions);
+const activeCategoryRoot = ref(categoryExplorer[0]?.value || "");
+const dialogCategoryRoot = ref(categoryExplorer[0]?.value || "");
+const quickCategoryFilter = ref("");
+
+const activeExplorerRoot = computed(() => {
+  return categoryExplorer.find(item => item.value === activeCategoryRoot.value) || categoryExplorer[0];
+});
+
+const dialogExplorerRoot = computed(() => {
+  return categoryExplorer.find(item => item.value === dialogCategoryRoot.value) || categoryExplorer[0];
+});
+
+const quickCategoryMeta = computed(() => getCategoryMeta(categoryOptions, quickCategoryFilter.value));
+const selectedFormCategoryMeta = computed(() => getCategoryMeta(categoryOptions, form.category));
+const tableInitParam = computed(() => (quickCategoryFilter.value ? { category: quickCategoryFilter.value } : {}));
+
+// 展示用分类路径：兼容「后端直接返回完整路径」和「只返回叶子值」两种情况
+const getDisplayCategoryPath = (category: string) => {
+  if (!category) return "";
+  // 如果后端已经是完整路径（包含“ / ”），直接用
+  if (category.includes(" / ")) return category;
+  // 否则按叶子值从本地多级配置还原完整路径
+  return getCategoryFullPath(categoryOptions, category) || category;
+};
+
+const getCategoryPathLabels = (category: string) => {
+  return getCategoryMeta(categoryOptions, category)?.pathLabels || [category];
+};
+
+const getCategoryLeafLabel = (category: string) => {
+  const labels = getCategoryPathLabels(category);
+  return labels[labels.length - 1] || category;
+};
+
+const setQuickCategoryFilter = (category: string) => {
+  quickCategoryFilter.value = quickCategoryFilter.value === category ? "" : category;
+};
+
+const clearQuickCategoryFilter = () => {
+  quickCategoryFilter.value = "";
+};
+
+const selectFormCategory = (category: string) => {
+  if (form.tagId) return;
+  form.category = category;
+};
+
+watch(
+  () => form.category,
+  category => {
+    const rootValue = getCategoryMeta(categoryOptions, category)?.pathValues[0];
+    if (rootValue) {
+      dialogCategoryRoot.value = rootValue;
+    }
+  },
+  { immediate: true }
+);
 
 // 规则树（用于规则编辑器）
 const ruleTree = ref<RuleNode>({
@@ -354,20 +418,8 @@ const columns = reactive<ColumnProps<TagManage.TagInfo>[]>([
   {
     prop: "category",
     label: "分类",
-    minWidth: 100,
-    enum: categoryOptions,
-    search: {
-      el: "cascader",
-      label: "分类",
-      props: {
-        options: categoryOptions,
-        checkStrictly: true,
-        emitPath: false,
-        placeholder: "请选择分类（多级）",
-        filterable: true,
-        clearable: true
-      }
-    }
+    minWidth: 180,
+    enum: categoryOptions
   },
   {
     prop: "tagType",
@@ -503,6 +555,21 @@ const handleSimulate = async () => {
 const handleAdd = () => {
   resetForm();
   title.value = "新增标签";
+  dialogCategoryRoot.value = categoryExplorer[0]?.value || "";
+  open.value = true;
+};
+
+// 在当前快速筛选分类下新增标签（从多级导航入口新建）
+const handleAddWithCurrentCategory = () => {
+  if (!quickCategoryFilter.value) {
+    handleAdd();
+    return;
+  }
+  resetForm();
+  title.value = "新增标签";
+  form.category = quickCategoryFilter.value;
+  const rootValue = getCategoryMeta(categoryOptions, form.category)?.pathValues[0];
+  dialogCategoryRoot.value = rootValue || categoryExplorer[0]?.value || "";
   open.value = true;
 };
 
@@ -572,6 +639,7 @@ const handleUpdate = (row?: TagManage.TagInfo) => {
     title.value = "修改标签";
     open.value = true;
     simulateResult.value = null;
+    dialogCategoryRoot.value = getCategoryMeta(categoryOptions, data.category)?.pathValues[0] || categoryExplorer[0]?.value || "";
   });
 };
 
@@ -639,6 +707,13 @@ const handleViewDetail = async (row?: TagManage.TagInfo) => {
 const submitForm = () => {
   formRef.value?.validate((valid: boolean) => {
     if (!valid) return;
+
+    // 分类必须选到最后一级（叶子节点）
+    const meta = getCategoryMeta(categoryOptions, form.category);
+    if (!meta || !meta.isLeaf) {
+      ElMessage.warning("请选择具体的末级分类");
+      return;
+    }
 
     // 如果是自动化规则，验证规则配置
     if (form.tagType === "auto") {
@@ -722,6 +797,7 @@ const resetForm = () => {
     children: []
   };
   simulateResult.value = null;
+  dialogCategoryRoot.value = categoryExplorer[0]?.value || "";
   formRef.value?.resetFields();
 };
 
@@ -736,6 +812,233 @@ const handleDialogClose = () => {
   .coverage-count {
     font-weight: 600;
     color: var(--el-color-primary);
+  }
+
+  .category-root-card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    border-radius: 14px;
+    text-align: left;
+    transition:
+      transform 0.2s ease,
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+    cursor: pointer;
+
+    &:hover {
+      transform: translateY(-1px);
+      border-color: rgba(64, 158, 255, 0.35);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+    }
+
+    &.is-active {
+      background: #ffffff;
+      border-color: rgba(64, 158, 255, 0.52);
+      box-shadow: 0 14px 28px rgba(64, 158, 255, 0.12);
+    }
+  }
+
+  .category-root-card__title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #111827;
+  }
+
+  .category-root-card__meta {
+    font-size: 12px;
+    color: #64748b;
+  }
+
+  .category-browser__branches {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 14px;
+  }
+
+  .category-branch-card {
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(226, 232, 240, 0.92);
+    border-radius: 16px;
+  }
+
+  .category-branch-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .category-branch-card__title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #111827;
+  }
+
+  .category-branch-card__path {
+    margin-top: 4px;
+    font-size: 12px;
+    color: #6b7280;
+  }
+
+  .category-branch-card__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .category-leaf-chip {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 10px 12px;
+    min-width: 132px;
+    border: 1px solid rgba(203, 213, 225, 0.9);
+    border-radius: 12px;
+    background: #f8fafc;
+    color: #0f172a;
+    text-align: left;
+    cursor: pointer;
+    transition:
+      background 0.2s ease,
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+
+    small {
+      font-size: 11px;
+      line-height: 1.4;
+      color: #64748b;
+    }
+
+    &.is-active {
+      background: rgba(64, 158, 255, 0.1);
+      border-color: rgba(64, 158, 255, 0.48);
+      box-shadow: 0 8px 16px rgba(64, 158, 255, 0.12);
+    }
+  }
+
+  .category-picker {
+    width: 100%;
+    padding: 16px;
+    border: 1px solid var(--el-border-color);
+    border-radius: 14px;
+    background: #fafbfd;
+  }
+
+  .category-picker.is-disabled {
+    opacity: 0.78;
+    background: #f5f7fa;
+  }
+
+  .category-picker__summary {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding: 12px 14px;
+    background: #ffffff;
+    border: 1px solid rgba(226, 232, 240, 0.95);
+    border-radius: 12px;
+    color: #1f2937;
+
+    strong {
+      font-size: 14px;
+      font-weight: 600;
+    }
+  }
+
+  .category-picker__summary-label {
+    font-size: 12px;
+    color: #64748b;
+  }
+
+  .category-picker__roots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .category-picker__root {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    padding: 10px 12px;
+    min-width: 120px;
+    border: 1px solid rgba(203, 213, 225, 0.95);
+    border-radius: 12px;
+    background: #ffffff;
+    cursor: pointer;
+
+    small {
+      font-size: 11px;
+      color: #64748b;
+    }
+
+    &.is-active {
+      border-color: rgba(64, 158, 255, 0.48);
+      background: rgba(64, 158, 255, 0.08);
+    }
+  }
+
+  .category-picker__branches {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 12px;
+  }
+
+  .category-picker__branch {
+    padding: 14px;
+    background: #ffffff;
+    border: 1px solid rgba(226, 232, 240, 0.95);
+    border-radius: 14px;
+  }
+
+  .category-picker__branch-title {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 12px;
+
+    span {
+      font-size: 14px;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    small {
+      font-size: 12px;
+      color: #6b7280;
+    }
+  }
+
+  .category-picker__leaf-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .category-picker__leaf {
+    padding: 8px 12px;
+    border: 1px solid rgba(203, 213, 225, 0.95);
+    border-radius: 999px;
+    background: #f8fafc;
+    color: #334155;
+    cursor: pointer;
+
+    &.is-active {
+      border-color: rgba(64, 158, 255, 0.5);
+      background: rgba(64, 158, 255, 0.1);
+      color: var(--el-color-primary);
+      font-weight: 600;
+    }
   }
 
   .status-cell {
@@ -887,6 +1190,20 @@ const handleDialogClose = () => {
 
   // 响应式设计
   @media (max-width: 1400px) {
+    .category-browser__header {
+      flex-direction: column;
+    }
+
+    .category-browser__actions {
+      width: 100%;
+      flex-direction: column;
+      align-items: flex-start;
+
+      .category-browser__active {
+        align-items: flex-start;
+      }
+    }
+
     .stats-panel {
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 12px;
@@ -909,6 +1226,15 @@ const handleDialogClose = () => {
   }
 
   @media (max-width: 768px) {
+    .category-browser {
+      padding: 16px;
+    }
+
+    .category-browser__branches,
+    .category-picker__branches {
+      grid-template-columns: 1fr;
+    }
+
     .stats-panel {
       grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
       gap: 12px;

@@ -3,8 +3,8 @@
     <!-- 一级导航 (L1) - PageHeader -->
     <div class="page-header">
       <el-tabs v-model="activeStatusTab" class="l1-tabs" @tab-change="handleStatusTabChange">
-        <el-tab-pane :label="t('errorCorrection.tabs.pending')" />
-        <el-tab-pane :label="t('errorCorrection.tabs.processed')" />
+        <el-tab-pane name="pending" :label="t('errorCorrection.tabs.pending')" />
+        <el-tab-pane name="processed" :label="t('errorCorrection.tabs.processed')" />
       </el-tabs>
     </div>
 
@@ -34,6 +34,10 @@
               <span>{{ t("errorCorrection.taxonomy.completeness.name") }}</span>
               <el-badge :value="errorTypeCounts.completeness" :max="99" class="filter-badge" type="info" />
             </el-radio-button>
+            <el-radio-button value="consistency">
+              <span>{{ t("errorCorrection.taxonomy.consistency.name") }}</span>
+              <el-badge :value="errorTypeCounts.consistency" :max="99" class="filter-badge" type="info" />
+            </el-radio-button>
           </el-radio-group>
         </div>
 
@@ -45,7 +49,6 @@
           :request-api="fetchTaskList"
           :columns="columns"
           :tool-button="['refresh', 'setting', 'search']"
-          @selection-change="handleSelectionChange"
         >
           <!-- 表格 header 按钮 -->
           <template #tableHeader> </template>
@@ -493,7 +496,6 @@ interface ExceptionTask {
 
 // ==================== 数据模型 ====================
 const tableRef = ref<ProTableInstance>();
-const selectedTasks = ref<ExceptionTask[]>([]);
 
 // 从 Mock 数据加载
 const baseTasks = reactive<ExceptionTask[]>(
@@ -594,7 +596,6 @@ const getSlaCountdown = (deadline: string) => {
 
 const columns = computed<ColumnProps<ExceptionTask>[]>(() => {
   const baseColumns: ColumnProps<ExceptionTask>[] = [
-    { type: "selection", fixed: "left", width: 50 },
     {
       prop: "taskNo",
       label: t("errorCorrection.table.taskNo"),
@@ -606,15 +607,19 @@ const columns = computed<ColumnProps<ExceptionTask>[]>(() => {
       label: t("errorCorrection.table.oneId"),
       width: 120,
       search: { el: "input", props: { placeholder: t("errorCorrection.table.oneId") } }
-    },
-    {
+    }
+  ];
+
+  // 处理人、真实姓名等只在「已处理」Tab 展示
+  if (activeStatusTab.value === "processed") {
+    baseColumns.push({
       prop: "sourceName",
       label: t("errorCorrection.table.customerName"),
       align: "center",
       width: 120,
       search: { el: "input", props: { placeholder: t("errorCorrection.table.customerName") } }
-    }
-  ];
+    });
+  }
 
   // 只有在"全部"tab时才显示【异常类型】和【主要问题】列
   if (activeErrorType.value === "all") {
@@ -662,24 +667,27 @@ const columns = computed<ColumnProps<ExceptionTask>[]>(() => {
     }
   });
 
-  baseColumns.push({
-    prop: "severity",
-    label: t("errorCorrection.table.severity"),
-    width: 100,
-    search: {
-      el: "select",
-      props: { placeholder: t("errorCorrection.filter.severity"), clearable: true },
-      options: [
-        { label: t("errorCorrection.severity.high"), value: "high" },
-        { label: t("errorCorrection.severity.medium"), value: "medium" },
-        { label: t("errorCorrection.severity.low"), value: "low" }
-      ]
-    },
-    render: scope => {
-      const info = getSeverityMap()[scope.row.severity];
-      return <ElTag type={info.type as any}>{info.label}</ElTag>;
-    }
-  });
+  // 严重程度仅在「已处理」Tab 展示
+  if (activeStatusTab.value === "processed") {
+    baseColumns.push({
+      prop: "severity",
+      label: t("errorCorrection.table.severity"),
+      width: 100,
+      search: {
+        el: "select",
+        props: { placeholder: t("errorCorrection.filter.severity"), clearable: true },
+        options: [
+          { label: t("errorCorrection.severity.high"), value: "high" },
+          { label: t("errorCorrection.severity.medium"), value: "medium" },
+          { label: t("errorCorrection.severity.low"), value: "low" }
+        ]
+      },
+      render: scope => {
+        const info = getSeverityMap()[scope.row.severity];
+        return <ElTag type={info.type as any}>{info.label}</ElTag>;
+      }
+    });
+  }
 
   baseColumns.push({
     prop: "createTime",
@@ -715,8 +723,8 @@ const columns = computed<ColumnProps<ExceptionTask>[]>(() => {
     }
   });
 
-  // 只有在"全部"tab时才显示【主要问题】列
-  if (activeErrorType.value === "all") {
+  // 只有在「已处理」+「全部」tab 时才显示【主要问题】列
+  if (activeStatusTab.value === "processed" && activeErrorType.value === "all") {
     baseColumns.push({ prop: "errorField", label: t("errorCorrection.table.mainIssue"), minWidth: 180 });
   }
 
@@ -735,13 +743,25 @@ const columns = computed<ColumnProps<ExceptionTask>[]>(() => {
         ]
       }
     },
-    { prop: "handler", label: t("errorCorrection.table.handler"), width: 100 },
+    // 处理人仅在「已处理」Tab 展示
+    ...(activeStatusTab.value === "processed"
+      ? ([{ prop: "handler", label: t("errorCorrection.table.handler"), width: 100 }] as ColumnProps<ExceptionTask>[])
+      : []),
     {
       prop: "operation",
       label: t("errorCorrection.table.operation"),
       width: 160,
       fixed: "right",
       render: scope => {
+        // 关联性异常：只允许查看，不允许处理
+        if (scope.row.category === "consistency") {
+          return (
+            <ElButton type="info" size="small" onClick={() => openTaskDialog(scope.row)}>
+              {t("errorCorrection.view")}
+            </ElButton>
+          );
+        }
+
         const canHandle = scope.row.status === "pending";
         const canView = scope.row.status === "processed";
         return (
@@ -815,33 +835,6 @@ const fetchTaskList = (params: any) => {
 };
 
 // ==================== 事件处理 ====================
-const handleSelectionChange = (selection: ExceptionTask[]) => {
-  selectedTasks.value = selection;
-};
-
-const handleBatchIgnore = () => {
-  if (selectedTasks.value.length === 0) return;
-
-  ElMessageBox.confirm(
-    t("errorCorrection.batchIgnoreConfirm", { count: selectedTasks.value.length }),
-    t("errorCorrection.messages.ignoreConfirmTitle"),
-    {
-      type: "warning"
-    }
-  ).then(() => {
-    selectedTasks.value.forEach(task => {
-      const idx = baseTasks.findIndex(t => t.id === task.id);
-      if (idx !== -1) {
-        baseTasks[idx].status = "processed";
-        baseTasks[idx].updateTime = new Date().toLocaleString("zh-CN");
-      }
-    });
-    ElMessage.success(t("errorCorrection.messages.batchIgnoreCompleted", { count: selectedTasks.value.length }));
-    tableRef.value?.getTableList();
-    selectedTasks.value = [];
-  });
-};
-
 const openTaskDialog = (task: ExceptionTask) => {
   // 判断是否为已处理状态（在已处理tab下，或者任务状态为已处理）
   const isProcessed = activeStatusTab.value === "processed" || task.status === "processed";
@@ -978,46 +971,24 @@ const openTaskDialog = (task: ExceptionTask) => {
       quickEditVisible.value = true;
       break;
     case "consistency":
-      // 关联性异常：逻辑冲突或状态冲突
-      if (isProcessed) {
-        // 已处理：显示查看弹窗
-        currentQuickEditTask.value = {
-          id: task.id,
-          taskNo: task.taskNo,
-          errorField: task.errorField,
-          errorFields: task.errorFields,
-          originalData: task.originalData || {},
-          errorType: task.category,
-          errorMessage: task.errorMessage,
-          readonly: true,
-          status: task.status,
-          handler: task.handler,
-          createTime: task.createTime,
-          updateTime: task.updateTime,
-          conflictInfo: task.conflictInfo,
-          statusConflict: task.statusConflict
-        };
-        quickEditVisible.value = true;
-      } else {
-        // 未处理：显示操作弹窗
-        if (task.subType === "logical_conflict") {
-          // 逻辑互斥：信任选择
-          ElMessageBox.confirm(`逻辑互斥：${task.errorMessage}\n\n请选择信任的字段值。`, "逻辑冲突处理", {
-            confirmButtonText: "选择信任值",
-            cancelButtonText: "取消"
-          }).then(() => {
-            ElMessage.success("已选择信任值");
-          });
-        } else if (task.subType === "status_conflict") {
-          // 状态冲突：信任源
-          ElMessageBox.confirm(`状态冲突：${task.errorMessage}\n\n请选择信任的源系统。`, "状态冲突处理", {
-            confirmButtonText: "选择信任源",
-            cancelButtonText: "取消"
-          }).then(() => {
-            ElMessage.success("已选择信任源");
-          });
-        }
-      }
+      // 关联性异常：仅支持查看，不支持在异常中心内处理
+      currentQuickEditTask.value = {
+        id: task.id,
+        taskNo: task.taskNo,
+        errorField: task.errorField,
+        errorFields: task.errorFields,
+        originalData: task.originalData || {},
+        errorType: task.category,
+        errorMessage: task.errorMessage,
+        readonly: true,
+        status: task.status,
+        handler: task.handler,
+        createTime: task.createTime,
+        updateTime: task.updateTime,
+        conflictInfo: task.conflictInfo,
+        statusConflict: task.statusConflict
+      };
+      quickEditVisible.value = true;
       break;
     case "compliance":
       // 合规性异常：授权缺失或 H5 反馈

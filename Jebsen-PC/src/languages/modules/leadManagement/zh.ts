@@ -35,6 +35,7 @@ export default {
       priority: "优先级",
       status: "状态",
       pushTarget: "推送目标",
+      pushRole: "推送角色",
       pushStatus: "推送状态",
       assignedAdvisor: "推送至SA/SC",
       createdAt: "创建时间",

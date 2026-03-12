@@ -94,21 +94,6 @@ const columns = computed<ColumnProps<Lead.RuleConfig>[]>(() => [
     label: t("ruleConfig.columns.pushCount"),
     width: 100
   },
-  // 优先级
-  {
-    prop: "priority",
-    label: t("ruleConfig.columns.priority"),
-    width: 90,
-    enum: [
-      { label: t("ruleConfig.enums.priority.high"), value: "high" },
-      { label: t("ruleConfig.enums.priority.medium"), value: "medium" },
-      { label: t("ruleConfig.enums.priority.low"), value: "low" }
-    ],
-    search: {
-      el: "select",
-      props: { placeholder: t("ruleConfig.placeholders.selectPriority") }
-    }
-  },
   // 推送目标
   {
     prop: "pushTarget",
@@ -118,20 +103,6 @@ const columns = computed<ColumnProps<Lead.RuleConfig>[]>(() => [
     search: {
       el: "select",
       props: { placeholder: t("ruleConfig.placeholders.selectTarget") }
-    }
-  },
-  // 启用状态
-  {
-    prop: "enabled",
-    label: t("ruleConfig.columns.enabled"),
-    width: 100,
-    enum: [
-      { label: t("ruleConfig.enums.status.enable"), value: true },
-      { label: t("ruleConfig.enums.status.disable"), value: false }
-    ],
-    search: {
-      el: "select",
-      props: { placeholder: t("ruleConfig.placeholders.selectStatus") }
     }
   },
   // 创建人

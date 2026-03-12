@@ -78,7 +78,12 @@ export default {
       growth: "较昨日",
       mergedCount: "已合并数",
       updatedCount: "已更新数",
-      incremental: "增量数据"
+      incremental: "增量数据",
+      salesDiamond: "销售钻石客户",
+      aftersalesDiamond: "售后钻石客户",
+      activeAfterSales: "普通活跃售后客户",
+      dormant: "休眠客户",
+      lost: "流失客户"
     },
     lifecycleStatusOptions: {
       active: "活跃",

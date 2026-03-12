@@ -60,7 +60,10 @@ export default {
         BDC外呼系统: "线索与交互",
         voucher: "会员优惠券"
       },
-      manual: "手动系统",
+      manual: "手工表",
+      auto: "直连数据库",
+      manualGroupTitle: "手工表",
+      autoGroupTitle: "直连数据库",
       upload: "上传",
       governance: {
         mergeConflict: "合并冲突: 客户 ID #88392",

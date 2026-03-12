@@ -14,13 +14,13 @@
             </span>
           </template>
         </el-tab-pane>
-        <el-tab-pane v-for="type in leadTypeOptions" :key="type.value" :name="type.value">
+        <el-tab-pane v-for="tab in typeTabOptions" :key="tab.value" :name="tab.value">
           <template #label>
             <span class="tab-label">
-              {{ getLeadTypeLabel(type.value) }}
+              {{ tab.group ? tab.label : getLeadTypeLabel(tab.value) }}
               <el-badge
-                v-if="getTypeStats(type.value).pushed > 0"
-                :value="getTypeStats(type.value).pushed"
+                v-if="getTypeStats(tab.value).pushed > 0"
+                :value="getTypeStats(tab.value).pushed"
                 :max="9999"
                 class="tab-badge"
               />
@@ -159,10 +159,24 @@
           <el-button type="primary" :icon="Refresh" @click="handleRefresh">{{ $t("leadManagement.overview.refresh") }}</el-button>
         </template>
 
+        <!-- 商机分类列 -->
+        <template #leadType="scope">
+          <el-tag :type="getTypeTagType(scope.row.leadType) as any" size="small">
+            {{ getLeadTypeLabel(scope.row.leadType) }}
+          </el-tag>
+        </template>
+
         <!-- 推送目标列 -->
         <template #pushTarget="scope">
           <el-tag type="info" size="small">
             {{ getPushTargetLabel(scope.row.pushTarget) }}
+          </el-tag>
+        </template>
+
+        <!-- 推送角色列 -->
+        <template #pushRole="scope">
+          <el-tag type="info" size="small">
+            {{ getPushRoleLabel(scope.row.pushRole) }}
           </el-tag>
         </template>
 
@@ -254,7 +268,13 @@ import ProTable from "@/components/ProTable/index.vue";
 import type { ColumnProps } from "@/components/ProTable/interface";
 import { getLeadTrackingList, getLeadTrackingStats } from "@/api/modules/lead";
 import type { Lead } from "@/api/modules/lead";
-import { LEAD_TYPE_OPTIONS, PUSH_TARGET_OPTIONS } from "./interface";
+import {
+  LEAD_TYPE_OPTIONS,
+  PUSH_TARGET_OPTIONS,
+  STANDARD_18_LEAD_TYPES,
+  GENERAL_LEAD_TYPES,
+  C360_LEAD_TYPES
+} from "./interface";
 import {
   getLeadTypeLabel,
   getLeadTypeTagType,
@@ -301,78 +321,90 @@ const leadTypeOptions = LEAD_TYPE_OPTIONS;
 const pushTargetOptions = PUSH_TARGET_OPTIONS;
 const trackingMockList = normalizeLeadTypeList((leadTrackingMockData as any).trackingList.data.list || [], "leadType");
 
+// 商机追踪 Tab 配置：18 个标准商机 + 通用商机 + 系统商机（与商机看板保持一致）
+const typeTabOptions = [
+  // 18 个标准商机（逐个展示）
+  ...STANDARD_18_LEAD_TYPES.map(option => ({
+    label: option.label,
+    value: option.value,
+    group: false as const
+  })),
+  // 通用商机分组
+  {
+    label: "通用商机",
+    value: "general",
+    group: true as const
+  },
+  // 系统商机分组
+  {
+    label: "系统商机",
+    value: "system",
+    group: true as const
+  }
+] as const;
+
+// 根据当前 Tab 计算实际包含的商机类型列表（用于筛选与统计聚合）
+const getActiveLeadTypes = (): string[] | null => {
+  if (!activeTypeTab.value) return null;
+  if (activeTypeTab.value === "general") {
+    return GENERAL_LEAD_TYPES.map(t => t.value as string);
+  }
+  if (activeTypeTab.value === "system") {
+    return C360_LEAD_TYPES.map(t => t.value as string);
+  }
+  return [activeTypeTab.value];
+};
+
 // 表格列配置
 const columns: ColumnProps[] = [
   {
     prop: "oneId",
     label: t("leadManagement.columns.oneId"),
-    width: 150
+    minWidth: 150
   },
   {
-    prop: "customerName",
-    label: t("leadManagement.columns.customerName"),
+    prop: "leadType",
+    label: t("leadManagement.columns.leadType"),
     minWidth: 120
   },
   {
     prop: "phone",
     label: t("customer.phone"),
-    width: 120
-  },
-  {
-    prop: "ruleName",
-    label: t("leadManagement.columns.ruleName"),
-    width: 150
-  },
-  {
-    prop: "pushTime",
-    label: t("leadManagement.tracking.pushTime"),
-    width: 160,
-    sortable: true
+    minWidth: 120
   },
   {
     prop: "pushTarget",
     label: t("leadManagement.columns.pushTarget"),
-    width: 120
+    minWidth: 120
   },
   {
-    prop: "converted",
-    label: t("leadManagement.tracking.converted"),
-    width: 100
-  },
-  {
-    prop: "convertedTime",
-    label: t("leadManagement.tracking.convertedTime"),
-    width: 160,
-    sortable: true
-  },
-  {
-    prop: "lostReason",
-    label: t("leadManagement.tracking.lostReason"),
-    width: 150
+    prop: "pushRole",
+    label: t("leadManagement.columns.pushRole"),
+    minWidth: 120
   },
   {
     prop: "orderCount",
     label: t("leadManagement.tracking.orderCount"),
-    width: 100,
+    minWidth: 100,
     align: "right",
     sortable: true
   },
   {
     prop: "totalOrderAmount",
     label: t("leadManagement.tracking.totalOrderAmount"),
-    width: 150,
+    minWidth: 150,
     align: "right",
     sortable: true
   },
   {
     prop: "advisorName",
     label: t("leadManagement.tracking.advisorName"),
-    width: 120
+    minWidth: 120
   },
   {
     prop: "storeName",
     label: t("customer.profile360.storeName"),
-    width: 150
+    minWidth: 150
   },
   {
     prop: "operation",
@@ -384,7 +416,8 @@ const columns: ColumnProps[] = [
 
 // 加载数据
 const loadData = async (params: any) => {
-  const queryParams: Lead.ReqLeadTrackingParams = {
+  // 允许扩展参数（如 leadTypes 分组筛选）
+  const queryParams: any = {
     ...params,
     ...initParam
   };
@@ -405,7 +438,9 @@ const loadData = async (params: any) => {
     });
 
     // 应用筛选条件
-    if (queryParams.leadType) {
+    if (Array.isArray(queryParams.leadTypes) && queryParams.leadTypes.length > 0) {
+      mockList = mockList.filter(item => queryParams.leadTypes.includes(item.leadType));
+    } else if (queryParams.leadType) {
       mockList = mockList.filter(item => item.leadType === queryParams.leadType);
     }
     if (queryParams.pushTarget) {
@@ -475,9 +510,6 @@ const loadStats = async () => {
     params.startDate = dateRange.value[0].toISOString().split("T")[0];
     params.endDate = dateRange.value[1].toISOString().split("T")[0];
   }
-  if (initParam.leadType) {
-    params.leadType = initParam.leadType;
-  }
 
   // 开发环境直接使用mock数据，生产环境尝试调用API
   const useMockData = import.meta.env.MODE === "development" || import.meta.env.DEV;
@@ -486,11 +518,14 @@ const loadStats = async () => {
     // 使用 mock 列表数据动态计算统计信息，确保与业务数据一致
     const allList = trackingMockList as Lead.LeadTrackingItem[];
 
-    // 按筛选条件过滤
+    const activeTypes = getActiveLeadTypes();
+
+    // 按筛选条件过滤（日期 + 类型分组）
     const filteredList = allList.filter(item => {
       const itemDate = item.pushTime?.slice(0, 10);
-      const matchType = !initParam.leadType || item.leadType === initParam.leadType;
-      const matchDate = !dateRange.value || (!itemDate ? false : itemDate >= params.startDate && itemDate <= params.endDate);
+      const matchType = !activeTypes || activeTypes.includes(item.leadType);
+      const matchDate =
+        !dateRange.value || (!itemDate ? false : itemDate >= params.startDate && itemDate <= params.endDate);
       return matchType && matchDate;
     });
 
@@ -573,10 +608,43 @@ const loadStats = async () => {
   // 生产环境调用真实API
   try {
     const res = await getLeadTrackingStats(params);
-    Object.assign(stats, {
+
+    // 先按类型归一合并（全量统计）
+    const fullStats: Lead.LeadTrackingStats = {
       ...res.data,
       byType: mergeLeadTypeMetrics(res.data?.byType || [], ["pushed", "converted", "orderCount", "orderAmount"])
-    });
+    };
+
+    const activeTypes = getActiveLeadTypes();
+
+    if (!activeTypes) {
+      // 未选择特定 Tab，使用全量统计
+      Object.assign(stats, fullStats);
+      return;
+    }
+
+    // 针对当前 Tab（单类型或分组）重新按类型聚合顶部统计指标
+    const filteredByType = fullStats.byType.filter(item => activeTypes.includes(item.type));
+
+    const totalPushed = filteredByType.reduce((sum, item) => sum + (item.pushed || 0), 0);
+    const convertedCount = filteredByType.reduce((sum, item) => sum + (item.converted || 0), 0);
+    const orderCount = filteredByType.reduce((sum, item) => sum + (item.orderCount || 0), 0);
+    const totalOrderAmount = filteredByType.reduce((sum, item) => sum + (item.orderAmount || 0), 0);
+
+    const conversionRate = totalPushed ? convertedCount / totalPushed : 0;
+    const avgOrderAmount = orderCount ? totalOrderAmount / orderCount : 0;
+
+    Object.assign(stats, {
+      ...fullStats,
+      totalGenerated: totalPushed, // 追踪维度中视为都已推送
+      totalPushed,
+      convertedCount,
+      orderCount,
+      totalOrderAmount,
+      conversionRate,
+      avgOrderAmount,
+      byType: filteredByType
+    } as Lead.LeadTrackingStats);
   } catch (error) {
     console.error("加载统计数据失败，使用mock数据:", error);
     // API失败时使用mock数据
@@ -646,6 +714,19 @@ const getPushTargetLabel = (target: string) => {
   return option ? option.label : target;
 };
 
+// 获取推送角色标签
+const getPushRoleLabel = (role?: string | null) => {
+  if (!role) return "-";
+  const map: Record<string, string> = {
+    SA: "SA",
+    SC: "SC",
+    OTHER: "其他",
+    Other: "其他",
+    other: "其他"
+  };
+  return map[role] || role;
+};
+
 // 获取类型的统计数据
 const getTypeStats = (type: string) => {
   if (!type) {
@@ -657,7 +738,37 @@ const getTypeStats = (type: string) => {
       orderAmount: stats.totalOrderAmount
     };
   }
-  // 查找对应类型的统计数据
+
+  // Tab 为分组类型时（通用商机 / 系统商机），聚合该组下所有类型
+  if (type === "general") {
+    const types = GENERAL_LEAD_TYPES.map(t => t.value as string);
+    const list = stats.byType.filter(item => types.includes(item.type));
+    return list.reduce(
+      (acc, cur) => ({
+        pushed: acc.pushed + (cur.pushed || 0),
+        converted: acc.converted + (cur.converted || 0),
+        orderCount: acc.orderCount + (cur.orderCount || 0),
+        orderAmount: acc.orderAmount + (cur.orderAmount || 0)
+      }),
+      { pushed: 0, converted: 0, orderCount: 0, orderAmount: 0 }
+    );
+  }
+
+  if (type === "system") {
+    const types = C360_LEAD_TYPES.map(t => t.value as string);
+    const list = stats.byType.filter(item => types.includes(item.type));
+    return list.reduce(
+      (acc, cur) => ({
+        pushed: acc.pushed + (cur.pushed || 0),
+        converted: acc.converted + (cur.converted || 0),
+        orderCount: acc.orderCount + (cur.orderCount || 0),
+        orderAmount: acc.orderAmount + (cur.orderAmount || 0)
+      }),
+      { pushed: 0, converted: 0, orderCount: 0, orderAmount: 0 }
+    );
+  }
+
+  // 单一类型：查找对应类型的统计数据
   const typeStat = stats.byType.find(item => item.type === type);
   return (
     typeStat || {
@@ -671,7 +782,28 @@ const getTypeStats = (type: string) => {
 
 // Tab 切换处理
 const handleTypeTabChange = (tabName: string | number) => {
-  initParam.leadType = String(tabName);
+  const name = String(tabName);
+  activeTypeTab.value = name;
+
+  // 清理旧的分组参数
+  (initParam as any).leadTypes = undefined;
+
+  if (!name) {
+    // 全部
+    initParam.leadType = "";
+  } else if (name === "general") {
+    // 通用商机分组
+    initParam.leadType = "";
+    (initParam as any).leadTypes = GENERAL_LEAD_TYPES.map(t => t.value as string);
+  } else if (name === "system") {
+    // 系统商机分组
+    initParam.leadType = "";
+    (initParam as any).leadTypes = C360_LEAD_TYPES.map(t => t.value as string);
+  } else {
+    // 单一类型
+    initParam.leadType = name;
+  }
+
   handleRefresh();
 };
 

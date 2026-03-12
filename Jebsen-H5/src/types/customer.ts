@@ -33,6 +33,7 @@ export interface TagPool {
   name: string
   color?: string
   category?: string // 标签分类
+  categoryPath?: string[] // 多级分类路径，兼容后续服务端返回
   required?: boolean // 是否必选
   minSelect?: number // 最少选择数量（如爱好≥1项）
 }
@@ -411,4 +412,3 @@ export interface CustomerProfile {
   /** 公司类型：车-角色-经办人 vehicleKey -> role -> handlerId，支持一人多车多角色 */
   companyVehicleRoleAssignments?: Record<string, Record<string, string>>
 }
-

@@ -1,113 +1,134 @@
 <template>
   <div class="data-quality-workbench">
-    <!-- 核心操作区：场景化入口 -->
-    <el-card shadow="never" class="data-source-card">
-      <template #header>
-        <div class="card-header">
-          <h2 class="card-title">{{ $t("dataQualityWorkbench.dataSource.title") }}</h2>
+    <div class="dq-layout">
+      <!-- 整体卡片风格：左侧 Tab，右侧内容 -->
+      <el-card class="dq-card-layout" shadow="never">
+        <div class="dq-card-header">
+          <div class="dq-card-title">
+            {{ $t("dataQualityWorkbench.dataSource.title") }}
+          </div>
+          <div class="dq-card-subtitle">
+            {{ $t("dataQualityWorkbench.dataSource.subtitle") }}
+          </div>
         </div>
-      </template>
-      <div class="data-source-tabs">
-        <el-tabs v-model="selectedDataSource" type="card" class="main-tabs" @tab-change="handleDataSourceChange">
-          <el-tab-pane v-for="source in dataSourceList" :key="source.value" :label="source.label" :name="source.value" />
-        </el-tabs>
-      </div>
-    </el-card>
 
-    <!-- 上传与预检区域 -->
-    <el-card v-if="selectedDataSource" shadow="hover" class="upload-card">
-      <!-- 拖拽上传区域 (Tabs) -->
-      <div class="upload-area">
-        <el-tabs v-model="activeReportId" class="report-tabs">
-          <el-tab-pane v-for="report in currentPlatformReports" :key="report.id" :label="report.name" :name="report.id">
-            <!-- 邮件通知规则 (Moved inside Report Tab) -->
-            <div class="notification-tip-info">
-              <div class="notification-card-new">
-                <div class="card-left">
-                  <div class="header-row">
-                    <el-icon class="icon"><Bell /></el-icon>
-                    <span class="title">{{ $t("dataQualityWorkbench.notification.title") }}</span>
-                  </div>
-
-                  <div class="info-row">
-                    <div class="info-item">
-                      <span class="label">{{ $t("dataQualityWorkbench.notification.deadlineTime") }}：</span>
-                      <el-tag type="warning" size="small" effect="plain" class="deadline-tag">{{
-                        getNotificationDeadline(selectedDataSource)
-                      }}</el-tag>
-                      <span class="desc">{{ $t("dataQualityWorkbench.notification.deadlineTimeDesc") }}</span>
-                    </div>
-                    <div class="info-item">
-                      <span class="label">{{ $t("dataQualityWorkbench.notification.emailRecipients") }}：</span>
-                      <span class="recipients">{{ getNotificationRecipients(selectedDataSource) }}</span>
-                      <span class="desc">{{ $t("dataQualityWorkbench.notification.emailRecipientsDesc") }}</span>
-                    </div>
-                  </div>
+        <div class="dq-card-main">
+          <el-tabs v-model="activeReportId" tab-position="left" class="dq-tabs-layout">
+            <el-tab-pane v-for="report in allReports" :key="report.id" :name="report.id">
+              <template #label>
+                <div class="dq-tab-label">
+                  <div class="dq-tab-platform">{{ getPlatformLabel(report.source) }}</div>
+                  <div class="dq-tab-name">{{ stripPlatformPrefix(report.name) }}</div>
                 </div>
+              </template>
 
-                <div class="card-right">
-                  <div class="rules-timeline">
-                    <div v-for="(rule, index) in getNotificationRules(selectedDataSource)" :key="index" class="timeline-item">
-                      <div class="timeline-marker">
-                        <el-tag :type="getStageTagType(index)" size="small" effect="dark" class="stage-tag">{{
-                          rule.stage
-                        }}</el-tag>
+              <!-- 当前报表的上传与预检区域 -->
+              <div v-if="currentReport" class="upload-card dq-main-card">
+                <div class="upload-area">
+                  <!-- 邮件通知规则 -->
+                  <div class="notification-tip-info">
+                    <div class="notification-card-new">
+                      <div class="card-left">
+                        <div class="header-row">
+                          <el-icon class="icon"><Bell /></el-icon>
+                          <span class="title">{{ $t("dataQualityWorkbench.notification.title") }}</span>
+                        </div>
+
+                        <div class="info-row">
+                          <div class="info-item">
+                            <span class="label">{{ $t("dataQualityWorkbench.notification.deadlineTime") }}：</span>
+                            <el-tag type="warning" size="small" effect="plain" class="deadline-tag">
+                              {{ getNotificationDeadline(currentReport.source) }}
+                            </el-tag>
+                            <span class="desc">{{ $t("dataQualityWorkbench.notification.deadlineTimeDesc") }}</span>
+                          </div>
+                          <div class="info-item">
+                            <span class="label">{{ $t("dataQualityWorkbench.notification.emailRecipients") }}：</span>
+                            <span class="recipients">{{ getNotificationRecipients(currentReport.source) }}</span>
+                            <span class="desc">{{ $t("dataQualityWorkbench.notification.emailRecipientsDesc") }}</span>
+                          </div>
+                        </div>
                       </div>
-                      <div class="timeline-content">
-                        <div class="time">{{ rule.time }}</div>
-                        <div class="desc">{{ rule.description }}</div>
-                        <div class="recipients-mini">{{ rule.recipients }}</div>
+
+                      <div class="card-right">
+                        <div class="rules-timeline">
+                          <div
+                            v-for="(rule, index) in getNotificationRules(currentReport.source)"
+                            :key="index"
+                            class="timeline-item"
+                          >
+                            <div class="timeline-marker">
+                              <el-tag :type="getStageTagType(index)" size="small" effect="dark" class="stage-tag">
+                                {{ rule.stage }}
+                              </el-tag>
+                            </div>
+                            <div class="timeline-content">
+                              <div class="time">{{ rule.time }}</div>
+                              <div class="desc">{{ rule.description }}</div>
+                              <div class="recipients-mini">{{ rule.recipients }}</div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
+                  </div>
+
+                  <div class="tab-content">
+                    <!-- 报表状态/信息 -->
+                    <div class="report-info-bar">
+                      <el-tag
+                        :type="getReportStatusTag(currentReport.id) as 'success' | 'danger' | 'info' | 'warning' | 'primary'"
+                        size="small"
+                        class="status-tag"
+                      >
+                        {{ getReportStatusLabel(currentReport.id) }}
+                      </el-tag>
+                      <span class="last-upload-time" v-if="getReportLastUploadTime(currentReport.id)">
+                        {{ $t("dataQualityWorkbench.upload.lastUploadTime") }}:
+                        {{ getReportLastUploadTime(currentReport.id) }}
+                      </span>
+                      <el-button
+                        type="primary"
+                        link
+                        :icon="Download"
+                        @click="downloadReportTemplate(currentReport!)"
+                        class="download-btn"
+                      >
+                        {{ $t("dataQualityWorkbench.dataSource.downloadTemplate") }}
+                      </el-button>
+                    </div>
+
+                    <!-- 专用上传区域 -->
+                    <el-upload
+                      class="upload-dragger"
+                      :data-report-id="report.id"
+                      drag
+                      action="#"
+                      :auto-upload="false"
+                      :show-file-list="false"
+                      :on-change="file => handleReportFileChange(file, currentReport!)"
+                      accept=".xlsx"
+                    >
+                      <el-icon class="el-icon--upload"><upload-filled /></el-icon>
+                      <div class="el-upload__text">
+                        {{ $t("dataQualityWorkbench.upload.dragText") }}
+                        <em>{{ $t("dataQualityWorkbench.upload.clickUpload") }}</em>
+                      </div>
+                      <!-- 提示当前上传的是哪个报表 -->
+                      <template #tip>
+                        <div class="el-upload__tip">
+                          {{ $t("dataQualityWorkbench.upload.taskListTitle", { platform: currentReport.name }) }}
+                        </div>
+                      </template>
+                    </el-upload>
                   </div>
                 </div>
               </div>
-            </div>
-
-            <div class="tab-content">
-              <!-- 报表状态/信息 -->
-              <div class="report-info-bar">
-                <el-tag
-                  :type="getReportStatusTag(report.id) as 'success' | 'danger' | 'info' | 'warning' | 'primary'"
-                  size="small"
-                  class="status-tag"
-                >
-                  {{ getReportStatusLabel(report.id) }}
-                </el-tag>
-                <span class="last-upload-time" v-if="getReportLastUploadTime(report.id)">
-                  {{ $t("dataQualityWorkbench.upload.lastUploadTime") }}: {{ getReportLastUploadTime(report.id) }}
-                </span>
-                <el-button type="primary" link :icon="Download" @click="downloadReportTemplate(report)" class="download-btn">
-                  {{ $t("dataQualityWorkbench.dataSource.downloadTemplate") }}
-                </el-button>
-              </div>
-
-              <!-- 专用上传区域 -->
-              <el-upload
-                class="upload-dragger"
-                drag
-                action="#"
-                :auto-upload="false"
-                :show-file-list="false"
-                :on-change="file => handleReportFileChange(file, report)"
-                accept=".xlsx"
-              >
-                <el-icon class="el-icon--upload"><upload-filled /></el-icon>
-                <div class="el-upload__text">
-                  {{ $t("dataQualityWorkbench.upload.dragText") }} <em>{{ $t("dataQualityWorkbench.upload.clickUpload") }}</em>
-                </div>
-                <!-- 提示当前上传的是哪个报表 -->
-                <template #tip>
-                  <div class="el-upload__tip">
-                    {{ $t("dataQualityWorkbench.upload.taskListTitle", { platform: report.name }) }}
-                  </div>
-                </template>
-              </el-upload>
-            </div>
-          </el-tab-pane>
-        </el-tabs>
-      </div>
-    </el-card>
+            </el-tab-pane>
+          </el-tabs>
+        </div>
+      </el-card>
+    </div>
 
     <!-- 批量上传与验证状态 (Global Loading) -->
     <div v-if="validating" class="global-loading-overlay">
@@ -346,44 +367,86 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
-import { ElMessage, ElMessageBox, type UploadFile, type UploadFiles } from "element-plus";
+import { ref, computed, watch, nextTick } from "vue";
+import { ElMessage, type UploadFile } from "element-plus";
 import { useI18n } from "vue-i18n";
+import { useRoute, useRouter } from "vue-router";
 import { WarningFilled, CircleCheck, Download, UploadFilled, Loading, Check, Bell, InfoFilled } from "@element-plus/icons-vue";
-import {
-  uploadAndValidateFile,
-  downloadTemplate as downloadTemplateApi,
-  importValidData,
-  submitAllData,
-  type ValidationResult
-} from "@/api/modules/dataQualityWorkbench";
-import { PLATFORM_REPORTS, PLATFORM_METADATA } from "@/views/collection/constants";
+import { uploadAndValidateFile, downloadTemplate as downloadTemplateApi } from "@/api/modules/dataQualityWorkbench";
+import { PLATFORM_REPORTS, DATA_PLATFORM_LABELS, PLATFORM_METADATA } from "@/views/collection/constants";
 
 const { t } = useI18n();
+const route = useRoute();
+const router = useRouter();
 
 // 状态数据（已移除，不再使用）
 
-// 数据源选择（默认选中 DMS）
-const selectedDataSource = ref<string>("poas");
+const fileList = ref<UploadFile[]>([]);
+const validating = ref(false);
+const activeReportId = ref<string>("");
 
-const dataSourceList = computed(() => {
-  return Object.keys(PLATFORM_METADATA).map(key => {
-    const meta = PLATFORM_METADATA[key];
-    // 使用国际化获取数据源名称和标签
-    const i18nKey = `dataQualityWorkbench.dataSource.${key}`;
+// 报表与数据源映射（用于从报表反推所属平台）
+const allReports = computed(() => {
+  const results: Array<{ id: string; name: string; source: string }> = [];
+  Object.keys(PLATFORM_REPORTS).forEach(sourceKey => {
+    const reports = PLATFORM_REPORTS[sourceKey] || [];
+    reports.forEach(report => {
+      results.push({
+        ...report,
+        source: sourceKey
+      });
+    });
+  });
+  // 应用国际化名称，并在名称上加平台前缀
+  return results.map(report => {
+    const baseName = t(`dataQualityWorkbench.reports.${report.id}`, report.name);
+    const platformLabel = DATA_PLATFORM_LABELS[report.source] || report.source.toUpperCase();
     return {
-      value: key,
-      label: t(`${i18nKey}.name`, meta.label), // 如果翻译不存在，使用 meta.label 作为后备
-      tagType: meta.tagType,
-      tagLabel: t(`${i18nKey}.tag`, meta.tagLabel) // 如果翻译不存在，使用 meta.tagLabel 作为后备
+      ...report,
+      name: `[${platformLabel}] ${baseName}`
     };
   });
 });
 
-const uploadRef = ref();
-const fileList = ref<UploadFile[]>([]);
-const validating = ref(false);
-const activeReportId = ref<string>("");
+// 左侧导航分组：按平台分组报表
+const groupedReports = computed(() => {
+  const groups: Array<{
+    source: string;
+    label: string;
+    reports: { id: string; name: string; source: string }[];
+  }> = [];
+
+  const bySource: Record<string, { id: string; name: string; source: string }[]> = {};
+  allReports.value.forEach(report => {
+    if (!bySource[report.source]) {
+      bySource[report.source] = [];
+    }
+    bySource[report.source].push(report);
+  });
+
+  Object.keys(bySource).forEach(sourceKey => {
+    groups.push({
+      source: sourceKey,
+      label: DATA_PLATFORM_LABELS[sourceKey] || sourceKey.toUpperCase(),
+      reports: bySource[sourceKey]
+    });
+  });
+
+  return groups;
+});
+
+// 左侧 / Tab 标签仅展示“报表名”，去掉前缀的 [平台]
+const stripPlatformPrefix = (fullName: string): string => {
+  return fullName.replace(/^\[[^\]]+\]\s*/, "");
+};
+
+// Tab 标签中展示的平台名称
+const getPlatformLabel = (source: string): string => {
+  return DATA_PLATFORM_LABELS[source] || source.toUpperCase();
+};
+
+// Tab 当前索引（仅用于一些状态判断，如后续需要）
+const currentReportIndex = computed(() => allReports.value.findIndex(report => report.id === activeReportId.value));
 
 // 邮件通知配置信息（仅展示，业务人员查看）
 // 获取邮件通知截止时间（仅展示）
@@ -431,22 +494,71 @@ const uploadCompleted = ref(false);
 const completedTime = ref("");
 const completedRows = ref(0);
 
-// 平台报表清单配置
-const currentPlatformReports = computed(() => {
-  const reports = PLATFORM_REPORTS[selectedDataSource.value] || [];
-  // 使用国际化获取报表名称
-  return reports.map(report => ({
-    ...report,
-    name: t(`dataQualityWorkbench.reports.${report.id}`, report.name) // 如果翻译不存在，使用 report.name 作为后备
-  }));
+// 当前选中的报表（用于去掉二级 Tab 后的单一视图）
+const currentReport = computed(() => {
+  if (!allReports.value.length) return null;
+  return allReports.value.find(report => report.id === activeReportId.value) || allReports.value[0];
 });
 
-// 初始化或监听 activeReportId
-onMounted(() => {
-  if (currentPlatformReports.value.length > 0 && !activeReportId.value) {
-    activeReportId.value = currentPlatformReports.value[0].id;
+// 初始化或在报表列表变化时重置 activeReportId，确保始终有一个报表被选中
+watch(
+  allReports,
+  reports => {
+    if (!reports.length) {
+      activeReportId.value = "";
+      return;
+    }
+    if (!reports.find(r => r.id === activeReportId.value)) {
+      activeReportId.value = reports[0].id;
+    }
+  },
+  { immediate: true }
+);
+
+const resolveQueryString = (value: unknown): string => {
+  if (Array.isArray(value)) return value[0] ?? "";
+  return typeof value === "string" ? value : "";
+};
+
+const triggerCurrentUploadPicker = async () => {
+  if (!activeReportId.value) return;
+
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    await nextTick();
+
+    const input = document.querySelector(
+      `.upload-dragger[data-report-id="${activeReportId.value}"] input[type="file"]`
+    ) as HTMLInputElement | null;
+
+    if (input) {
+      input.click();
+      return;
+    }
+
+    await new Promise(resolve => window.setTimeout(resolve, 30));
   }
-});
+};
+
+watch(
+  [allReports, () => route.query.reportId, () => route.query.openPicker],
+  async ([reports, reportIdQuery, openPickerQuery]) => {
+    if (!reports.length) return;
+
+    const requestedReportId = resolveQueryString(reportIdQuery);
+    if (requestedReportId && reports.some(report => report.id === requestedReportId)) {
+      activeReportId.value = requestedReportId;
+    }
+
+    if (resolveQueryString(openPickerQuery) !== "1") return;
+
+    await triggerCurrentUploadPicker();
+
+    const nextQuery = { ...route.query };
+    delete nextQuery.openPicker;
+    router.replace({ query: nextQuery });
+  },
+  { immediate: true }
+);
 
 // 报表状态管理 (Mock)
 // key: reportId, value: { status, lastUploadTime, ... }
@@ -537,36 +649,19 @@ const getColumnLabel = (column: string): string => {
   return columnNameMapping.value[column] || column;
 };
 
-// 处理数据源变更
-const handleDataSourceChange = () => {
-  fileList.value = [];
-  validationResult.value = null;
-  uploadCompleted.value = false;
-  completedTime.value = "";
-  completedRows.value = 0;
-
-  // 重置选中的报表Tab
-  if (currentPlatformReports.value.length > 0) {
-    activeReportId.value = currentPlatformReports.value[0].id;
-  } else {
-    activeReportId.value = "";
-  }
-};
-
 // 下载通用模板
 const downloadTemplate = async () => {
-  if (!selectedDataSource.value) {
+  if (!currentReport.value) {
     ElMessage.warning(t("dataQualityWorkbench.messages.fileRequired"));
     return;
   }
   try {
-    const res = await downloadTemplateApi(selectedDataSource.value);
-    // @ts-expect-error
-    const blob = res instanceof Blob ? res : (res as any);
+    const res = await downloadTemplateApi(currentReport.value.source);
+    const blob = res as unknown as Blob;
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `${selectedDataSource.value.toUpperCase()}_template.xlsx`;
+    link.download = `${currentReport.value.source.toUpperCase()}_template.xlsx`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -580,13 +675,13 @@ const downloadTemplate = async () => {
 
 // 下载模板 (具体报表)
 const downloadReportTemplate = async (report: { id: string; name: string }) => {
-  if (!selectedDataSource.value) {
+  if (!currentReport.value) {
     ElMessage.warning(t("dataQualityWorkbench.messages.fileRequired"));
     return;
   }
   try {
     // 模拟下载
-    // const res = await downloadTemplateApi(selectedDataSource.value, report.id);
+    // const res = await downloadTemplateApi(currentReport.value.source, report.id);
     // 暂时不做实际请求，仅提示
     ElMessage.success(t("dataQualityWorkbench.messages.uploadSuccess"));
   } catch (error) {
@@ -610,7 +705,7 @@ const checkDataAssociation = async (vin?: string, customerPhone?: string): Promi
 
 // 处理报表文件上传（增加预检功能）
 const handleReportFileChange = async (file: UploadFile, report: { id: string; name: string }) => {
-  if (!selectedDataSource.value) {
+  if (!currentReport.value) {
     ElMessage.warning(t("dataQualityWorkbench.messages.fileRequired"));
     return;
   }
@@ -629,7 +724,7 @@ const handleReportFileChange = async (file: UploadFile, report: { id: string; na
   }
 
   // Step 2: 对于Manual Files，执行预检流水线
-  if (selectedDataSource.value === "manual") {
+  if (currentReport.value.source === "manual") {
     await performPreCheck(file.raw as File, report);
     return;
   }
@@ -639,7 +734,7 @@ const handleReportFileChange = async (file: UploadFile, report: { id: string; na
   try {
     const res = await uploadAndValidateFile({
       file: file.raw as File,
-      dataSource: selectedDataSource.value,
+      dataSource: currentReport.value.source,
       reportType: report.id
     });
 
@@ -866,7 +961,7 @@ const handleImportData = async () => {
     // 调用入库API
     const res = await uploadAndValidateFile({
       file: currentPreCheckFile.value,
-      dataSource: selectedDataSource.value,
+      dataSource: currentReport.value?.source || "manual",
       reportType: currentPreCheckReport.value.id
     });
 
@@ -1037,13 +1132,288 @@ const simulateErrorFile = () => {
   // 这个函数可以在开发时用于测试错误场景
   console.log("模拟错误文件功能");
 };
-
 </script>
 
 <style lang="scss" scoped>
 .data-quality-workbench {
-  padding: 20px;
+  padding: 16px 20px 24px 20px;
   background-color: var(--el-bg-color-page, #f5f7fa);
+  /* 让整个工作台区域在视口内自适应，不再让外层页面滚动 */
+  height: calc(100vh - 80px);
+  box-sizing: border-box;
+  overflow: hidden;
+
+  .dq-layout {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .report-info-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding: 10px 16px;
+    background-color: var(--el-bg-color-page, #f5f7fa);
+    border-radius: 4px;
+
+    .status-tag {
+      margin-right: 12px;
+    }
+
+    .last-upload-time {
+      font-size: 13px;
+      color: var(--el-text-color-regular, #606266);
+      flex: 1;
+    }
+  }
+
+  /* 整体卡片布局样式 */
+  .dq-card-layout {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    border-radius: 8px;
+
+    :deep(.el-card__body) {
+      padding: 16px 20px 20px 20px;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      box-sizing: border-box;
+    }
+  }
+
+  .dq-card-main {
+    flex: 1;
+    display: flex;
+    min-height: 0;
+  }
+
+  /* 左右结构 Tabs 容器（卡片风格） */
+  .dq-tabs-layout {
+    flex: 1;
+    display: flex;
+
+    :deep(.el-tabs__header.is-left) {
+      padding-right: 0;
+      margin-right: 16px;
+
+      .el-tabs__nav-wrap {
+        margin-right: 0;
+      }
+
+      .el-tabs__nav-scroll {
+        padding: 4px 8px 4px 0;
+      }
+    }
+
+    :deep(.el-tabs__content) {
+      flex: 1;
+      height: 100%;
+      overflow: auto;
+
+      .el-tab-pane {
+        height: 100%;
+      }
+    }
+  }
+
+  /* 左侧 Tab 标签（两行文案） */
+  .dq-tab-label {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    line-height: 1.3;
+
+    .dq-tab-platform {
+      font-size: 12px;
+      color: var(--el-text-color-secondary);
+      margin-bottom: 2px;
+    }
+
+    .dq-tab-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--el-text-color-primary);
+      max-width: 200px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+  }
+
+  /* 卡片感的左侧 tab 栏 */
+  :deep(.dq-tabs-layout .el-tabs__item) {
+    height: auto;
+    padding: 8px 10px;
+    margin: 4px 0;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    transition: all 0.15s ease;
+    align-items: flex-start;
+    justify-content: flex-start;
+    white-space: normal;
+  }
+
+  :deep(.dq-tabs-layout .el-tabs__item:hover) {
+    background-color: var(--el-fill-color-light);
+    border-color: var(--el-border-color-lighter);
+  }
+
+  :deep(.dq-tabs-layout .el-tabs__item.is-active) {
+    background: linear-gradient(135deg, var(--el-color-primary-light-9), #ffffff);
+
+    .dq-tab-name {
+      color: var(--el-color-primary);
+      font-weight: 600;
+    }
+
+    .dq-tab-platform {
+      color: var(--el-color-primary);
+    }
+  }
+
+  .dq-card-header {
+    margin-bottom: 12px;
+
+    .dq-card-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--el-text-color-primary);
+      margin-bottom: 4px;
+    }
+
+    .dq-card-subtitle {
+      font-size: 12px;
+      color: var(--el-text-color-secondary);
+    }
+  }
+
+  .dq-card-tabs {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+
+    :deep(.el-tabs__header) {
+      margin: 0 0 12px 0;
+    }
+
+    :deep(.el-tabs__content) {
+      flex: 1;
+      overflow: auto;
+    }
+  }
+
+  /* 卡片风格 Tab */
+  :deep(.dq-card-tabs .el-tabs__item) {
+    padding: 8px 14px;
+    border-radius: 4px 4px 0 0;
+    font-size: 13px;
+  }
+
+  .dq-sidebar {
+    width: 260px;
+    background: #ffffff;
+    border-radius: 4px;
+    border: 1px solid var(--el-border-color-lighter, #ebeef5);
+    padding: 16px 12px 16px 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* 跟随 dq-layout 撑满 */
+    overflow: hidden;
+  }
+
+  .dq-sidebar-header {
+    margin-bottom: 12px;
+
+    .dq-sidebar-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--el-text-color-primary);
+      margin: 0 0 4px 0;
+    }
+
+    .dq-sidebar-desc {
+      font-size: 12px;
+      color: var(--el-text-color-secondary);
+      margin: 0;
+    }
+  }
+
+  .dq-sidebar-groups {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 4px;
+  }
+
+  .dq-sidebar-group + .dq-sidebar-group {
+    margin-top: 12px;
+  }
+
+  .dq-sidebar-group-header {
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    color: var(--el-text-color-secondary);
+    margin-bottom: 4px;
+
+    .dq-sidebar-group-name {
+      font-weight: 600;
+    }
+  }
+
+  .dq-sidebar-item {
+    cursor: pointer;
+    padding: 6px 8px 6px 12px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    border: none;
+    background: transparent;
+    margin: 2px 0;
+
+    .dq-sidebar-item-name {
+      font-size: 13px;
+      color: var(--el-text-color-primary);
+      font-weight: 500;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    &:hover {
+      background: var(--el-fill-color-light);
+    }
+
+    &.active {
+      background: var(--el-color-primary-light-9);
+
+      &::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 4px;
+        bottom: 4px;
+        width: 3px;
+        border-radius: 2px;
+        background: var(--el-color-primary);
+      }
+
+      .dq-sidebar-item-name {
+        color: var(--el-color-primary);
+      }
+    }
+  }
+
+  .dq-main-card {
+    flex: 1;
+  }
 
   .card-header {
     display: flex;
@@ -1090,21 +1460,50 @@ const simulateErrorFile = () => {
     }
 
     .data-source-tabs {
-      margin-bottom: 0px; /* Remove tab bottom margin */
+      margin-bottom: 0;
 
-      :deep(.el-tabs__header) {
-        margin-bottom: 0;
-        background-color: transparent;
-        /* Restore standard border */
+      .report-nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        max-height: 140px;
+        overflow-y: auto;
+        padding-right: 4px;
       }
 
-      /* Optional: Customize top-level tabs to stand out */
-      :deep(.el-tabs__item) {
-        font-weight: 500;
-        &.is-active {
+      .report-nav-item {
+        cursor: pointer;
+        min-width: 220px;
+        flex: 0 0 auto;
+        padding: 10px 14px;
+        border-radius: 6px;
+        border: 1px solid var(--el-border-color-lighter, #ebeef5);
+        background: #fff;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        transition: all 0.15s ease;
+
+        .report-nav-title {
+          font-size: 13px;
           font-weight: 600;
-          background-color: #fff;
-          border-bottom-color: #fff; /* Connect to next card */
+          color: var(--el-text-color-primary);
+          margin-bottom: 4px;
+        }
+
+        .report-nav-sub {
+          font-size: 12px;
+          color: var(--el-text-color-secondary);
+        }
+
+        &:hover {
+          border-color: var(--el-color-primary-light-5);
+          box-shadow: 0 2px 6px rgba(64, 158, 255, 0.2);
+          transform: translateY(-1px);
+        }
+
+        &.active {
+          border-color: var(--el-color-primary);
+          background: linear-gradient(135deg, var(--el-color-primary-light-9), #ffffff);
+          box-shadow: 0 2px 8px rgba(64, 158, 255, 0.25);
         }
       }
     }
@@ -1123,7 +1522,6 @@ const simulateErrorFile = () => {
     margin-top: -1px; /* Overlap borders */
     border-top: 1px solid var(--el-border-color-lighter, #dcdfe6); /* Ensure border matches */
     overflow: hidden;
-    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.08);
 
     /* Removed Header specific styles since header is gone */
 
@@ -1134,13 +1532,11 @@ const simulateErrorFile = () => {
 
     .notification-tip-info {
       margin-bottom: 24px;
-      margin-top: 16px; /* Space from tabs */
+      margin-top: 8px; /* Space from tabs */
 
       .notification-card-new {
         display: flex;
-        /* Enterprise Info Block Style */
-        border: 1px solid var(--el-color-primary-light-8);
-        border-left: 4px solid var(--el-color-primary); /* Left Accent */
+
         background-color: var(--el-color-primary-light-9); /* Very light brand tint */
         border-radius: 4px; /* Slight rounding */
         overflow: hidden;
@@ -1387,25 +1783,6 @@ const simulateErrorFile = () => {
 
       .tab-content {
         padding: 24px 0; /* Add top padding to content */
-        .report-info-bar {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin-bottom: 16px;
-          padding: 10px 16px;
-          background-color: var(--el-bg-color-page, #f5f7fa);
-          border-radius: 4px;
-
-          .status-tag {
-            margin-right: 12px;
-          }
-
-          .last-upload-time {
-            font-size: 13px;
-            color: var(--el-text-color-regular, #606266);
-            flex: 1;
-          }
-        }
       }
     }
 

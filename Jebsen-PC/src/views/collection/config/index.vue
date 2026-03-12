@@ -10,13 +10,26 @@
         </div>
       </template>
 
-      <el-tabs v-model="activeTab" class="config-tabs">
+      <el-tabs
+        v-model="activeTab"
+        tab-position="left"
+        class="config-tabs"
+      >
         <el-tab-pane
-          v-for="(platformLabel, platformKey) in manualPlatformsMap"
-          :key="platformKey"
-          :label="platformLabel"
-          :name="platformKey"
+          v-for="item in manualReports"
+          :key="item.reportId"
+          :name="item.reportId"
         >
+          <template #label>
+            <div class="config-tab-label">
+              <div class="config-tab-platform">
+                {{ item.platformLabel }}
+              </div>
+              <div class="config-tab-name">
+                {{ item.reportName }}
+              </div>
+            </div>
+          </template>
           <div class="tab-content">
             <el-form
               ref="configFormRef"
@@ -26,16 +39,16 @@
               class="config-form"
               :label-width="'120px'"
             >
-              <!-- 平台下的报表列表 -->
+              <!-- 单报表配置表单：直接平铺在右侧 -->
               <div class="platform-list">
-                <div v-for="report in getPlatformReports(platformKey)" :key="report.id" class="platform-item">
+                <div class="platform-item">
                   <PlatformConfigCard
-                    :platform="platformLabel as DataPlatform"
+                    :platform="item.platformLabel as DataPlatform"
                     :category="'手动上传'"
-                    :report-name="report.name"
+                    :report-name="item.reportName"
                     :employees="employeeList"
-                    :config="getReportConfig(platformKey, report.id)"
-                    @update="cfg => handleReportUpdate(platformKey, report.id, report.name, cfg)"
+                    :config="getReportConfig(item.platformKey, item.reportId)"
+                    @update="cfg => handleReportUpdate(item.platformKey, item.reportId, item.reportName, cfg)"
                   />
                 </div>
               </div>
@@ -104,7 +117,7 @@ import { createDefaultGlobalRules } from "../globalRules";
 
 const { t } = useI18n();
 
-const activeTab = ref("poas");
+const activeTab = ref("");
 const configFormRef = ref<FormInstance>();
 const saving = ref(false);
 const employeeList = ref<Employee[]>([]);
@@ -121,10 +134,64 @@ const manualPlatformsMap = computed(() => {
   return map;
 });
 
-// 获取某平台下的报表列表
-const getPlatformReports = (platformKey: string) => {
-  return PLATFORM_REPORTS[platformKey] || [];
+// 标准化姓名（去掉多余空格、忽略大小写）
+const normalizeName = (name: string) => name.replace(/\s+/g, " ").trim().toLowerCase();
+
+// 通过姓名查找员工 ID（宽松匹配 "Christopher Xu"）
+const findEmployeeIdByName = (name: string) => {
+  const target = normalizeName(name);
+  const emp = employeeList.value.find(e => normalizeName(e.name) === target);
+  return emp ? emp.id : null;
 };
+
+// 通过姓名查找员工邮箱（宽松匹配）
+const findEmployeeEmailByName = (name: string) => {
+  const target = normalizeName(name);
+  const emp = employeeList.value.find(e => normalizeName(e.name) === target);
+  return emp ? emp.email : "";
+};
+
+// 获取默认负责人 ID：只使用 Christopher Xu
+const getDefaultEmployeeIdForReport = (platformKey: string | undefined, reportId?: string, reportName?: string) => {
+  const chrisId = findEmployeeIdByName("Christopher Xu");
+
+  if (chrisId) {
+    return chrisId;
+  }
+
+  // 如果找不到 Christopher Xu，则不设置默认负责人
+  return null;
+};
+
+// 根据平台展示名称反推 key
+const getPlatformKeyByLabel = (label: string): string | undefined => {
+  const entry = Object.entries(DATA_PLATFORM_LABELS).find(([, val]) => val === label);
+  return entry ? entry[0] : undefined;
+};
+
+// 手动上传报表扁平列表（用于左侧一级 Tab）
+const manualReports = computed(() => {
+  const list: {
+    platformKey: string;
+    platformLabel: string;
+    reportId: string;
+    reportName: string;
+  }[] = [];
+
+  Object.entries(manualPlatformsMap.value).forEach(([platformKey, platformLabel]) => {
+    const reports = PLATFORM_REPORTS[platformKey] || [];
+    reports.forEach(report => {
+      list.push({
+        platformKey,
+        platformLabel,
+        reportId: report.id,
+        reportName: report.name
+      });
+    });
+  });
+
+  return list;
+});
 
 // 初始化配置表单
 const configForm = reactive<CollectionConfig>({
@@ -167,6 +234,22 @@ const formRules: FormRules = {
   ]
 };
 
+// 确保员工列表中存在 Christopher Xu （前端兜底创建）
+const ensureChristopherExists = () => {
+  const targetName = "Christopher Xu";
+  const targetEmail = "christopher.xu@company.com";
+  const exists = employeeList.value.some(emp => normalizeName(emp.name) === normalizeName(targetName));
+  if (!exists) {
+    const maxId = employeeList.value.reduce((max, emp) => Math.max(max, emp.id || 0), 0);
+    employeeList.value.push({
+      id: maxId + 1,
+      name: targetName,
+      email: targetEmail,
+      status: "active"
+    });
+  }
+};
+
 // 加载员工列表
 const loadEmployees = async () => {
   loadingEmployees.value = true;
@@ -174,6 +257,8 @@ const loadEmployees = async () => {
     const res = await getEmployeeList();
     if (res.code === 200 && res.data) {
       employeeList.value = res.data.filter(emp => emp.status !== "resigned"); // 只显示在职员工
+      // 前端兜底补充 Christopher Xu
+      ensureChristopherExists();
     }
   } catch (error) {
     console.error("加载员工列表失败:", error);
@@ -192,7 +277,9 @@ const loadConfig = async () => {
         configForm.platforms = res.data.platforms;
         // 如果前两个阶段没有员工，设置默认值
         configForm.platforms.forEach(platform => {
-          const defaultEmployeeId = employeeList.value.length > 0 ? employeeList.value[0].id : null;
+          const platformKey = getPlatformKeyByLabel(platform.platform);
+          const defaultEmployeeId = getDefaultEmployeeIdForReport(platformKey, platform.reportId, platform.reportName);
+
           if (platform.schedules[0] && platform.schedules[0].employeeIds.length === 0 && defaultEmployeeId) {
             platform.schedules[0].employeeIds = [defaultEmployeeId];
           }
@@ -204,7 +291,8 @@ const loadConfig = async () => {
         // 如果没有平台配置，初始化所有平台
         initDefaultPlatforms();
       }
-      configForm.ccEmail = res.data.ccEmail || "";
+      // 兜底邮箱：如果后端没返回，就默认用 Christopher Xu 的邮箱
+      configForm.ccEmail = res.data.ccEmail || findEmployeeEmailByName("Christopher Xu") || "";
       // 全局规则：如果后端没有返回，则使用默认配置
       if (res.data.globalRules && res.data.globalRules.length > 0) {
         configForm.globalRules = res.data.globalRules;
@@ -218,9 +306,26 @@ const loadConfig = async () => {
   }
 };
 
+// 将所有阶段的默认收件人统一设置为 Christopher Xu（如果存在）
+const applyDefaultRecipientToAllSchedules = () => {
+  const chrisId = findEmployeeIdByName("Christopher Xu");
+  if (!chrisId) return;
+
+  configForm.platforms.forEach(platform => {
+    platform.schedules.forEach(schedule => {
+      if (!schedule) return;
+      schedule.employeeIds = [chrisId];
+    });
+  });
+
+  // 如果兜底邮箱还没设置，也默认成 Christopher Xu 的邮箱
+  if (!configForm.ccEmail) {
+    configForm.ccEmail = findEmployeeEmailByName("Christopher Xu") || "";
+  }
+};
+
 // 初始化默认平台配置
 const initDefaultPlatforms = () => {
-  const defaultEmployeeId = employeeList.value.length > 0 ? employeeList.value[0].id : null;
   const newPlatforms: PlatformConfig[] = [];
 
   // 获取所有手动上传的平台 Key
@@ -231,6 +336,7 @@ const initDefaultPlatforms = () => {
     const reports = PLATFORM_REPORTS[key] || [];
 
     reports.forEach(report => {
+      const defaultEmployeeId = getDefaultEmployeeIdForReport(key, report.id, report.name);
       newPlatforms.push({
         platform: platformLabel,
         category: "手动上传",
@@ -254,6 +360,12 @@ const initDefaultPlatforms = () => {
             time: "9:00",
             employeeIds: [],
             description: t("collection.config.recipients.scheduleConfig.stageT2Desc")
+          },
+          {
+            stage: "T+3",
+            time: "18:00",
+            employeeIds: defaultEmployeeId ? [defaultEmployeeId] : [],
+            description: t("collection.config.recipients.scheduleConfig.stageT3DescPrefix") || ""
           }
         ]
       });
@@ -309,7 +421,8 @@ const resetConfig = () => {
   })
     .then(() => {
       initDefaultPlatforms();
-      configForm.ccEmail = "";
+      // 重置后，兜底邮箱也默认恢复为 Christopher Xu
+      configForm.ccEmail = findEmployeeEmailByName("Christopher Xu") || "";
       ElMessage.info(t("collection.config.recipients.resetSuccess"));
     })
     .catch(() => {
@@ -321,6 +434,14 @@ onMounted(async () => {
   // 先加载员工列表，再加载配置，这样可以设置默认值
   await loadEmployees();
   await loadConfig();
+
+  // 将所有阶段的默认收件人统一设置为 Christopher Xu
+  applyDefaultRecipientToAllSchedules();
+
+  // 默认选中第一个报表 Tab
+  if (!activeTab.value && manualReports.value.length > 0) {
+    activeTab.value = manualReports.value[0].reportId;
+  }
 });
 </script>
 
@@ -341,6 +462,87 @@ onMounted(async () => {
   :deep(.el-card__body) {
     padding: 20px;
     background: #ffffff;
+  }
+}
+
+.config-tabs {
+  display: flex;
+
+  :deep(.el-tabs__header.is-left) {
+    padding-right: 0;
+    margin-right: 16px;
+
+    .el-tabs__nav-wrap {
+      margin-right: 0;
+    }
+
+    .el-tabs__nav-scroll {
+      padding: 4px 8px 4px 0;
+    }
+  }
+
+  :deep(.el-tabs__content) {
+    flex: 1;
+    height: 100%;
+    overflow: auto;
+
+    .el-tab-pane {
+      height: 100%;
+    }
+  }
+}
+
+.config-tab-label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  line-height: 1.3;
+
+  .config-tab-platform {
+    font-size: 12px;
+    color: var(--el-text-color-secondary);
+    margin-bottom: 2px;
+  }
+
+  .config-tab-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--el-text-color-primary);
+    max-width: 200px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+}
+
+:deep(.config-tabs .el-tabs__item) {
+  height: auto;
+  padding: 8px 10px;
+  margin: 4px 0;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+  align-items: flex-start;
+  justify-content: flex-start;
+  white-space: normal;
+}
+
+:deep(.config-tabs .el-tabs__item:hover) {
+  background-color: var(--el-fill-color-light);
+  border-color: var(--el-border-color-lighter);
+}
+
+:deep(.config-tabs .el-tabs__item.is-active) {
+  background: linear-gradient(135deg, var(--el-color-primary-light-9), #ffffff);
+
+  .config-tab-name {
+    color: var(--el-color-primary);
+    font-weight: 600;
+  }
+
+  .config-tab-platform {
+    color: var(--el-color-primary);
   }
 }
 
@@ -382,27 +584,40 @@ onMounted(async () => {
 }
 
 .tab-content {
-  padding: 0;
+  padding: 4px 0 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.config-main-card {
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #ebeef5;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  padding: 16px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .platforms-section {
   margin-bottom: 20px;
 }
 
-.platform-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-  gap: 16px;
-  padding-bottom: 20px;
+// .platform-list {
+//   display: grid;
+//   grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+//   gap: 16px;
+//   padding-bottom: 20px;
 
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
+//   @media (max-width: 768px) {
+//     grid-template-columns: 1fr;
+//   }
 
-  .platform-item {
-    width: 100%;
-  }
-}
+//   .platform-item {
+//     width: 100%;
+//   }
+// }
 
 .common-config-section {
   padding: 20px 0;

@@ -10,18 +10,8 @@
       @reset="handleReset"
     >
       <!-- 表格 header 按钮 -->
-      <template #tableHeader="scope">
+      <template #tableHeader>
         <el-button type="primary" :icon="Plus" @click="handleAdd">新增</el-button>
-        <el-button
-          type="success"
-          plain
-          :icon="Edit"
-          :disabled="!scope.isSelected || scope.selectedListIds.length !== 1"
-          @click="handleUpdate()"
-        >
-          修改
-        </el-button>
-        <el-button type="danger" plain :icon="Delete" :disabled="!scope.isSelected" @click="handleDelete()">删除</el-button>
       </template>
       <!-- 公告类型列 -->
       <template #noticeType="scope">
@@ -126,7 +116,6 @@ const rules = {
 
 // 表格配置项
 const columns = reactive<ColumnProps[]>([
-  { type: "selection", fixed: "left", width: 50 },
   {
     prop: "noticeId",
     label: "序号",
@@ -274,15 +263,15 @@ const submitForm = () => {
   }
 };
 
-// 删除按钮操作
+// 删除按钮操作（按行删除）
 const handleDelete = (row?: any) => {
-  const noticeIds = row?.noticeId || proTable.value?.selectedListIds;
-  if (!noticeIds || (Array.isArray(noticeIds) && noticeIds.length === 0)) {
-    ElMessage.warning("请选择要删除的公告");
+  const noticeId = row?.noticeId;
+  if (!noticeId) {
+    ElMessage.warning("未找到要删除的公告");
     return;
   }
   ElMessageBox.confirm(
-    `是否确认删除公告编号为"${Array.isArray(noticeIds) ? noticeIds.join(",") : noticeIds}"的数据项？`,
+    `是否确认删除公告编号为"${noticeId}"的数据项？`,
     "提示",
     {
       confirmButtonText: "确定",
@@ -292,13 +281,9 @@ const handleDelete = (row?: any) => {
   )
     .then(async () => {
       try {
-        const idsToDelete = Array.isArray(noticeIds) ? noticeIds : [noticeIds];
-        for (const id of idsToDelete) {
-          await delNotice(id);
-        }
+        await delNotice(noticeId);
         ElMessage.success("删除成功");
         proTable.value?.getTableList();
-        proTable.value?.clearSelection();
       } catch (error) {
         console.error("删除失败:", error);
       }

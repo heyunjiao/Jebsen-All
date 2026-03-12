@@ -33,15 +33,15 @@
       </div>
     </el-card>
 
-    <!-- 统计面板 -->
+    <!-- 统计面板：客户分层维度 -->
     <div class="stats-panel">
       <div class="stats-card primary-card">
         <div class="stats-icon-wrapper">
-          <el-icon><User /></el-icon>
+          <el-icon><Medal /></el-icon>
         </div>
         <div class="stats-content">
-          <div class="stats-number">{{ formatNumber(customerStats.total) }}</div>
-          <div class="stats-label">{{ t("customer.stats.total") }}</div>
+          <div class="stats-number">{{ formatNumber(customerStats.salesDiamond) }}</div>
+          <div class="stats-label">{{ t("customer.stats.salesDiamond") }}</div>
         </div>
       </div>
       <div class="stats-card success-card">
@@ -49,10 +49,17 @@
           <el-icon><Top /></el-icon>
         </div>
         <div class="stats-content">
-          <div class="stats-number">
-            +{{ formatNumber(customerStats.newToday) }} <span class="sub-value">{{ t("customer.stats.growth") }}</span>
-          </div>
-          <div class="stats-label">{{ t("customer.stats.newToday") }}</div>
+          <div class="stats-number">{{ formatNumber(customerStats.aftersalesDiamond) }}</div>
+          <div class="stats-label">{{ t("customer.stats.aftersalesDiamond") }}</div>
+        </div>
+      </div>
+      <div class="stats-card info-card">
+        <div class="stats-icon-wrapper">
+          <el-icon><Connection /></el-icon>
+        </div>
+        <div class="stats-content">
+          <div class="stats-number">{{ formatNumber(customerStats.activeAfterSales) }}</div>
+          <div class="stats-label">{{ t("customer.stats.activeAfterSales") }}</div>
         </div>
       </div>
       <div class="stats-card warning-card">
@@ -60,35 +67,17 @@
           <el-icon><Select /></el-icon>
         </div>
         <div class="stats-content">
-          <div class="stats-number">{{ customerStats.contactable }}%</div>
-          <div class="stats-label">{{ t("customer.stats.contactable") }}</div>
+          <div class="stats-number">{{ formatNumber(customerStats.dormant) }}</div>
+          <div class="stats-label">{{ t("customer.stats.dormant") }}</div>
         </div>
       </div>
       <div class="stats-card info-card">
         <div class="stats-icon-wrapper">
-          <el-icon><Medal /></el-icon>
-        </div>
-        <div class="stats-content">
-          <div class="stats-number">{{ formatNumber(customerStats.verified) }}</div>
-          <div class="stats-label">{{ t("customer.stats.verified") }}</div>
-        </div>
-      </div>
-      <div class="stats-card success-card">
-        <div class="stats-icon-wrapper">
-          <el-icon><Connection /></el-icon>
-        </div>
-        <div class="stats-content">
-          <div class="stats-number">{{ formatNumber(customerStats.mergedCount) }}</div>
-          <div class="stats-label">{{ t("customer.stats.mergedCount") }}</div>
-        </div>
-      </div>
-      <div class="stats-card primary-card">
-        <div class="stats-icon-wrapper">
           <el-icon><Refresh /></el-icon>
         </div>
         <div class="stats-content">
-          <div class="stats-number">{{ formatNumber(customerStats.updatedCount) }}</div>
-          <div class="stats-label">{{ t("customer.stats.updatedCount") }}</div>
+          <div class="stats-number">{{ formatNumber(customerStats.lost) }}</div>
+          <div class="stats-label">{{ t("customer.stats.lost") }}</div>
         </div>
       </div>
     </div>
@@ -267,14 +256,13 @@ const storeSearchOptions = computed(() => [
   ...MOCK_STORE_LIST.map(s => ({ label: s.storeName, value: s.storeId }))
 ]);
 
-// 客户库统计数据（根据当前筛选/Tab 的结果动态计算）
+// 客户库统计数据（根据当前筛选/Tab 的结果动态计算）- 客户分层维度
 const customerStats = reactive({
-  total: 0,
-  newToday: 0,
-  contactable: 0,
-  verified: 0,
-  mergedCount: 0,
-  updatedCount: 0
+  salesDiamond: 0, // 销售钻石客户
+  aftersalesDiamond: 0, // 售后钻石客户
+  activeAfterSales: 0, // 普通活跃售后客户
+  dormant: 0, // 休眠客户
+  lost: 0 // 流失客户
 });
 
 // 格式化数字
@@ -1209,28 +1197,65 @@ const generateMockData = (pageNum: number, pageSize: number, filters: any = {}) 
   const end = start + pageSize;
   const pageData = filteredData.slice(start, end);
 
-  // 基于筛选后的全量数据（非分页）计算统计面板数据
+  // 基于筛选后的全量数据（非分页）计算统计面板数据：客户分层维度
+  let salesDiamond = 0;
+  let aftersalesDiamond = 0;
+  let activeAfterSales = 0;
+  let dormant = 0;
+  let lost = 0;
+
+  const now = Date.now();
+
+  filteredData.forEach(item => {
+    const visitCount90Days = Number(item.visitCount90Days || 0);
+    const annualOrderFrequency = Number(item.annualOrderFrequency || 0);
+    const loyaltyLevel = item.loyaltyLevel as string | undefined;
+    const tags = (item.tags || []) as string[];
+
+    let daysSinceLastVisit = 9999;
+    if (item.lastVisitTime) {
+      const time = new Date(item.lastVisitTime).getTime();
+      if (!Number.isNaN(time)) {
+        daysSinceLastVisit = Math.floor((now - time) / (1000 * 60 * 60 * 24));
+      }
+    }
+
+    // 流失：很久未到店（> 365 天）
+    if (daysSinceLastVisit > 365) {
+      lost += 1;
+      return;
+    }
+
+    // 休眠：较长时间未到店（180–365 天）
+    if (daysSinceLastVisit > 180) {
+      dormant += 1;
+      return;
+    }
+
+    // 普通活跃售后客户：近 90 天有到店记录
+    if (visitCount90Days > 0) {
+      activeAfterSales += 1;
+    }
+
+    // 售后钻石客户：活跃 + 标签/忠诚度较高
+    const isHighLoyalty = loyaltyLevel === "金卡" || loyaltyLevel === "VIP";
+    const hasValueTag = tags.includes("高价值客户") || tags.includes("VIP客户") || tags.includes("活跃客户");
+    if (visitCount90Days > 0 && (isHighLoyalty || hasValueTag)) {
+      aftersalesDiamond += 1;
+    }
+
+    // 销售钻石客户：忠诚度高 + 年度订单频次较高
+    if (isHighLoyalty && annualOrderFrequency >= 5) {
+      salesDiamond += 1;
+    }
+  });
+
   const stats = {
-    total: filteredTotal,
-    // 模拟“今日新增”：按 5% 比例估算，至少 0
-    newToday: filteredTotal > 0 ? Math.max(1, Math.floor(filteredTotal * 0.05)) : 0,
-    // 可触达率：有手机号视为可触达
-    contactable:
-      filteredTotal === 0
-        ? 0
-        : Number(
-            (
-              (filteredData.filter(item => !!item.phone && (Array.isArray(item.phone) ? item.phone.length > 0 : true)).length /
-                filteredTotal) *
-              100
-            ).toFixed(1)
-          ),
-    // 成交车主：简单以年度订单频次>0 作为“真实下单客户”
-    verified: filteredData.filter(item => item.annualOrderFrequency > 0).length,
-    // 已合并数：有跨源冲突的客户数量
-    mergedCount: filteredData.filter(item => item.hasConflict).length,
-    // 已更新数：用“总数 - 未合并数”的方式模拟
-    updatedCount: Math.max(0, filteredTotal - filteredData.filter(item => !item.hasConflict).length)
+    salesDiamond,
+    aftersalesDiamond,
+    activeAfterSales,
+    dormant,
+    lost
   };
 
   return {
@@ -1347,13 +1372,12 @@ const loadPersonData = async (params: any) => {
 
   console.log(`生成了 ${result.data.length} 条数据，总共 ${result.total} 条`);
 
-  // 同步更新统计面板数据
-  customerStats.total = result.stats.total;
-  customerStats.newToday = result.stats.newToday;
-  customerStats.contactable = result.stats.contactable;
-  customerStats.verified = result.stats.verified;
-  customerStats.mergedCount = result.stats.mergedCount;
-  customerStats.updatedCount = result.stats.updatedCount;
+  // 同步更新统计面板数据（客户分层维度）
+  customerStats.salesDiamond = result.stats.salesDiamond;
+  customerStats.aftersalesDiamond = result.stats.aftersalesDiamond;
+  customerStats.activeAfterSales = result.stats.activeAfterSales;
+  customerStats.dormant = result.stats.dormant;
+  customerStats.lost = result.stats.lost;
 
   // 模拟网络延迟
   await new Promise(resolve => setTimeout(resolve, 300));
@@ -1388,15 +1412,12 @@ const loadVehicleData = async (params: any) => {
   listModeStats.person = personResult.total;
   listModeStats.vehicle = vehicleRows.length;
 
-  customerStats.total = vehicleRows.length;
-  customerStats.newToday = vehicleRows.length > 0 ? Math.max(1, Math.floor(vehicleRows.length * 0.05)) : 0;
-  customerStats.contactable =
-    vehicleRows.length === 0
-      ? 0
-      : Number(((vehicleRows.filter(item => !!item.buyerPhone).length / vehicleRows.length) * 100).toFixed(1));
-  customerStats.verified = vehicleRows.filter(item => item.status !== "订车中-在途").length;
-  customerStats.mergedCount = vehicleRows.filter(item => item.hasConflict).length;
-  customerStats.updatedCount = Math.max(0, vehicleRows.length - customerStats.mergedCount);
+  // 使用按人维度的统计结果，保持客户分层口径一致
+  customerStats.salesDiamond = personResult.stats.salesDiamond;
+  customerStats.aftersalesDiamond = personResult.stats.aftersalesDiamond;
+  customerStats.activeAfterSales = personResult.stats.activeAfterSales;
+  customerStats.dormant = personResult.stats.dormant;
+  customerStats.lost = personResult.stats.lost;
 
   const start = (pageNum - 1) * pageSize;
   const end = start + pageSize;

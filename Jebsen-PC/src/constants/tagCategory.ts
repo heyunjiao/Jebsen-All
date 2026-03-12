@@ -3,6 +3,35 @@
  */
 export type CategoryOption = { value: string; label: string; children?: CategoryOption[] };
 
+export interface CategoryMeta {
+  value: string;
+  label: string;
+  level: number;
+  parentValue?: string;
+  isLeaf: boolean;
+  pathValues: string[];
+  pathLabels: string[];
+}
+
+export interface CategoryExplorerBranch {
+  value: string;
+  label: string;
+  pathValues: string[];
+  pathLabels: string[];
+  leafCount: number;
+  leaves: CategoryMeta[];
+}
+
+export interface CategoryExplorerRoot {
+  value: string;
+  label: string;
+  pathValues: string[];
+  pathLabels: string[];
+  branchCount: number;
+  leafCount: number;
+  branches: CategoryExplorerBranch[];
+}
+
 /** 多级分类树（与标签管理、分群管理等保持一致） */
 export const TAG_CATEGORY_OPTIONS: CategoryOption[] = [
   {
@@ -51,6 +80,77 @@ export const TAG_CATEGORY_OPTIONS: CategoryOption[] = [
     ]
   }
 ];
+
+function flattenCategoryNodes(
+  options: CategoryOption[],
+  level = 1,
+  pathValues: string[] = [],
+  pathLabels: string[] = [],
+  parentValue?: string
+): CategoryMeta[] {
+  return options.flatMap(option => {
+    const nextPathValues = [...pathValues, option.value];
+    const nextPathLabels = [...pathLabels, option.label];
+    const current: CategoryMeta = {
+      value: option.value,
+      label: option.label,
+      level,
+      parentValue,
+      isLeaf: !option.children?.length,
+      pathValues: nextPathValues,
+      pathLabels: nextPathLabels
+    };
+
+    return [current, ...(option.children?.length ? flattenCategoryNodes(option.children, level + 1, nextPathValues, nextPathLabels, option.value) : [])];
+  });
+}
+
+const FLATTENED_CATEGORY_META = flattenCategoryNodes(TAG_CATEGORY_OPTIONS);
+
+export function getCategoryMeta(
+  options: CategoryOption[],
+  value?: string
+): CategoryMeta | null {
+  if (!value) return null;
+  const target = flattenCategoryNodes(options).find(item => item.value === value);
+  return target || null;
+}
+
+export function getFlattenedCategoryMeta(options: CategoryOption[]): CategoryMeta[] {
+  return flattenCategoryNodes(options);
+}
+
+export function buildCategoryExplorer(options: CategoryOption[]): CategoryExplorerRoot[] {
+  return options.map(root => {
+    const branches: CategoryExplorerBranch[] = (root.children || []).map(child => {
+      const childMeta = getCategoryMeta(options, child.value);
+      const leaves = child.children?.length
+        ? child.children
+            .map(item => getCategoryMeta(options, item.value))
+            .filter((item): item is CategoryMeta => Boolean(item))
+        : (childMeta ? [childMeta] : []);
+
+      return {
+        value: child.value,
+        label: child.label,
+        pathValues: childMeta?.pathValues || [root.value, child.value],
+        pathLabels: childMeta?.pathLabels || [root.label, child.label],
+        leafCount: leaves.length,
+        leaves
+      };
+    });
+
+    return {
+      value: root.value,
+      label: root.label,
+      pathValues: [root.value],
+      pathLabels: [root.label],
+      branchCount: branches.length,
+      leafCount: branches.reduce((count, item) => count + item.leafCount, 0),
+      branches
+    };
+  });
+}
 
 /**
  * 根据叶子值从多级选项中解析完整路径（用于多级别分类展示）
@@ -101,3 +201,5 @@ export function getCategoryType(category: string | undefined): string {
   const lastPart = String(category).split(" / ").pop() || category;
   return CATEGORY_TYPE_MAP[lastPart] || "info";
 }
+
+export const TAG_CATEGORY_META = FLATTENED_CATEGORY_META;

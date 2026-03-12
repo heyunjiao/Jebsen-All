@@ -255,6 +255,11 @@ const columns = computed<ColumnProps<Lead.LeadInfo>[]>(() => [
     }
   },
   {
+    prop: "pushRole",
+    label: t("leadManagement.columns.pushRole"),
+    minWidth: 120
+  },
+  {
     prop: "assignedAdvisor",
     label: t("leadManagement.columns.assignedAdvisor"),
     minWidth: 120
@@ -482,6 +487,18 @@ const getPushStatusTagType = (
     failed: "danger"
   };
   return typeMap[status] || "info";
+};
+
+const getPushRoleLabel = (role?: string | null) => {
+  if (!role) return "-";
+  const map: Record<string, string> = {
+    SA: "SA",
+    SC: "SC",
+    OTHER: "其他",
+    Other: "其他",
+    other: "其他"
+  };
+  return map[role] || role;
 };
 </script>
 

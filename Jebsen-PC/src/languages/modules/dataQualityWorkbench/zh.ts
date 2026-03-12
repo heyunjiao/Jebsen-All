@@ -1,7 +1,7 @@
 export default {
   dataQualityWorkbench: {
     title: "数据文件上传",
-    subtitle: "Data Quality Gate Workbench",
+    subtitle: "左侧选择报表类型，右侧上传并校验数据",
     statusDashboard: {
       title: "今日数据上传概览",
       pendingUpload: "今日待传",
@@ -14,7 +14,8 @@ export default {
       rows: "行"
     },
     dataSource: {
-      title: "选择数据源",
+      title: "选择上传任务",
+      subtitle: "左侧选择具体上传任务，右侧完成文件上传与质量校验",
       dms: {
         name: "DMS",
         tag: "强依赖"
@@ -70,21 +71,15 @@ export default {
       poas_opp: "商机表",
       wws_activity: "活动列表",
       cap_vehicle: "车辆报告",
-      cap_complaint: "投诉报告",
-      cap_prosperity: "共行致远",
-      voucher_sales: "附加销售报表",
-      voucher_benefits: "会员优惠信息统计表",
-      voucher_balance: "优惠券余额报表 (明细)",
-      manual_pc_marketing: "PC主动营销跟进信息更新表",
-      manual_client_base: "客户基盘",
-      manual_loss_15m: "首保15个月流失判定",
-      manual_ins_new: "Monthly Insurance Report-New Car",
-      manual_ins_used: "Monthly Insurance Report-Used Car",
-      manual_ins_renewal: "Monthly Renewal Insurance",
-      manual_jsp: "JSP PAW PSP",
-      manual_pcn_interest: "PCN企微助手 兴趣爱好",
-      manual_sign: "活动报道签名",
-      manual_base_analysis: "基盘分析统计表"
+      voucher_member_addon_sales: "会员附加销售报表",
+      voucher_balance_detail: "优惠券余额报表明细",
+      voucher_first_owner_info: "首任车主信息",
+      manual_ins_renewal_sales: "续保销售记录",
+      manual_ins_new_sales: "新保销售记录",
+      manual_client_base_table: "客户基盘表",
+      manual_replace_approval: "推荐置换再购审批记录",
+      manual_offline_marketing_segment: "线下营销/社群活动分群",
+      manual_generic_opportunity: "自定义通用商机"
     },
     notification: {
       title: "邮件通知规则",

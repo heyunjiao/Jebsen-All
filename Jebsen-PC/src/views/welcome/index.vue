@@ -1,42 +1,62 @@
 <template>
   <div class="welcome-container">
-    <!-- 页面头部：问候 + 系统最后更新时间 + 引导 -->
-    <div class="welcome-header">
-      <div class="header-content">
-        <h1 class="animate__animated animate__fadeInLeft">
-          {{ timePeriod }},
-          <span class="user-name">{{ userInfo?.name }}</span>
-        </h1>
-        <p class="subtitle animate__animated animate__fadeInLeft animate__delay-1s">
-          {{ welcomeMessage }}
-        </p>
-      </div>
-      <div class="header-action animate__animated animate__fadeInRight">
-        <template v-if="getRoleFromStorage() === 'admin'">
-          <span class="global-update">
-            <span class="global-update-label">系统最后更新</span>
-            <span class="global-update-time">{{ sourceMonitorBrief.lastUpdate }}</span>
-          </span>
-        </template>
-        <el-button type="primary" size="large" round icon="Guide" @click="startTour">
-          {{ $t("welcome.startTour") }}
-        </el-button>
-      </div>
-      <div class="header-bg"></div>
-    </div>
+    <div class="welcome-shell">
+      <section class="welcome-hero">
+        <div class="hero-main">
+          <div class="hero-copy">
+            <h1 class="hero-title animate__animated animate__fadeInLeft">
+              {{ timePeriod }},
+              <span class="hero-user-name">{{ userInfo?.name }}</span>
+            </h1>
+            <p class="hero-subtitle animate__animated animate__fadeInLeft animate__delay-1s">
+              {{ welcomeMessage }}
+            </p>
+          </div>
 
-    <!-- 管理员视图：按区块顺序排列 -->
-    <template v-if="getRoleFromStorage() === 'admin'">
-      <!-- 区块一：客户库与源数据（融合为一块，全量 + 增量紧凑展示） -->
-      <section class="page-section" id="step-admin-customer-stats">
-        <h2 class="section-title">客户库 · 源数据</h2>
-        <div class="indicator-block">
-          <div class="indicator-group">
-            <h3 class="indicator-group-title">全量</h3>
-            <div class="indicator-grid">
+          <div class="hero-toolbar animate__animated animate__fadeInRight">
+            <el-tag size="small" :type="heroStatus.type" effect="light">{{ heroStatus.text }}</el-tag>
+            <div class="hero-meta">
+              <span class="meta-pill">
+                <el-icon><User /></el-icon>
+                {{ isAdmin ? "管理端" : "业务端" }}
+              </span>
+              <span class="meta-pill" v-if="isAdmin">
+                <el-icon><Refresh /></el-icon>
+                更新 {{ sourceMonitorBrief.lastUpdate }}
+              </span>
+              <span class="meta-pill" v-else>
+                <el-icon><MagicStick /></el-icon>
+                新增商机 {{ formatNumber(opportunityStats.incremental) }}
+              </span>
+            </div>
+            <div class="hero-actions">
+              <el-button type="primary" size="large" round :icon="Guide" @click="startTour">
+                {{ $t("welcome.startTour") }}
+              </el-button>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-orb hero-orb-primary"></div>
+        <div class="hero-orb hero-orb-warm"></div>
+      </section>
+
+      <section class="page-section">
+        <div class="section-heading">
+          <div>
+            <h2 class="section-title">核心经营指标</h2>
+          </div>
+        </div>
+
+        <div class="indicator-board" id="step-user-metrics">
+          <div class="indicator-row">
+            <div class="indicator-side">
+              <span class="indicator-side-label">全量</span>
+            </div>
+            <div class="indicator-grid indicator-grid-4">
               <div
-                v-for="(item, index) in fullVolumeIndicators"
-                :key="'full-' + index"
+                v-for="(item, index) in topFullIndicators"
+                :key="'top-full-' + index"
                 class="indicator-mini-card"
                 :class="item.iconClass"
               >
@@ -45,12 +65,15 @@
               </div>
             </div>
           </div>
-          <div class="indicator-group">
-            <h3 class="indicator-group-title">增量</h3>
-            <div class="indicator-grid">
+
+          <div class="indicator-row">
+            <div class="indicator-side">
+              <span class="indicator-side-label">今日新增</span>
+            </div>
+            <div class="indicator-grid indicator-grid-4">
               <div
-                v-for="(item, index) in incrementalIndicators"
-                :key="'inc-' + index"
+                v-for="(item, index) in topIncrementalIndicators"
+                :key="'top-inc-' + index"
                 class="indicator-mini-card"
                 :class="item.iconClass"
               >
@@ -60,106 +83,158 @@
             </div>
           </div>
         </div>
-        <el-card shadow="hover" class="pipeline-card-welcome section-card">
-          <template #header>
-            <div class="pipeline-card-header">
-              <div class="header-left">
-                <el-icon class="header-icon"><Operation /></el-icon>
-                <div class="title-wrap">
-                  <span class="title">{{ $t("dashboard.dataMonitor.pipelineTitle") }}</span>
-                  <span class="title-desc">{{ $t("dashboard.dataMonitor.pipelineResultDesc") }}</span>
-                </div>
-              </div>
-              <div class="header-right">
-                <el-tag size="small" :type="pipelineStatusType" effect="dark">
-                  {{ $t("dashboard.dataMonitor.processing") }}
-                </el-tag>
-                <span class="meta-info">
-                  <span class="dot-online"></span>
-                  {{ $t("dashboard.dataMonitor.pipelineStart") }}: {{ pipelineData.startTime }}
-                </span>
-              </div>
+      </section>
+
+      <template v-if="isAdmin">
+        <section class="page-section">
+          <div class="section-heading">
+            <div>
+              <h2 class="section-title">今日数据采集状态</h2>
             </div>
-          </template>
-          <div class="pipeline-steps-wrapper">
-            <el-steps
-              :active="pipelineData.currentStep"
-              process-status="process"
-              finish-status="success"
-              align-center
-              class="pipeline-steps"
-            >
-              <el-step
-                v-for="(step, index) in pipelineSteps"
-                :key="index"
-                :title="step.title"
-                :description="step.desc"
-                :status="getStepStatusForElSteps(index)"
-              >
-                <template #icon>
-                  <div class="step-icon-custom" :class="getPipelineStepStatus(index)">
-                    <el-icon><component :is="step.icon" /></el-icon>
-                    <div v-if="getPipelineStepStatus(index) === 'active'" class="step-pulse"></div>
+            <el-tag :type="systemStatusSummary.type" effect="light">{{ systemStatusSummary.text }}</el-tag>
+          </div>
+
+          <el-card shadow="hover" class="content-card status-card" id="step-admin-system">
+            <div class="system-section system-section-split">
+              <div class="system-group">
+                <div class="system-group-header">
+                  <div>
+                    <div class="system-group-title">{{ $t("welcome.data.manualGroupTitle") }}</div>
+                    <div class="system-group-meta">已到位 {{ manualUploadedCount }} / {{ manualSystems.length }}</div>
                   </div>
-                </template>
-                <template #description>
-                  <div class="step-description">
-                    <div class="step-desc-text">{{ step.desc }}</div>
-                    <div v-if="getPipelineStepStatus(index) === 'active'" class="step-processing">
-                      {{ $t("dashboard.dataMonitor.processing") }}...
+                  <span class="group-badge group-badge-primary">{{ $t("welcome.data.manual") }}</span>
+                </div>
+
+                <div class="system-grid">
+                  <div
+                    v-for="sys in manualSystems"
+                    :key="`manual-${sys.name}-${sys.desc}`"
+                    class="system-item"
+                    :class="{ 'is-clickable': sys.type === 'manual' && sys.status !== 'gray' }"
+                    @click="sys.status !== 'gray' ? handleSystemClick(sys) : null"
+                  >
+                    <div class="sys-icon" :class="sys.status">
+                      <component :is="sys.icon" />
+                    </div>
+                    <div class="sys-info">
+                      <div class="sys-main-line">
+                        <span class="sys-name">{{ sys.name }}</span>
+                        <span class="sys-sep">/</span>
+                        <span class="sys-desc">{{ sys.desc }}</span>
+                      </div>
+                      <div class="sys-status-row">
+                        <span class="sys-status">{{ sys.statusText }}</span>
+                        <span class="sys-time" v-if="sys.uploadTime">{{ sys.uploadTime }}</span>
+                        <span class="sys-type-tag">{{ $t("welcome.data.manual") }}</span>
+                        <el-button
+                          v-if="sys.status === 'gray'"
+                          text
+                          type="primary"
+                          size="small"
+                          class="sys-upload-link"
+                          :icon="Upload"
+                          @click.stop="handleUpload(sys)"
+                        >
+                          {{ $t("welcome.data.upload") }}
+                        </el-button>
+                      </div>
                     </div>
                   </div>
-                </template>
-              </el-step>
-            </el-steps>
-          </div>
-        </el-card>
-      </section>
-
-      <!-- 区块二：今日数据采集状态（放在上面） -->
-      <section class="page-section">
-        <h2 class="section-title">今日数据采集状态</h2>
-        <el-card shadow="hover" class="status-card" id="step-admin-system">
-          <template #header>
-            <div class="card-header">
-              <span><el-icon><Monitor /></el-icon> {{ $t("welcome.systemStatus") }}</span>
-              <el-tag :type="systemStatusSummary.type" effect="dark">{{ systemStatusSummary.text }}</el-tag>
-            </div>
-          </template>
-          <div class="system-grid">
-            <div
-              v-for="sys in sourceSystems"
-              :key="sys.name"
-              class="system-item"
-              :class="{ 'is-clickable': sys.type === 'manual' && sys.status !== 'gray' }"
-              @click="sys.status !== 'gray' ? handleSystemClick(sys) : null"
-            >
-              <div v-if="sys.status === 'gray'" class="upload-btn-wrapper">
-                <el-button type="primary" :icon="Upload" size="small" class="upload-btn" @click.stop="handleUpload(sys)">
-                  {{ $t("welcome.data.upload") }}
-                </el-button>
-              </div>
-              <div v-else class="sys-icon" :class="sys.status">
-                <component :is="sys.icon" />
-              </div>
-              <div class="sys-info">
-                <span class="sys-name">{{ sys.name }}</span>
-                <span class="sys-desc">{{ sys.desc }}</span>
-                <div class="sys-status-row">
-                  <span class="sys-status">{{ sys.statusText }}</span>
-                  <span class="sys-time" v-if="sys.uploadTime">{{ sys.uploadTime }}</span>
                 </div>
-                <span class="sys-type-tag" v-if="sys.type === 'manual'">{{ $t("welcome.data.manual") }}</span>
+              </div>
+
+              <div class="system-group">
+                <div class="system-group-header">
+                  <div>
+                    <div class="system-group-title">{{ $t("welcome.data.autoGroupTitle") }}</div>
+                    <div class="system-group-meta">在线 {{ autoSyncedCount }} / {{ autoSystems.length }}</div>
+                  </div>
+                  <span class="group-badge group-badge-success">{{ $t("welcome.data.auto") }}</span>
+                </div>
+
+                <div class="system-grid">
+                  <div v-for="sys in autoSystems" :key="`auto-${sys.name}`" class="system-item">
+                    <div class="sys-icon" :class="sys.status">
+                      <component :is="sys.icon" />
+                    </div>
+                    <div class="sys-info">
+                      <div class="sys-main-line">
+                        <span class="sys-name">{{ sys.name }}</span>
+                        <span class="sys-sep">/</span>
+                        <span class="sys-desc">{{ sys.desc }}</span>
+                      </div>
+                      <div class="sys-status-row">
+                        <span class="sys-status">{{ sys.statusText }}</span>
+                        <span class="sys-time" v-if="sys.uploadTime">{{ sys.uploadTime }}</span>
+                        <span class="sys-type-tag sys-type-tag-auto">{{ $t("welcome.data.auto") }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </el-card>
-      </section>
+          </el-card>
+        </section>
 
-      <!-- 区块三：快捷导航（放在上面） -->
+        <section class="page-section">
+          <div class="section-heading">
+            <h2 class="section-title">全链路批处理结果</h2>
+            <el-tag size="small" type="success" effect="light">处理完成</el-tag>
+          </div>
+
+          <div class="pipeline-grid">
+            <div v-for="(step, index) in pipelineSteps" :key="step.title" class="pipeline-stage">
+              <div class="pipeline-stage-head">
+                <div class="step-icon-custom">
+                  <el-icon><component :is="step.icon" /></el-icon>
+                </div>
+                <span class="pipeline-stage-index">0{{ index + 1 }}</span>
+              </div>
+              <div class="pipeline-stage-title">{{ step.title }}</div>
+              <div class="pipeline-stage-main">{{ step.main }}</div>
+              <el-tooltip placement="top" effect="dark" :content="step.detail">
+                <div class="pipeline-stage-detail">
+                  <span>查看说明</span>
+                  <el-icon class="step-detail-icon">
+                    <Document />
+                  </el-icon>
+                </div>
+              </el-tooltip>
+            </div>
+          </div>
+        </section>
+      </template>
+
+      <template v-else>
+        <section class="page-section">
+          <div class="section-heading">
+            <h2 class="section-title">{{ $t("welcome.opportunityPipeline") }}</h2>
+          </div>
+
+          <el-card shadow="hover" class="content-card funnel-card" id="step-user-opportunities">
+            <div class="opportunity-list">
+              <div v-for="opp in opportunities" :key="opp.name" class="opp-item">
+                <div class="opp-info">
+                  <span class="opp-name">{{ opp.name }}</span>
+                  <span class="opp-desc">{{ opp.desc }}</span>
+                </div>
+                <div class="opp-action">
+                  <el-button type="primary" plain size="small" @click="handlePush(opp)">
+                    {{ $t("welcome.pushToBDC") }}
+                  </el-button>
+                </div>
+              </div>
+            </div>
+          </el-card>
+        </section>
+      </template>
+
       <section class="page-section" v-if="quickNavItems.length > 0">
-        <h2 class="section-title">{{ $t("welcome.quickNavigation") }}</h2>
-        <div class="quick-nav-container">
+        <div class="section-heading">
+          <h2 class="section-title">{{ $t("welcome.quickNavigation") }}</h2>
+        </div>
+
+        <div class="quick-nav-panel">
           <div class="quick-nav-grid">
             <div v-for="item in quickNavItems" :key="item.path" class="nav-item" @click="handleNavClick(item)">
               <div class="nav-icon" :class="item.iconClass">
@@ -167,121 +242,29 @@
               </div>
               <div class="nav-content">
                 <div class="nav-title">{{ item.title }}</div>
-                <div class="nav-desc" v-if="item.desc">{{ item.desc }}</div>
+              </div>
+              <div class="nav-item-arrow">
+                <el-icon><ArrowRight /></el-icon>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- 区块四：数据接入与质量（图表放在最下方） -->
-      <section class="page-section">
-        <h2 class="section-title">{{ $t("dashboard.dataMonitor.qualityTitle") }}（{{ $t("dashboard.dataMonitor.dataVolume") }}）</h2>
-        <el-card shadow="hover" class="chart-card-welcome">
+      <section class="page-section" v-if="isAdmin">
+        <div class="section-heading">
+          <div>
+            <h2 class="section-title">{{ $t("dashboard.dataMonitor.qualityTitle") }}</h2>
+          </div>
+        </div>
+
+        <el-card shadow="hover" class="content-card chart-card-welcome">
           <div class="chart-body-welcome">
-            <ECharts :option="dataVolumeChartOption" :height="280" />
+            <ECharts :option="dataVolumeChartOption" :height="320" />
           </div>
         </el-card>
       </section>
-    </template>
-
-    <!-- 业务用户视图 -->
-    <template v-else>
-      <section class="page-section">
-        <h2 class="section-title">业务概览</h2>
-        <div class="metrics-grid" id="step-user-metrics">
-              <div class="metric-card">
-                <div class="metric-icon blue">
-                  <el-icon><User /></el-icon>
-                </div>
-                <div class="metric-info">
-                  <div class="label">{{ $t("welcome.totalClients") }}</div>
-                  <div class="value">12,543</div>
-                  <div class="trend up">
-                    +12% <el-icon><Top /></el-icon>
-                  </div>
-                </div>
-              </div>
-              <div class="metric-card">
-                <div class="metric-icon purple">
-                  <el-icon><Star /></el-icon>
-                </div>
-                <div class="metric-info">
-                  <div class="label">{{ $t("welcome.highIntent") }}</div>
-                  <div class="value">856</div>
-                  <div class="trend up">
-                    +5% <el-icon><Top /></el-icon>
-                  </div>
-                </div>
-              </div>
-              <div class="metric-card">
-                <div class="metric-icon orange">
-                  <el-icon><Trophy /></el-icon>
-                </div>
-                <div class="metric-info">
-                  <div class="label">{{ $t("welcome.conversionRate") }}</div>
-                  <div class="value">24.5%</div>
-                  <div class="trend down">
-                    -2% <el-icon><Bottom /></el-icon>
-                  </div>
-                </div>
-              </div>
-              <div class="metric-card">
-                <div class="metric-icon green">
-                  <el-icon><Money /></el-icon>
-                </div>
-                <div class="metric-info">
-                  <div class="label">{{ $t("welcome.revenueEst") }}</div>
-                  <div class="value">¥2.4M</div>
-                  <div class="trend up">
-                    +18% <el-icon><Top /></el-icon>
-                  </div>
-                </div>
-              </div>
-        </div>
-      </section>
-
-      <section class="page-section">
-        <h2 class="section-title">{{ $t("welcome.opportunityPipeline") }}</h2>
-        <el-card shadow="hover" class="funnel-card" id="step-user-opportunities">
-          <template #header>
-            <div class="card-header">
-              <span><el-icon><TrendCharts /></el-icon> {{ $t("welcome.opportunityPipeline") }}</span>
-            </div>
-          </template>
-          <div class="opportunity-list">
-            <div v-for="opp in opportunities" :key="opp.name" class="opp-item">
-              <div class="opp-info">
-                <span class="opp-name">{{ opp.name }}</span>
-                <span class="opp-desc">{{ opp.desc }}</span>
-              </div>
-              <div class="opp-action">
-                <el-button type="primary" plain size="small" @click="handlePush(opp)">
-                  {{ $t("welcome.pushToBDC") }}
-                </el-button>
-              </div>
-            </div>
-          </div>
-        </el-card>
-      </section>
-
-      <section class="page-section" v-if="quickNavItems.length > 0">
-        <h2 class="section-title">{{ $t("welcome.quickNavigation") }}</h2>
-        <div class="quick-nav-container">
-          <div class="quick-nav-grid">
-            <div v-for="item in quickNavItems" :key="item.path" class="nav-item" @click="handleNavClick(item)">
-              <div class="nav-icon" :class="item.iconClass">
-                <el-icon :size="22"><component :is="item.icon" /></el-icon>
-              </div>
-              <div class="nav-content">
-                <div class="nav-title">{{ item.title }}</div>
-                <div class="nav-desc" v-if="item.desc">{{ item.desc }}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-    </template>
+    </div>
   </div>
 </template>
 
@@ -297,15 +280,8 @@ import {
   Monitor,
   List,
   User,
-  Star,
-  Trophy,
-  Money,
   TrendCharts,
-  Top,
-  Bottom,
-  VideoCamera,
   Connection,
-  Iphone,
   Service,
   Menu,
   ArrowRight,
@@ -332,17 +308,12 @@ import {
   Operation,
   Refresh,
   Ticket,
-  Van,
   Upload,
   Download,
   Filter,
-  Cpu,
-  Histogram,
-  Files,
-  Select,
   MagicStick
 } from "@element-plus/icons-vue";
-import { ElMessage, ElNotification } from "element-plus";
+import { ElMessage } from "element-plus";
 import { useI18n } from "vue-i18n";
 import ECharts from "@/components/ECharts/index.vue";
 import type { ECOption } from "@/components/ECharts/config";
@@ -352,6 +323,7 @@ const router = useRouter();
 const userStore = useUserStore();
 const authStore = useAuthStore();
 const userInfo = computed(() => userStore.userInfo);
+type StatusTagType = "success" | "warning" | "info" | "primary" | "danger";
 
 // 从 localStorage 中读取角色信息
 const getRoleFromStorage = (): string => {
@@ -381,62 +353,167 @@ const welcomeMessage = computed(() => {
   return role === "admin" ? t("welcome.adminMessage") : t("welcome.businessMessage");
 });
 
-// Mock Data
-// Mock Data
+const isAdmin = computed(() => getRoleFromStorage() === "admin");
+
+// 当日数据采集来源（按你的图：系统名称 + 表名）
 const sourceSystems = computed(() => [
-  {
-    name: "DMS",
-    type: "manual",
-    status: "success",
-    statusText: t("welcome.data.status.uploaded"),
-    desc: t("welcome.data.desc.dms"),
-    uploadTime: "10:30",
-    icon: Monitor
-  },
+  // 手工表（Manual）
   {
     name: "POAS",
     type: "manual",
+    reportId: "poas_opp",
     status: "success",
     statusText: t("welcome.data.status.uploaded"),
-    desc: t("welcome.data.desc.poas"),
-    uploadTime: "11:15",
+    desc: "商机表",
+    uploadTime: "10:30",
     icon: Tickets
   },
   {
     name: "WWS",
     type: "manual",
-    status: "gray",
-    statusText: t("welcome.data.status.pendingUpload"),
-    desc: t("welcome.data.desc.wws"),
+    reportId: "wws_activity",
+    status: "success",
+    statusText: t("welcome.data.status.uploaded"),
+    desc: "活动列表",
+    uploadTime: "10:45",
+    icon: Monitor
+  },
+  {
+    name: "C@P系统",
+    type: "manual",
+    reportId: "cap_vehicle",
+    status: "success",
+    statusText: t("welcome.data.status.uploaded"),
+    desc: "车辆报告",
+    uploadTime: "11:00",
     icon: Upload
   },
   {
-    name: "C@P",
+    name: "Voucher",
     type: "manual",
+    reportId: "voucher_member_addon_sales",
+    status: "success",
+    statusText: t("welcome.data.status.uploaded"),
+    desc: "会员附加销售报表",
+    uploadTime: "11:15",
+    icon: Ticket
+  },
+  {
+    name: "Voucher",
+    type: "manual",
+    reportId: "voucher_balance_detail",
+    status: "success",
+    statusText: t("welcome.data.status.uploaded"),
+    desc: "优惠券余额报表明细",
+    uploadTime: "11:20",
+    icon: Ticket
+  },
+  {
+    name: "Voucher",
+    type: "manual",
+    reportId: "voucher_first_owner_info",
+    status: "success",
+    statusText: t("welcome.data.status.uploaded"),
+    desc: "首任车主信息",
+    uploadTime: "11:25",
+    icon: Ticket
+  },
+  {
+    name: "Manual Files",
+    type: "manual",
+    reportId: "manual_ins_renewal_sales",
+    status: "success",
+    statusText: t("welcome.data.status.uploaded"),
+    desc: "续保销售记录",
+    uploadTime: "09:30",
+    icon: Document
+  },
+  {
+    name: "Manual Files",
+    type: "manual",
+    reportId: "manual_ins_new_sales",
+    status: "success",
+    statusText: t("welcome.data.status.uploaded"),
+    desc: "新保销售记录",
+    uploadTime: "09:45",
+    icon: Document
+  },
+  {
+    name: "Manual Files",
+    type: "manual",
+    reportId: "manual_client_base_table",
+    status: "success",
+    statusText: t("welcome.data.status.uploaded"),
+    desc: "客户基盘表",
+    uploadTime: "10:00",
+    icon: Document
+  },
+  {
+    name: "Manual Files",
+    type: "manual",
+    reportId: "manual_replace_approval",
+    status: "success",
+    statusText: t("welcome.data.status.uploaded"),
+    desc: "推荐置换再购审批记录",
+    uploadTime: "10:10",
+    icon: Document
+  },
+  {
+    name: "Manual Files",
+    type: "manual",
+    reportId: "manual_offline_marketing_segment",
+    status: "success",
+    statusText: t("welcome.data.status.uploaded"),
+    desc: "线下营销/社群活动分群",
+    uploadTime: "10:20",
+    icon: Document
+  },
+  {
+    name: "Manual Files",
+    type: "manual",
+    reportId: "manual_generic_opportunity",
     status: "gray",
     statusText: t("welcome.data.status.pendingUpload"),
-    desc: t("welcome.data.desc.cap"),
+    desc: "自定义通用商机",
     icon: Upload
   },
+
+  // 直连数据库（Auto）
   {
     name: "BDC",
     type: "auto",
     status: "success",
     statusText: t("welcome.data.status.synced"),
-    desc: t("welcome.data.desc.BDC外呼系统"),
+    desc: "BDC 外呼系统数据",
+    uploadTime: "实时",
     icon: Service
   },
   {
-    name: "Voucher",
+    name: "DMS",
     type: "auto",
     status: "success",
     statusText: t("welcome.data.status.synced"),
-    desc: t("welcome.data.desc.voucher"),
-    icon: Ticket
+    desc: "DMS 主数据",
+    uploadTime: "实时",
+    icon: Monitor
+  },
+  {
+    name: "WeCom",
+    type: "auto",
+    status: "success",
+    statusText: t("welcome.data.status.synced"),
+    desc: "企业微信互动数据",
+    uploadTime: "实时",
+    icon: Connection
   }
 ]);
 
-const systemStatusSummary = computed(() => {
+const manualSystems = computed(() => sourceSystems.value.filter(s => s.type === "manual"));
+const autoSystems = computed(() => sourceSystems.value.filter(s => s.type === "auto"));
+const manualUploadedCount = computed(() => manualSystems.value.filter(s => s.status === "success").length);
+const autoSyncedCount = computed(() => autoSystems.value.filter(s => s.status === "success").length);
+
+const systemStatusSummary = computed<{ text: string; type: StatusTagType }>(() => {
   const systems = sourceSystems.value;
   const errorCount = systems.filter(s => s.status === "error" || s.status === "warning").length;
   const pendingCount = systems.filter(s => s.status === "gray").length;
@@ -461,16 +538,24 @@ const systemStatusSummary = computed(() => {
   };
 });
 
+const openWorkbenchUpload = (reportId?: string) => {
+  router.push({
+    path: "/dataProcess/dataQualityWorkbench",
+    query: {
+      reportId,
+      openPicker: reportId ? "1" : undefined
+    }
+  });
+};
+
 const handleSystemClick = (sys: any) => {
   if (sys.type === "manual") {
-    // Navigate to Data Quality Workbench for manual upload systems
-    router.push("/dataProcess/dataQualityWorkbench");
+    openWorkbenchUpload(sys.reportId);
   }
 };
 
-const handleUpload = (sys: any) => {
-  // Navigate to Data Quality Workbench for upload
-  router.push("/dataProcess/dataQualityWorkbench");
+const handleUpload = (sys?: any) => {
+  openWorkbenchUpload(sys?.reportId);
   ElMessage.info(t("welcome.data.upload.clickUpload"));
 };
 
@@ -481,14 +566,125 @@ const opportunities = computed(() => [
   { name: t("welcome.data.opportunity.lostLead"), desc: t("welcome.data.opportunity.lostLeadDesc") }
 ]);
 
-// 客户库统计数据
+// 顶部业务指标 Mock 数据
+// 客户库统计数据（主数据）
 const customerStats = ref({
+  // 截至当前批次完成后的主数据客户总量
   total: 1342001,
+  // 今日客户总量相较于昨日的净增客户数
   incremental: 1245,
+  // 以下字段暂未在欢迎页使用，保留给后续扩展
   mergedCount: 85600,
   updatedCount: 234500,
   newMerged: 124,
   newUpdated: 532
+});
+
+// 冲突客户统计（待人工 / 规则复核）
+const conflictStats = ref({
+  // 当前仍未解决、待处理冲突客户总量
+  total: 3486,
+  // 今日待处理冲突客户数相较于昨日的增量
+  incremental: 72
+});
+
+// 标签统计（被至少一个标签覆盖的客户）
+const tagStats = ref({
+  total: 256034,
+  incremental: 3210
+});
+
+// 分群统计（被纳入任一客户群的客户）
+const segmentStats = ref({
+  total: 168905,
+  incremental: 980
+});
+
+// 商机统计（主数据驱动产生的商机）
+const opportunityStats = ref({
+  total: 4325,
+  incremental: 135
+});
+
+// 全链路批处理结果 Mock 数据（全部视为已完成状态）
+const pipelineSteps = computed(() => {
+  return [
+    {
+      title: "源数据导入",
+      main: `已导入源表数 8 / 计划源表数 10`,
+      detail: "本批次计划导入 10 张源表，当前已成功导入 8 张，其余 2 张待下批处理。",
+      icon: Download
+    },
+    {
+      title: "清洗通过",
+      main: `清洗合格客户记录数 ${formatNumber(118920)} / 接收客户记录数 ${formatNumber(125890)}`,
+      detail: "共接收到 125,890 条客户记录，其中 118,920 条通过清洗校验，其余记录存在必填缺失或格式异常。",
+      icon: Filter
+    },
+    {
+      title: "参与合并",
+      main: `新增主数据客户数 ${formatNumber(2345)} / 更新主数据客户数 ${formatNumber(9840)}`,
+      detail: "识别出 2,345 名新增主数据客户，并对 9,840 名既有客户进行了主数据属性更新。",
+      icon: User
+    },
+    {
+      title: "新增冲突",
+      main: `本批产生的冲突客户数 ${formatNumber(86)}`,
+      detail: "在本批处理中产生 86 名冲突客户，等待人工或规则进一步复核处理。",
+      icon: WarningFilled
+    }
+  ];
+});
+
+// 顶部业务指标：全量 & 增量（共 8 个块级元素）
+const topFullIndicators = computed(() => {
+  return [
+    {
+      label: "客户总量",
+      value: formatNumber(customerStats.value.total),
+      iconClass: "primary-bg"
+    },
+    {
+      label: "冲突总量",
+      value: formatNumber(conflictStats.value.total),
+      iconClass: "warning-bg"
+    },
+    {
+      label: "标签总量",
+      value: formatNumber(tagStats.value.total),
+      iconClass: "purple-bg"
+    },
+    {
+      label: "分群总量",
+      value: formatNumber(segmentStats.value.total),
+      iconClass: "success-bg"
+    }
+  ];
+});
+
+const topIncrementalIndicators = computed(() => {
+  return [
+    {
+      label: "客户增量",
+      value: "+" + formatNumber(customerStats.value.incremental),
+      iconClass: "primary-bg"
+    },
+    {
+      label: "冲突增量",
+      value: "+" + formatNumber(conflictStats.value.incremental),
+      iconClass: "warning-bg"
+    },
+    {
+      label: "标签增量",
+      value: "+" + formatNumber(tagStats.value.incremental),
+      iconClass: "purple-bg"
+    },
+    {
+      label: "分群增量",
+      value: "+" + formatNumber(segmentStats.value.incremental),
+      iconClass: "success-bg"
+    }
+  ];
 });
 
 // 源数据采集看板关键指标（合并自 dataMonitor，仅做首页概览）
@@ -500,63 +696,17 @@ const sourceMonitorBrief = ref({
   mergeNeeded: 45,
   autoMerged: 8560,
   incremental: 1248,
-  pipelineStep: "批处理进行中",
-  pipelineStart: "02:00:00",
-  pipelineRemaining: "约 15 分钟",
   dataVolume: "850 GB"
 });
 
-// 融合块：全量指标（4–8 个，紧凑展示）
-const fullVolumeIndicators = computed(() => {
-  const c = customerStats.value;
-  const b = sourceMonitorBrief.value;
-  return [
-    { label: t("customer.stats.total"), value: formatNumber(c.total), iconClass: "primary-bg" },
-    { label: t("customer.stats.mergedCount"), value: formatNumber(c.mergedCount), iconClass: "success-bg" },
-    { label: t("customer.stats.updatedCount"), value: formatNumber(c.updatedCount), iconClass: "info-bg" },
-    { label: t("dashboard.dataMonitor.backendCredit.totalProcessed"), value: formatNumber(b.totalProcessed), iconClass: "primary-bg" },
-    { label: t("dashboard.dataMonitor.backendCredit.totalVolume"), value: b.totalVolume, iconClass: "info-bg" },
-    { label: t("dashboard.dataMonitor.backendCredit.successCount"), value: formatNumber(b.successCount), iconClass: "success-bg" }
-  ];
-});
+const heroStatus = computed<{ text: string; type: StatusTagType }>(() => {
+  if (isAdmin.value) return systemStatusSummary.value;
 
-// 融合块：增量指标（4–8 个，紧凑展示）
-const incrementalIndicators = computed(() => {
-  const c = customerStats.value;
-  const b = sourceMonitorBrief.value;
-  return [
-    { label: t("customer.stats.incremental"), value: "+" + formatNumber(c.incremental), iconClass: "warning-bg" },
-    { label: t("customer.stats.newMerged"), value: "+" + formatNumber(c.newMerged), iconClass: "purple-bg" },
-    { label: t("customer.stats.newUpdated"), value: "+" + formatNumber(c.newUpdated), iconClass: "primary-bg" },
-    { label: t("dashboard.dataMonitor.backendCredit.incremental"), value: "+" + formatNumber(b.incremental), iconClass: "warning-bg" },
-    { label: t("dashboard.dataMonitor.backendCredit.autoMerged"), value: formatNumber(b.autoMerged), iconClass: "purple-bg" },
-    { label: t("dashboard.dataMonitor.backendCredit.mergeNeeded"), value: String(b.mergeNeeded), iconClass: "info-bg" }
-  ];
+  return {
+    text: `新增 ${formatNumber(opportunityStats.value.incremental)} 条`,
+    type: "success"
+  };
 });
-
-// 全链路批处理（静态展示，不刷新）
-const pipelineData = ref({
-  currentStep: 2,
-  startTime: "02:00:00"
-});
-const pipelineStatusType = "success" as const;
-const pipelineSteps = computed(() => [
-  { title: t("dashboard.dataMonitor.steps.ingestion"), desc: "100/100", icon: Download },
-  { title: t("dashboard.dataMonitor.steps.cleaning"), desc: "99/100", icon: Filter },
-  { title: t("dashboard.dataMonitor.steps.identify"), desc: "98/100", icon: User },
-  { title: t("dashboard.dataMonitor.steps.tagging"), desc: "97/100", icon: Cpu },
-  { title: t("dashboard.dataMonitor.steps.dispatch"), desc: "96/100", icon: Connection }
-]);
-const getPipelineStepStatus = (index: number) => {
-  if (index < pipelineData.value.currentStep) return "completed";
-  if (index === pipelineData.value.currentStep) return "active";
-  return "pending";
-};
-const getStepStatusForElSteps = (index: number): "wait" | "process" | "finish" | "error" | "success" => {
-  if (index < pipelineData.value.currentStep) return "finish";
-  if (index === pipelineData.value.currentStep) return "process";
-  return "wait";
-};
 
 // 数据接入与质量 - 仅数据量柱状图（静态假数据）
 const dataVolumeSourceData = [1200, 932, 2013, 934, 1290, 430, 220];
@@ -798,1304 +948,899 @@ onMounted(() => {
 <style scoped lang="scss">
 .welcome-container {
   min-height: 100%;
-  padding: 20px;
-  background-color: var(--el-bg-color-page);
-  overflow: visible;
+  padding: 24px;
+  background: radial-gradient(circle at top right, rgba(64, 158, 255, 0.06), transparent 26%),
+    linear-gradient(180deg, #f8fafc 0%, var(--el-bg-color-page) 38%);
 }
 
-.dashboard-content {
-  /* 整页滚动：不设固定高度与内部滚动，由外层页面滚动 */
+.welcome-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
-.welcome-header {
+.welcome-hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 22px 24px;
+  overflow: hidden;
+  border-radius: 28px;
+  background: linear-gradient(135deg, #fbfdff 0%, #eef5ff 56%, #ffffff 100%);
+  border: 1px solid rgba(64, 158, 255, 0.12);
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.06);
+}
+
+.hero-copy,
+.hero-toolbar {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-main {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: start;
+}
+
+.hero-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+
+.hero-title {
+  margin: 0;
+  color: var(--el-text-color-primary);
+  font-size: 38px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.hero-user-name {
+  color: var(--el-color-primary);
+}
+
+.hero-subtitle {
+  max-width: 640px;
+  margin: 10px 0 0;
+  color: var(--el-text-color-secondary);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.hero-toolbar {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.meta-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  color: #475569;
+  font-size: 12px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 999px;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  align-items: center;
+  margin-top: 0;
+
+  :deep(.el-button) {
+    min-width: 142px;
+    box-shadow: 0 8px 18px rgba(64, 158, 255, 0.12);
+  }
+}
+
+.hero-orb {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(16px);
+  opacity: 0.7;
+}
+
+.hero-orb-primary {
+  top: -88px;
+  right: -68px;
+  width: 260px;
+  height: 260px;
+  background: rgba(191, 219, 254, 0.22);
+}
+
+.hero-orb-warm {
+  bottom: -96px;
+  left: 54%;
+  width: 180px;
+  height: 180px;
+  background: rgba(250, 204, 21, 0.1);
+}
+
+.page-section {
+  margin: 0;
+}
+
+.section-heading {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-  padding: 20px 30px;
-  background: linear-gradient(135deg, var(--el-color-primary-light-9) 0%, var(--el-bg-color) 100%);
-  border-radius: 16px;
-  position: relative;
-  overflow: hidden;
-
-  .header-bg {
-    position: absolute;
-    top: -50%;
-    right: -10%;
-    width: 300px;
-    height: 300px;
-    background: var(--el-color-primary);
-    filter: blur(80px);
-    opacity: 0.1;
-    border-radius: 50%;
-  }
-
-  .header-content {
-    h1 {
-      font-size: 32px;
-      margin: 0 0 12px 0;
-      color: var(--el-text-color-primary);
-      font-weight: 600;
-
-      .user-name {
-        color: var(--el-color-primary);
-      }
-    }
-    .subtitle {
-      font-size: 16px;
-      color: var(--el-text-color-secondary);
-      margin: 0;
-      max-width: 600px;
-    }
-  }
-
-  .header-action {
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-  }
-
-  .global-update {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    font-size: 12px;
-    color: var(--el-text-color-secondary);
-    .global-update-label {
-      font-weight: 500;
-    }
-    .global-update-time {
-      font-family: SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--el-color-primary);
-    }
-  }
-}
-
-/* 统一区块与标题 */
-.page-section {
-  margin-bottom: 28px;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 12px;
 }
 
 .section-title {
-  font-size: 16px;
-  font-weight: 600;
+  margin: 0;
   color: var(--el-text-color-primary);
-  margin: 0 0 16px 0;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--el-border-color-lighter);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.2;
 }
 
-/* 客户库·源数据 融合块：全量/增量紧凑指标，不占大块 */
-.indicator-block {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-.indicator-group {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.indicator-group-title {
-  font-size: 13px;
-  font-weight: 600;
+.section-desc {
+  margin: 6px 0 0;
   color: var(--el-text-color-secondary);
-  margin: 0;
-  padding: 0 0 4px 0;
+  font-size: 13px;
+  line-height: 1.6;
 }
+
+.indicator-board {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 12px 18px;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 24px;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+}
+
+.indicator-row {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: 16px;
+  align-items: center;
+  padding: 14px 4px;
+
+  & + .indicator-row {
+    border-top: 1px solid #edf2f7;
+  }
+}
+
+.indicator-side {
+  display: flex;
+  align-items: center;
+}
+
+.indicator-side-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 72px;
+  padding: 8px 10px;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 700;
+  background: #f8fafc;
+  border-radius: 12px;
+}
+
 .indicator-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 10px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
 }
+
 .indicator-mini-card {
+  position: relative;
+  padding: 14px 16px;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #edf2f7;
+  border-radius: 16px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+
+  &::before {
+    position: absolute;
+    top: 0;
+    left: 16px;
+    width: 40px;
+    height: 4px;
+    content: "";
+    border-radius: 999px;
+  }
+
+  &.primary-bg {
+    background: linear-gradient(180deg, rgba(64, 158, 255, 0.08), #ffffff 62%);
+
+    &::before {
+      background: var(--el-color-primary);
+    }
+  }
+
+  &.warning-bg {
+    background: linear-gradient(180deg, rgba(230, 162, 60, 0.1), #ffffff 62%);
+
+    &::before {
+      background: var(--el-color-warning);
+    }
+  }
+
+  &.purple-bg {
+    background: linear-gradient(180deg, rgba(142, 68, 173, 0.1), #ffffff 62%);
+
+    &::before {
+      background: #8e44ad;
+    }
+  }
+
+  &.success-bg {
+    background: linear-gradient(180deg, rgba(103, 194, 58, 0.1), #ffffff 62%);
+
+    &::before {
+      background: var(--el-color-success);
+    }
+  }
+}
+
+.indicator-label {
+  display: block;
+  color: var(--el-text-color-secondary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.indicator-value {
+  display: block;
+  margin-top: 10px;
+  color: var(--el-text-color-primary);
+  font-family: DIN, "DIN Alternate", "Arial Narrow", sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.content-card {
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.94);
+  border: none;
+  border-radius: 22px;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.07);
+
+  :deep(.el-card__body) {
+    padding: 22px;
+  }
+}
+
+.system-section {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 10px 14px;
-  border-radius: 8px;
-  border: 1px solid var(--el-border-color-lighter);
-  background: var(--el-bg-color-overlay);
-  min-height: 52px;
-  transition: box-shadow 0.2s ease;
-  &:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  }
-  .indicator-label {
-    font-size: 11px;
-    color: var(--el-text-color-secondary);
-    line-height: 1.3;
-    margin-bottom: 2px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 100%;
-  }
-  .indicator-value {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--el-text-color-primary);
-    line-height: 1.2;
-    letter-spacing: -0.02em;
-  }
-  &.primary-bg { border-left: 3px solid var(--el-color-primary); }
-  &.success-bg { border-left: 3px solid var(--el-color-success); }
-  &.info-bg { border-left: 3px solid var(--el-color-info); }
-  &.warning-bg { border-left: 3px solid var(--el-color-warning); }
-  &.purple-bg { border-left: 3px solid #8e44ad; }
-}
-@media (max-width: 1200px) {
-  .indicator-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-@media (max-width: 768px) {
-  .indicator-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-  }
-  .indicator-mini-card {
-    padding: 8px 12px;
-    min-height: 48px;
-    .indicator-value { font-size: 14px; }
-  }
+  gap: 18px;
 }
 
-.section-card {
-  margin-top: 16px;
-  &:first-of-type {
-    margin-top: 0;
-  }
+.system-section-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(320px, 1fr);
+  gap: 18px;
+  align-items: start;
 }
 
-.card-header {
+.system-group {
+  padding: 20px;
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
+  border: 1px solid #edf2f7;
+  border-radius: 20px;
+  height: 100%;
+}
+
+.system-group-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  font-weight: 600;
-  font-size: 16px;
-
-  span {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
 }
 
-/* 数据统计 - 6 个独立卡片 */
-.source-stats-grid {
+.system-group-title {
+  color: var(--el-text-color-primary);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.system-group-meta {
+  margin-top: 4px;
+  color: var(--el-text-color-secondary);
+  font-size: 12px;
+}
+
+.group-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 999px;
+}
+
+.group-badge-primary {
+  color: var(--el-color-primary);
+  background: rgba(64, 158, 255, 0.12);
+}
+
+.group-badge-success {
+  color: var(--el-color-success);
+  background: rgba(103, 194, 58, 0.12);
+}
+
+.system-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-bottom: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
 }
-.credit-card-welcome {
+
+.system-item {
   display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 16px 20px;
-  border-radius: 12px;
-  border: 1px solid var(--el-border-color-lighter);
-  background: var(--el-bg-color-overlay);
-  transition: all 0.3s ease;
-  min-height: 88px;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 16px;
+  background: #ffffff;
+  border: 1px solid #edf2f7;
+  border-radius: 18px;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-color: var(--el-color-primary-light-7);
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
   }
+}
 
-  .credit-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 22px;
-    flex-shrink: 0;
+.system-item.is-clickable {
+  cursor: pointer;
+}
 
-    .el-icon {
-      font-size: 22px;
-    }
-  }
+.sys-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  font-size: 20px;
+  border-radius: 14px;
+  background: #eff6ff;
 
-  &.primary-bg .credit-icon {
-    background: linear-gradient(135deg, #ecf5ff, #c6e2ff);
-    color: var(--el-color-primary);
-  }
-  &.info-bg .credit-icon {
-    background: linear-gradient(135deg, #f4f4f5, #e9e9eb);
-    color: #909399;
-  }
-  &.success-bg .credit-icon {
-    background: linear-gradient(135deg, #f0f9eb, #d1edc4);
+  &.success {
     color: var(--el-color-success);
+    background: rgba(103, 194, 58, 0.12);
   }
-  &.warning-bg .credit-icon {
-    background: linear-gradient(135deg, #fdf6ec, #faecd8);
+
+  &.warning {
     color: var(--el-color-warning);
-  }
-  &.purple-bg .credit-icon {
-    background: linear-gradient(135deg, #f8effc, #e5d4f5);
-    color: #8e44ad;
+    background: rgba(230, 162, 60, 0.12);
   }
 
-  .credit-info {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+  &.error {
+    color: var(--el-color-danger);
+    background: rgba(245, 108, 108, 0.12);
   }
-  .credit-label {
-    font-size: 12px;
-    color: var(--el-text-color-secondary);
-    font-weight: 600;
-    line-height: 1.3;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .credit-value {
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--el-text-color-primary);
-    line-height: 1.2;
-    letter-spacing: -0.02em;
+
+  &.gray {
+    color: var(--el-color-primary);
+    background: rgba(64, 158, 255, 0.12);
+    border: 1px solid rgba(64, 158, 255, 0.2);
+    animation: pulse-upload 2s ease-in-out infinite;
   }
 }
 
-@media (max-width: 1200px) {
-  .source-stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-@media (max-width: 768px) {
-  .source-stats-grid {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-  .credit-card-welcome {
-    min-height: 76px;
-    padding: 12px 16px;
-    .credit-icon {
-      width: 42px;
-      height: 42px;
-      font-size: 20px;
-    }
-    .credit-value {
-      font-size: 18px;
-    }
-  }
+.sys-info {
+  flex: 1;
+  min-width: 0;
 }
 
-/* 全链路批处理结果 - 沿用原看板样式 */
-.pipeline-card-welcome {
-  .pipeline-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 12px;
-
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      .header-icon {
-        font-size: 18px;
-        color: var(--el-color-primary);
-      }
-      .title-wrap {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-      }
-      .title {
-        font-size: 16px;
-        font-weight: 700;
-        color: var(--el-text-color-primary);
-      }
-      .title-desc {
-        font-size: 12px;
-        font-weight: 400;
-        color: var(--el-text-color-secondary);
-      }
-    }
-
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      .meta-info {
-        font-size: 12px;
-        color: var(--el-text-color-secondary);
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        .dot-online {
-          width: 6px;
-          height: 6px;
-          background: var(--el-color-success);
-          border-radius: 50%;
-          animation: step-pulse-glow 2s infinite;
-        }
-      }
-    }
-  }
-
-  .pipeline-steps-wrapper {
-    padding: 16px 0 8px;
-  }
-
-  .pipeline-steps {
-    :deep(.el-step__main) {
-      margin-top: 20px !important;
-      padding-top: 0 !important;
-    }
-    :deep(.el-steps .el-step__head) {
-      margin-right: 16px !important;
-    }
-    :deep(.el-step__icon) {
-      width: 36px !important;
-      height: 36px !important;
-      min-width: 36px !important;
-      min-height: 36px !important;
-      border-width: 2px;
-      font-size: 16px;
-      border-radius: 50% !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      &.is-process {
-        border-color: var(--el-color-primary);
-        color: var(--el-color-primary);
-      }
-      &.is-finish {
-        border-color: var(--el-color-success);
-        background-color: var(--el-color-success);
-        color: #fff;
-      }
-      &.is-wait {
-        border-color: #e4e7ed;
-        background-color: #fff;
-        color: #cbd5e0;
-      }
-    }
-    :deep(.el-step__title) {
-      font-size: 14px;
-      font-weight: 700;
-      &.is-process {
-        color: var(--el-color-primary);
-      }
-      &.is-wait {
-        color: #a0aec0;
-      }
-    }
-    :deep(.el-step__line--inner) {
-      background: linear-gradient(90deg, var(--el-color-success) 0%, var(--el-color-primary) 100%);
-      border-radius: 2px;
-    }
-  }
-
-  .step-icon-custom {
-    position: relative;
-    width: 36px !important;
-    height: 36px !important;
-    min-width: 36px !important;
-    min-height: 36px !important;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50% !important;
-    flex-shrink: 0;
-    &.completed {
-      background: var(--el-color-success);
-      color: #fff;
-    }
-    &.active {
-      background: var(--el-color-primary);
-      color: #fff;
-      box-shadow: 0 0 0 4px rgba(64, 158, 255, 0.2);
-    }
-    &.pending {
-      background: #fff;
-      color: #cbd5e0;
-    }
-    .step-pulse {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      border: 2px solid var(--el-color-primary);
-      opacity: 0.6;
-      animation: step-pulse 2s ease-out infinite;
-    }
-  }
-
-  .step-description {
-    .step-desc-text {
-      font-size: 11px;
-      color: var(--el-text-color-secondary);
-      margin-bottom: 4px;
-    }
-    .step-processing {
-      font-size: 10px;
-      color: var(--el-color-primary);
-      font-weight: 600;
-      animation: pulse-text 1.5s ease-in-out infinite;
-      margin-top: 2px;
-    }
-  }
+.sys-main-line {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
-@keyframes step-pulse {
-  0% {
-    width: 100%;
-    height: 100%;
-    opacity: 0.6;
-  }
-  100% {
-    width: 150%;
-    height: 150%;
-    opacity: 0;
-  }
-}
-@keyframes step-pulse-glow {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 rgba(103, 194, 58, 0.4);
-  }
-  70% {
-    box-shadow: 0 0 0 8px rgba(103, 194, 58, 0);
-  }
-}
-@keyframes pulse-text {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.6;
-  }
+.sys-name {
+  color: var(--el-text-color-primary);
+  font-size: 14px;
+  font-weight: 700;
 }
 
-/* 数据接入与质量 - 仅数据量图表 */
-.chart-card-welcome {
-  .chart-body-welcome {
-    width: 100%;
-    min-height: 280px;
-  }
+.sys-sep {
+  color: var(--el-text-color-placeholder);
 }
 
-.mt-20 {
-  margin-top: 20px;
+.sys-desc {
+  color: var(--el-text-color-secondary);
+  font-size: 12px;
+  line-height: 1.4;
 }
 
-.mt-10 {
+.sys-status-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
   margin-top: 10px;
 }
 
-/* System Grid */
-.system-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-  gap: 16px;
+.sys-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  color: #475569;
+  font-size: 12px;
+  background: #f8fafc;
+  border-radius: 999px;
+}
 
-  .system-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 16px;
-    background: var(--el-fill-color-light);
-    border-radius: 8px;
-    transition: all 0.3s;
+.sys-time {
+  color: var(--el-color-success);
+  font-size: 12px;
+  font-weight: 700;
+}
 
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--el-box-shadow-light);
-    }
+.sys-type-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  color: var(--el-color-primary);
+  font-size: 12px;
+  background: rgba(64, 158, 255, 0.1);
+  border-radius: 999px;
+}
 
-    .sys-icon {
-      font-size: 24px;
-      margin-bottom: 8px;
-      width: 48px;
-      height: 48px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 12px;
-      background: var(--el-bg-color);
+.sys-type-tag-auto {
+  color: var(--el-color-success);
+  background: rgba(103, 194, 58, 0.12);
+}
 
-      &.normal {
-        color: var(--el-color-success);
-      }
-      &.warning {
-        color: var(--el-color-warning);
-      }
-      &.error {
-        color: var(--el-color-danger);
-      }
-    }
+.sys-upload-link {
+  margin-left: auto;
+}
 
-    .sys-info {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-
-      .sys-name {
-        font-weight: 500;
-        font-size: 14px;
-        margin-bottom: 2px;
-      }
-
-      .sys-desc {
-        font-size: 11px;
-        color: var(--el-text-color-secondary);
-        margin-bottom: 2px;
-      }
-
-      .sys-status-row {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-top: 2px;
-      }
-
-      .sys-status {
-        font-size: 12px;
-        color: var(--el-text-color-secondary);
-      }
-
-      .sys-time {
-        font-size: 12px;
-        color: var(--el-color-success);
-        font-weight: 500;
-      }
-
-      .sys-type-tag {
-        font-size: 10px;
-        color: var(--el-color-info);
-        background: var(--el-fill-color);
-        padding: 0 4px;
-        border-radius: 4px;
-        margin-top: 2px;
-      }
-    }
-  }
-
-  .system-item.is-clickable {
-    cursor: pointer;
-
-    &:hover {
-      background: var(--el-fill-color);
-      transform: translateY(-2px);
-      box-shadow: var(--el-box-shadow-light);
-
-      .sys-icon {
-        background: var(--el-bg-color-overlay);
-      }
-    }
-  }
-
-  .sys-icon {
-    &.success {
-      color: var(--el-color-success);
-    }
-    &.gray {
-      color: var(--el-color-primary);
-      background: var(--el-color-primary-light-9) !important;
-      border: 1.5px solid var(--el-color-primary-light-7);
-      animation: pulse-upload 2s ease-in-out infinite;
-
-      &:hover {
-        background: var(--el-color-primary-light-8) !important;
-        border-color: var(--el-color-primary-light-5);
-        animation: none;
-      }
-    }
-    // Keep existing classes if needed or override
-  }
-
-  // 上传按钮容器
-  .upload-btn-wrapper {
-    width: 100%;
-    margin-bottom: 8px;
-    display: flex;
-    justify-content: center;
-  }
-
-  // 上传按钮样式 - 精致现代设计
-  .upload-btn {
-    width: 70%;
-    height: 40px;
-    font-weight: 500;
-    font-size: 13px;
-    letter-spacing: 0.3px;
-    border-radius: 8px;
-    border: none;
-    background: var(--el-color-primary);
-    color: #ffffff;
-    box-shadow: 0 2px 4px var(--el-color-primary-light-8);
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
-
-    // 光泽效果
-    &::after {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-      transition: left 0.5s;
-    }
-
-    &:hover {
-      transform: translateY(-1px);
-      background: var(--el-color-primary-light-3);
-      box-shadow: 0 4px 8px var(--el-color-primary-light-7);
-
-      &::after {
-        left: 100%;
-      }
-    }
-
-    &:active {
-      transform: translateY(0);
-      box-shadow: 0 1px 3px var(--el-color-primary-light-8);
-    }
-
-    // 图标样式
-    :deep(.el-icon) {
-      margin-right: 4px;
-      font-size: 15px;
-      vertical-align: middle;
-    }
-  }
-
-  @keyframes pulse-upload {
-    0%,
-    100% {
-      box-shadow: 0 0 0 0 var(--el-color-primary-light-6);
-    }
-    50% {
-      box-shadow: 0 0 0 4px transparent;
-    }
+.chart-card-welcome {
+  :deep(.el-card__body) {
+    padding: 20px 24px 16px;
   }
 }
 
-/* Metrics Grid */
-.metrics-grid {
+.chart-body-welcome {
+  width: 100%;
+  min-height: 320px;
+}
+
+.pipeline-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
 
-  .metric-card {
-    background: var(--el-bg-color-overlay);
-    padding: 24px;
-    border-radius: 12px;
-    box-shadow: var(--el-box-shadow-light);
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    transition: all 0.3s;
-    border: 1px solid var(--el-border-color-light);
+.pipeline-stage {
+  position: relative;
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 20px;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.05);
 
-    &:hover {
-      transform: translateY(-4px);
-      box-shadow: var(--el-box-shadow);
-    }
-
-    .metric-icon {
-      width: 60px;
-      height: 60px;
-      border-radius: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 28px;
-
-      &.blue {
-        background: rgba(64, 158, 255, 0.1);
-        color: #409eff;
-      }
-      &.purple {
-        background: rgba(139, 92, 246, 0.1);
-        color: #8b5cf6;
-      }
-      &.orange {
-        background: rgba(249, 115, 22, 0.1);
-        color: #f97316;
-      }
-      &.green {
-        background: rgba(34, 197, 94, 0.1);
-        color: #22c55e;
-      }
-    }
-
-    .metric-info {
-      flex: 1;
-
-      .label {
-        color: var(--el-text-color-secondary);
-        font-size: 14px;
-        margin-bottom: 4px;
-      }
-      .value {
-        font-size: 24px;
-        font-weight: 700;
-        color: var(--el-text-color-primary);
-        margin-bottom: 4px;
-      }
-      .trend {
-        font-size: 12px;
-        display: flex;
-        align-items: center;
-        gap: 4px;
-
-        &.up {
-          color: var(--el-color-success);
-        }
-        &.down {
-          color: var(--el-color-danger);
-        }
-      }
-    }
+  &:not(:last-child)::after {
+    position: absolute;
+    top: 34px;
+    right: -14px;
+    width: 14px;
+    height: 2px;
+    content: "";
+    background: #d7e5f2;
   }
 }
 
-/* Opportunity List */
+.pipeline-stage-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pipeline-stage-index {
+  color: #94a3b8;
+  font-family: DIN, "DIN Alternate", "Arial Narrow", sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.step-icon-custom {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--el-color-success), #8ad75a);
+  border-radius: 999px;
+  box-shadow: 0 0 0 4px rgba(103, 194, 58, 0.18);
+}
+
+.pipeline-stage-title {
+  margin-top: 16px;
+  color: var(--el-text-color-primary);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.pipeline-stage-main {
+  margin-top: 10px;
+  color: var(--el-text-color-primary);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.pipeline-stage-detail {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+  color: var(--el-color-primary);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.step-detail-icon {
+  color: var(--el-color-info);
+  font-size: 14px;
+  cursor: pointer;
+}
+
 .opportunity-list {
   display: flex;
   flex-direction: column;
+  gap: 14px;
+}
+
+.opp-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 16px;
+  align-items: center;
+  padding: 18px 20px;
+  background: linear-gradient(90deg, rgba(64, 158, 255, 0.08), #ffffff 38%);
+  border: 1px solid rgba(64, 158, 255, 0.14);
+  border-radius: 20px;
+}
 
-  .opp-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px;
-    background: var(--el-fill-color-lighter);
-    border-radius: 8px;
-    border-left: 4px solid var(--el-color-primary);
+.opp-name {
+  display: block;
+  color: var(--el-text-color-primary);
+  font-size: 16px;
+  font-weight: 700;
+}
 
-    .opp-info {
-      .opp-name {
-        display: block;
-        font-weight: 600;
-        font-size: 15px;
-        margin-bottom: 4px;
-      }
-      .opp-desc {
-        font-size: 13px;
-        color: var(--el-text-color-secondary);
-      }
-    }
+.opp-desc {
+  display: block;
+  margin-top: 6px;
+  color: var(--el-text-color-secondary);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.opp-action {
+  :deep(.el-button) {
+    min-width: 124px;
   }
 }
 
-/* 快捷导航 */
-.quick-nav-container {
-  background: var(--el-bg-color-overlay);
-  border-radius: 12px;
-  padding: 24px;
-  border: 1px solid var(--el-border-color-light);
-  box-shadow: var(--el-box-shadow-light);
+.quick-nav-panel {
+  padding: 22px;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 24px;
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.08);
 }
 
 .quick-nav-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 16px;
-
-  .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 16px;
-    background: var(--el-bg-color);
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 1px solid var(--el-border-color-lighter);
-    position: relative;
-    overflow: hidden;
-
-    &::before {
-      content: "";
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 3px;
-      background: transparent;
-      transition: all 0.3s;
-    }
-
-    &:hover {
-      background: var(--el-bg-color-overlay);
-      border-color: var(--el-color-primary-light-7);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-
-      &::before {
-        background: var(--el-color-primary);
-      }
-
-      .nav-icon {
-        transform: scale(1.1);
-      }
-    }
-
-    .nav-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      transition: all 0.3s;
-
-      &.icon-blue {
-        background: rgba(64, 158, 255, 0.1);
-        color: #409eff;
-      }
-
-      &.icon-purple {
-        background: rgba(139, 92, 246, 0.1);
-        color: #8b5cf6;
-      }
-
-      &.icon-orange {
-        background: rgba(249, 115, 22, 0.1);
-        color: #f97316;
-      }
-
-      &.icon-green {
-        background: rgba(34, 197, 94, 0.1);
-        color: #22c55e;
-      }
-
-      &.icon-red {
-        background: rgba(239, 68, 68, 0.1);
-        color: #ef4444;
-      }
-
-      &.icon-cyan {
-        background: rgba(6, 182, 212, 0.1);
-        color: #06b6d4;
-      }
-
-      &.icon-yellow {
-        background: rgba(234, 179, 8, 0.1);
-        color: #eab308;
-      }
-
-      &.icon-pink {
-        background: rgba(236, 72, 153, 0.1);
-        color: #ec4899;
-      }
-
-      &.icon-indigo {
-        background: rgba(99, 102, 241, 0.1);
-        color: #6366f1;
-      }
-
-      &.icon-default {
-        background: var(--el-fill-color-light);
-        color: var(--el-text-color-regular);
-      }
-    }
-
-    .nav-content {
-      flex: 1;
-      min-width: 0;
-
-      .nav-title {
-        font-size: 14px;
-        font-weight: 500;
-        color: var(--el-text-color-primary);
-        margin-bottom: 4px;
-        line-height: 1.4;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-
-      .nav-desc {
-        font-size: 12px;
-        color: var(--el-text-color-secondary);
-        line-height: 1.4;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-    }
-  }
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
 }
 
-@media screen and (max-width: 1400px) {
-  .quick-nav-grid {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  }
-}
-
-@media screen and (max-width: 1200px) {
-  .quick-nav-grid {
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 12px;
-
-    .nav-item {
-      padding: 12px;
-      flex-direction: column;
-      text-align: center;
-      gap: 8px;
-
-      .nav-icon {
-        width: 36px;
-        height: 36px;
-      }
-
-      .nav-content {
-        .nav-title {
-          font-size: 13px;
-        }
-
-        .nav-desc {
-          font-size: 11px;
-        }
-      }
-    }
-  }
-}
-
-@media screen and (max-width: 768px) {
-  .quick-nav-container {
-    padding: 16px;
-
-    .section-title {
-      font-size: 14px;
-      margin-bottom: 16px;
-      padding-bottom: 12px;
-    }
-  }
-
-  .quick-nav-grid {
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    gap: 10px;
-
-    .nav-item {
-      padding: 12px 8px;
-
-      .nav-icon {
-        width: 32px;
-        height: 32px;
-      }
-
-      .nav-content {
-        .nav-title {
-          font-size: 12px;
-        }
-
-        .nav-desc {
-          display: none;
-        }
-      }
-    }
-  }
-}
-
-@media screen and (max-width: 1200px) {
-  .metrics-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media screen and (max-width: 768px) {
-  .metrics-grid {
-    grid-template-columns: 1fr;
-  }
-  .welcome-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 20px;
-
-    .header-action {
-      align-items: flex-start;
-      margin-top: 20px;
-    }
-  }
-}
-
-.mb-20 {
-  margin-bottom: 20px;
-}
-
-/* 统一统计面板样式 - 独立卡片风格 */
-.stats-panel {
+.nav-item {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.stats-card {
-  position: relative;
-  display: flex;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 14px;
   align-items: center;
-  gap: 16px;
-  padding: 16px 20px;
-  background: #ffffff;
-  border: 1px solid #e4e7ed;
-  border-radius: 8px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 18px;
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
+  border: 1px solid #edf2f7;
+  border-radius: 18px;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    border-color: transparent;
-  }
+    border-color: var(--el-color-primary-light-7);
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
 
-  .stats-icon-wrapper {
-    width: 48px;
-    height: 48px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    transition: all 0.3s ease;
-    font-size: 24px;
-  }
-
-  .stats-content {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    flex: 1;
-    min-width: 0;
-  }
-
-  .stats-number {
-    font-size: 28px;
-    font-weight: 700;
-    line-height: 1.2;
-    letter-spacing: -0.02em;
-    font-variant-numeric: tabular-nums;
-
-    .sub-value {
-      font-size: 14px;
-      font-weight: 400;
-      color: #909399;
-      margin-left: 4px;
-    }
-  }
-
-  .stats-label {
-    font-size: 14px;
-    font-weight: 400;
-    color: #606266;
-    line-height: 1.5;
-    word-break: break-word;
-  }
-
-  // 各类型卡片颜色配置
-  &.primary-card {
-    background: linear-gradient(135deg, rgba(64, 158, 255, 0.1), rgba(255, 255, 255, 0.4));
-    border: 1px solid rgba(64, 158, 255, 0.2);
-    .stats-icon-wrapper {
+    .nav-item-arrow {
       color: var(--el-color-primary);
-      background: rgba(64, 158, 255, 0.15);
-    }
-    .stats-main .stats-content .stats-number {
-      color: var(--el-color-primary);
-    }
-  }
-
-  &.success-card {
-    background: linear-gradient(135deg, rgba(103, 194, 58, 0.1), rgba(255, 255, 255, 0.4));
-    border: 1px solid rgba(103, 194, 58, 0.2);
-    .stats-icon-wrapper {
-      color: var(--el-color-success);
-      background: rgba(103, 194, 58, 0.15);
-    }
-    .stats-main .stats-content .stats-number {
-      color: var(--el-color-success);
-    }
-  }
-
-  &.warning-card {
-    background: linear-gradient(135deg, rgba(230, 162, 60, 0.1), rgba(255, 255, 255, 0.4));
-    border: 1px solid rgba(230, 162, 60, 0.2);
-    .stats-icon-wrapper {
-      color: var(--el-color-warning);
-      background: rgba(230, 162, 60, 0.15);
-    }
-    &:hover .stats-icon-wrapper {
-      background-color: rgba(230, 162, 60, 0.2);
-    }
-  }
-
-  .stats-main {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    width: 100%;
-  }
-
-  .stats-icon-wrapper {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    flex-shrink: 0;
-  }
-
-  .stats-content {
-    flex: 1;
-    min-width: 0;
-
-    .stats-number {
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--el-text-color-primary);
-      line-height: 1.2;
-    }
-
-    .stats-label {
-      font-size: 13px;
-      color: var(--el-text-color-secondary);
-      margin-top: 2px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-  }
-
-  .stats-sub {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 12px;
-    padding-top: 10px;
-    border-top: 1px solid rgba(0, 0, 0, 0.05);
-    width: 100%;
-
-    .sub-item {
-      display: flex;
-      flex-direction: column;
-
-      .sub-label {
-        font-size: 11px;
-        color: var(--el-text-color-secondary);
-        margin-bottom: 2px;
-      }
-      .sub-value {
-        font-size: 13px;
-        font-weight: 600;
-        color: var(--el-text-color-regular);
-      }
-    }
-  }
-
-  &.info-card {
-    .stats-icon-wrapper {
-      background-color: rgba(144, 147, 153, 0.12);
-      color: #909399;
-    }
-    .stats-number {
-      color: #909399;
-    }
-    &:hover .stats-icon-wrapper {
-      background-color: rgba(144, 147, 153, 0.2);
+      transform: translateX(3px);
     }
   }
 }
 
-// 响应式设计
-@media (max-width: 1400px) {
-  .stats-panel {
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 12px;
+.nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+
+  &.icon-blue {
+    color: #409eff;
+    background: rgba(64, 158, 255, 0.12);
   }
 
-  .stats-card {
-    padding: 14px 16px;
-    gap: 12px;
+  &.icon-purple {
+    color: #8b5cf6;
+    background: rgba(139, 92, 246, 0.12);
+  }
 
-    .stats-number {
-      font-size: 24px;
-    }
+  &.icon-orange {
+    color: #f97316;
+    background: rgba(249, 115, 22, 0.12);
+  }
 
-    .stats-icon-wrapper {
-      width: 44px;
-      height: 44px;
-      font-size: 22px;
-    }
+  &.icon-green {
+    color: #22c55e;
+    background: rgba(34, 197, 94, 0.12);
+  }
+
+  &.icon-red {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.12);
+  }
+
+  &.icon-cyan {
+    color: #06b6d4;
+    background: rgba(6, 182, 212, 0.12);
+  }
+
+  &.icon-yellow {
+    color: #eab308;
+    background: rgba(234, 179, 8, 0.12);
+  }
+
+  &.icon-pink {
+    color: #ec4899;
+    background: rgba(236, 72, 153, 0.12);
+  }
+
+  &.icon-indigo {
+    color: #6366f1;
+    background: rgba(99, 102, 241, 0.12);
+  }
+
+  &.icon-teal {
+    color: #0f766e;
+    background: rgba(15, 118, 110, 0.12);
+  }
+
+  &.icon-default {
+    color: var(--el-text-color-regular);
+    background: var(--el-fill-color-light);
+  }
+}
+
+.nav-content {
+  min-width: 0;
+}
+
+.nav-title {
+  color: var(--el-text-color-primary);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.nav-item-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+@keyframes pulse-upload {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(64, 158, 255, 0.16);
+  }
+
+  50% {
+    box-shadow: 0 0 0 6px rgba(64, 158, 255, 0);
+  }
+}
+
+@media (max-width: 1400px) {
+  .pipeline-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-main {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-toolbar {
+    align-items: flex-start;
+  }
+
+  .hero-meta,
+  .hero-actions {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 992px) {
+  .welcome-container {
+    padding: 18px;
+  }
+
+  .welcome-hero {
+    padding: 22px;
+    border-radius: 24px;
+  }
+
+  .hero-title {
+    font-size: 34px;
+  }
+
+  .system-grid,
+  .quick-nav-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .system-section-split {
+    grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 768px) {
-  .stats-panel {
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 12px;
+  .welcome-container {
+    padding: 14px;
   }
 
-  .stats-card {
-    padding: 12px 14px;
-    gap: 12px;
-
-    .stats-number {
-      font-size: 22px;
-    }
-
-    .stats-icon-wrapper {
-      width: 40px;
-      height: 40px;
-      font-size: 20px;
-    }
-
-    .stats-label {
-      font-size: 12px;
-    }
+  .welcome-shell {
+    gap: 18px;
   }
-}
 
-@media (max-width: 480px) {
-  .stats-panel {
-    grid-template-columns: repeat(2, 1fr);
+  .welcome-hero {
+    gap: 16px;
+    padding: 18px;
+    border-radius: 22px;
+  }
+
+  .hero-title {
+    font-size: 30px;
+  }
+
+  .hero-meta,
+  .hero-actions {
     gap: 10px;
   }
 
-  .stats-card {
-    padding: 10px 12px;
-    gap: 10px;
+  .hero-actions {
+    align-items: stretch;
 
-    .stats-number {
-      font-size: 20px;
-    }
-
-    .stats-icon-wrapper {
-      width: 36px;
-      height: 36px;
-      font-size: 18px;
+    :deep(.el-button) {
+      width: 100%;
     }
   }
-}
 
+  .quick-nav-panel,
+  .indicator-board {
+    padding: 18px;
+  }
+
+  .section-heading {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .section-title {
+    font-size: 18px;
+  }
+
+  .indicator-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .indicator-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .content-card {
+    :deep(.el-card__body) {
+      padding: 18px;
+    }
+  }
+
+  .system-group {
+    padding: 16px;
+  }
+
+  .system-group-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .system-item,
+  .nav-item,
+  .opp-item {
+    padding: 14px;
+  }
+
+  .opp-item {
+    grid-template-columns: 1fr;
+  }
+
+  .opp-action {
+    width: 100%;
+
+    :deep(.el-button) {
+      width: 100%;
+    }
+  }
+
+  .pipeline-stage {
+    padding: 16px;
+
+    &::after {
+      display: none;
+    }
+  }
+
+  .nav-item {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .nav-item-arrow {
+    display: none;
+  }
+}
 </style>

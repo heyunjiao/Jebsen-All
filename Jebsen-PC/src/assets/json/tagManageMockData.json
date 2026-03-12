@@ -7,7 +7,7 @@
         {
           "tagId": "TAG-001",
           "tagName": "意向级别-热",
-          "category": "意向级别",
+          "category": "业务 / 意向级别",
           "tagType": "manual",
           "status": "active",
           "coverageCount": 15230,
@@ -23,7 +23,7 @@
         {
           "tagId": "TAG-002",
           "tagName": "意向级别-暖",
-          "category": "意向级别",
+          "category": "业务 / 意向级别",
           "tagType": "manual",
           "status": "active",
           "coverageCount": 28450,
@@ -39,7 +39,7 @@
         {
           "tagId": "TAG-003",
           "tagName": "意向级别-冷",
-          "category": "意向级别",
+          "category": "业务 / 意向级别",
           "tagType": "manual",
           "status": "active",
           "coverageCount": 45600,
@@ -55,7 +55,7 @@
         {
           "tagId": "TAG-004",
           "tagName": "私牌",
-          "category": "车牌类型",
+          "category": "车 / 车牌类型",
           "tagType": "auto",
           "status": "active",
           "coverageCount": 78900,
@@ -80,7 +80,7 @@
         {
           "tagId": "TAG-005",
           "tagName": "公牌",
-          "category": "车牌类型",
+          "category": "车 / 车牌类型",
           "tagType": "auto",
           "status": "active",
           "coverageCount": 12300,
@@ -105,7 +105,7 @@
         {
           "tagId": "TAG-006",
           "tagName": "本市",
-          "category": "所在城市",
+          "category": "车 / 所在城市",
           "tagType": "auto",
           "status": "active",
           "coverageCount": 67800,
@@ -130,7 +130,7 @@
         {
           "tagId": "TAG-007",
           "tagName": "省内外市",
-          "category": "所在城市",
+          "category": "车 / 所在城市",
           "tagType": "auto",
           "status": "active",
           "coverageCount": 23400,
@@ -155,7 +155,7 @@
         {
           "tagId": "TAG-008",
           "tagName": "免打扰车主",
-          "category": "特殊标识",
+          "category": "业务 / 特殊标识",
           "tagType": "manual",
           "status": "active",
           "coverageCount": 890,
@@ -171,7 +171,7 @@
         {
           "tagId": "TAG-009",
           "tagName": "爱好-亲子",
-          "category": "爱好",
+          "category": "人 / 爱好",
           "tagType": "manual",
           "status": "active",
           "coverageCount": 15600,
@@ -187,7 +187,7 @@
         {
           "tagId": "TAG-010",
           "tagName": "爱好-品酒",
-          "category": "爱好",
+          "category": "人 / 爱好",
           "tagType": "manual",
           "status": "active",
           "coverageCount": 8900,
@@ -203,7 +203,7 @@
         {
           "tagId": "TAG-011",
           "tagName": "爱好-宠物",
-          "category": "爱好",
+          "category": "人 / 爱好",
           "tagType": "manual",
           "status": "active",
           "coverageCount": 12300,
@@ -219,7 +219,7 @@
         {
           "tagId": "TAG-012",
           "tagName": "爱好-自驾游",
-          "category": "爱好",
+          "category": "人 / 爱好",
           "tagType": "manual",
           "status": "active",
           "coverageCount": 22300,
@@ -235,7 +235,7 @@
         {
           "tagId": "TAG-013",
           "tagName": "爱好-艺术文化",
-          "category": "爱好",
+          "category": "人 / 爱好",
           "tagType": "manual",
           "status": "active",
           "coverageCount": 11200,
@@ -251,7 +251,7 @@
         {
           "tagId": "TAG-014",
           "tagName": "爱好-赛车",
-          "category": "爱好",
+          "category": "人 / 爱好",
           "tagType": "manual",
           "status": "active",
           "coverageCount": 3450,
@@ -267,7 +267,7 @@
         {
           "tagId": "TAG-015",
           "tagName": "爱好-运动",
-          "category": "爱好",
+          "category": "人 / 爱好",
           "tagType": "manual",
           "status": "active",
           "coverageCount": 28900,
@@ -283,7 +283,7 @@
         {
           "tagId": "TAG-016",
           "tagName": "爱好-高尔夫",
-          "category": "爱好",
+          "category": "人 / 爱好",
           "tagType": "manual",
           "status": "active",
           "coverageCount": 6780,
@@ -299,7 +299,7 @@
         {
           "tagId": "TAG-017",
           "tagName": "SC-PMP邀约",
-          "category": "SC",
+          "category": "业务 / SC",
           "tagType": "manual",
           "status": "active",
           "coverageCount": 12580,
@@ -315,7 +315,7 @@
         {
           "tagId": "TAG-018",
           "tagName": "SC-全款",
-          "category": "SC",
+          "category": "业务 / SC",
           "tagType": "auto",
           "status": "active",
           "coverageCount": 45600,
@@ -340,7 +340,7 @@
         {
           "tagId": "TAG-019",
           "tagName": "SC-贷款",
-          "category": "SC",
+          "category": "业务 / SC",
           "tagType": "auto",
           "status": "active",
           "coverageCount": 34500,
@@ -365,7 +365,7 @@
         {
           "tagId": "TAG-020",
           "tagName": "SC-员工介绍",
-          "category": "SC",
+          "category": "业务 / SC",
           "tagType": "manual",
           "status": "active",
           "coverageCount": 8900,
@@ -381,7 +381,7 @@
         {
           "tagId": "TAG-021",
           "tagName": "SC-市场活动",
-          "category": "SC",
+          "category": "业务 / SC",
           "tagType": "manual",
           "status": "active",
           "coverageCount": 15600,
@@ -397,7 +397,7 @@
         {
           "tagId": "TAG-022",
           "tagName": "SC-新车",
-          "category": "SC",
+          "category": "业务 / SC",
           "tagType": "auto",
           "status": "active",
           "coverageCount": 78900,
@@ -422,7 +422,7 @@
         {
           "tagId": "TAG-023",
           "tagName": "SC-易手车",
-          "category": "SC",
+          "category": "业务 / SC",
           "tagType": "auto",
           "status": "active",
           "coverageCount": 12300,
@@ -447,7 +447,7 @@
         {
           "tagId": "TAG-024",
           "tagName": "SC-老客介绍",
-          "category": "SC",
+          "category": "业务 / SC",
           "tagType": "manual",
           "status": "active",
           "coverageCount": 22300,
@@ -463,7 +463,7 @@
         {
           "tagId": "TAG-025",
           "tagName": "SC-老客重购",
-          "category": "SC",
+          "category": "业务 / SC",
           "tagType": "auto",
           "status": "active",
           "coverageCount": 11200,
@@ -488,7 +488,7 @@
         {
           "tagId": "TAG-026",
           "tagName": "SC-自然客流",
-          "category": "SC",
+          "category": "业务 / SC",
           "tagType": "manual",
           "status": "active",
           "coverageCount": 34500,
@@ -504,7 +504,7 @@
         {
           "tagId": "TAG-027",
           "tagName": "SC-销售邀约",
-          "category": "SC",
+          "category": "业务 / SC",
           "tagType": "manual",
           "status": "active",
           "coverageCount": 18900,
@@ -520,7 +520,7 @@
         {
           "tagId": "TAG-028",
           "tagName": "续保-人保",
-          "category": "续保",
+          "category": "业务 / 续保",
           "tagType": "manual",
           "status": "active",
           "coverageCount": 23400,
@@ -536,7 +536,7 @@
         {
           "tagId": "TAG-029",
           "tagName": "续保-平安",
-          "category": "续保",
+          "category": "业务 / 续保",
           "tagType": "manual",
           "status": "active",
           "coverageCount": 28900,
@@ -552,7 +552,7 @@
         {
           "tagId": "TAG-030",
           "tagName": "续保-太保",
-          "category": "续保",
+          "category": "业务 / 续保",
           "tagType": "manual",
           "status": "active",
           "coverageCount": 15600,
@@ -568,7 +568,7 @@
         {
           "tagId": "TAG-031",
           "tagName": "续保-新保",
-          "category": "续保",
+          "category": "业务 / 续保",
           "tagType": "auto",
           "status": "active",
           "coverageCount": 12300,
@@ -593,7 +593,7 @@
         {
           "tagId": "TAG-032",
           "tagName": "续保-续保",
-          "category": "续保",
+          "category": "业务 / 续保",
           "tagType": "auto",
           "status": "active",
           "coverageCount": 67800,
@@ -618,7 +618,7 @@
         {
           "tagId": "TAG-033",
           "tagName": "续保-在修不在保",
-          "category": "续保",
+          "category": "业务 / 续保",
           "tagType": "manual",
           "status": "active",
           "coverageCount": 3450,
@@ -634,7 +634,7 @@
         {
           "tagId": "TAG-034",
           "tagName": "保险到期月份-1月",
-          "category": "保险到期月份",
+          "category": "业务 / 保险到期月份",
           "tagType": "auto",
           "status": "active",
           "coverageCount": 8900,
@@ -659,7 +659,7 @@
         {
           "tagId": "TAG-035",
           "tagName": "保险到期月份-2月",
-          "category": "保险到期月份",
+          "category": "业务 / 保险到期月份",
           "tagType": "auto",
           "status": "active",
           "coverageCount": 7800,
@@ -684,7 +684,7 @@
         {
           "tagId": "TAG-036",
           "tagName": "保险到期月份-3月",
-          "category": "保险到期月份",
+          "category": "业务 / 保险到期月份",
           "tagType": "auto",
           "status": "active",
           "coverageCount": 8900,
@@ -709,7 +709,7 @@
         {
           "tagId": "TAG-037",
           "tagName": "POC-精确报价",
-          "category": "POC",
+          "category": "业务 / POC",
           "tagType": "manual",
           "status": "active",
           "coverageCount": 45600,
@@ -725,7 +725,7 @@
         {
           "tagId": "TAG-038",
           "tagName": "POC-区间报价",
-          "category": "POC",
+          "category": "业务 / POC",
           "tagType": "manual",
           "status": "active",
           "coverageCount": 23400,
@@ -741,7 +741,7 @@
         {
           "tagId": "TAG-039",
           "tagName": "POC-销售评估",
-          "category": "POC",
+          "category": "业务 / POC",
           "tagType": "manual",
           "status": "active",
           "coverageCount": 34500,
@@ -757,7 +757,7 @@
         {
           "tagId": "TAG-040",
           "tagName": "POC-售后评估",
-          "category": "POC",
+          "category": "业务 / POC",
           "tagType": "manual",
           "status": "active",
           "coverageCount": 28900,
@@ -773,7 +773,7 @@
         {
           "tagId": "TAG-041",
           "tagName": "线上活动-8月再购活动抽奖",
-          "category": "线上活动",
+          "category": "业务 / 线上活动",
           "tagType": "manual",
           "status": "active",
           "coverageCount": 1230,
@@ -789,7 +789,7 @@
         {
           "tagId": "TAG-042",
           "tagName": "保时捷911",
-          "category": "保时捷",
+          "category": "车 / 保时捷",
           "tagType": "auto",
           "status": "active",
           "coverageCount": 15230,
@@ -814,7 +814,7 @@
         {
           "tagId": "TAG-043",
           "tagName": "保时捷Cayenne",
-          "category": "保时捷",
+          "category": "车 / 保时捷",
           "tagType": "auto",
           "status": "active",
           "coverageCount": 28900,
@@ -839,7 +839,7 @@
         {
           "tagId": "TAG-044",
           "tagName": "保时捷Macan",
-          "category": "保时捷",
+          "category": "车 / 保时捷",
           "tagType": "auto",
           "status": "active",
           "coverageCount": 22300,
@@ -864,7 +864,7 @@
         {
           "tagId": "TAG-045",
           "tagName": "保时捷Panamera",
-          "category": "保时捷",
+          "category": "车 / 保时捷",
           "tagType": "auto",
           "status": "active",
           "coverageCount": 15600,
@@ -889,7 +889,7 @@
         {
           "tagId": "TAG-046",
           "tagName": "保时捷Taycan",
-          "category": "保时捷",
+          "category": "车 / 保时捷",
           "tagType": "auto",
           "status": "active",
           "coverageCount": 11200,
@@ -914,7 +914,7 @@
         {
           "tagId": "TAG-047",
           "tagName": "新能源车型",
-          "category": "新能源",
+          "category": "车 / 新能源",
           "tagType": "auto",
           "status": "active",
           "coverageCount": 18900,
@@ -962,7 +962,7 @@
     "data": {
       "tagId": "TAG-001",
       "tagName": "意向级别-热",
-      "category": "意向级别",
+      "category": "业务 / 意向级别",
       "tagType": "manual",
       "status": "active",
       "coverageCount": 15230,

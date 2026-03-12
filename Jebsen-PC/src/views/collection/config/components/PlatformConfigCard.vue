@@ -12,7 +12,7 @@
         v-for="(schedule, index) in localConfig.schedules"
         :key="index"
         class="schedule-item"
-        :class="`schedule-item-${index}`"
+        :class="[`schedule-item-${index}`, { 'schedule-static': index === 3 }]"
       >
         <div class="schedule-header-compact">
           <div class="schedule-stage">
@@ -35,18 +35,27 @@
               @change="handleTimeChange(index)"
             />
           </div>
-          <span class="schedule-desc-compact">
+          <span
+            v-if="index !== 3"
+            class="schedule-desc-compact"
+          >
             {{ getStageDayDesc(index) }}{{ localConfig.schedules[index].time || getDefaultTime(index)
             }}{{ getStageDescSuffix(index) }}
+          </span>
+          <span
+            v-else
+            class="schedule-desc-compact"
+          >
+            当天18:00前已成功上传文件清单，发送给操作人（唯一邮箱）
           </span>
         </div>
         <el-form-item
           :label="$t('collection.config.recipients.scheduleConfig.recipientLabel')"
           class="schedule-recipients"
-          :required="index < 2"
+          :required="index !== 2"
         >
           <el-select
-            v-if="index < 2"
+            v-if="index !== 2"
             :model-value="localConfig.schedules[index].employeeIds[0]"
             filterable
             :placeholder="$t('collection.config.platforms.selectEmployee')"
@@ -54,7 +63,7 @@
             @change="handleEmployeeChange(index, $event)"
           >
             <el-option
-              v-for="employee in employees"
+              v-for="employee in availableEmployees"
               :key="employee.id"
               :label="`${employee.name} (${employee.email})`"
               :value="employee.id"
@@ -75,7 +84,7 @@
             @change="handleEmployeeChange(index, $event)"
           >
             <el-option
-              v-for="employee in employees"
+              v-for="employee in availableEmployees"
               :key="employee.id"
               :label="`${employee.name} (${employee.email})`"
               :value="employee.id"
@@ -97,7 +106,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue";
 import { InfoFilled } from "@element-plus/icons-vue";
 import { useI18n } from "vue-i18n";
 import type { PlatformConfig, DataPlatform, Employee, PlatformCategory } from "../../interface";
@@ -117,6 +126,15 @@ const props = defineProps<Props>();
 const emit = defineEmits<{
   update: [config: PlatformConfig];
 }>();
+
+// 只保留 Christopher Xu 作为可选收件人；如果暂时找不到他，则回退到全部员工，避免下拉为空
+const normalizeName = (name: string) => name.replace(/\s+/g, " ").trim().toLowerCase();
+const chrisOnlyEmployees = computed(() =>
+  props.employees.filter(e => normalizeName(e.name) === normalizeName("Christopher Xu"))
+);
+const availableEmployees = computed(() =>
+  chrisOnlyEmployees.value.length > 0 ? chrisOnlyEmployees.value : props.employees
+);
 
 // 默认阶段选项（只保留 T+0, T+1, T+2, T+3 格式）
 const defaultStages = ["T+0", "T+1", "T+2", "T+3"];
@@ -145,6 +163,12 @@ const localConfig = ref<PlatformConfig>({
         time: "9:00",
         employeeIds: [],
         description: t("collection.config.recipients.scheduleConfig.stageT2Desc")
+      },
+      {
+        stage: "T+3",
+        time: "18:00",
+        employeeIds: [],
+        description: t("collection.config.recipients.scheduleConfig.stageT3DescPrefix") || ""
       }
     ].map(s => ({ ...s }))
 });
@@ -200,7 +224,7 @@ const getStageDescSuffix = (index: number): string => {
 
 // 获取默认时间
 const getDefaultTime = (index: number): string => {
-  const defaultTimes = ["18:00", "9:00", "9:00"];
+  const defaultTimes = ["18:00", "9:00", "9:00", "18:00"];
   return defaultTimes[index] || "9:00";
 };
 
@@ -216,12 +240,12 @@ const handleTimeChange = (index: number) => {
 
 // 统一处理员工选择变化
 const handleEmployeeChange = (index: number, value: number | number[]) => {
-  if (index < 2) {
-    // T+0 和 T+1 是单选
-    localConfig.value.schedules[index].employeeIds = value ? [value as number] : [];
-  } else {
+  if (index === 2) {
     // T+2 是多选
     localConfig.value.schedules[index].employeeIds = (value as number[]) || [];
+  } else {
+    // 其他阶段单选
+    localConfig.value.schedules[index].employeeIds = value ? [value as number] : [];
   }
   emit("update", { ...localConfig.value });
 };
@@ -229,12 +253,11 @@ const handleEmployeeChange = (index: number, value: number | number[]) => {
 
 <style scoped lang="scss">
 .platform-config-card {
-  padding: 18px;
-  background: #ffffff;
-  border-radius: 6px;
-  border: 1px solid #e4e7ed;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
-  transition: all 0.3s ease;
+  padding: 0 0 8px;
+  background: transparent;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
 
   .platform-header {
     margin-bottom: 16px;
@@ -263,8 +286,8 @@ const handleEmployeeChange = (index: number, value: number | number[]) => {
   }
 
   .schedules-list {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px;
   }
 
@@ -370,6 +393,23 @@ const handleEmployeeChange = (index: number, value: number | number[]) => {
       font-size: 12px;
       color: #909399;
       margin-left: 12px;
+    }
+  }
+
+  .schedule-static {
+    border-left: 3px solid #67c23a;
+    order: -1;
+
+    .schedule-static-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #606266;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    .schedule-item {
+      flex: 0 0 100%;
     }
   }
 

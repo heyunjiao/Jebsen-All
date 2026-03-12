@@ -1136,68 +1136,68 @@
           <van-icon name="cross" @click="showTagManager = false" />
         </div>
         <div class="popup-content tag-manager-content">
-          <!-- 空状态：无真实数据且无 mock 时显示（effectiveTagPool 会 fallback 到 mock，通常不会空） -->
-          <div v-if="effectiveTagPool.length === 0" class="empty-state">
+          <div v-if="tagHierarchyRoots.length === 0" class="empty-state">
             <van-empty description="标签数据加载中..." />
           </div>
 
           <div v-else>
-            <!-- 已拥有标签（点击移除） -->
-            <div class="tag-manager-section">
-              <div class="tag-manager-section-title">
-                <span>已拥有标签（点击移除）</span>
+            <div class="tag-manager-selected">
+              <div class="tag-manager-selected__header">
+                <span class="tag-manager-section-title">已选标签</span>
+                <span class="tag-manager-selected__count">{{ selectedTags.length }} 项</span>
               </div>
-              <div class="tag-manager-tag-list">
-                <template v-if="selectedTagsInManager.length > 0">
-                  <div
-                    v-for="tagName in selectedTagsInManager"
-                    :key="tagName"
-                    class="tag-manager-tag selected"
-                    @click="toggleTag(tagName)"
-                  >
-                    <span class="tag-manager-tag-text">{{ tagName }}</span>
-                    <span class="tag-manager-tag-close">✕</span>
-                  </div>
-                </template>
-                <div v-else class="tag-manager-empty-text">暂无已选标签</div>
+              <div class="tag-manager-chip-grid tag-manager-chip-grid--selected">
+                <button
+                  v-for="tag in selectedTagCards"
+                  :key="tag.id"
+                  type="button"
+                  class="tag-manager-chip selected is-compact"
+                  @click="toggleTag(tag.name)"
+                >
+                  <span class="tag-manager-chip__name">{{ tag.name }}</span>
+                  <span v-if="tag.categoryLabel" class="tag-manager-chip__path">{{ tag.categoryLabel }}</span>
+                </button>
+                <div v-if="selectedTagCards.length === 0" class="tag-manager-empty-text">暂无已选标签</div>
               </div>
             </div>
 
-            <!-- 标签池（点击添加，按分类展示） -->
-            <div class="tag-manager-section">
-              <div class="tag-manager-section-title">
-                <span>标签池（点击添加）</span>
-              </div>
+            <div v-if="tagSelectionIssues[0]" class="tag-manager-validation-tip">
+              {{ tagSelectionIssues[0] }}
+            </div>
 
-              <template v-if="Object.keys(groupedTags).length > 0">
+            <section
+              v-for="root in tagHierarchyRoots"
+              :key="root.key"
+              class="tag-manager-root-section"
+            >
+              <div class="tag-manager-root-section__title">{{ root.label }}</div>
+              <div class="tag-manager-root-section__body">
                 <div
-                  v-for="(tags, category) in groupedUnselectedTags"
-                  :key="category"
-                  class="tag-manager-category"
+                  v-for="category in root.categories"
+                  :key="category.key"
+                  class="tag-manager-category-block"
                 >
-                  <div class="tag-manager-category-title">
-                    {{ category }}
+                  <div class="tag-manager-category-block__header">
+                    <div class="tag-manager-category-block__title">{{ category.label }}</div>
+                    <span v-if="getCategoryRuleText(category)" class="tag-manager-category-block__rule">
+                      {{ getCategoryRuleText(category) }}
+                    </span>
                   </div>
-                  <div class="tag-manager-tag-list tag-manager-tag-list--pool">
-                    <template v-if="tags && tags.length">
-                      <div
-                        v-for="tag in tags"
-                        :key="tag.id"
-                        class="tag-manager-tag tag-manager-tag--pool"
-                        @click="toggleTag(tag.name)"
-                      >
-                        <span class="tag-manager-tag-text">{{ tag.name }}</span>
-                      </div>
-                    </template>
-                    <div v-else class="tag-manager-empty-text">
-                      该分类暂无可添加标签
-                    </div>
+                  <div class="tag-manager-chip-grid">
+                    <button
+                      v-for="tag in getCategoryTags(category)"
+                      :key="tag.id"
+                      type="button"
+                      class="tag-manager-chip"
+                      :class="{ selected: isTagSelectedInManager(tag.name) }"
+                      @click="toggleTag(tag.name)"
+                    >
+                      <span class="tag-manager-chip__name">{{ tag.name }}</span>
+                    </button>
                   </div>
                 </div>
-              </template>
-
-              <div v-else class="tag-manager-empty-text">暂无可添加标签</div>
-            </div>
+              </div>
+            </section>
           </div>
         </div>
         <div class="popup-footer">
@@ -1214,7 +1214,7 @@
             :loading="savingTags"
             @click="handleSaveTags"
           >
-            确定
+            保存标签
           </van-button>
         </div>
       </div>
@@ -1390,6 +1390,7 @@ import {
   getOpportunityThemeClass,
   normalizeOpportunityType,
 } from '@/constants/opportunityTypes'
+import { buildTagHierarchy } from '@/constants/tagHierarchy'
 // 导入 Lucide 图标
 import { Phone, CarFront, Ticket, Tag, UserCircle, Edit2 } from 'lucide-vue-next'
 
@@ -3032,11 +3033,6 @@ const isTagSelectedInManager = (tagName: string) => {
   return selectedTags.value.includes(tagName)
 }
 
-// 已选标签列表（用于标签管理弹窗）
-const selectedTagsInManager = computed(() => {
-  return selectedTags.value
-})
-
 // 标签池 mock 数据：用于没有后端数据时预览 UI
 const mockTagPool: Array<{
   id: number
@@ -3066,108 +3062,68 @@ const effectiveTagPool = computed(() => {
   return mockTagPool
 })
 
-// 按分类分组的标签（用于标签管理弹窗）
-const groupedTags = computed(() => {
-  const source = effectiveTagPool.value
-  const groups: Record<string, typeof source> = {}
-  
-  source.forEach(tag => {
-    const category = tag.category || '其他'
-    if (!groups[category]) {
-      groups[category] = []
-    }
-    groups[category].push(tag)
-  })
-  
-  // 按分类名称排序
-  const sortedGroups: Record<string, typeof source> = {}
-  const categoryOrder = [
-    '意向级别',
-    'SC【必选】',
-    'SA【必选】',
-    '续保【必选】',
-    'POC【必选】',
-    '免打扰车主',
-    '线上活动',
-    '爱好(≥1项)',
-  ]
-  
-  // 先按顺序添加已知分类
-  categoryOrder.forEach(category => {
-    if (groups[category]) {
-      sortedGroups[category] = groups[category]
-    }
-  })
-  
-  // 再添加其他分类
-  Object.keys(groups).forEach(category => {
-    if (!categoryOrder.includes(category)) {
-      sortedGroups[category] = groups[category]
-    }
-  })
-  
-  console.log('[标签管理] 分组后的数据:', sortedGroups)
-  console.log('[标签管理] 分类数量:', Object.keys(sortedGroups).length)
-  
-  return sortedGroups
+const tagHierarchyRoots = computed(() => buildTagHierarchy(effectiveTagPool.value as any, selectedTags.value))
+
+const selectedTagCards = computed(() => {
+  const selectedSet = new Set(selectedTags.value)
+  const hierarchyCards = tagHierarchyRoots.value
+    .flatMap(root => root.categories)
+    .flatMap(category => category.subgroups)
+    .flatMap(subgroup => subgroup.tags)
+    .filter(tag => selectedSet.has(tag.name))
+    .sort((a, b) => a.meta.categoryOrder - b.meta.categoryOrder || a.name.localeCompare(b.name, 'zh-CN'))
+    .map(tag => ({
+      id: tag.id,
+      name: tag.name,
+      categoryLabel: tag.meta.pathLabels.join(' / '),
+    }))
+
+  const existingNames = new Set(hierarchyCards.map(tag => tag.name))
+  const orphanCards = selectedTags.value
+    .filter(tagName => !existingNames.has(tagName))
+    .map(tagName => ({
+      id: `orphan-${tagName}`,
+      name: tagName,
+      categoryLabel: '历史标签',
+    }))
+
+  return [...hierarchyCards, ...orphanCards]
 })
 
-// 标签池用：按分组只包含未选中的标签（选中在上方「已拥有」展示，池子里只展示可添加的）
-const groupedUnselectedTags = computed(() => {
-  const grouped = groupedTags.value
-  const result: Record<string, Array<{ id: number; name: string; category?: string }>> = {}
-  Object.keys(grouped).forEach(category => {
-    const list = (grouped[category] || []).filter(
-      tag => tag && tag.name && !selectedTags.value.includes(tag.name)
-    )
-    result[category] = list
-  })
-  return result
-})
-
-// 获取分类中已选标签数量
-const getSelectedCountInCategory = (category: string) => {
-  const categoryTags = groupedTags.value[category] || []
-  return categoryTags.filter(tag => selectedTags.value.includes(tag.name)).length
+const getCategoryTags = (category: { subgroups: Array<{ tags: any[] }> }) => {
+  return category.subgroups.flatMap(subgroup => subgroup.tags)
 }
+
+const getCategoryRuleText = (category: { required: boolean; minSelect: number }) => {
+  if (category.minSelect > 1) {
+    return `至少 ${category.minSelect} 项`
+  }
+  if (category.minSelect === 1) {
+    return '至少 1 项'
+  }
+  if (category.required) {
+    return '必选'
+  }
+  return ''
+}
+
+const tagSelectionIssues = computed(() => {
+  const issues: string[] = []
+  tagHierarchyRoots.value.forEach(root => {
+    root.categories.forEach(category => {
+      if (category.required && category.selectedCount === 0) {
+        issues.push(`${category.label}需至少选择 1 项`)
+      } else if (category.minSelect > 0 && category.selectedCount < category.minSelect) {
+        issues.push(`${category.label}需至少选择 ${category.minSelect} 项`)
+      }
+    })
+  })
+  return issues
+})
 
 // 验证必选标签
 const validateRequiredTags = (): string | null => {
-  const requiredCategories: string[] = []
-  
-  // 检查所有必选分类
-  Object.keys(groupedTags.value).forEach(category => {
-    const categoryTags = groupedTags.value[category]
-    const requiredTags = categoryTags.filter(tag => tag.required)
-    
-    if (requiredTags.length > 0) {
-      const selectedInCategory = categoryTags.filter(tag => 
-        selectedTags.value.includes(tag.name)
-      )
-      
-      if (selectedInCategory.length === 0) {
-        requiredCategories.push(category)
-      }
-    }
-    
-    // 检查最少选择数量要求
-    const minSelectTag = categoryTags.find(tag => tag.minSelect)
-    if (minSelectTag && minSelectTag.minSelect) {
-      const selectedInCategory = categoryTags.filter(tag => 
-        selectedTags.value.includes(tag.name)
-      )
-      
-      if (selectedInCategory.length < minSelectTag.minSelect) {
-        return `${category}至少需要选择${minSelectTag.minSelect}项`
-      }
-    }
-  })
-  
-  if (requiredCategories.length > 0) {
-    return `请至少选择一项：${requiredCategories.join('、')}`
-  }
-  
-  return null
+  return tagSelectionIssues.value[0] || null
 }
 
 // 保存标签（一次性提交）
@@ -6248,104 +6204,140 @@ onMounted(async () => {
     }
   }
   
-// 标签管理弹窗样式：上方已拥有标签 / 下方标签池
+// 标签管理弹窗样式：简化为多级分组展示
 &.tag-manager {
   .tag-manager-content {
     padding-top: 8px;
     padding-bottom: 12px;
   }
 
-  .tag-manager-section {
-    margin-bottom: 16px;
+  .tag-manager-selected {
+    margin-bottom: 14px;
+    padding: 12px;
+    border-radius: 12px;
+    background: #fff;
+    border: 1px solid rgba(226, 232, 240, 0.92);
+  }
 
-    &:last-child {
-      margin-bottom: 0;
-    }
+  .tag-manager-selected__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
   }
 
   .tag-manager-section-title {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     color: #1F2933;
+  }
+
+  .tag-manager-selected__count {
+    font-size: 12px;
+    color: var(--text-sub);
+  }
+
+  .tag-manager-validation-tip {
+    margin-bottom: 12px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: rgba(238, 10, 36, 0.06);
+    color: #ee0a24;
+    font-size: 12px;
+  }
+
+  .tag-manager-root-section + .tag-manager-root-section {
+    margin-top: 14px;
+  }
+
+  .tag-manager-root-section__title {
+    margin-bottom: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--theme-primary, #94724A);
+  }
+
+  .tag-manager-root-section__body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .tag-manager-category-block {
+    padding: 12px;
+    border-radius: 12px;
+    background: #fff;
+    border: 1px solid rgba(226, 232, 240, 0.92);
+  }
+
+  .tag-manager-category-block__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
     margin-bottom: 10px;
   }
 
-  .tag-manager-tag-list {
+  .tag-manager-category-block__title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-main);
+  }
+
+  .tag-manager-category-block__rule {
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(238, 10, 36, 0.08);
+    color: #ee0a24;
+    font-size: 10px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .tag-manager-chip-grid {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px 12px;
+    gap: 8px;
   }
 
-  .tag-manager-category {
-    margin-bottom: 12px;
-
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
-
-  .tag-manager-category-title {
-    font-size: 12px;
-    color: #6B7280;
-    margin-bottom: 6px;
-  }
-
-  .tag-manager-tag-list--pool {
-    /* 与已拥有同布局：flex wrap，仅下方分类用 */
-  }
-
-  /* 已拥有：棕色胶囊 + 删除 icon */
-  .tag-manager-tag {
+  .tag-manager-chip {
     display: inline-flex;
-    align-items: center;
-    padding: 4px 10px;
-    min-height: 28px;
-    border-radius: 4px;
-    background-color: #8B6A3D;
-    color: #FFFFFF;
-    font-size: 13px;
-    line-height: 1;
-    cursor: pointer;
-    user-select: none;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
-    border: 1px solid transparent;
-    transition:
-      background-color 0.15s ease,
-      box-shadow 0.15s ease,
-      transform 0.1s ease,
-      opacity 0.15s ease;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    min-width: calc(50% - 4px);
+    padding: 9px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(203, 213, 225, 0.96);
+    background: #fff;
+    color: var(--text-main);
+    text-align: left;
+    transition: all 0.15s ease;
 
-    &:active {
-      transform: scale(0.97);
-      opacity: 0.9;
+    &.is-compact {
+      min-width: auto;
+      padding: 7px 10px;
     }
 
     &.selected {
-      opacity: 0.95;
+      background: rgba(201, 162, 39, 0.12);
+      border-color: rgba(148, 114, 74, 0.28);
+    }
+
+    &:active {
+      opacity: 0.82;
     }
   }
 
-  /* 标签池未选中：必须写在 .tag-manager-tag 后面，才能覆盖基础色，避免样式串用 */
-  .tag-manager-tag--pool {
-    background-color: #FFFFFF;
-    color: #6B7280;
-    border: 1px solid #D1D5DB;
-    box-shadow: none;
-  }
-
-  .tag-manager-tag--pool:active {
-    background-color: #F9FAFB;
-    border-color: #9CA3AF;
-    color: #374151;
-  }
-
-  .tag-manager-tag-text {
+  .tag-manager-chip__name {
+    font-size: 13px;
+    line-height: 1.4;
     white-space: nowrap;
   }
 
-  .tag-manager-tag-close {
-    margin-left: 6px;
-    font-size: 12px;
+  .tag-manager-chip__path {
+    font-size: 10px;
+    color: var(--text-sub);
   }
 
   .tag-manager-empty-text {

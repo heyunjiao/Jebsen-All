@@ -7,6 +7,7 @@ export default {
     tagName: "Tag Name",
     enterTagName: "Please enter tag name",
     category: "Tag Category",
+    categoryPlaceholder: "Please select category",
     selectCategory: "Please select tag category",
     tagType: "Tag Type",
     autoRule: "Auto Rule",

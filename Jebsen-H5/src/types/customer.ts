@@ -17,6 +17,9 @@ export interface FieldData {
   sources?: SourceDetail[] // 冲突时的多源数据
 }
 
+export type CustomerPersonRole = '购车人' | '送修人' | '联系人'
+export type AddressSlotKey = 'address1' | 'address2' | 'address3' | 'address4'
+
 // 手机号搜索返回的 OneId 选项（多 oneId 时用于顶部切换）
 export interface OneIdOption {
   oneId: string
@@ -48,6 +51,11 @@ export interface MobileItem {
   isPrimary: boolean // 是否为主号码
   source?: string // 来源系统
   updateTime?: string // 更新时间
+  readonly?: boolean // 是否只读（如售后订单同步的送修人）
+  personRole?: CustomerPersonRole // 人员角色：购车人/送修人/联系人
+  linkedVehicleIds?: string[] // 关联车辆 ID 列表
+  isPreferredRepairer?: boolean // 是否为首选送修人（同一客户仅一个）
+  isPrimaryContact?: boolean // 是否为首选联系人（公司客户）
 }
 
 // 电话号码数据类型（支持列表）
@@ -61,10 +69,13 @@ export interface MobileData {
 export interface AddressItem {
   id: string
   address: string // 完整地址
-  label?: string // 标签：家庭、公司、其他等
+  label?: string // 标签：地址1、地址2等
   isPrimary?: boolean // 是否为主地址
   source?: string
   updateTime?: string
+  slotKey?: AddressSlotKey
+  weight?: number
+  weightLabel?: string
 }
 
 // 地址数据类型（多个地址）
@@ -121,6 +132,18 @@ export interface VehicleRelation {
   nonCashDiscountAmount?: number // 非现金折扣金额
   salesItemAmount?: number // 销售项目金额
   salesItemName?: string // 销售项目名称
+  relatedPersons?: VehicleRelatedPerson[] // 车辆关联的购车人/送修人，来源于销售/售后订单
+}
+
+export interface VehicleRelatedPerson {
+  id: string
+  role: Extract<CustomerPersonRole, '购车人' | '送修人'>
+  name: string
+  phone: string
+  orderNo?: string
+  source?: string
+  readonly?: boolean
+  isPreferred?: boolean
 }
 
 // 资产类型（优惠券/代金券）
@@ -310,6 +333,13 @@ export interface MarketingCampaign {
   source?: string // 来源系统
 }
 
+export interface CommunicationRecord {
+  id: string
+  time: string
+  channel: string
+  content: string
+}
+
 // 经办人信息类型
 export interface Handler {
   id: string
@@ -330,6 +360,9 @@ export interface Handler {
   assets?: Asset[]
   opportunities?: Opportunity[]
   nameMobileConflict?: NameMobileConflict[]
+  isPrimaryContact?: boolean
+  isPreferredRepairer?: boolean
+  readonly?: boolean
 }
 
 // 客户画像数据类型
@@ -361,6 +394,7 @@ export interface CustomerProfile {
   platformSources?: PlatformSource[] // 平台溯源信息
   // 预约信息
   appointments?: Appointment[] // 预约信息列表
+  communicationRecords?: CommunicationRecord[] // 沟通记录
   // 最新操作信息（用于首页提示）
   latestOperation?: {
     operator: string // 操作人
@@ -377,5 +411,4 @@ export interface CustomerProfile {
   /** 公司类型：车-角色-经办人 vehicleKey -> role -> handlerId，支持一人多车多角色 */
   companyVehicleRoleAssignments?: Record<string, Record<string, string>>
 }
-
 

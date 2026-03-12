@@ -146,11 +146,6 @@ export const getVersionHistory = (id: string) => {
   return http.get<CustomerSegmentation.SegmentInfo[]>("/customer-segmentation/" + id + "/versions");
 };
 
-// 回滚到指定版本
-export const rollbackVersion = (id: string, version: string) => {
-  return http.post("/customer-segmentation/" + id + "/rollback", { version });
-};
-
 // 模拟验证规则
 export const simulateRule = (params: CustomerSegmentation.ReqSimulateParams) => {
   return http.post<CustomerSegmentation.ResSimulate>("/customer-segmentation/simulate", params);

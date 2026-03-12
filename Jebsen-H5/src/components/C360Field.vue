@@ -77,6 +77,7 @@
       v-if="isMobileData"
       v-model="showMobileEditor"
       :mobile-data="fieldData as MobileData"
+      customer-type="individual"
       @update="handleMobileUpdate"
     />
   </div>
@@ -322,4 +323,3 @@ const emit = defineEmits<{
   }
 }
 </style>
-

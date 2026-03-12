@@ -531,11 +531,6 @@ function getTagManageMockData(url: string, method: string, params: any) {
     return tagManageMockData.simulate;
   }
 
-  // 版本回滚接口
-  if (url.includes("/tag/rollback") && method === "post") {
-    return tagManageMockData.rollback;
-  }
-
   // 默认返回空数据
   return { code: "200", msg: "操作成功", data: null };
 }
@@ -864,15 +859,6 @@ function getCustomerSegmentationMockData(url: string, method: string, params: an
       code: 200,
       msg: "操作成功",
       data: []
-    };
-  }
-
-  // 回滚
-  if (url.includes("/customer-segmentation/") && url.includes("/rollback") && method === "post") {
-    return {
-      code: 200,
-      msg: "操作成功",
-      data: null
     };
   }
 

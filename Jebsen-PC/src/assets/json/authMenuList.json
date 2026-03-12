@@ -7,7 +7,7 @@
       "component": "/welcome/index",
       "meta": {
         "icon": "HomeFilled",
-        "title": "欢迎页",
+        "title": "源数据采集",
         "isLink": "",
         "isHide": false,
         "isFull": false,
@@ -23,7 +23,7 @@
         "icon": "Monitor",
         "title": "源数据采集看板",
         "isLink": "",
-        "isHide": false,
+        "isHide": true,
         "isFull": false,
         "isAffix": false,
         "isKeepAlive": true
@@ -64,6 +64,20 @@
           "meta": {
             "icon": "DocumentChecked",
             "title": "数据文件上传",
+            "isLink": "",
+            "isHide": false,
+            "isFull": false,
+            "isAffix": false,
+            "isKeepAlive": true
+          }
+        },
+        {
+          "path": "/dataProcess/fileUploadLog",
+          "name": "fileUploadLog",
+          "component": "/fileUploadLog/index",
+          "meta": {
+            "icon": "Notebook",
+            "title": "文件上传日志",
             "isLink": "",
             "isHide": false,
             "isFull": false,
@@ -208,7 +222,7 @@
           "component": "/leadManagement/RuleConfigPage",
           "meta": {
             "icon": "Tools",
-            "title": "分发配置",
+            "title": "分发查询",
             "isLink": "",
             "isHide": false,
             "isFull": false,
@@ -298,7 +312,7 @@
         "icon": "DataAnalysis",
         "title": "运营分析",
         "isLink": "",
-        "isHide": false,
+        "isHide": true,
         "isFull": false,
         "isAffix": false,
         "isKeepAlive": true
@@ -312,7 +326,7 @@
             "icon": "TrendCharts",
             "title": "门店经营分析",
             "isLink": "",
-            "isHide": false,
+            "isHide": true,
             "isFull": false,
             "isAffix": false,
             "isKeepAlive": true
@@ -384,7 +398,7 @@
             "icon": "Bell",
             "title": "全局监控规则配置",
             "isLink": "",
-            "isHide": false,
+            "isHide": true,
             "isFull": false,
             "isAffix": false,
             "isKeepAlive": true
@@ -428,7 +442,7 @@
             "icon": "Key",
             "title": "登录日志",
             "isLink": "",
-            "isHide": false,
+            "isHide": true,
             "isFull": false,
             "isAffix": false,
             "isKeepAlive": true

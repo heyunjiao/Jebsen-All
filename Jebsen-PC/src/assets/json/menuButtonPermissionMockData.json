@@ -316,7 +316,7 @@
       "商机查阅": "leadManagement",
       "商机列表": "leadManagement",
       "商机看板": "leadManagement",
-      "分发配置": "autoPush",
+      "分发查询": "autoPush",
       "自动推送": "autoPush",
       "数据质量": "dataQuality",
       "数据清洗": "dataCleaning",

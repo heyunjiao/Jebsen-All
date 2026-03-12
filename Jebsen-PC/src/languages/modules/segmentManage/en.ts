@@ -48,6 +48,14 @@ export default {
     selectSegmentFirst: "Please select segment first",
     enterSegmentNameRequired: "Segment name cannot be empty",
     ruleConfigRequired: "Please configure segment distribution",
+    statusOptions: {
+      draft: "Draft",
+      running: "Calculating",
+      active: "Active",
+      failed: "Failed",
+      inactive: "Inactive",
+      disabled: "Disabled"
+    },
     stats: {
       segmentTotal: "Segment Total",
       totalMembers: "Total Members",

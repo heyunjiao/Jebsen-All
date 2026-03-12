@@ -29,7 +29,7 @@ export const staticRouter: RouteRecordRaw[] = [
         name: "home",
         component: () => import("@/views/welcome/index.vue"),
         meta: {
-          title: "欢迎页",
+          title: "源数据采集",
           isKeepAlive: true,
           isAffix: true
         }

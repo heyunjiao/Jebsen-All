@@ -37,16 +37,21 @@
         </div>
       </template>
 
-      <!-- 操作列 -->
+      <!-- 操作列：手动上传的批次不允许编辑 -->
       <template #operation="scope">
-        <el-button link type="primary" @click="handleEdit(scope.row)">
+        <el-button
+          v-if="scope.row.createMethod !== 'manual_upload'"
+          link
+          type="primary"
+          @click="handleEdit(scope.row)"
+        >
           <el-icon><Edit /></el-icon>
           {{ t("ruleConfig.buttons.edit") }}
         </el-button>
       </template>
     </pro-table>
 
-    <!-- 分发配置对话框 -->
+    <!-- 分发查询对话框 -->
     <el-dialog
       v-model="dialogVisible"
       :title="dialogTitle"
@@ -204,6 +209,13 @@ const pushTargetOptions = computed(() => [{ label: t("ruleConfig.enums.pushTarge
 const toolButton: ("refresh" | "setting" | "search")[] = ["refresh", "setting", "search"];
 
 const columns = computed<ColumnProps<Lead.RuleConfig>[]>(() => [
+  // 批次号
+  {
+    prop: "batchNo",
+    label: t("ruleConfig.columns.batchNo"),
+    minWidth: 140
+  },
+  // 商机类型
   {
     prop: "leadType",
     label: t("ruleConfig.columns.leadType"),
@@ -214,6 +226,13 @@ const columns = computed<ColumnProps<Lead.RuleConfig>[]>(() => [
       props: { placeholder: t("ruleConfig.placeholders.selectLeadType") }
     }
   },
+  // 推送人数
+  {
+    prop: "pushCount",
+    label: t("ruleConfig.columns.pushCount"),
+    width: 100
+  },
+  // 优先级
   {
     prop: "priority",
     label: t("ruleConfig.columns.priority"),
@@ -228,6 +247,7 @@ const columns = computed<ColumnProps<Lead.RuleConfig>[]>(() => [
       props: { placeholder: t("ruleConfig.placeholders.selectPriority") }
     }
   },
+  // 推送目标
   {
     prop: "pushTarget",
     label: t("ruleConfig.columns.pushTarget"),
@@ -238,6 +258,7 @@ const columns = computed<ColumnProps<Lead.RuleConfig>[]>(() => [
       props: { placeholder: t("ruleConfig.placeholders.selectTarget") }
     }
   },
+  // 启用状态
   {
     prop: "enabled",
     label: t("ruleConfig.columns.enabled"),
@@ -251,16 +272,29 @@ const columns = computed<ColumnProps<Lead.RuleConfig>[]>(() => [
       props: { placeholder: t("ruleConfig.placeholders.selectStatus") }
     }
   },
+  // 创建人
   {
     prop: "creator",
     label: t("ruleConfig.columns.creator"),
     width: 110
   },
+  // 创建时间
   {
     prop: "createdAt",
     label: t("ruleConfig.columns.createdAt"),
     minWidth: 170
   },
+  // 创建方式（手工上传 / 平台生成）
+  {
+    prop: "createMethod",
+    label: t("ruleConfig.columns.createMethod"),
+    width: 120,
+    enum: [
+      { label: t("ruleConfig.enums.createMethod.manual_upload"), value: "manual_upload" },
+      { label: t("ruleConfig.enums.createMethod.system_generated"), value: "system_generated" }
+    ]
+  },
+  // 操作
   {
     prop: "operation",
     label: t("ruleConfig.columns.operation"),

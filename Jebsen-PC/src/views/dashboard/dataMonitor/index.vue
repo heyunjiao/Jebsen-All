@@ -144,7 +144,10 @@
           <div class="card-header-pro">
             <div class="header-left">
               <el-icon class="header-icon"><Operation /></el-icon>
-              <span class="title">{{ t("dashboard.dataMonitor.pipelineTitle") }}</span>
+              <div class="title-wrap">
+                <span class="title">{{ t("dashboard.dataMonitor.pipelineTitle") }}</span>
+                <span class="title-desc">{{ t("dashboard.dataMonitor.pipelineResultDesc") }}</span>
+              </div>
             </div>
             <div class="header-right">
               <el-tag size="small" :type="getPipelineStatusType()" effect="dark">
@@ -1069,10 +1072,22 @@ $glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
           color: $primary;
         }
 
+        .title-wrap {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+
         .title {
           font-size: 16px;
           font-weight: 700;
           color: $text-main;
+        }
+
+        .title-desc {
+          font-size: 12px;
+          font-weight: 400;
+          color: $text-sub;
         }
       }
 

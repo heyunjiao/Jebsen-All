@@ -1,12 +1,5 @@
 <template>
   <div class="error-correction table-box">
-    <!-- 统计面板 -->
-    <el-card shadow="never" class="stats-panel-card">
-      <div class="header-content">
-        <StatsPanel :stats="pageStats" />
-      </div>
-    </el-card>
-
     <!-- 一级导航 (L1) - PageHeader -->
     <div class="page-header">
       <el-tabs v-model="activeStatusTab" class="l1-tabs" @tab-change="handleStatusTabChange">
@@ -434,7 +427,6 @@ import { useI18n } from "vue-i18n";
 import ProTable from "@/components/ProTable/index.vue";
 import type { ProTableInstance, ColumnProps } from "@/components/ProTable/interface";
 import MergeWorkbenchDialog, { type ConflictTask } from "./MergeWorkbenchDialog.vue";
-import StatsPanel from "./components/StatsPanel.vue";
 import QuickEditDialog, { type QuickEditTask } from "./components/QuickEditDialog.vue";
 import SyncRetryDialog, { type SyncTask } from "./components/SyncRetryDialog.vue";
 import FeedbackResolutionDrawer, { type FeedbackTask } from "./components/FeedbackResolutionDrawer.vue";
@@ -509,24 +501,6 @@ const baseTasks = reactive<ExceptionTask[]>(
     ...task
   })) as ExceptionTask[]
 );
-
-// 页面统计 - 5大类异常
-const pageStats = computed(() => {
-  const pendingList = baseTasks.filter(t => t.status === "pending");
-  return {
-    validity: pendingList.filter(t => t.category === "validity").length,
-    uniqueness: pendingList.filter(t => t.category === "uniqueness").length,
-    completeness: pendingList.filter(t => t.category === "completeness").length,
-    consistency: pendingList.filter(t => t.category === "consistency").length,
-    compliance: pendingList.filter(t => t.category === "compliance").length,
-    autoMergeRate: errorCorrectionMockData.stats.autoMergeRate,
-    totalProcessed: errorCorrectionMockData.stats.totalProcessed,
-    totalVolume: errorCorrectionMockData.stats.totalVolume,
-    successCount: errorCorrectionMockData.stats.successCount,
-    manualMergeNeeded: errorCorrectionMockData.stats.manualMergeNeeded,
-    autoMergedCount: errorCorrectionMockData.stats.autoMergedCount
-  };
-});
 
 // 错误类型 Tab 状态
 const activeErrorType = ref<string>("all");
@@ -1529,24 +1503,6 @@ const submitTicket = () => {
   box-sizing: border-box;
   background: #f5f7fa;
   min-height: 100vh;
-
-  // 统计面板卡片
-  .stats-panel-card {
-    margin-bottom: 16px;
-    border-radius: 8px;
-    overflow: visible;
-
-    :deep(.el-card__body) {
-      padding: 16px 20px;
-    }
-
-    .header-content {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 20px;
-    }
-  }
 
   // 一级导航 (L1) - PageHeader
   .page-header {
@@ -2799,32 +2755,8 @@ const submitTicket = () => {
   }
 
   // 响应式设计
-  @media (max-width: 1200px) {
-    .stats-panel-card {
-      :deep(.el-card__body) {
-        padding: 14px 16px;
-      }
-
-      .header-content {
-        gap: 16px;
-      }
-    }
-  }
-
   @media (max-width: 768px) {
     .error-correction {
-      .stats-panel-card {
-        margin-bottom: 12px;
-
-        :deep(.el-card__body) {
-          padding: 12px;
-        }
-
-        .header-content {
-          gap: 12px;
-        }
-      }
-
       .page-header {
         .l1-tabs {
           :deep(.el-tabs__header) {
@@ -2867,12 +2799,6 @@ const submitTicket = () => {
 
   @media (max-width: 480px) {
     .error-correction {
-      .stats-panel-card {
-        :deep(.el-card__body) {
-          padding: 10px;
-        }
-      }
-
       .page-header {
         .l1-tabs {
           :deep(.el-tabs__header) {

@@ -48,6 +48,8 @@ export default {
     stats: {
       total: "Total Data",
       newToday: "New Today",
+      newMerged: "Merged Today",
+      newUpdated: "Updated Today",
       contactable: "Contactable Rate",
       verified: "Transaction Owners (Real Orders)",
       growth: "vs Yesterday",

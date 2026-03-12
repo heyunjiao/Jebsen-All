@@ -44,6 +44,21 @@ export default {
       individual: "个人",
       company: "公司"
     },
+    listMode: {
+      label: "列表视图"
+    },
+    listModeTabs: {
+      person: "按人",
+      vehicle: "按车"
+    },
+    vehicleView: {
+      customerName: "客户姓名",
+      companyName: "公司名称",
+      buyerPhone: "购车人电话",
+      insuranceStatus: "保险状态",
+      insuranceEndDate: "保险到期日",
+      financeStatus: "金融状态"
+    },
     conflict: "数据冲突",
     view360: "360视图",
     noRelatedData: "没有关联的数据",
@@ -56,6 +71,8 @@ export default {
     stats: {
       total: "全量数据",
       newToday: "今日新增",
+      newMerged: "今日合并",
+      newUpdated: "今日更新",
       contactable: "可触达率",
       verified: "成交车主（真实下单客户）",
       growth: "较昨日",
@@ -332,6 +349,8 @@ export default {
       vehicleRoleSetFor: "为 {model} 设置{role}",
       vehicleDefault: "该车辆",
       vehicleRelatedPerson: "相关人员",
+      vehicleBuyer: "购车人",
+      vehicleRepairers: "送修人",
       vehicleAndContract: "车辆与合同",
       vehiclePriceAndItem: "价格与项目",
       vehicleStatusEdit: "修改车辆状态",

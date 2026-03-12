@@ -158,7 +158,7 @@
                 <div class="category-tags-group">
                   <div class="category-header">
                     <span class="category-name">
-                      {{ getCategoryDisplayName(category) }}
+                      {{ getCategoryDisplayLabel(category) }}
                     </span>
                   </div>
                   <div class="tags-list">
@@ -440,6 +440,7 @@ import {
   CopyDocument,
   MagicStick
 } from "@element-plus/icons-vue";
+import { TAG_CATEGORY_OPTIONS, getCategoryFullPath } from "@/constants/tagCategory";
 
 const { t } = useI18n();
 
@@ -531,6 +532,12 @@ const getCategoryDisplayName = (category: string): string => {
     .replace(/【必选】/g, "")
     .replace(/必选/g, "")
     .trim();
+};
+
+// 获取分类多级展示名称（完整路径，与系统标签多级一致）
+const getCategoryDisplayLabel = (category: string): string => {
+  const clean = getCategoryDisplayName(category);
+  return getCategoryFullPath(TAG_CATEGORY_OPTIONS, clean) || clean;
 };
 
 const getCategoryColorIndex = (category: string): number => {

@@ -1289,7 +1289,7 @@
           "component": "/leadManagement/RuleConfigPage",
           "meta": {
             "icon": "Setting",
-            "title": "分发配置",
+            "title": "分发查询",
             "isLink": "",
             "isHide": false,
             "isFull": false,

@@ -189,6 +189,8 @@
         >
           <span class="handler-name">{{ h.name }}</span>
           <span v-if="h.role" class="handler-role-tag">{{ h.role }}</span>
+          <span v-if="h.isPrimaryContact" class="handler-flag">首选联系人</span>
+          <span v-else-if="h.isPreferredRepairer" class="handler-flag">首选送修人</span>
         </div>
       </div>
 
@@ -251,6 +253,9 @@
                   }}</span>
                   <span v-else class="relation-tag secondary">{{ $t("customer.profile360.secondary") || "副号" }}</span>
                   <span v-if="phoneItem.relationTagName" class="relation-tag">{{ phoneItem.relationTagName }}</span>
+                  <span v-if="phoneItem.isPrimaryContact" class="relation-tag highlight">首选联系人</span>
+                  <span v-if="phoneItem.isPreferredRepairer" class="relation-tag highlight">首选送修人</span>
+                  <span v-if="phoneItem.readonly" class="relation-tag readonly">售后同步</span>
                 </span>
               </div>
             </template>
@@ -262,6 +267,7 @@
                   size="small"
                   clearable
                   class="phone-input"
+                  :disabled="basicInfoForm.phoneReadonly[index]"
                 />
                 <el-select
                   v-model="basicInfoForm.phoneRelationTags[index]"
@@ -269,13 +275,15 @@
                   size="small"
                   clearable
                   class="relation-tag-select"
+                  :disabled="basicInfoForm.phoneReadonly[index]"
                 >
                   <el-option v-for="opt in relationTagOptions" :key="opt.value" :label="opt.label" :value="opt.value" />
                 </el-select>
                 <el-radio-group
                   :model-value="basicInfoForm.primaryPhoneIndex === index ? 'primary' : 'secondary'"
                   size="small"
-                  @update:model-value="(val: string) => onPhonePrimarySecondaryChange(index, val)"
+                  @update:model-value="val => onPhonePrimarySecondaryChange(index, String(val))"
+                  :disabled="basicInfoForm.phoneReadonly[index]"
                 >
                   <el-radio label="primary">{{ $t("customer.profile360.primary") }}</el-radio>
                   <el-radio label="secondary">{{ $t("customer.profile360.secondary") }}</el-radio>
@@ -285,9 +293,10 @@
                   link
                   size="small"
                   :icon="Delete"
-                  :disabled="basicInfoForm.phoneList.length <= 1"
+                  :disabled="basicInfoForm.phoneList.length <= 1 || basicInfoForm.phoneReadonly[index]"
                   @click="removeBasicInfoPhone(index)"
                 />
+                <div v-if="basicInfoForm.phoneReadonly[index]" class="readonly-tip">该号码来自售后订单同步，仅支持查看</div>
               </div>
               <el-button type="primary" link size="small" :icon="Plus" @click="addBasicInfoPhone">
                 {{ $t("customer.profile360.addPhone") }}
@@ -355,12 +364,24 @@
             <template v-if="!isBasicInfoEditMode">
               <div class="address-tags-container">
                 <el-tag v-for="(addressItem, index) in addressValues" :key="index" type="info" size="small" class="address-tag">
-                  {{ addressItem.value }}
+                  {{ formatAddressDisplay(addressItem) }}
                 </el-tag>
                 <span v-if="addressValues.length === 0">-</span>
               </div>
             </template>
-            <el-input v-else v-model="basicInfoForm.address" :placeholder="$t('customer.placeholder.address')" size="small" />
+            <div v-else class="address-list-edit">
+              <div v-for="(address, index) in basicInfoForm.addresses" :key="address.slotKey" class="address-item-edit">
+                <div class="address-meta">
+                  <span class="slot-label">{{ address.slotLabel }}</span>
+                  <span class="slot-weight">{{ address.weightLabel }}</span>
+                </div>
+                <el-input
+                  v-model="basicInfoForm.addresses[index].value"
+                  :placeholder="$t('customer.placeholder.address')"
+                  size="small"
+                />
+              </div>
+            </div>
           </el-descriptions-item>
         </el-descriptions>
       </el-card>
@@ -428,7 +449,7 @@
                 <div class="category-tags-group">
                   <div class="category-header">
                     <span class="category-name">
-                      {{ getCategoryDisplayName(category) }}
+                      {{ getCategoryDisplayLabel(category) }}
                     </span>
                   </div>
                   <div class="tags-list">
@@ -465,7 +486,7 @@
                     <div class="category-tags-group">
                       <div class="category-header">
                         <span class="category-name">
-                          {{ getCategoryDisplayName(category) }}
+                          {{ getCategoryDisplayLabel(category) }}
                         </span>
                       </div>
                       <div class="tags-list">
@@ -608,31 +629,18 @@
             <el-timeline-item
               v-for="item in profileData.interactions"
               :key="item.id"
-              :timestamp="item.communicationTime || formatDateTime(item.date || '')"
+              :timestamp="item.time || item.communicationTime || formatDateTime(String(item.date || ''))"
               placement="top"
-              :type="getInteractionTimelineType(item.type)"
+              :type="getInteractionTimelineType(item.channel || item.type)"
             >
               <el-card shadow="hover" class="interaction-card">
                 <div class="interaction-item">
                   <div class="interaction-header">
-                    <el-tag :type="getInteractionType(item.type)" size="small">
-                      {{ getInteractionTypeLabel(item.type) || item.type }}
+                    <el-tag :type="getInteractionType(item.channel || item.type)" size="small">
+                      {{ getInteractionTypeLabel(item.channel || item.type) || item.channel || item.type }}
                     </el-tag>
-                    <span class="operator">{{ $t("customer.profile360.operator") }}: {{ item.operator || "—" }}</span>
-                    <span v-if="item.duration" class="duration">
-                      {{ $t("customer.profile360.duration") }}:
-                      {{ typeof item.duration === "number" ? formatDuration(item.duration) : item.duration }}
-                    </span>
                   </div>
                   <div class="interaction-content">{{ item.content || "—" }}</div>
-                  <div v-if="item.result" class="interaction-result">
-                    <el-tag type="info" size="small">
-                      {{ $t("customer.profile360.result") || "沟通结果" }}: {{ item.result }}
-                    </el-tag>
-                  </div>
-                  <div v-if="item.notes" class="interaction-notes">
-                    {{ $t("customer.profile360.notes") || "备注" }}: {{ item.notes }}
-                  </div>
                 </div>
               </el-card>
             </el-timeline-item>
@@ -785,7 +793,7 @@
                   :model-value="scope.row.status"
                   size="small"
                   style="width: 100%"
-                  @update:model-value="(val: string) => handleVehicleStatusChange(scope.row.id, val)"
+                  @update:model-value="val => handleVehicleStatusChange(scope.row.id, String(val))"
                 >
                   <el-option v-for="opt in vehicleStatusOptions" :key="opt.value" :label="opt.name" :value="opt.value" />
                 </el-select>
@@ -794,24 +802,23 @@
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column
-              v-for="entry in vehicleRoleEntries"
-              :key="entry.key"
-              :label="entry.label"
-              min-width="100"
-              align="left"
-            >
+            <el-table-column :label="$t('customer.profile360.vehicleBuyer')" min-width="140">
               <template #default="scope">
-                <el-select
-                  v-if="isVehicleEditMode && canEditVehicleRole"
-                  :model-value="getVehicleRoleSelectValue(scope.row, entry.key)"
-                  size="small"
-                  style="width: 100%"
-                  @update:model-value="(val: string) => handleVehicleRoleSelect(scope.row, entry.key, val)"
-                >
-                  <el-option v-for="opt in vehicleRolePickerOptions" :key="opt.value" :label="opt.label" :value="opt.value" />
-                </el-select>
-                <span v-else>{{ getVehicleRolePerson(scope.row, entry.key) }}</span>
+                <div class="vehicle-person-cell">{{ getVehicleBuyer(scope.row) }}</div>
+              </template>
+            </el-table-column>
+            <el-table-column :label="$t('customer.profile360.vehicleRepairers')" min-width="220">
+              <template #default="scope">
+                <div class="vehicle-repairer-cell">
+                  <template v-if="getVehicleRepairers(scope.row).length > 0">
+                    <div v-for="repairer in getVehicleRepairers(scope.row)" :key="repairer.id" class="vehicle-repairer-chip">
+                      <span>{{ repairer.name }}</span>
+                      <span v-if="repairer.phone" class="vehicle-repairer-phone">{{ repairer.phone }}</span>
+                      <span v-if="repairer.isPreferred" class="vehicle-repairer-badge">首选送修人</span>
+                    </div>
+                  </template>
+                  <span v-else>暂无送修人</span>
+                </div>
               </template>
             </el-table-column>
             <el-table-column prop="source" :label="$t('customer.profile360.source')" width="90" />
@@ -1016,6 +1023,8 @@ import {
   View,
   Check,
   Close,
+  Plus,
+  Delete,
   OfficeBuilding,
   Connection,
   Location,
@@ -1027,6 +1036,7 @@ import {
 import { useI18n } from "vue-i18n";
 import { Customer360View, LifecycleStatus } from "../interface";
 import LineageView from "./LineageView.vue";
+import { TAG_CATEGORY_OPTIONS, getCategoryFullPath } from "@/constants/tagCategory";
 import ProTable from "@/components/ProTable/index.vue";
 import { ColumnProps } from "@/components/ProTable/interface";
 import { h } from "vue";
@@ -1114,12 +1124,6 @@ const contactArchiveTitle = computed(() => {
   return t("customer.profile360.contactArchive");
 });
 
-// 车辆信息 Tab 修改功能（与 H5 一致）
-const vehicleRoleEntries = computed(() => [
-  { key: "使用人", label: t("customer.profile360.vehicleRoleUser") },
-  { key: "联系人", label: t("customer.profile360.vehicleRoleContact") },
-  { key: "送修人", label: t("customer.profile360.vehicleRoleRepair") }
-]);
 const vehicleStatusOptions = computed(() => {
   const base = [
     { name: t("customer.profile360.vehicleStatusSold"), value: "已售" },
@@ -1135,61 +1139,16 @@ const vehicleStatusOptions = computed(() => {
   ];
   return base;
 });
-const canEditVehicleRole = computed(() => {
-  const data = props.profileData;
-  if (!data) return false;
-  const hasPhoneItems = data.customer?.phone && Array.isArray(data.customer.phone) && data.customer.phone.length > 0;
-  const hasHandlers = isCompanyCustomer.value && (data.handlers?.length ?? 0) > 0;
-  return hasPhoneItems || hasHandlers;
-});
-const getVehicleRolePerson = (vehicle: Customer360View["vehicles"][number], roleKey: string): string => {
-  const rp = vehicle.rolePerson as Record<string, string> | undefined;
-  return rp?.[roleKey] || t("customer.profile360.vehicleRoleNone");
-};
-const vehicleRolePickerOptions = computed(() => {
-  const tags: { label: string; value: string }[] = [{ label: t("customer.profile360.vehicleRoleNone"), value: "__none__" }];
-  const data = props.profileData;
-  if (!data) return tags;
-  if (isCompanyCustomer.value && data.handlers?.length) {
-    data.handlers.forEach((h: { id: string; name?: string }) => {
-      tags.push({ label: h.name || t("customer.profile360.handler"), value: `handler_${h.id}` });
-    });
-  }
-  const phone = data.customer?.phone;
-  if (phone && Array.isArray(phone)) {
-    phone.forEach((item: Record<string, unknown>, idx: number) => {
-      const id = (item.id as string) ?? (item.value as string) ?? `phone_${idx}`;
-      const label =
-        (item.contactName as string) ||
-        (item.relationTagName as string) ||
-        (item.value ? `${String(item.value).slice(0, 3)}****${String(item.value).slice(-4)}` : "—");
-      tags.push({ label, value: id });
-    });
-  }
-  return tags;
-});
 function handleVehicleStatusChange(vehicleId: string, status: string) {
   editingVehicleStatusId.value = null;
   emit("vehicleStatusChange", vehicleId, status);
 }
-/** 表格内编辑：当前行该角色对应的下拉选项 value（用于 el-select model-value） */
-function getVehicleRoleSelectValue(row: Customer360View["vehicles"][number], roleKey: string): string {
-  const label = getVehicleRolePerson(row, roleKey);
-  if (!label || label === t("customer.profile360.vehicleRoleNone")) return "__none__";
-  const opt = vehicleRolePickerOptions.value.find(o => o.label === label);
-  return opt ? opt.value : "__none__";
-}
-/** 表格内编辑：选择使用人/联系人/送修人后触发 */
-function handleVehicleRoleSelect(vehicle: Customer360View["vehicles"][number], roleKey: string, selectedValue: string) {
-  const opt = vehicleRolePickerOptions.value.find(o => o.value === selectedValue);
-  if (!opt) return;
-  emit("vehicleRoleChange", {
-    vehicle,
-    role: roleKey,
-    selectedValue: opt.value,
-    selectedLabel: opt.label
-  });
-}
+
+const getVehicleBuyer = (vehicle: Customer360View["vehicles"][number]) =>
+  vehicle.relatedPersons?.find(person => person.role === "购车人")?.name || "暂无";
+
+const getVehicleRepairers = (vehicle: Customer360View["vehicles"][number]) =>
+  vehicle.relatedPersons?.filter(person => person.role === "送修人") || [];
 
 // 线下活动表格列配置
 const offlineActivityColumns = computed<ColumnProps[]>(() => [
@@ -1205,95 +1164,30 @@ const offlineActivityColumns = computed<ColumnProps[]>(() => [
     align: "left"
   },
   {
-    prop: "activityName",
-    label: t("customer.profile360.activityName"),
-    minWidth: 200,
-    align: "left"
-  },
-  {
-    prop: "activityType",
-    label: t("customer.profile360.activityType"),
-    minWidth: 120,
-    align: "left"
-  },
-  {
-    prop: "activityTime",
-    label: t("customer.profile360.activityTime"),
+    prop: "activityDate",
+    label: t("customer.profile360.date"),
     minWidth: 160,
     align: "left",
     render: scope => {
-      return formatDateTime(scope.row.activityTime);
+      return scope.row.activityDate || formatDateTime(scope.row.activityTime);
     }
-  },
-  {
-    prop: "activityLocation",
-    label: t("customer.profile360.activityLocation"),
-    minWidth: 140,
-    align: "left"
-  },
-  {
-    prop: "organizer",
-    label: t("customer.profile360.organizer"),
-    minWidth: 140,
-    align: "left"
-  },
-  {
-    prop: "uploader",
-    label: t("customer.profile360.uploader"),
-    minWidth: 120,
-    align: "left"
-  },
-  {
-    prop: "validExamples",
-    label: t("customer.profile360.validExamples"),
-    width: 120,
-    align: "right",
-    render: scope => {
-      return scope.row.validExamples !== undefined ? scope.row.validExamples : "-";
-    }
-  },
-  {
-    prop: "status",
-    label: t("customer.profile360.status"),
-    width: 120,
-    align: "center",
-    render: scope => {
-      const isParticipated = scope.row.status === "participated";
-      return h(
-        "el-tag",
-        {
-          type: isParticipated ? "success" : "warning",
-          size: "small"
-        },
-        () => (isParticipated ? t("customer.profile360.participated") : t("customer.profile360.notParticipated"))
-      );
-    }
-  },
-  {
-    prop: "activityDescription",
-    label: t("customer.profile360.activityDescription"),
-    minWidth: 250,
-    align: "left",
-    showOverflowTooltip: true
   }
 ]);
 
-// 关系标签选项（与 H5 一致：本人、配偶、公司电话等）
-const RELATION_TAG_KEYS = [
-  "self",
-  "spouse",
-  "companyPhone",
-  "father",
-  "mother",
-  "son",
-  "daughter",
-  "friend",
-  "colleague",
-  "other"
-] as const;
-const relationTagOptions = computed(() =>
-  RELATION_TAG_KEYS.map(key => ({ value: key, label: t(`customer.relationTag.${key}`) }))
-);
+const PERSONAL_RELATION_TAGS = [
+  { value: "self", label: "本人" },
+  { value: "spouse", label: "配偶" },
+  { value: "friend", label: "家庭联系人" },
+  { value: "other", label: "其他个人关系" }
+];
+const COMPANY_RELATION_TAGS = [
+  { value: "companyPhone", label: "公司总机" },
+  { value: "colleague", label: "采购联系人" },
+  { value: "mother", label: "财务联系人" },
+  { value: "father", label: "行政联系人" },
+  { value: "other", label: "其他公司关系" }
+];
+const relationTagOptions = computed(() => (isCompanyCustomer.value ? COMPANY_RELATION_TAGS : PERSONAL_RELATION_TAGS));
 
 // 基础信息编辑表单
 const basicInfoForm = ref<{
@@ -1302,9 +1196,10 @@ const basicInfoForm = ref<{
   ageGroup: string;
   city: string;
   familyStatus: string;
-  address: string;
+  addresses: Array<{ slotKey: string; slotLabel: string; value: string; weightLabel: string }>;
   phoneList: string[];
   phoneRelationTags: string[]; // 每个号码的关系标签 key（与 H5 一致）
+  phoneReadonly: boolean[];
   primaryPhoneIndex: number;
   lifecycleStatus: LifecycleStatus;
   originalLifecycleStatus: LifecycleStatus;
@@ -1314,9 +1209,10 @@ const basicInfoForm = ref<{
   ageGroup: "",
   city: "",
   familyStatus: "",
-  address: "",
+  addresses: [],
   phoneList: [],
   phoneRelationTags: [],
+  phoneReadonly: [],
   primaryPhoneIndex: 0,
   lifecycleStatus: "active",
   originalLifecycleStatus: "active"
@@ -1407,9 +1303,26 @@ const allCategoryTags: Record<string, string[]> = {
 const phoneValues = computed(() => {
   if (!props.profileData) return [];
   if (isCompanyCustomer.value && selectedHandler.value) {
-    const h = selectedHandler.value as { mobile?: string; role?: string };
+    const h = selectedHandler.value as {
+      mobile?: string;
+      role?: string;
+      isPrimaryContact?: boolean;
+      isPreferredRepairer?: boolean;
+      readonly?: boolean;
+    };
     if (h.mobile) {
-      return [{ value: h.mobile, source: "DMS", isPrimary: true, updateTime: "", relationTagName: h.role }];
+      return [
+        {
+          value: h.mobile,
+          source: "DMS",
+          isPrimary: true,
+          updateTime: "",
+          relationTagName: h.role,
+          isPrimaryContact: h.isPrimaryContact,
+          isPreferredRepairer: h.isPreferredRepairer,
+          readonly: h.readonly
+        }
+      ];
     }
     return [];
   }
@@ -1423,7 +1336,10 @@ const phoneValues = computed(() => {
       source: typeof item === "object" ? item.source || "DMS" : "DMS",
       isPrimary: typeof item === "object" ? !!item.isPrimary : index === 0,
       updateTime: typeof item === "object" ? item.updateTime || "" : "",
-      relationTagName: typeof item === "object" ? (item as { relationTagName?: string }).relationTagName : undefined
+      relationTagName: typeof item === "object" ? item.relationTagName : undefined,
+      isPreferredRepairer: typeof item === "object" ? item.isPreferredRepairer : false,
+      isPrimaryContact: typeof item === "object" ? item.isPrimaryContact : false,
+      readonly: typeof item === "object" ? item.readonly : false
     }));
   }
   return [];
@@ -1442,12 +1358,14 @@ const addressValues = computed(() => {
           value: typeof item === "string" ? item : item.value || "",
           source: typeof item === "object" ? item.source || "DMS" : "DMS",
           isPrimary: typeof item === "object" ? item.isPrimary || index === 0 : index === 0,
-          updateTime: typeof item === "object" ? item.updateTime || "" : ""
+          updateTime: typeof item === "object" ? item.updateTime || "" : "",
+          slotKey: typeof item === "object" ? item.slotKey : `address${index + 1}`,
+          weightLabel: typeof item === "object" ? item.weightLabel : undefined
         }));
       }
     } catch (e) {
       // 如果不是JSON，直接作为字符串返回
-      return [{ value: address, source: "DMS", isPrimary: true, updateTime: "" }];
+      return [{ value: address, source: "DMS", isPrimary: true, updateTime: "", slotKey: "address1", weightLabel: "高权重" }];
     }
   }
   if (Array.isArray(address)) {
@@ -1455,11 +1373,18 @@ const addressValues = computed(() => {
       value: typeof item === "string" ? item : item.value || "",
       source: typeof item === "object" ? item.source || "DMS" : "DMS",
       isPrimary: typeof item === "object" ? item.isPrimary || index === 0 : index === 0,
-      updateTime: typeof item === "object" ? item.updateTime || "" : ""
+      updateTime: typeof item === "object" ? item.updateTime || "" : "",
+      slotKey: typeof item === "object" ? item.slotKey : `address${index + 1}`,
+      weightLabel: typeof item === "object" ? item.weightLabel : undefined
     }));
   }
   return [];
 });
+
+const formatAddressDisplay = (addressItem: { slotKey?: string; weightLabel?: string; value: string }) => {
+  const slotLabel = addressItem.slotKey ? addressItem.slotKey.replace("address", "地址") : "地址";
+  return [slotLabel, addressItem.weightLabel, addressItem.value].filter(Boolean).join(" · ");
+};
 
 // 商机信息列表（从customer数据中提取或使用默认值）
 const opportunityInfoList = computed(() => {
@@ -1665,13 +1590,13 @@ const formatDuration = (seconds: number) => {
   });
 };
 
-const getGenderLabel = (gender: string) => {
+const getGenderLabel = (gender?: string) => {
   const map: Record<string, string> = {
     male: t("customer.gender.male"),
     female: t("customer.gender.female"),
     other: t("customer.gender.other")
   };
-  return map[gender] || gender;
+  return gender ? map[gender] || gender : "—";
 };
 
 const getCouponStatusLabel = (status: string) => {
@@ -1737,8 +1662,11 @@ const getLoanStatusType = (status: string): "success" | "warning" | "primary" | 
 const getInteractionType = (type: string): "primary" | "success" | "warning" | "info" => {
   const map: Record<string, "primary" | "success" | "warning" | "info"> = {
     call: "primary",
+    电话: "primary",
     wechat: "success",
+    微信: "success",
     visit: "warning",
+    到店: "warning",
     email: "info",
     sms: "info"
   };
@@ -1748,8 +1676,11 @@ const getInteractionType = (type: string): "primary" | "success" | "warning" | "
 const getInteractionTypeLabel = (type: string) => {
   const map: Record<string, string> = {
     call: t("customer.profile360.call"),
+    电话: "电话",
     wechat: t("customer.profile360.wechat"),
+    微信: "微信",
     visit: t("customer.profile360.visit"),
+    到店: "到店",
     email: t("customer.profile360.email"),
     sms: t("customer.profile360.sms")
   };
@@ -1759,8 +1690,11 @@ const getInteractionTypeLabel = (type: string) => {
 const getInteractionTimelineType = (type: string): "primary" | "success" | "warning" | undefined => {
   const map: Record<string, "primary" | "success" | "warning"> = {
     call: "primary",
+    电话: "primary",
     wechat: "success",
-    visit: "warning"
+    微信: "success",
+    visit: "warning",
+    到店: "warning"
   };
   return map[type] || undefined;
 };
@@ -1784,6 +1718,12 @@ const getCategoryDisplayName = (category: string): string => {
     .replace(/【必选】/g, "")
     .replace(/必选/g, "")
     .trim();
+};
+
+// 获取分类多级展示名称（完整路径，与系统标签多级一致）
+const getCategoryDisplayLabel = (category: string): string => {
+  const clean = getCategoryDisplayName(category);
+  return getCategoryFullPath(TAG_CATEGORY_OPTIONS, clean) || clean;
 };
 
 // 判断某个标签分类是否为自动计算类
@@ -1852,11 +1792,6 @@ const enterBasicInfoEditMode = () => {
   const display = currentDisplayCustomer.value ?? props.profileData?.customer;
   if (!display) return;
 
-  const addr = display.address;
-  const addressStr = Array.isArray(addr)
-    ? (typeof addr[0] === "object" ? (addr[0] as { value?: string })?.value : addr[0]) || ""
-    : (typeof addr === "string" ? addr : "") || "";
-
   const phones = phoneValues.value;
   const phoneList = phones.length > 0 ? phones.map(p => p.value) : [""];
   const primaryIdx = phones.findIndex(p => p.isPrimary);
@@ -1864,8 +1799,17 @@ const enterBasicInfoEditMode = () => {
   const phoneRelationTags = phoneList.map((_, i) => {
     const name = phones[i]?.relationTagName;
     if (!name) return "";
-    const found = RELATION_TAG_KEYS.find(k => t(`customer.relationTag.${k}`) === name);
-    return found ?? "";
+    const found = relationTagOptions.value.find(option => option.label === name);
+    return found?.value ?? "";
+  });
+  const addresses = addressValues.value.map((item, index) => {
+    const slotKey = item.slotKey || `address${index + 1}`;
+    return {
+      slotKey,
+      slotLabel: slotKey.replace("address", "地址"),
+      value: item.value,
+      weightLabel: item.weightLabel || ["高权重", "中高权重", "中权重", "低权重"][index] || "普通"
+    };
   });
 
   basicInfoForm.value = {
@@ -1874,9 +1818,10 @@ const enterBasicInfoEditMode = () => {
     ageGroup: display.ageGroup || "",
     city: (display as { city?: string }).city || "",
     familyStatus: (display.familyStatus as string) || "",
-    address: addressStr,
+    addresses,
     phoneList,
     phoneRelationTags,
+    phoneReadonly: phoneList.map((_, index) => !!phones[index]?.readonly),
     primaryPhoneIndex,
     lifecycleStatus: (props.profileData?.customer.lifecycleStatus as LifecycleStatus) ?? "active",
     originalLifecycleStatus: (props.profileData?.customer.lifecycleStatus as LifecycleStatus) ?? "active"
@@ -1901,6 +1846,7 @@ function onPhonePrimarySecondaryChange(rowIndex: number, value: string) {
 function addBasicInfoPhone() {
   basicInfoForm.value.phoneList.push("");
   basicInfoForm.value.phoneRelationTags.push("");
+  basicInfoForm.value.phoneReadonly.push(false);
 }
 
 function removeBasicInfoPhone(index: number) {
@@ -1908,6 +1854,7 @@ function removeBasicInfoPhone(index: number) {
   if (list.length <= 1) return;
   list.splice(index, 1);
   basicInfoForm.value.phoneRelationTags.splice(index, 1);
+  basicInfoForm.value.phoneReadonly.splice(index, 1);
   const primary = basicInfoForm.value.primaryPhoneIndex;
   if (primary >= list.length) basicInfoForm.value.primaryPhoneIndex = Math.max(0, list.length - 1);
   else if (primary > index) basicInfoForm.value.primaryPhoneIndex = primary - 1;
@@ -1921,9 +1868,10 @@ const exitBasicInfoEditMode = () => {
     ageGroup: "",
     city: "",
     familyStatus: "",
-    address: "",
+    addresses: [],
     phoneList: [],
     phoneRelationTags: [],
+    phoneReadonly: [],
     primaryPhoneIndex: 0,
     lifecycleStatus: "active",
     originalLifecycleStatus: "active"
@@ -1996,10 +1944,9 @@ const handleSubmitBasicInfo = async () => {
     const phonePayload = basicInfoForm.value.phoneList
       .map((value, i) => ({
         value,
-        relationTagName: basicInfoForm.value.phoneRelationTags[i]
-          ? t(`customer.relationTag.${basicInfoForm.value.phoneRelationTags[i]}`)
-          : undefined,
-        isPrimary: basicInfoForm.value.primaryPhoneIndex === i
+        relationTagName: relationTagOptions.value.find(option => option.value === basicInfoForm.value.phoneRelationTags[i])?.label,
+        isPrimary: basicInfoForm.value.primaryPhoneIndex === i,
+        readonly: basicInfoForm.value.phoneReadonly[i]
       }))
       .filter(p => p.value);
     console.log("提交基础信息:", {
@@ -2007,7 +1954,7 @@ const handleSubmitBasicInfo = async () => {
       gender: basicInfoForm.value.gender,
       ageGroup: basicInfoForm.value.ageGroup,
       familyStatus: basicInfoForm.value.familyStatus,
-      address: basicInfoForm.value.address,
+      addresses: basicInfoForm.value.addresses,
       phoneList: phonePayload,
       primaryPhoneIndex: basicInfoForm.value.primaryPhoneIndex,
       lifecycleStatus: basicInfoForm.value.lifecycleStatus
@@ -2335,6 +2282,30 @@ const handleSaveTags = async () => {
       .address-tag {
         padding: 4px 10px;
         font-size: 12px;
+      }
+    }
+    .address-list-edit {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .address-item-edit {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .address-meta {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      .slot-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--el-text-color-primary);
+      }
+      .slot-weight {
+        font-size: 12px;
+        color: var(--el-text-color-secondary);
       }
     }
     .preferences-container {
@@ -2791,22 +2762,11 @@ const handleSaveTags = async () => {
         gap: 12px;
         align-items: center;
         margin-bottom: 8px;
-        .operator {
-          font-size: 13px;
-          color: var(--el-text-color-secondary);
-        }
-        .duration {
-          font-size: 12px;
-          color: var(--el-text-color-regular);
-        }
       }
       .interaction-content {
         margin-bottom: 8px;
         line-height: 1.6;
         color: var(--el-text-color-primary);
-      }
-      .interaction-result {
-        margin-top: 8px;
       }
     }
     .interaction-card {
@@ -2956,6 +2916,14 @@ const handleSaveTags = async () => {
     border: 1px solid rgb(64 158 255 / 30%);
     border-radius: 999px;
   }
+  .handler-flag {
+    padding: 2px 8px;
+    font-size: 11px;
+    line-height: 1;
+    color: #94724a;
+    background: rgb(148 114 74 / 12%);
+    border-radius: 999px;
+  }
   .handler-pill:hover {
     background: var(--el-color-primary-light-9);
     border-color: var(--el-color-primary-light-5);
@@ -2987,7 +2955,46 @@ const handleSaveTags = async () => {
       &.secondary {
         color: var(--el-text-color-secondary);
       }
+      &.highlight {
+        font-weight: 600;
+        color: #94724a;
+      }
+      &.readonly {
+        color: #909399;
+      }
     }
+  }
+  .readonly-tip {
+    width: 100%;
+    font-size: 12px;
+    color: var(--el-text-color-secondary);
+  }
+  .vehicle-person-cell {
+    font-weight: 500;
+    color: var(--el-text-color-primary);
+  }
+  .vehicle-repairer-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .vehicle-repairer-chip {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+  }
+  .vehicle-repairer-phone {
+    font-size: 12px;
+    color: var(--el-text-color-secondary);
+  }
+  .vehicle-repairer-badge {
+    padding: 2px 8px;
+    font-size: 11px;
+    line-height: 1;
+    color: #0f766e;
+    background: rgb(15 118 110 / 10%);
+    border-radius: 999px;
   }
 }
 .drawer-header {

@@ -14,7 +14,7 @@
         class="campaign-card"
       >
         <div class="card-header">
-          <div class="campaign-title">{{ campaign.campaignName }}</div>
+          <div class="campaign-title">{{ campaign.campaignCode }}</div>
           <van-tag :type="getStatusType(campaign.status)" :size="'small' as any">
             {{ campaign.status }}
           </van-tag>
@@ -25,36 +25,8 @@
             <span class="value">{{ campaign.campaignCode }}</span>
           </div>
           <div class="info-row">
-            <span class="label">活动名称：</span>
-            <span class="value">{{ campaign.campaignName }}</span>
-          </div>
-          <div class="info-row">
-            <span class="label">活动类型：</span>
-            <span class="value">{{ campaign.campaignType }}</span>
-          </div>
-          <div class="info-row">
-            <span class="label">活动时间：</span>
-            <span class="value">{{ campaign.activityTime }}</span>
-          </div>
-          <div v-if="campaign.location" class="info-row">
-            <span class="label">活动地点：</span>
-            <span class="value">{{ campaign.location }}</span>
-          </div>
-          <div v-if="campaign.organizer" class="info-row">
-            <span class="label">组织者：</span>
-            <span class="value">{{ campaign.organizer }}</span>
-          </div>
-          <div v-if="campaign.uploader" class="info-row">
-            <span class="label">上传人：</span>
-            <span class="value">{{ campaign.uploader }}</span>
-          </div>
-          <div v-if="campaign.validExamples" class="info-row">
-            <span class="label">有效例子：</span>
-            <span class="value">{{ campaign.validExamples }}</span>
-          </div>
-          <div v-if="campaign.description" class="info-row">
-            <span class="label">活动描述：</span>
-            <span class="value">{{ campaign.description }}</span>
+            <span class="label">活动日期：</span>
+            <span class="value">{{ campaign.activityDate || campaign.activityTime }}</span>
           </div>
         </div>
       </div>
@@ -212,4 +184,3 @@ onMounted(async () => {
   padding: 30px 0;
 }
 </style>
-

@@ -17,7 +17,7 @@
         </div>
         <div class="stats-content">
           <div class="stats-number">
-            {{ formatNumber(tagStats.coverageCount) }} <span class="sub-value">({{ tagStats.coveragePercent }}%)</span>
+            {{ formatNumber(tagStats.coverageCount) }}
           </div>
           <div class="stats-label">{{ t("tagManage.stats.tagCoverage") }}</div>
         </div>
@@ -60,7 +60,7 @@
       :tool-button="['refresh', 'setting', 'search']"
     >
       <!-- 表格 header 按钮（新增标签不设权限，始终显示） -->
-      <template #tableHeader="scope">
+      <template #tableHeader>
         <el-button type="primary" :icon="Plus" @click="handleAdd">新增标签</el-button>
         <!-- <el-button
           type="success"
@@ -89,17 +89,17 @@
         </el-link>
       </template>
 
-      <!-- 分类列 -->
+      <!-- 分类列（多级别展示完整路径） -->
       <template #category="scope">
         <el-tag :type="getCategoryType(scope.row.category) as any" size="small">
-          {{ scope.row.category }}
+          {{ getCategoryFullPath(categoryOptions, scope.row.category) || scope.row.category }}
         </el-tag>
       </template>
 
       <!-- 标签类型列 -->
       <template #tagType="scope">
-        <el-tag :type="scope.row.tagType === 'auto' ? 'success' : 'info'" size="small">
-          {{ scope.row.tagType === "auto" ? "自动化规则" : "人工手动" }}
+        <el-tag :type="getTagTypeStyle(scope.row.tagType) as any" size="small">
+          {{ getTagTypeLabel(scope.row.tagType) }}
         </el-tag>
       </template>
 
@@ -115,7 +115,6 @@
       <!-- 覆盖人数列 -->
       <template #coverageCount="scope">
         <span class="coverage-count">{{ scope.row.coverageCount.toLocaleString() }}</span>
-        <span class="coverage-rate">({{ scope.row.coverageRate }})</span>
       </template>
 
       <!-- 表格操作 -->
@@ -148,18 +147,19 @@
     >
       <el-form ref="formRef" :model="form" :rules="rules" label-width="120px">
         <el-form-item label="标签名称" prop="tagName">
-          <el-input v-model="form.tagName" placeholder="请输入标签名称" maxlength="50" show-word-limit />
+          <el-input v-model="form.tagName" placeholder="请输入标签名称" maxlength="50" show-word-limit :disabled="!!form.tagId" />
         </el-form-item>
         <el-form-item :label="t('tagManage.category')" prop="category">
-          <el-select
+          <el-cascader
             v-model="form.category"
-            :placeholder="t('tagManage.selectCategory')"
+            :options="categoryOptions"
+            :props="{ checkStrictly: true, emitPath: false }"
+            :placeholder="t('tagManage.categoryPlaceholder')"
+            :disabled="!!form.tagId"
             style="width: 100%"
             filterable
             clearable
-          >
-            <el-option v-for="opt in categoryOptions" :key="opt" :label="opt" :value="opt" />
-          </el-select>
+          />
         </el-form-item>
         <el-form-item label="标签类型" prop="tagType">
           <el-radio-group v-model="form.tagType">
@@ -220,12 +220,12 @@
           <el-descriptions-item label="标签名称">{{ currentTag.tagName }}</el-descriptions-item>
           <el-descriptions-item label="标签分类">
             <el-tag :type="getCategoryType(currentTag.category) as any" size="small">
-              {{ currentTag.category }}
+              {{ getCategoryFullPath(categoryOptions, currentTag.category) || currentTag.category }}
             </el-tag>
           </el-descriptions-item>
           <el-descriptions-item label="标签类型">
-            <el-tag :type="currentTag.tagType === 'auto' ? 'success' : 'info'" size="small">
-              {{ currentTag.tagType === "auto" ? "自动化规则" : "人工手动" }}
+            <el-tag :type="getTagTypeStyle(currentTag.tagType) as any" size="small">
+              {{ getTagTypeLabel(currentTag.tagType) }}
             </el-tag>
           </el-descriptions-item>
           <el-descriptions-item label="状态">
@@ -234,7 +234,7 @@
             </el-tag>
           </el-descriptions-item>
           <el-descriptions-item label="覆盖人数">
-            {{ currentTag.coverageCount.toLocaleString() }} ({{ currentTag.coverageRate }})
+            {{ currentTag.coverageCount.toLocaleString() }}
           </el-descriptions-item>
           <el-descriptions-item label="创建人">{{ currentTag.creator }}</el-descriptions-item>
           <el-descriptions-item label="创建时间">{{ currentTag.createTime }}</el-descriptions-item>
@@ -246,25 +246,7 @@
           <el-descriptions-item label="描述" :span="2">{{ currentTag.description }}</el-descriptions-item>
         </el-descriptions>
 
-        <!-- 规则配置展示 -->
-        <div v-if="currentTag.ruleConfig" class="rule-display mt-20">
-          <h4>规则配置</h4>
-          <el-card shadow="never">
-            <div v-if="currentTag.ruleConfig.root" class="rule-tree-display">
-              <RuleTreeDisplay :node="currentTag.ruleConfig.root" />
-            </div>
-            <div v-else-if="currentTag.ruleConfig.conditions" class="rule-tree">
-              <div class="rule-logic">{{ currentTag.ruleConfig.logic || "AND" }}</div>
-              <div class="rule-conditions">
-                <div v-for="(condition, index) in currentTag.ruleConfig.conditions" :key="index" class="condition-display">
-                  {{ getFieldLabel(condition.field) }} {{ getOperatorLabel(condition.operator) }} {{ condition.value }}
-                </div>
-              </div>
-            </div>
-          </el-card>
-        </div>
-
-        <!-- 版本历史 -->
+        <!-- 版本历史（coveragePreview 以下仅保留此项） -->
         <div v-if="currentTag.versionHistory && currentTag.versionHistory.length > 0" class="version-history mt-20">
           <h4>版本历史</h4>
           <el-timeline>
@@ -278,15 +260,6 @@
                 <h4>{{ version.version }}</h4>
                 <p>操作人：{{ version.operator }}</p>
                 <p>变更说明：{{ version.changeLog }}</p>
-                <el-button
-                  v-if="index > 0"
-                  type="primary"
-                  link
-                  size="small"
-                  @click="handleRollback(currentTag.tagId, version.version)"
-                >
-                  回滚到此版本
-                </el-button>
               </el-card>
             </el-timeline-item>
           </el-timeline>
@@ -305,7 +278,6 @@ import ProTable from "@/components/ProTable/index.vue";
 import { ProTableInstance, ColumnProps } from "@/components/ProTable/interface";
 import type { TagManage } from "@/api/modules/tagManage";
 import RuleEditor, { type RuleNode } from "./components/RuleEditor.vue";
-import RuleTreeDisplay from "./components/RuleTreeDisplay.vue";
 import {
   getTagList,
   getTagDetail,
@@ -313,9 +285,13 @@ import {
   editTag,
   publishTag,
   disableTag,
-  simulateRule,
-  rollbackVersion
+  simulateRule
 } from "@/api/modules/tagManage";
+import {
+  TAG_CATEGORY_OPTIONS,
+  getCategoryFullPath,
+  getCategoryType
+} from "@/constants/tagCategory";
 
 // ProTable 实例
 const proTable = ref<ProTableInstance>();
@@ -357,20 +333,7 @@ const form = reactive<TagManage.ReqTagForm & { description: string; status: TagM
   ruleConfig: null
 });
 
-const categoryOptions = [
-  "意向级别",
-  "车牌类型",
-  "所在城市",
-  "特殊标识",
-  "爱好",
-  "SC",
-  "续保",
-  "保险到期月份",
-  "POC",
-  "线上活动",
-  "保时捷",
-  "新能源"
-];
+const categoryOptions = TAG_CATEGORY_OPTIONS;
 
 // 规则树（用于规则编辑器）
 const ruleTree = ref<RuleNode>({
@@ -404,12 +367,17 @@ const columns = reactive<ColumnProps<TagManage.TagInfo>[]>([
     prop: "category",
     label: "分类",
     minWidth: 100,
+    enum: categoryOptions,
     search: {
-      el: "select",
+      el: "cascader",
       label: "分类",
       props: {
-        placeholder: "请选择分类",
-        options: categoryOptions.map(item => ({ label: item, value: item }))
+        options: categoryOptions,
+        checkStrictly: true,
+        emitPath: false,
+        placeholder: "请选择分类（多级）",
+        filterable: true,
+        clearable: true
       }
     }
   },
@@ -505,58 +473,27 @@ const getStatusLabel = (status: TagManage.TagStatus) => {
   return t(`tagManage.statusOptions.${status}`);
 };
 
-// 获取分类类型
-const getCategoryType = (category: TagManage.TagCategory) => {
-  if (!category) return "info";
-  // 根据分类名称动态分配颜色类型
-  const categoryMap: Record<string, string> = {
-    意向级别: "primary",
-    车牌类型: "success",
-    所在城市: "warning",
-    特殊标识: "danger",
-    爱好: "info",
-    SC: "success",
-    续保: "warning",
-    保险到期月份: "info",
-    POC: "primary",
-    线上活动: "success",
-    保时捷: "warning",
-    新能源: "success"
+// 获取标签类型文案
+const getTagTypeLabel = (type: TagManage.TagType) => {
+  const map = {
+    auto: "自动化规则",
+    manual: "人工手动",
+    file_upload: "文件导入"
   };
-  return categoryMap[category] || "info";
+  return map[type] || type;
 };
 
-// 获取字段标签
-const getFieldLabel = (field: string) => {
-  const fieldMap: Record<string, string> = {
-    annualConsumption: "年消费金额",
-    age: "年龄",
-    gender: "性别",
-    visitCount90Days: "90天到店次数",
-    vehicleType: "车辆类型",
-    lastVisitDays: "最后到店天数",
-    totalConsumption: "累计消费"
+// 获取标签类型搜索或显示样式
+const getTagTypeStyle = (type: TagManage.TagType) => {
+  const map = {
+    auto: "success",
+    manual: "info",
+    file_upload: "primary"
   };
-  return fieldMap[field] || field;
+  return map[type] || "info";
 };
 
-// 获取操作符标签
-const getOperatorLabel = (operator: string) => {
-  const operatorMap: Record<string, string> = {
-    "=": "等于",
-    "!=": "不等于",
-    ">": "大于",
-    ">=": "大于等于",
-    "<": "小于",
-    "<=": "小于等于",
-    contains: "包含",
-    "not contains": "不包含"
-  };
-  return operatorMap[operator] || operator;
-};
-
-// 移除实时同步，避免递归更新
-// 规则配置将在提交表单时设置
+// 分类展示与样式使用共享常量 getCategoryFullPath、getCategoryType
 
 // 模拟验证
 const handleSimulate = async () => {
@@ -710,21 +647,6 @@ const handleViewDetail = async (row?: TagManage.TagInfo) => {
   }
 };
 
-// 版本回滚
-const handleRollback = (tagId: string, version: string) => {
-  ElMessageBox.confirm(`确定要回滚到版本"${version}"吗？`, "提示", {
-    confirmButtonText: "确定",
-    cancelButtonText: "取消",
-    type: "warning"
-  }).then(() => {
-    rollbackVersion({ tagId, version }).then(() => {
-      ElMessage.success("回滚成功");
-      handleViewDetail({ tagId } as TagManage.TagInfo);
-      proTable.value?.getTableList();
-    });
-  });
-};
-
 // 提交表单
 const submitForm = () => {
   formRef.value?.validate((valid: boolean) => {
@@ -766,6 +688,7 @@ const submitForm = () => {
 
     submitting.value = true;
     const api = form.tagId ? editTag : addTag;
+
     const params: TagManage.ReqTagForm = {
       tagId: form.tagId,
       tagName: form.tagName,
@@ -837,12 +760,6 @@ const handleDialogClose = () => {
     cursor: help;
   }
 
-  .coverage-rate {
-    color: var(--el-text-color-secondary);
-    font-size: 12px;
-    margin-left: 4px;
-  }
-
   .rule-config-form-item {
     :deep(.el-form-item__content) {
       width: 100%;
@@ -850,35 +767,6 @@ const handleDialogClose = () => {
   }
 
   .tag-detail {
-    .rule-display {
-      h4 {
-        margin-bottom: 12px;
-        font-size: 16px;
-        font-weight: 600;
-      }
-
-      .rule-tree {
-        .rule-logic {
-          font-weight: 600;
-          color: var(--el-color-primary);
-          margin-bottom: 12px;
-        }
-
-        .rule-conditions {
-          .condition-display {
-            padding: 8px 12px;
-            background-color: var(--el-bg-color-page);
-            border-radius: 4px;
-            margin-bottom: 8px;
-
-            &:last-child {
-              margin-bottom: 0;
-            }
-          }
-        }
-      }
-    }
-
     .version-history {
       h4 {
         margin-bottom: 12px;

@@ -53,10 +53,10 @@
         <el-button type="primary" :icon="Plus" @click="handleAdd">{{ t("segmentManage.createSegment") }}</el-button>
       </template>
 
-      <!-- 分类列 -->
+      <!-- 分类列（多级别展示完整路径） -->
       <template #category="scope">
         <el-tag v-if="scope.row.category" :type="getCategoryType(scope.row.category) as any" size="small">
-          {{ scope.row.category }}
+          {{ getCategoryFullPath(TAG_CATEGORY_OPTIONS, scope.row.category) || scope.row.category }}
         </el-tag>
         <span v-else class="text-gray-500">-</span>
       </template>
@@ -91,18 +91,25 @@
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="1400px" append-to-body :close-on-click-modal="false">
       <el-form ref="formRef" :model="form" :rules="rules" label-width="120px">
         <el-form-item :label="t('segmentManage.segmentName')" prop="name" required>
-          <el-input v-model="form.name" maxlength="50" show-word-limit :placeholder="t('segmentManage.enterSegmentName')" />
+          <el-input
+            v-model="form.name"
+            maxlength="50"
+            show-word-limit
+            :placeholder="t('segmentManage.enterSegmentName')"
+            :disabled="!!form.id"
+          />
         </el-form-item>
         <el-form-item :label="t('segmentManage.category')" prop="category">
-          <el-select
+          <el-cascader
             v-model="form.category"
+            :options="categoryOptions"
+            :props="{ checkStrictly: true, emitPath: false }"
             :placeholder="t('segmentManage.selectCategory')"
             style="width: 100%"
-            clearable
             filterable
-          >
-            <el-option v-for="opt in categoryOptions" :key="opt" :label="opt" :value="opt" />
-          </el-select>
+            clearable
+            :disabled="!!form.id"
+          />
         </el-form-item>
         <el-form-item :label="t('segmentManage.description')" prop="description">
           <el-input
@@ -190,6 +197,11 @@ import {
 } from "@/api/modules/segment";
 import { getTagList } from "@/api/modules/tagManage";
 import type { TagManage } from "@/api/modules/tagManage";
+import {
+  TAG_CATEGORY_OPTIONS,
+  getCategoryFullPath,
+  getCategoryType as getCategoryTypeFromConst
+} from "@/constants/tagCategory";
 import { onMounted } from "vue";
 
 const { t } = useI18n();
@@ -259,41 +271,9 @@ const statusLabel = (s: Segment.SegmentStatus) => {
   }[s];
 };
 
-// 获取分类类型
-const categoryOptions = [
-  "意向级别",
-  "车牌类型",
-  "所在城市",
-  "特殊标识",
-  "爱好",
-  "SC",
-  "续保",
-  "保险到期月份",
-  "POC",
-  "线上活动",
-  "保时捷",
-  "新能源"
-];
-
-const getCategoryType = (category?: Segment.SegmentCategory) => {
-  if (!category) return "info";
-  // 根据分类名称动态分配颜色类型
-  const categoryMap: Record<string, string> = {
-    意向级别: "primary",
-    车牌类型: "success",
-    所在城市: "warning",
-    特殊标识: "danger",
-    爱好: "info",
-    SC: "success",
-    续保: "warning",
-    保险到期月份: "info",
-    POC: "primary",
-    线上活动: "success",
-    保时捷: "warning",
-    新能源: "success"
-  };
-  return categoryMap[category] || "info";
-};
+// 多级分类（与标签管理统一）
+const categoryOptions = TAG_CATEGORY_OPTIONS;
+const getCategoryType = (category?: Segment.SegmentCategory) => getCategoryTypeFromConst(category);
 
 const columns = reactive<ColumnProps<Segment.SegmentInfo>[]>([
   {
@@ -306,11 +286,16 @@ const columns = reactive<ColumnProps<Segment.SegmentInfo>[]>([
     prop: "category",
     label: t("segmentManage.category"),
     minWidth: 100,
+    enum: categoryOptions,
     search: {
-      el: "select",
+      el: "cascader",
       props: {
+        options: categoryOptions,
+        checkStrictly: true,
+        emitPath: false,
         placeholder: t("segmentManage.selectCategory"),
-        options: categoryOptions.map(item => ({ label: item, value: item }))
+        filterable: true,
+        clearable: true
       }
     }
   },

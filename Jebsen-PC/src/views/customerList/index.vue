@@ -1,6 +1,6 @@
 <template>
   <div class="customer-list-container table-box">
-    <!-- 双层 Tab：第一层门店，第二层客户类型（OneID/全部·个人·公司） -->
+    <!-- 双层 Tab：第一层门店，第二层视图模式（按人 / 按车） -->
     <el-card shadow="hover" class="double-tabs-card">
       <!-- 第一层：门店 -->
       <div class="tabs-layer">
@@ -9,31 +9,23 @@
           <el-tab-pane v-for="opt in storeSearchOptions" :key="opt.value" :name="opt.value" :label="opt.label" />
         </el-tabs>
       </div>
-      <!-- 第二层：客户类型 -->
+      <!-- 第二层：视图模式 -->
       <div class="tabs-layer">
-        <span class="tabs-layer-label">{{ t("customer.customerType.label") }}</span>
-        <el-tabs v-model="activeCustomerTypeTab" class="layer-tabs type-tabs" @tab-change="handleCustomerTypeTabChange">
-          <el-tab-pane>
+        <span class="tabs-layer-label">{{ t("customer.listMode.label") }}</span>
+        <el-tabs v-model="activeListMode" class="layer-tabs type-tabs" @tab-change="handleListModeChange">
+          <el-tab-pane name="person">
             <template #label>
               <span class="tab-label">
-                {{ t("customer.customerTypeTabs.all") }}
-                <span v-if="customerTypeStats.all > 0" class="tab-count">{{ customerTypeStats.all }}</span>
+                {{ t("customer.listModeTabs.person") }}
+                <span v-if="listModeStats.person > 0" class="tab-count">{{ listModeStats.person }}</span>
               </span>
             </template>
           </el-tab-pane>
-          <el-tab-pane>
+          <el-tab-pane name="vehicle">
             <template #label>
               <span class="tab-label">
-                {{ t("customer.customerTypeTabs.individual") }}
-                <span v-if="customerTypeStats.individual > 0" class="tab-count">{{ customerTypeStats.individual }}</span>
-              </span>
-            </template>
-          </el-tab-pane>
-          <el-tab-pane>
-            <template #label>
-              <span class="tab-label">
-                {{ t("customer.customerTypeTabs.company") }}
-                <span v-if="customerTypeStats.company > 0" class="tab-count">{{ customerTypeStats.company }}</span>
+                {{ t("customer.listModeTabs.vehicle") }}
+                <span v-if="listModeStats.vehicle > 0" class="tab-count">{{ listModeStats.vehicle }}</span>
               </span>
             </template>
           </el-tab-pane>
@@ -101,35 +93,12 @@
       </div>
     </div>
 
-    <!-- 公司客户筛选（使用公共 SearchForm 组件，支持多条件） -->
-    <SearchForm
-      v-if="activeCustomerTypeTab === 'company'"
-      :columns="companySearchColumns"
-      :search-param="companyFilter"
-      :search-col="3"
-      :search="handleCompanySearch"
-      :reset="handleCompanyReset"
-    />
-
-    <!-- 公司客户表格（独立表头版） -->
-    <CompanyCustomerTable
-      v-if="activeCustomerTypeTab === 'company'"
-      ref="companyTableRef"
-      :table-data="companyTableData"
-      :columns="columns"
-      :pagination="companyPagination"
-      @view360="viewProfile360"
-      @view-sensitive-data="handleViewSensitiveData"
-      @size-change="handleCompanySizeChange"
-      @current-change="handleCompanyCurrentChange"
-    />
-
-    <!-- 个人客户表格（使用 ProTable） -->
+    <!-- 按人列表 -->
     <pro-table
-      v-else
+      v-if="activeListMode === 'person'"
       ref="proTableRef"
-      :columns="columns"
-      :request-api="loadData"
+      :columns="personColumns"
+      :request-api="loadPersonData"
       :init-param="initParam"
       :pagination="true"
       :tool-button="toolButton"
@@ -183,6 +152,34 @@
       </template>
     </pro-table>
 
+    <!-- 按车列表 -->
+    <pro-table
+      v-else
+      ref="vehicleTableRef"
+      :columns="vehicleColumns"
+      :request-api="loadVehicleData"
+      :init-param="initParam"
+      :pagination="true"
+      :tool-button="toolButton"
+      :border="true"
+      :row-key="'id'"
+    >
+      <template #tableHeader>
+        <el-button type="primary" @click="handleExport">
+          <el-icon>
+            <Download />
+          </el-icon>
+          {{ $t("customer.export") }}
+        </el-button>
+      </template>
+
+      <template #status="scope">
+        <el-tag :type="getVehicleStatusType(scope.row.status)" size="small">
+          {{ scope.row.status || TABLE_EMPTY_PLACEHOLDER }}
+        </el-tag>
+      </template>
+    </pro-table>
+
     <!-- 360度全景视图 -->
     <Profile360View
       v-model="show360View"
@@ -204,12 +201,10 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import { Download, View, Warning, User, Top, Select, Medal, Connection, Refresh } from "@element-plus/icons-vue";
 import { useUserStore } from "@/stores/modules/user";
 import ProTable from "@/components/ProTable/index.vue";
-import SearchForm from "@/components/SearchForm/index.vue";
 import { ColumnProps } from "@/components/ProTable/interface";
 import { TABLE_EMPTY_PLACEHOLDER } from "@/utils";
 import { Customer, Customer360View, FeedbackForm, LifecycleStatus, CompanyInfo } from "./interface";
 import MultiValueField from "./components/MultiValueField.vue";
-import CompanyCustomerTable from "./components/CompanyCustomerTable.vue";
 import Profile360View from "./components/Profile360View.vue";
 import FeedbackDialog from "./components/FeedbackDialog.vue";
 
@@ -218,6 +213,44 @@ import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
 const userStore = useUserStore();
+
+interface VehicleListRow {
+  id: string;
+  oneId: string;
+  userId: string;
+  customerRef: Customer;
+  hasConflict: boolean;
+  primaryStoreName?: string;
+  customerType: Customer["customerType"];
+  vehicleModel: string;
+  licensePlate: string;
+  vin: string;
+  purchaseDate: string;
+  currentMileage: number;
+  insuranceCompany: string;
+  insuranceType: string;
+  insuranceStatus: string;
+  insuranceEndDate: string;
+  financeInstitution: string;
+  loanStatus: string;
+  loanAmount: number;
+  loanTerm: string;
+  submitDate: string;
+  signStatus: string;
+  signDate: string;
+  issueCenter: string;
+  customerRate: number;
+  bankRebate: number;
+  loanServiceFee: number;
+  vehicleRegistrationFee: number;
+  vehicleRegistrationCitySubsidy: number;
+  discountRate: number;
+  lastVisitTime: string;
+  visitCount90Days: number;
+  annualOrderFrequency: number;
+  buyerPhone: string;
+  status: string;
+}
 
 // 模拟门店列表（与 Mock 数据一致，保证搜索选项与列表数据可关联、门店筛选生效）
 const MOCK_STORE_LIST = [
@@ -249,27 +282,23 @@ const formatNumber = (num: number) => {
   return num.toLocaleString("zh-CN");
 };
 
-// 客户类型 Tab（全部 / 个人 / 公司）
-type CustomerTypeTab = "all" | "individual" | "company";
-const activeCustomerTypeTab = ref<CustomerTypeTab>("all");
+// 客户列表模式（按人 / 按车）
+type CustomerListMode = "person" | "vehicle";
+const activeListMode = ref<CustomerListMode>("person");
 
-// Tab 对应数量统计（受除 customerType 以外的筛选影响）
-const customerTypeStats = reactive<{
-  all: number;
-  individual: number;
-  company: number;
+const listModeStats = reactive<{
+  person: number;
+  vehicle: number;
 }>({
-  all: 0,
-  individual: 0,
-  company: 0
+  person: 0,
+  vehicle: 0
 });
 
 // 顶部门店选择（与下方列表、公司筛选共用，变更时触发刷新）
 const selectedStoreId = ref("");
 
-// 初始化参数：含 customerType（Tab）与 storeId（顶部门店），供 ProTable / loadCompanyData 使用
-const initParam = reactive<{ customerType?: Customer["customerType"] | ""; storeId?: string }>({
-  customerType: "",
+// 初始化参数：当前仅保留门店维度，列表模式由页面级 Tab 控制
+const initParam = reactive<{ storeId?: string }>({
   storeId: ""
 });
 
@@ -277,10 +306,8 @@ const initParam = reactive<{ customerType?: Customer["customerType"] | ""; store
 const onTopStoreChange = () => {
   const storeId = selectedStoreId.value ?? "";
   initParam.storeId = storeId;
-  if (activeCustomerTypeTab.value === "company") {
-    companyFilter.storeId = storeId;
-    companyPagination.pageNum = 1;
-    loadCompanyData();
+  if (activeListMode.value === "vehicle") {
+    vehicleTableRef.value?.getTableList?.();
   } else {
     proTableRef.value?.getTableList?.();
   }
@@ -722,118 +749,211 @@ const baseColumns: ColumnProps<Customer>[] = [
   }
 ];
 
-// 根据当前客户类型 Tab 动态裁剪列：
-// - 个人 Tab：不展示公司经办人列 & 客户类型列
-// - 公司 Tab：不展示客户类型列（已由 Tab 语义明确）
-// - 全部 Tab：展示全部基础列
-const columns = computed<ColumnProps<Customer>[]>(() => {
-  if (activeCustomerTypeTab.value === "individual") {
-    return baseColumns.filter(col => col.prop !== "handler" && col.prop !== "customerType");
+const personColumns = computed<ColumnProps<Customer>[]>(() => baseColumns.filter(col => col.prop !== "handler"));
+
+const vehicleColumns = computed<ColumnProps<VehicleListRow>[]>(() => [
+  {
+    prop: "primaryStoreName",
+    label: t("customer.store.label"),
+    minWidth: 180
+  },
+  {
+    prop: "vehicleModel",
+    label: t("customer.profile360.vehicleModel"),
+    minWidth: 160,
+    search: {
+      el: "input",
+      label: t("customer.profile360.vehicleModel"),
+      props: { placeholder: t("customer.placeholder.carSeriesModel") }
+    }
+  },
+  {
+    prop: "licensePlate",
+    label: t("customer.licensePlate"),
+    minWidth: 130,
+    search: {
+      el: "input",
+      label: t("customer.licensePlate"),
+      props: { placeholder: t("customer.placeholder.licensePlate") }
+    }
+  },
+  {
+    prop: "vin",
+    label: t("customer.profile360.vin"),
+    minWidth: 160,
+    search: {
+      el: "input",
+      label: t("customer.profile360.vin"),
+      props: { placeholder: t("customer.placeholder.vinInfo") }
+    }
+  },
+  {
+    prop: "purchaseDate",
+    label: t("customer.profile360.purchaseDate"),
+    minWidth: 120
+  },
+  {
+    prop: "status",
+    label: t("customer.profile360.status"),
+    minWidth: 110
+  },
+  {
+    prop: "submitDate",
+    label: t("customer.profile360.submitDate"),
+    minWidth: 130
+  },
+  {
+    prop: "signStatus",
+    label: t("customer.profile360.signStatus"),
+    minWidth: 120
+  },
+  {
+    prop: "signDate",
+    label: t("customer.profile360.signDate"),
+    minWidth: 130
+  },
+  {
+    prop: "issueCenter",
+    // 发放中心跟随订单，不直接等于上方门店列
+    label: t("customer.profile360.issueCenter"),
+    minWidth: 160
+  },
+  {
+    label: t("customer.profile360.transactions"),
+    _children: [
+      {
+        prop: "lastVisitTime",
+        label: t("customer.lastVisitTime"),
+        minWidth: 170
+      },
+      {
+        prop: "visitCount90Days",
+        label: t("customer.visitCount90Days"),
+        minWidth: 140
+      },
+      {
+        prop: "annualOrderFrequency",
+        label: t("customer.annualOrderFrequency"),
+        minWidth: 140
+      },
+      {
+        prop: "currentMileage",
+        label: t("customer.currentMileage"),
+        minWidth: 130,
+        render: scope => `${formatNumber(Math.round(scope.row.currentMileage || 0))} km`
+      }
+    ]
+  },
+  {
+    label: t("customer.profile360.insurance"),
+    _children: [
+      {
+        prop: "insuranceCompany",
+        label: t("customer.profile360.insuranceCompany"),
+        minWidth: 150,
+        search: {
+          el: "input",
+          label: t("customer.profile360.insuranceCompany"),
+          props: { placeholder: t("customer.profile360.insuranceCompany") }
+        }
+      },
+      {
+        prop: "insuranceType",
+        label: t("customer.profile360.insuranceType"),
+        minWidth: 120
+      },
+      {
+        prop: "insuranceStatus",
+        label: t("customer.vehicleView.insuranceStatus"),
+        minWidth: 120
+      },
+      {
+        prop: "insuranceEndDate",
+        label: t("customer.vehicleView.insuranceEndDate"),
+        minWidth: 130
+      }
+    ]
+  },
+  {
+    label: t("customer.profile360.financialLoans"),
+    _children: [
+      {
+        prop: "financeInstitution",
+        label: t("customer.profile360.financeInstitution"),
+        minWidth: 150,
+        search: {
+          el: "input",
+          label: t("customer.profile360.financeInstitution"),
+          props: { placeholder: t("customer.profile360.financeInstitution") }
+        }
+      },
+      {
+        prop: "loanStatus",
+        label: t("customer.vehicleView.financeStatus"),
+        minWidth: 120
+      },
+      {
+        prop: "customerRate",
+        label: t("customer.profile360.customerRate"),
+        minWidth: 130,
+        render: scope => `${scope.row.customerRate?.toFixed(1) ?? 0}%`
+      },
+      {
+        prop: "loanAmount",
+        label: t("customer.profile360.loanAmount"),
+        minWidth: 140,
+        render: scope => `¥${formatNumber(Math.round(scope.row.loanAmount || 0))}`
+      },
+      {
+        prop: "loanTerm",
+        label: t("customer.profile360.loanTerm"),
+        minWidth: 120
+      },
+      {
+        prop: "bankRebate",
+        label: t("customer.profile360.bankRebate"),
+        minWidth: 130,
+        render: scope => `¥${formatNumber(Math.round(scope.row.bankRebate || 0))}`
+      },
+      {
+        prop: "loanServiceFee",
+        label: t("customer.profile360.loanServiceFee"),
+        minWidth: 140,
+        render: scope => `¥${formatNumber(Math.round(scope.row.loanServiceFee || 0))}`
+      },
+      {
+        prop: "vehicleRegistrationFee",
+        label: t("customer.profile360.vehicleRegistrationFee"),
+        minWidth: 150,
+        render: scope => `¥${formatNumber(Math.round(scope.row.vehicleRegistrationFee || 0))}`
+      },
+      {
+        prop: "vehicleRegistrationCitySubsidy",
+        label: t("customer.profile360.vehicleRegistrationCitySubsidy"),
+        minWidth: 180,
+        render: scope => `¥${formatNumber(Math.round(scope.row.vehicleRegistrationCitySubsidy || 0))}`
+      },
+      {
+        prop: "discountRate",
+        label: t("customer.profile360.discountRate"),
+        minWidth: 130,
+        render: scope => `${scope.row.discountRate?.toFixed(1) ?? 0}%`
+      }
+    ]
   }
-  if (activeCustomerTypeTab.value === "company") {
-    return baseColumns.filter(col => col.prop !== "customerType");
-  }
-  return baseColumns;
-});
+]);
 
 // 表格引用
 const proTableRef = ref();
-const companyTableRef = ref();
+const vehicleTableRef = ref();
 
-// 公司客户表格数据
-const companyTableData = ref<Customer[]>([]);
-const companyPagination = reactive({
-  pageNum: 1,
-  pageSize: 10,
-  total: 0
-});
-// 公司客户筛选参数（使用公共 SearchForm，需支持多条件）
-const companyFilter = reactive<Record<string, any>>({});
-
-// 公司 Tab 使用的搜索列（复用基础列配置，过滤掉仅个人/类型相关字段）
-const companySearchColumns = computed<ColumnProps<Customer>[]>(() =>
-  baseColumns.filter(
-    col =>
-      col.search &&
-      col.prop !== "customerType" &&
-      col.prop !== "handler" &&
-      col.prop !== "gender" &&
-      col.prop !== "ageGroup" &&
-      col.prop !== "familyStatus"
-  )
-);
-
-// 切换客户类型 Tab
-const handleCustomerTypeTabChange = (name: any) => {
-  const tab: CustomerTypeTab = (name || "all") as CustomerTypeTab;
-  activeCustomerTypeTab.value = tab;
-  initParam.customerType = tab === "all" ? "" : tab;
-
-  if (tab === "company") {
-    // 公司客户：加载数据到 companyTableData
-    companyPagination.pageNum = 1;
-    // 重置公司筛选参数（但保留 Tab 级别的公共 initParam.customerType）
-    Object.keys(companyFilter).forEach(key => {
-      delete companyFilter[key];
-    });
-    loadCompanyData();
-  } else {
-    // 个人客户：使用 ProTable
-    if (proTableRef.value && (proTableRef.value as any).pageable) {
-      (proTableRef.value as any).pageable.pageNum = 1;
-    }
-    proTableRef.value?.getTableList?.();
+const handleListModeChange = (name: string) => {
+  activeListMode.value = (name || "person") as CustomerListMode;
+  if (activeListMode.value === "vehicle") {
+    vehicleTableRef.value?.getTableList?.();
+    return;
   }
-};
-
-// 加载公司客户数据
-const loadCompanyData = async () => {
-  const params = {
-    ...initParam,
-    ...companyFilter,
-    customerType: "company",
-    pageNum: companyPagination.pageNum,
-    pageSize: companyPagination.pageSize
-  };
-
-  const result = await loadData(params);
-  if (result?.data) {
-    companyTableData.value = result.data.list || [];
-    companyPagination.total = result.data.total || 0;
-  }
-};
-
-// 公司筛选：公共 SearchForm 搜索回调
-const handleCompanySearch = (params: Record<string, any>) => {
-  // 清空旧条件，写入新条件
-  Object.keys(companyFilter).forEach(key => {
-    delete companyFilter[key];
-  });
-  Object.assign(companyFilter, params);
-  companyPagination.pageNum = 1;
-  loadCompanyData();
-};
-
-// 公司筛选：重置回调
-const handleCompanyReset = () => {
-  Object.keys(companyFilter).forEach(key => {
-    delete companyFilter[key];
-  });
-  companyPagination.pageNum = 1;
-  loadCompanyData();
-};
-
-// 公司表格分页大小变化
-const handleCompanySizeChange = (size: number) => {
-  companyPagination.pageSize = size;
-  companyPagination.pageNum = 1;
-  loadCompanyData();
-};
-
-// 公司表格当前页变化
-const handleCompanyCurrentChange = (page: number) => {
-  companyPagination.pageNum = page;
-  loadCompanyData();
+  proTableRef.value?.getTableList?.();
 };
 
 // 生成模拟数据（门店使用上方 MOCK_STORE_LIST 的 storeId/storeName）（先生成全量，再按筛选条件过滤，最后做分页与统计）
@@ -1074,10 +1194,7 @@ const generateMockData = (pageNum: number, pageSize: number, filters: any = {}) 
     });
   });
 
-  // 更新 Tab 数量（受其他筛选影响，但与当前激活 Tab 无关）
-  customerTypeStats.all = baseFiltered.length;
-  customerTypeStats.individual = baseFiltered.filter(item => item.customerType === "individual").length;
-  customerTypeStats.company = baseFiltered.filter(item => item.customerType === "company").length;
+  listModeStats.person = baseFiltered.length;
 
   // 表格数据在基础集合上叠加当前 Tab / 搜索中的 customerType 条件
   let filteredData = baseFiltered;
@@ -1123,8 +1240,94 @@ const generateMockData = (pageNum: number, pageSize: number, filters: any = {}) 
   };
 };
 
-// 模拟数据加载函数
-const loadData = async (params: any) => {
+const getDisplayValue = (field: string | { value?: string }[] | undefined) => {
+  if (!field) return "";
+  if (typeof field === "string") return field;
+  return field[0]?.value || "";
+};
+
+const buildVehicleRows = (customers: Customer[]): VehicleListRow[] =>
+  customers.map((customer, index) => {
+    const primaryPhone = Array.isArray(customer.phone) ? customer.phone[0] : undefined;
+    const buyerPhone =
+      customer.customerType === "company"
+        ? customer.handlers?.[0]?.mobile || (typeof primaryPhone === "object" ? primaryPhone?.value : "")
+        : typeof customer.phone === "string"
+          ? customer.phone
+          : primaryPhone?.value || "";
+    const insuranceCompanies = ["平安财险", "太保财险", "人保财险"];
+    const insuranceTypes = ["商业险", "交强险", "商业险+交强险"];
+    const insuranceStatuses = ["已生效", "待续保", "已过期"];
+    const financeInstitutions = ["招商银行金融", "保时捷金融", "建设银行"];
+    const issueCenters = ["上海闵行保时捷中心", "上海闵行保时捷金融中心", "上海浦东保时捷中心"];
+    const loanStatuses = ["正常", "即将到期", "已结清"];
+    const loanTerms = ["12期", "24期", "36期", "48期"];
+    const insuranceIndex = customer.id % insuranceCompanies.length;
+    const financeIndex = customer.id % financeInstitutions.length;
+    const endMonth = String((customer.id % 12) + 1).padStart(2, "0");
+    const endDay = String(((customer.id * 3) % 20) + 8).padStart(2, "0");
+    const submitMonth = String(((customer.id + 5) % 12) + 1).padStart(2, "0");
+    const submitDay = String(((customer.id * 2) % 20) + 5).padStart(2, "0");
+    const baseAmount = Math.max(120000, Math.round(Number(customer.avgConsumption || 0) * 80 + customer.id * 5000));
+    const customerRate = 3 + (customer.id % 5); // 3% - 7%
+    const bankRebate = Math.round(baseAmount * 0.015);
+    const loanServiceFee = 3000 + (customer.id % 5) * 500;
+    const vehicleRegistrationFee = 2000 + (customer.id % 3) * 300;
+    const vehicleRegistrationCitySubsidy = 1500 + (customer.id % 3) * 250;
+    const discountRate = 1 + (customer.id % 3); // 1% - 3%
+
+    return {
+      id: `vehicle-${customer.id}-${index + 1}`,
+      oneId: customer.oneId,
+      userId: customer.userId,
+      customerRef: customer,
+      hasConflict: customer.hasConflict,
+      primaryStoreName: customer.primaryStoreName,
+      customerType: customer.customerType,
+      vehicleModel: customer.carSeriesModel,
+      licensePlate: getDisplayValue(customer.licensePlate),
+      vin: getDisplayValue(customer.vinInfo),
+      purchaseDate: customer.createdAt?.slice(0, 10) || "2024-01-01",
+      currentMileage: Number(customer.currentMileage || 0),
+      insuranceCompany: insuranceCompanies[insuranceIndex],
+      insuranceType: insuranceTypes[insuranceIndex],
+      insuranceStatus: insuranceStatuses[insuranceIndex],
+      insuranceEndDate: `2026-${endMonth}-${endDay}`,
+      financeInstitution: financeInstitutions[financeIndex],
+      loanStatus: loanStatuses[financeIndex],
+      loanAmount: baseAmount,
+      loanTerm: loanTerms[customer.id % loanTerms.length],
+      submitDate: `2024-${submitMonth}-${submitDay}`,
+      signStatus: customer.id % 3 === 0 ? t("customer.profile360.signStatus") : t("customer.profile360.loanStatusNormal"),
+      signDate: `2024-${submitMonth}-${String(Number(submitMonth) + 1).padStart(2, "0")}-${submitDay}`,
+      // 发放中心随订单走，这里仅做示例模拟
+      issueCenter: issueCenters[financeIndex],
+      customerRate,
+      bankRebate,
+      loanServiceFee,
+      vehicleRegistrationFee,
+      vehicleRegistrationCitySubsidy,
+      discountRate,
+      lastVisitTime: customer.lastVisitTime,
+      visitCount90Days: Number(customer.visitCount90Days || 0),
+      annualOrderFrequency: Number(customer.annualOrderFrequency || 0),
+      buyerPhone,
+      status: ["自用", "维修中", "已售", "订车中-在途"][customer.id % 4]
+    };
+  });
+
+const getVehicleStatusType = (status: string): "success" | "info" | "warning" | "primary" => {
+  const map: Record<string, "success" | "info" | "warning" | "primary"> = {
+    自用: "success",
+    维修中: "warning",
+    已售: "info",
+    "订车中-在途": "primary"
+  };
+  return map[status] || "info";
+};
+
+// 模拟按人数据加载
+const loadPersonData = async (params: any) => {
   console.log("加载客户数据，参数：", params);
 
   // 获取页码和页面大小
@@ -1138,6 +1341,9 @@ const loadData = async (params: any) => {
 
   // 生成模拟数据
   const result = generateMockData(pageNum, pageSize, searchParams);
+  const totalCustomers = generateMockData(1, 1000, { ...searchParams, pageNum: 1, pageSize: 1000 }).data;
+  listModeStats.person = totalCustomers.length;
+  listModeStats.vehicle = buildVehicleRows(totalCustomers).length;
 
   console.log(`生成了 ${result.data.length} 条数据，总共 ${result.total} 条`);
 
@@ -1164,6 +1370,47 @@ const loadData = async (params: any) => {
   return response;
 };
 
+// 模拟按车数据加载
+const loadVehicleData = async (params: any) => {
+  const { pageNum = 1, pageSize = 10, ...filters } = params || {};
+  const personResult = generateMockData(1, 1000, { ...filters, pageNum: 1, pageSize: 1000 });
+  let vehicleRows = buildVehicleRows(personResult.data);
+
+  Object.entries(filters || {}).forEach(([key, value]) => {
+    if (value === undefined || value === null || value === "") return;
+    vehicleRows = vehicleRows.filter((item: VehicleListRow) => {
+      const field = item[key as keyof VehicleListRow];
+      if (field === undefined || field === null) return false;
+      return String(field).includes(String(value));
+    });
+  });
+
+  listModeStats.person = personResult.total;
+  listModeStats.vehicle = vehicleRows.length;
+
+  customerStats.total = vehicleRows.length;
+  customerStats.newToday = vehicleRows.length > 0 ? Math.max(1, Math.floor(vehicleRows.length * 0.05)) : 0;
+  customerStats.contactable =
+    vehicleRows.length === 0
+      ? 0
+      : Number(((vehicleRows.filter(item => !!item.buyerPhone).length / vehicleRows.length) * 100).toFixed(1));
+  customerStats.verified = vehicleRows.filter(item => item.status !== "订车中-在途").length;
+  customerStats.mergedCount = vehicleRows.filter(item => item.hasConflict).length;
+  customerStats.updatedCount = Math.max(0, vehicleRows.length - customerStats.mergedCount);
+
+  const start = (pageNum - 1) * pageSize;
+  const end = start + pageSize;
+
+  await new Promise(resolve => setTimeout(resolve, 300));
+
+  return {
+    data: {
+      list: vehicleRows.slice(start, end),
+      total: vehicleRows.length
+    }
+  };
+};
+
 // 状态管理
 const show360View = ref(false);
 const showFeedbackDialog = ref(false);
@@ -1182,8 +1429,8 @@ const getStatusType = (status: LifecycleStatus): "success" | "info" | "warning" 
 };
 
 // 获取状态标签（避免 status 为空时出现 i18n undefined 警告）
-const getStatusLabel = (status: LifecycleStatus) => {
-  if (status == null || status === "") return TABLE_EMPTY_PLACEHOLDER;
+const getStatusLabel = (status?: LifecycleStatus | null) => {
+  if (!status) return TABLE_EMPTY_PLACEHOLDER;
   return t(`customer.lifecycleStatusOptions.${status}`);
 };
 
@@ -1200,8 +1447,181 @@ const handleViewSensitiveData = (value: string | number) => {
   console.log("查看敏感数据，已记录审计日志:", value);
 };
 
+const buildProfileAddresses = (row: Customer) => {
+  const baseAddress = typeof row.address === "string" ? row.address : row.address?.[0]?.value || "上海市浦东新区世纪大道 9 号";
+  return [
+    { value: baseAddress, source: "Golden Record", isPrimary: true, slotKey: "address1", weight: 100, weightLabel: "高权重" },
+    { value: `${row.city || "上海"}市常用收件地址`, source: "CRM", slotKey: "address2", weight: 80, weightLabel: "中高权重" }
+  ];
+};
+
+const buildProfilePhones = (row: Customer) => {
+  const primaryValue = typeof row.phone === "string" ? row.phone : row.phone?.[0]?.value || "13800000000";
+  if (row.customerType === "company") {
+    return [
+      {
+        value: "021-58886688",
+        source: "CRM",
+        isPrimary: true,
+        relationTagName: "公司总机"
+      },
+      {
+        value: primaryValue,
+        source: "Golden Record",
+        relationTagName: "采购联系人",
+        contactName: row.handlers?.[0]?.name || "首选联系人",
+        isPrimaryContact: true
+      },
+      {
+        value: "13900008888",
+        source: "DMS",
+        relationTagName: "售后送修人",
+        contactName: row.handlers?.[1]?.name || "送修人A",
+        personRole: "送修人",
+        readonly: true,
+        isPreferredRepairer: true,
+        linkedVehicleIds: ["V1"]
+      }
+    ];
+  }
+  return [
+    {
+      value: primaryValue,
+      source: "Golden Record",
+      isPrimary: true,
+      relationTagName: "本人",
+      contactName: row.name,
+      personRole: "购车人"
+    },
+    {
+      value: "13912345678",
+      source: "售后订单",
+      relationTagName: "家庭联系人",
+      contactName: `${row.name}的送修人A`,
+      personRole: "送修人",
+      readonly: true,
+      isPreferredRepairer: true,
+      linkedVehicleIds: ["V1"]
+    },
+    {
+      value: "13712345678",
+      source: "售后订单",
+      relationTagName: "其他个人关系",
+      contactName: `${row.name}的送修人B`,
+      personRole: "送修人",
+      readonly: true,
+      linkedVehicleIds: ["V1"]
+    }
+  ];
+};
+
+const buildProfileHandlers = (row: Customer) => {
+  if (row.customerType !== "company") return undefined;
+  return [
+    {
+      id: "H001",
+      name: row.handlers?.[0]?.name || "王敏",
+      role: "联系人",
+      mobile: typeof row.phone === "string" ? row.phone : row.phone?.[0]?.value || "13800000000",
+      age: 34,
+      gender: "female",
+      city: row.city || "上海",
+      isPrimaryContact: true
+    },
+    {
+      id: "H002",
+      name: row.handlers?.[1]?.name || "周杰",
+      role: "送修人",
+      mobile: "13900008888",
+      age: 38,
+      gender: "male",
+      city: row.city || "上海",
+      readonly: true,
+      isPreferredRepairer: true
+    }
+  ];
+};
+
+const buildProfileVehicles = (row: Customer, selectedVehicle?: VehicleListRow | null) => {
+  const licensePlate = selectedVehicle?.licensePlate || getDisplayValue(row.licensePlate) || "沪A12345";
+  const vin = selectedVehicle?.vin || getDisplayValue(row.vinInfo) || "WP0ZZZ99ZTS392124";
+  const purchaseDate = selectedVehicle?.purchaseDate || row.createdAt?.slice(0, 10) || "2024-01-01";
+  const buyerPhone = typeof row.phone === "string" ? row.phone : row.phone?.[0]?.value || "";
+  const buyerName = row.customerType === "company" ? row.handlers?.[0]?.name || "王敏" : row.name;
+  const repairerBaseName = row.customerType === "company" ? row.handlers?.[1]?.name || "周杰" : `${row.name}的送修人A`;
+
+  return [
+    {
+      id: "V1",
+      vehicleModel: selectedVehicle?.vehicleModel || row.carSeriesModel,
+      licensePlate,
+      registrationCity: row.city || "上海",
+      vin,
+      purchaseDate,
+      status: selectedVehicle?.status || "自用",
+      relatedPersons: [
+        {
+          id: "P-BUYER-1",
+          role: "购车人",
+          name: buyerName,
+          phone: buyerPhone
+        },
+        {
+          id: "P-REPAIR-1",
+          role: "送修人",
+          name: repairerBaseName,
+          phone: "13900008888",
+          orderNo: "SO20260311001",
+          readonly: true,
+          isPreferred: true
+        },
+        {
+          id: "P-REPAIR-2",
+          role: "送修人",
+          name: row.customerType === "company" ? "李海" : `${row.name}的送修人B`,
+          phone: "13700007777",
+          orderNo: "SO20260311002",
+          readonly: true
+        }
+      ],
+      source: "DMS",
+      newCarSeries: row.carSeriesModel.split(" ")[0] || "保时捷",
+      newCarModel: row.carSeriesModel,
+      contractNo: "CT2023001",
+      signStatus: "已签单",
+      submitTime: "2025-12-20",
+      signTime: "2026-01-01",
+      issueCenter: row.primaryStoreName || "上海浦东",
+      newCarMsrp: 1200000,
+      newCarContractPrice: 1150000,
+      nonCashDiscountAmount: 20000,
+      salesItemAmount: 50000,
+      salesItemName: "延保套餐",
+      model: row.carSeriesModel,
+      lastServiceDate: "2026-02-15",
+      nextServiceDate: "2026-08-15",
+      mileage: row.currentMileage,
+      serviceCount: 12,
+      totalServiceAmount: 15000
+    }
+  ];
+};
+
+const buildProfileInteractions = () => [
+  { id: "I1", channel: "电话", time: "2026-03-10 14:30:00", type: "电话", content: "确认保养预约与到店时间" },
+  { id: "I2", channel: "微信", time: "2026-03-09 10:20:00", type: "微信", content: "发送活动邀约和服务提醒" },
+  { id: "I3", channel: "到店", time: "2026-03-08 16:45:00", type: "到店", content: "当面确认维修项目和取车安排" }
+];
+
+const buildProfileOfflineActivities = () => [
+  { id: "A1", activityCode: "ACT-202603-001", activityDate: "2026-03-01" },
+  { id: "A2", activityCode: "ACT-202602-008", activityDate: "2026-02-18" }
+];
+
 // 查看360度全景视图
-const viewProfile360 = async (row: Customer) => {
+const viewProfile360 = async (sourceRow: Customer | VehicleListRow) => {
+  const row = "customerRef" in sourceRow ? sourceRow.customerRef : sourceRow;
+  const selectedVehicle = "customerRef" in sourceRow ? sourceRow : null;
   currentCustomer.value = row;
 
   // 生成消费趋势数据（最近12个月）
@@ -1237,41 +1657,18 @@ const viewProfile360 = async (row: Customer) => {
   const hasCompanyInfo = row.customerType === "company" || !!row.companyId || !!row.companyOneId;
 
   // 构建公司信息（如果客户属于公司）
-  // 需要从原始数据中查找公司信息，或者使用当前行的公司信息
   let companyInfo: CompanyInfo | undefined = undefined;
   if (hasCompanyInfo) {
-    // 如果是个人客户但有关联公司，需要查找公司信息
     if (row.customerType === "individual" && row.companyOneId) {
-      // 尝试从公司表格数据中查找公司信息
-      const companyRow = companyTableData.value.find(c => c.oneId === row.companyOneId || c.id.toString() === row.companyId);
-      if (companyRow) {
-        companyInfo = {
-          id: companyRow.id.toString(),
-          oneId: companyRow.oneId,
-          name: companyRow.name,
-          address:
-            typeof companyRow.address === "string"
-              ? companyRow.address
-              : Array.isArray(companyRow.address)
-                ? companyRow.address[0]?.value || ""
-                : "",
-          phone: companyRow.phone,
-          contactPerson: row.name,
-          lifecycleStatus: companyRow.lifecycleStatus
-        };
-      } else {
-        // 如果找不到，使用默认值
-        companyInfo = {
-          id: row.companyId || "",
-          oneId: row.companyOneId || row.companyId || "",
-          name: `公司-${row.companyOneId || row.companyId}`,
-          address: "",
-          phone: row.phone,
-          contactPerson: row.name
-        };
-      }
+      companyInfo = {
+        id: row.companyId || "",
+        oneId: row.companyOneId || row.companyId || "",
+        name: `公司-${row.companyOneId || row.companyId}`,
+        address: "",
+        phone: row.phone,
+        contactPerson: row.name
+      };
     } else if (row.customerType === "company") {
-      // 如果本身就是公司，使用当前行数据
       companyInfo = {
         id: row.id.toString(),
         oneId: row.oneId,
@@ -1291,6 +1688,9 @@ const viewProfile360 = async (row: Customer) => {
     // 带 lineage 的客户信息（用于 OneID 溯源）
     customer: {
       ...row,
+      address: buildProfileAddresses(row),
+      phone: buildProfilePhones(row),
+      primaryRelationTag: row.customerType === "company" ? "公司总机" : "本人",
       lineage: {
         oneId: row.oneId,
         sourceSystems: [
@@ -1597,70 +1997,8 @@ const viewProfile360 = async (row: Customer) => {
       totalCouponValue: 800,
       totalVoucherBalance: 1000
     },
-    vehicles: [
-      {
-        id: "V1",
-        vehicleModel: row.carSeriesModel,
-        licensePlate: typeof row.licensePlate === "string" ? row.licensePlate : row.licensePlate?.[0]?.value || "",
-        registrationCity: "上海",
-        vin: typeof row.vinInfo === "string" ? row.vinInfo : row.vinInfo?.[0]?.value || "",
-        purchaseDate: "2023-01-01",
-        status: "自用",
-        rolePerson: { 使用人: row.name, 联系人: "", 送修人: "" },
-        source: "DMS",
-        newCarSeries: row.carSeriesModel.split(" ")[0] || "保时捷",
-        newCarModel: row.carSeriesModel,
-        contractNo: "CT2023001",
-        signStatus: "已签单",
-        submitTime: "2022-12-20",
-        signTime: "2023-01-01",
-        issueCenter: "上海浦东",
-        newCarMsrp: 1200000,
-        newCarContractPrice: 1150000,
-        nonCashDiscountAmount: 20000,
-        salesItemAmount: 50000,
-        salesItemName: "延保套餐",
-        model: row.carSeriesModel,
-        lastServiceDate: "2024-01-15",
-        nextServiceDate: "2024-07-15",
-        mileage: row.currentMileage,
-        serviceCount: 12,
-        totalServiceAmount: 15000
-      }
-    ],
-    interactions: [
-      {
-        id: "1",
-        type: "电话沟通",
-        communicationTime: "2024-01-10 14:30:00",
-        date: "2024-01-10",
-        content: "电话咨询保养服务，询问下次保养时间",
-        operator: "BDC客服",
-        duration: 180,
-        result: "已预约",
-        notes: "客户对服务满意"
-      },
-      {
-        id: "2",
-        type: "微信沟通",
-        communicationTime: "2024-01-12 10:20:00",
-        date: "2024-01-12",
-        content: "企业微信沟通，发送保养提醒",
-        operator: "销售顾问",
-        duration: "8分钟",
-        result: "已发送"
-      },
-      {
-        id: "3",
-        type: "现场沟通",
-        communicationTime: "2024-01-15 16:45:00",
-        date: "2024-01-15",
-        content: "到店保养，完成常规保养服务",
-        operator: "服务顾问",
-        duration: "25分钟",
-        result: "已跟进"
-      }
-    ],
+    vehicles: buildProfileVehicles(row, selectedVehicle),
+    interactions: buildProfileInteractions(),
     metrics: {
       totalConsumption: row.annualConsumption,
       avgOrderValue: row.avgConsumption,
@@ -1693,60 +2031,7 @@ const viewProfile360 = async (row: Customer) => {
       vehicles: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
       interactions: new Date(Date.now() - 30 * 60 * 1000).toISOString()
     },
-    offlineActivities: [
-      {
-        id: "1",
-        activityCode: "CAM-2025-001",
-        activityName: "保时捷911试驾体验日",
-        activityType: "试驾活动",
-        activityTime: "2025-01-20 14:00:00",
-        activityLocation: "上海浦东店",
-        organizer: "上海浦东店",
-        uploader: "John Smith",
-        validExamples: 25,
-        activityDescription: "客户参加了保时捷911试驾体验活动,对车辆性能非常满意",
-        status: "participated" as const
-      },
-      {
-        id: "2",
-        activityCode: "CAM-2024-012",
-        activityName: "2025年春季新车发布会",
-        activityType: "新车发布会",
-        activityTime: "2024-12-15 19:00:00",
-        activityLocation: "上海闵行店",
-        organizer: "上海闵行店",
-        uploader: "Emily Johnson",
-        validExamples: 150,
-        activityDescription: "客户报名了2025年春季新车发布会,但最终未参加",
-        status: "not_participated" as const
-      },
-      {
-        id: "3",
-        activityCode: "CAM-2024-008",
-        activityName: "保时捷车主聚会",
-        activityType: "车主聚会",
-        activityTime: "2024-11-10 18:00:00",
-        activityLocation: "上海浦东店",
-        organizer: "上海浦东店",
-        uploader: "Michael Chen",
-        validExamples: 80,
-        activityDescription: "客户参加了保时捷车主聚会活动,与其他车主进行了深入交流",
-        status: "participated" as const
-      },
-      {
-        id: "4",
-        activityCode: "CAM-2024-005",
-        activityName: "保时捷赛道体验日",
-        activityType: "赛道体验",
-        activityTime: "2024-10-05 09:00:00",
-        activityLocation: "上海国际赛车场",
-        organizer: "上海保时捷中心",
-        uploader: "David Wang",
-        validExamples: 60,
-        activityDescription: "客户报名了保时捷赛道体验日活动,但因个人原因未能参加",
-        status: "not_participated" as const
-      }
-    ],
+    offlineActivities: buildProfileOfflineActivities(),
     financialLoans: [
       {
         id: "LOAN-001",
@@ -1813,42 +2098,17 @@ const viewProfile360 = async (row: Customer) => {
       { name: "Voucher", status: "success" as const }
     ],
     syncTime: new Date().toLocaleString("zh-CN"),
-    handlers:
-      row.customerType === "company" && row.handlers
-        ? row.handlers.map((h: { id: string; name: string; role?: string; mobile?: string }, i: number) => ({
-            ...h,
-            mobile:
-              h.mobile ||
-              (typeof row.phone === "string"
-                ? row.phone
-                : Array.isArray(row.phone)
-                  ? (row.phone[i] as { value?: string })?.value
-                  : undefined),
-            age: [28, 35, 42][i % 3],
-            gender: ["male", "female", "male"][i % 3],
-            city: ["上海", "北京", "广州"][i % 3],
-            latestOperation:
-              i === 0
-                ? {
-                    operator: "数据治理管理员",
-                    operationType: "人工更新",
-                    operationTime: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
-                  }
-                : undefined
-          }))
-        : undefined,
-    selectedHandlerId: row.customerType === "company" && row.handlers?.length ? row.handlers[0].id : undefined,
+    handlers: buildProfileHandlers(row),
+    selectedHandlerId: row.customerType === "company" ? "H001" : undefined,
     marketingCampaigns: [
       {
         id: "M1",
         campaignCode: "CAM-2025-002",
+        activityDate: "2026-02-01",
         campaignName: "保时捷新春试驾",
-        campaignType: "试驾活动",
-        activityTime: "2025-02-01 10:00:00",
+        activityTime: "2026-02-01",
         location: "上海浦东店",
         status: "已报名",
-        organizer: "上海浦东店",
-        uploader: "John",
         validExamples: 30,
         description: "新春试驾体验"
       }
@@ -1905,20 +2165,15 @@ const onVehicleRoleChange = (payload: {
 watch(
   () => initParam,
   () => {
-    if (activeCustomerTypeTab.value === "company") {
-      companyPagination.pageNum = 1;
-      loadCompanyData();
-    }
+    if (activeListMode.value === "vehicle") vehicleTableRef.value?.getTableList?.();
   },
   { deep: true }
 );
 
-// 组件挂载时：同步顶部门店到 initParam，公司 Tab 需主动加载数据
+// 组件挂载时：同步顶部门店到 initParam，并初始化列表
 onMounted(() => {
   initParam.storeId = selectedStoreId.value;
-  if (activeCustomerTypeTab.value === "company") {
-    loadCompanyData();
-  }
+  proTableRef.value?.getTableList?.();
 });
 </script>
 

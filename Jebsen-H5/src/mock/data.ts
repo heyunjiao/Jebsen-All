@@ -1,7 +1,18 @@
 /**
  * Mock 数据定义
  */
-import type { CustomerProfile, TagPool, MobileData, MaintenanceRecord, NameMobileConflict, PlatformSource, InsuranceInfo } from '@/types/customer'
+import type {
+  CustomerProfile,
+  TagPool,
+  MobileData,
+  MaintenanceRecord,
+  NameMobileConflict,
+  PlatformSource,
+  InsuranceInfo,
+  MarketingCampaign,
+  CommunicationRecord,
+  FinancialLoanRecord,
+} from '@/types/customer'
 
 // Mock 客户画像数据（包含冲突数据）
 export const mockCustomerProfile: CustomerProfile = {
@@ -32,7 +43,8 @@ export const mockCustomerProfile: CustomerProfile = {
         contactName: '张明',
         relationTagId: 'relation1',
         relationTagName: '本人',
-        businessTags: ['车主'],
+        businessTags: ['购车人'],
+        personRole: '购车人',
         source: 'DMS',
         updateTime: '2025-10-01 10:30:00',
       },
@@ -41,11 +53,29 @@ export const mockCustomerProfile: CustomerProfile = {
         mobile: '13900139000',
         isPrimary: false,
         contactName: '李芳',
-        relationTagId: 'relation2',
-        relationTagName: '配偶',
+        relationTagId: 'relation3',
+        relationTagName: '家庭联系人',
         businessTags: ['送修人'],
+        personRole: '送修人',
+        linkedVehicleIds: ['V002', 'V005'],
+        isPreferredRepairer: true,
+        readonly: true,
         source: 'BDC',
         updateTime: '2025-09-15 14:20:00',
+      },
+      {
+        id: 'mobile3',
+        mobile: '13700001111',
+        isPrimary: false,
+        contactName: '王敏',
+        relationTagId: 'relation3',
+        relationTagName: '家庭联系人',
+        businessTags: ['送修人'],
+        personRole: '送修人',
+        linkedVehicleIds: ['V005'],
+        readonly: true,
+        source: '售后订单',
+        updateTime: '2025-10-22 09:45:00',
       },
     ],
     isConflict: true,
@@ -70,16 +100,11 @@ export const mockCustomerProfile: CustomerProfile = {
   },
   addresses: {
     items: [
-      { id: 'addr1', address: '上海市浦东新区陆家嘴环路1000号', label: '家庭', isPrimary: true },
-      { id: 'addr2', address: '上海市静安区南京西路1788号', label: '公司', isPrimary: false },
+      { id: 'addr1', address: '上海市浦东新区陆家嘴环路1000号', label: '地址1', slotKey: 'address1', weight: 100, weightLabel: '高权重', isPrimary: true },
+      { id: 'addr2', address: '上海市静安区南京西路1788号', label: '地址2', slotKey: 'address2', weight: 80, weightLabel: '中高权重', isPrimary: false },
     ],
   },
-  emails: {
-    items: [
-      { id: 'email1', email: 'zhangming@example.com', label: '个人', isPrimary: true },
-      { id: 'email2', email: 'zm.work@company.com', label: '工作', isPrimary: false },
-    ],
-  },
+  emails: { items: [] },
   preferredCarModel: {
     value: '911',
     isConflict: true,
@@ -201,6 +226,9 @@ export const mockCustomerProfile: CustomerProfile = {
       nonCashDiscountAmount: 80000,
       salesItemAmount: 60000,
       salesItemName: '性能升级套装',
+      relatedPersons: [
+        { id: 'rp_v1_1', role: '购车人', name: '张明', phone: '13800138000', source: 'DMS', readonly: true },
+      ],
     },
     {
       id: 'V002',
@@ -220,6 +248,10 @@ export const mockCustomerProfile: CustomerProfile = {
       nonCashDiscountAmount: 60000,
       salesItemAmount: 45000,
       salesItemName: '豪华内饰套装',
+      relatedPersons: [
+        { id: 'rp_v2_1', role: '购车人', name: '张明', phone: '13800138000', source: 'DMS', readonly: true },
+        { id: 'rp_v2_2', role: '送修人', name: '李芳', phone: '13900139000', orderNo: 'RO20250915001', source: '售后订单', readonly: true, isPreferred: true },
+      ],
     },
     {
       id: 'V003',
@@ -239,6 +271,9 @@ export const mockCustomerProfile: CustomerProfile = {
       nonCashDiscountAmount: 70000,
       salesItemAmount: 55000,
       salesItemName: '行政加长套件',
+      relatedPersons: [
+        { id: 'rp_v3_1', role: '购车人', name: '张明', phone: '13800138000', source: 'DMS', readonly: true },
+      ],
     },
     {
       id: 'V004',
@@ -258,6 +293,9 @@ export const mockCustomerProfile: CustomerProfile = {
       nonCashDiscountAmount: 30000,
       salesItemAmount: 28000,
       salesItemName: '运动外观套件',
+      relatedPersons: [
+        { id: 'rp_v4_1', role: '购车人', name: '张明', phone: '13800138000', source: 'DMS', readonly: true },
+      ],
     },
     {
       id: 'V005',
@@ -277,6 +315,11 @@ export const mockCustomerProfile: CustomerProfile = {
       nonCashDiscountAmount: 45000,
       salesItemAmount: 35000,
       salesItemName: '充电套装',
+      relatedPersons: [
+        { id: 'rp_v5_1', role: '购车人', name: '张明', phone: '13800138000', source: 'DMS', readonly: true },
+        { id: 'rp_v5_2', role: '送修人', name: '李芳', phone: '13900139000', orderNo: 'RO20251021008', source: '售后订单', readonly: true, isPreferred: true },
+        { id: 'rp_v5_3', role: '送修人', name: '王敏', phone: '13700001111', orderNo: 'RO20251022009', source: '售后订单', readonly: true },
+      ],
     },
   ],
   assets: [
@@ -556,27 +599,23 @@ export const mockCompanyProfile: CustomerProfile = {
   customerType: { value: '公司', isConflict: false },
   addresses: {
     items: [
-      { id: 'c_addr1', address: '深圳市南山区科技园南区深南大道9988号', label: '注册地址', isPrimary: true },
-      { id: 'c_addr2', address: '上海市浦东新区世纪大道100号', label: '办公地址', isPrimary: false },
+      { id: 'c_addr1', address: '深圳市南山区科技园南区深南大道9988号', label: '地址1', slotKey: 'address1', weight: 100, weightLabel: '高权重', isPrimary: true },
+      { id: 'c_addr2', address: '上海市浦东新区世纪大道100号', label: '地址2', slotKey: 'address2', weight: 80, weightLabel: '中高权重', isPrimary: false },
     ],
   },
-  emails: {
-    items: [
-      { id: 'c_email1', email: 'contact@wangxin.com', label: '公司邮箱', isPrimary: true },
-      { id: 'c_email2', email: 'hr@wangxin.com', label: '人事', isPrimary: false },
-    ],
-  },
+  emails: { items: [] },
   latestOperation: { operator: 'Rebecca Z.', operationType: '人工更新', operationTime: '2025-01-15 10:00:00' },
   handlers: [
     {
       id: 'H001',
       name: '汪洁',
-      role: '使用人',
+      role: '联系人',
       mobile: '13811112222',
       age: 42,
       gender: '男',
       city: '上海',
       tags: ['高价值', '餐饮行业', 'VIP车主', '商务合作伙伴'],
+      isPrimaryContact: true,
       nameMobileConflict: [
         { id: 'conf_h1_1', name: '汪洁(二级部门)', mobile: '13811112222', origin: 'DMS', updateTime: '2025-01-12 10:00:00' }
       ],
@@ -721,6 +760,8 @@ export const mockCompanyProfile: CustomerProfile = {
       gender: '男',
       city: '上海',
       tags: ['大客户', '高价值', 'VIP车主', '决策者'],
+      isPreferredRepairer: true,
+      readonly: true,
       latestOperation: { operator: 'DMS', operationType: '自动化更新', operationTime: '2025-01-25 11:15:00' },
       vehicles: [
         {
@@ -781,10 +822,44 @@ export const mockCompanyProfile: CustomerProfile = {
   totalConsumption: { value: 5680000, isConflict: false },
   mobile: {
     items: [
-      { id: 'c_m1', mobile: '021-66668888', isPrimary: true, relationTagName: '公司电话', updateTime: '2025-01-15 10:00:00' },
-      { id: 'c_m2', mobile: '13811112222', isPrimary: false, relationTagName: '汪洁', contactName: '汪洁', businessTags: ['使用人'], vehicleLabel: 'Cayenne Turbo', updateTime: '2025-01-20 09:00:00' },
-      { id: 'c_m3', mobile: '13833334444', isPrimary: false, relationTagName: '张雪', contactName: '张雪', businessTags: ['联系人'], vehicleLabel: 'Macan 企业版', updateTime: '2025-01-22 15:30:00' },
-      { id: 'c_m4', mobile: '13855556666', isPrimary: false, relationTagName: '周杰', contactName: '周杰', businessTags: ['送修人'], vehicleLabel: 'Taycan Turbo S', updateTime: '2025-01-25 11:15:00' },
+      { id: 'c_m1', mobile: '021-66668888', isPrimary: true, relationTagName: '公司总机', updateTime: '2025-01-15 10:00:00' },
+      {
+        id: 'c_m2',
+        mobile: '13811112222',
+        isPrimary: false,
+        relationTagName: '采购联系人',
+        contactName: '汪洁',
+        businessTags: ['购车人'],
+        personRole: '购车人',
+        vehicleLabel: 'Cayenne Turbo',
+        isPrimaryContact: true,
+        updateTime: '2025-01-20 09:00:00'
+      },
+      {
+        id: 'c_m3',
+        mobile: '13833334444',
+        isPrimary: false,
+        relationTagName: '财务联系人',
+        contactName: '张雪',
+        businessTags: ['联系人'],
+        personRole: '联系人',
+        vehicleLabel: 'Macan 企业版',
+        updateTime: '2025-01-22 15:30:00'
+      },
+      {
+        id: 'c_m4',
+        mobile: '13855556666',
+        isPrimary: false,
+        relationTagName: '售后送修人',
+        contactName: '周杰',
+        businessTags: ['送修人'],
+        personRole: '送修人',
+        linkedVehicleIds: ['CV001', 'CV002'],
+        isPreferredRepairer: true,
+        readonly: true,
+        vehicleLabel: 'Taycan Turbo S',
+        updateTime: '2025-01-25 11:15:00'
+      },
     ],
     isConflict: true,
     editable: true,
@@ -808,6 +883,10 @@ export const mockCompanyProfile: CustomerProfile = {
       nonCashDiscountAmount: 100000,
       salesItemAmount: 85000,
       salesItemName: '企业定制套件',
+      relatedPersons: [
+        { id: 'cv1_buyer', role: '购车人', name: '汪洁', phone: '13811112222', source: 'DMS', readonly: true },
+        { id: 'cv1_repairer', role: '送修人', name: '周杰', phone: '13855556666', source: '售后订单', readonly: true, isPreferred: true, orderNo: 'RO-CV001-01' },
+      ],
     },
     {
       id: 'CV002',
@@ -827,6 +906,11 @@ export const mockCompanyProfile: CustomerProfile = {
       nonCashDiscountAmount: 70000,
       salesItemAmount: 52000,
       salesItemName: '商务接待套件',
+      relatedPersons: [
+        { id: 'cv2_buyer', role: '购车人', name: '汪洁', phone: '13811112222', source: 'CRM', readonly: true },
+        { id: 'cv2_repairer_1', role: '送修人', name: '周杰', phone: '13855556666', source: '售后订单', readonly: true, isPreferred: true, orderNo: 'RO-CV002-02' },
+        { id: 'cv2_repairer_2', role: '送修人', name: '张雪', phone: '13833334444', source: '售后订单', readonly: true, orderNo: 'RO-CV002-03' },
+      ],
     },
   ],
   assets: [
@@ -948,13 +1032,13 @@ export const mockTagPool: TagPool[] = [
 export const mockRelationTagPool: TagPool[] = [
   { id: 'relation1', name: '本人', color: '#1989fa' },
   { id: 'relation2', name: '配偶', color: '#ff6b9d' },
-  { id: 'relation3', name: '父亲', color: '#52c41a' },
-  { id: 'relation4', name: '母亲', color: '#52c41a' },
-  { id: 'relation5', name: '儿子', color: '#1890ff' },
-  { id: 'relation6', name: '女儿', color: '#eb2f96' },
-  { id: 'relation7', name: '朋友', color: '#fa8c16' },
-  { id: 'relation8', name: '同事', color: '#13c2c2' },
-  { id: 'relation9', name: '其他', color: '#8c8c8c' },
+  { id: 'relation3', name: '家庭联系人', color: '#52c41a' },
+  { id: 'relation4', name: '其他个人关系', color: '#8c8c8c' },
+  { id: 'relation5', name: '公司总机', color: '#1890ff' },
+  { id: 'relation6', name: '采购联系人', color: '#13c2c2' },
+  { id: 'relation7', name: '财务联系人', color: '#722ed1' },
+  { id: 'relation8', name: '行政联系人', color: '#fa8c16' },
+  { id: 'relation9', name: '其他公司关系', color: '#8c8c8c' },
 ]
 
 // Mock 维保记录数据
@@ -1034,7 +1118,7 @@ export const mockMaintenanceRecords: MaintenanceRecord[] = [
 ]
 
 // Mock 金融贷款记录
-export const mockFinancialLoanRecords = [
+export const mockFinancialLoanRecords: FinancialLoanRecord[] = [
   {
     id: 'L001',
     vehicleModel: 'Porsche 911 2024款',
@@ -1112,3 +1196,73 @@ export const mockFinancialLoanRecords = [
   }
 ]
 
+// Mock 线下活动记录（用于 H5 & PC 演示）
+export const mockMarketingCampaigns: MarketingCampaign[] = [
+  {
+    id: 'MC001',
+    campaignCode: 'OFFLINE_2025_FESTIVAL',
+    campaignName: '2025 车主节线下体验日',
+    campaignType: '品牌体验日',
+    activityTime: '2025-03-18 14:00-18:00',
+    activityDate: '2025-03-18',
+    location: '上海浦东保时捷中心',
+    status: '已参加',
+    description: '邀请重点车主到店参与试驾与沙龙分享，包含赛道体验与品酒活动。',
+    organizer: '上海浦东保时捷中心',
+    uploader: '系统自动同步',
+    validExamples: 38,
+    source: 'CRM',
+  },
+  {
+    id: 'MC002',
+    campaignCode: 'OFFLINE_2025_VIP_DINNER',
+    campaignName: 'VIP 车主答谢晚宴',
+    campaignType: '车主聚会',
+    activityTime: '2025-01-20 18:30-21:30',
+    activityDate: '2025-01-20',
+    location: '上海外滩某酒店宴会厅',
+    status: '已参加',
+    description: '邀请高价值车主及企业客户，进行年度答谢与新车静态展示。',
+    organizer: '华东大区市场部',
+    uploader: '市场运营专员',
+    validExamples: 56,
+    source: 'POAS',
+  },
+  {
+    id: 'MC003',
+    campaignCode: 'OFFLINE_2025_TEST_DRIVE',
+    campaignName: 'Taycan 试驾体验营',
+    campaignType: '试驾活动',
+    activityTime: '2025-02-08 09:30-16:30',
+    activityDate: '2025-02-08',
+    location: '上海国际赛车场体验中心',
+    status: '未参加',
+    description: '面向潜客开放的 Taycan 试驾活动，含技术讲解与路线体验。',
+    organizer: '集团市场部',
+    uploader: '系统自动同步',
+    validExamples: 120,
+    source: 'DMS',
+  },
+]
+
+// Mock 沟通记录（用于 H5 沟通记录 Tab 演示）
+export const mockCommunicationRecords: CommunicationRecord[] = [
+  {
+    id: 'COMM001',
+    time: '2025-01-16 14:30:00',
+    channel: '电话',
+    content: '客户咨询车辆保养事宜，已安排 1 月 20 日到店保养，并发送确认短信。',
+  },
+  {
+    id: 'COMM002',
+    time: '2025-01-15 10:20:00',
+    channel: '微信',
+    content: '向客户推送 2025 车主节线下活动邀请链接，客户已点击查看活动详情。',
+  },
+  {
+    id: 'COMM003',
+    time: '2025-01-14 16:45:00',
+    channel: '到店',
+    content: '客户到店试驾 Taycan，对金融方案有兴趣，建议跟进金融贷款方案。',
+  },
+]

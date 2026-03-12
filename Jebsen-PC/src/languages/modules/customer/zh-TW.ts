@@ -51,11 +51,14 @@ export default {
     stats: {
       total: "客戶檔案總數",
       newToday: "今日新增",
+      newMerged: "今日合併",
+      newUpdated: "今日更新",
       contactable: "可觸達率",
       verified: "成交車主（真實下單客戶）",
       growth: "較昨日",
       mergedCount: "已合併數",
-      updatedCount: "已更新數"
+      updatedCount: "已更新數",
+      incremental: "增量數據"
     },
     lifecycleStatusOptions: {
       active: "活躍",

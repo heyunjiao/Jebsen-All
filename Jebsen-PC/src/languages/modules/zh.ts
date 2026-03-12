@@ -503,7 +503,8 @@ export default {
       slaEstimate: "预计完成",
       refresh: "刷新",
       refreshSuccess: "刷新成功",
-      pipelineTitle: "全链路批处理进度",
+      pipelineTitle: "全链路批处理结果",
+      pipelineResultDesc: "T+1 前一晚的结果",
       pipelineStart: "启动时间",
       remaining: "预计剩余",
       qualityTitle: "数据接入与质量",
@@ -1279,7 +1280,8 @@ export default {
     estimatedCount: "预估人数",
     estimatedRate: "预估覆盖率",
     sampleData: "样本数据",
-    matchReason: "匹配原因",
+    matchReason: "匹配详情",
+    // 移除重复项
     save: "保存",
     cancel: "取消",
     reset: "重置",
@@ -1299,6 +1301,15 @@ export default {
       auto: "自动化规则",
       manual: "人工手动"
     },
+    publishConfirm: "确认发布该标签吗？",
+    disableConfirm: "确认停用该标签吗？",
+    enableConfirm: "确认启用该标签吗？",
+    uploadSuccess: "文件上传并导入成功",
+    uploadError: "文件上传失败，请检查格式后重试",
+    categoryPlaceholder: "请选择标签分类 (支持多级)",
+    coveragePreview: "覆盖预览",
+    oneId: "OneID",
+    name: "姓名",
     messages: {
       addSuccess: "新增标签成功",
       editSuccess: "编辑标签成功",
@@ -1314,9 +1325,6 @@ export default {
       statusRequired: "请选择状态",
       ruleConfigRequired: "自动化规则标签必须配置规则",
       deleteConfirm: "确认删除该标签吗？",
-      publishConfirm: "确认发布该标签吗？",
-      disableConfirm: "确认停用该标签吗？",
-      enableConfirm: "确认启用该标签吗？",
       abandonConfirm: "确认废弃该标签吗？废弃后将无法恢复"
     },
     stats: {

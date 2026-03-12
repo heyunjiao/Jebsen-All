@@ -1,6 +1,6 @@
 <template>
-  <div class="welcome-container no-scroll">
-    <!-- Header Section -->
+  <div class="welcome-container">
+    <!-- 页面头部：问候 + 系统最后更新时间 + 引导 -->
     <div class="welcome-header">
       <div class="header-content">
         <h1 class="animate__animated animate__fadeInLeft">
@@ -12,6 +12,12 @@
         </p>
       </div>
       <div class="header-action animate__animated animate__fadeInRight">
+        <template v-if="getRoleFromStorage() === 'admin'">
+          <span class="global-update">
+            <span class="global-update-label">系统最后更新</span>
+            <span class="global-update-time">{{ sourceMonitorBrief.lastUpdate }}</span>
+          </span>
+        </template>
         <el-button type="primary" size="large" round icon="Guide" @click="startTour">
           {{ $t("welcome.startTour") }}
         </el-button>
@@ -19,196 +25,171 @@
       <div class="header-bg"></div>
     </div>
 
-    <!-- Stats Panel at the Top -->
+    <!-- 管理员视图：按区块顺序排列 -->
     <template v-if="getRoleFromStorage() === 'admin'">
-      <div class="stats-panel mb-20" id="step-admin-customer-stats">
-        <div class="stats-card primary-card">
-          <div class="stats-icon-wrapper">
-            <el-icon><User /></el-icon>
+      <!-- 区块一：客户库与源数据（融合为一块，全量 + 增量紧凑展示） -->
+      <section class="page-section" id="step-admin-customer-stats">
+        <h2 class="section-title">客户库 · 源数据</h2>
+        <div class="indicator-block">
+          <div class="indicator-group">
+            <h3 class="indicator-group-title">全量</h3>
+            <div class="indicator-grid">
+              <div
+                v-for="(item, index) in fullVolumeIndicators"
+                :key="'full-' + index"
+                class="indicator-mini-card"
+                :class="item.iconClass"
+              >
+                <span class="indicator-label">{{ item.label }}</span>
+                <span class="indicator-value">{{ item.value }}</span>
+              </div>
+            </div>
           </div>
-          <div class="stats-content">
-            <div class="stats-number">{{ formatNumber(customerStats.total) }}</div>
-            <div class="stats-label">{{ $t("customer.stats.total") }}</div>
-          </div>
-        </div>
-        <div class="stats-card warning-card">
-          <div class="stats-icon-wrapper">
-            <el-icon><TrendCharts /></el-icon>
-          </div>
-          <div class="stats-content">
-            <div class="stats-number">+{{ formatNumber(customerStats.incremental) }}</div>
-            <div class="stats-label">{{ $t("customer.stats.incremental") }}</div>
-          </div>
-        </div>
-        <div class="stats-card success-card">
-          <div class="stats-icon-wrapper">
-            <el-icon><Connection /></el-icon>
-          </div>
-          <div class="stats-content">
-            <div class="stats-number">{{ formatNumber(customerStats.mergedCount) }}</div>
-            <div class="stats-label">{{ $t("customer.stats.mergedCount") }}</div>
-          </div>
-        </div>
-        <div class="stats-card primary-card">
-          <div class="stats-icon-wrapper">
-            <el-icon><Refresh /></el-icon>
-          </div>
-          <div class="stats-content">
-            <div class="stats-number">{{ formatNumber(customerStats.updatedCount) }}</div>
-            <div class="stats-label">{{ $t("customer.stats.updatedCount") }}</div>
+          <div class="indicator-group">
+            <h3 class="indicator-group-title">增量</h3>
+            <div class="indicator-grid">
+              <div
+                v-for="(item, index) in incrementalIndicators"
+                :key="'inc-' + index"
+                class="indicator-mini-card"
+                :class="item.iconClass"
+              >
+                <span class="indicator-label">{{ item.label }}</span>
+                <span class="indicator-value">{{ item.value }}</span>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+        <el-card shadow="hover" class="pipeline-card-welcome section-card">
+          <template #header>
+            <div class="pipeline-card-header">
+              <div class="header-left">
+                <el-icon class="header-icon"><Operation /></el-icon>
+                <div class="title-wrap">
+                  <span class="title">{{ $t("dashboard.dataMonitor.pipelineTitle") }}</span>
+                  <span class="title-desc">{{ $t("dashboard.dataMonitor.pipelineResultDesc") }}</span>
+                </div>
+              </div>
+              <div class="header-right">
+                <el-tag size="small" :type="pipelineStatusType" effect="dark">
+                  {{ $t("dashboard.dataMonitor.processing") }}
+                </el-tag>
+                <span class="meta-info">
+                  <span class="dot-online"></span>
+                  {{ $t("dashboard.dataMonitor.pipelineStart") }}: {{ pipelineData.startTime }}
+                </span>
+              </div>
+            </div>
+          </template>
+          <div class="pipeline-steps-wrapper">
+            <el-steps
+              :active="pipelineData.currentStep"
+              process-status="process"
+              finish-status="success"
+              align-center
+              class="pipeline-steps"
+            >
+              <el-step
+                v-for="(step, index) in pipelineSteps"
+                :key="index"
+                :title="step.title"
+                :description="step.desc"
+                :status="getStepStatusForElSteps(index)"
+              >
+                <template #icon>
+                  <div class="step-icon-custom" :class="getPipelineStepStatus(index)">
+                    <el-icon><component :is="step.icon" /></el-icon>
+                    <div v-if="getPipelineStepStatus(index) === 'active'" class="step-pulse"></div>
+                  </div>
+                </template>
+                <template #description>
+                  <div class="step-description">
+                    <div class="step-desc-text">{{ step.desc }}</div>
+                    <div v-if="getPipelineStepStatus(index) === 'active'" class="step-processing">
+                      {{ $t("dashboard.dataMonitor.processing") }}...
+                    </div>
+                  </div>
+                </template>
+              </el-step>
+            </el-steps>
+          </div>
+        </el-card>
+      </section>
+
+      <!-- 区块二：今日数据采集状态（放在上面） -->
+      <section class="page-section">
+        <h2 class="section-title">今日数据采集状态</h2>
+        <el-card shadow="hover" class="status-card" id="step-admin-system">
+          <template #header>
+            <div class="card-header">
+              <span><el-icon><Monitor /></el-icon> {{ $t("welcome.systemStatus") }}</span>
+              <el-tag :type="systemStatusSummary.type" effect="dark">{{ systemStatusSummary.text }}</el-tag>
+            </div>
+          </template>
+          <div class="system-grid">
+            <div
+              v-for="sys in sourceSystems"
+              :key="sys.name"
+              class="system-item"
+              :class="{ 'is-clickable': sys.type === 'manual' && sys.status !== 'gray' }"
+              @click="sys.status !== 'gray' ? handleSystemClick(sys) : null"
+            >
+              <div v-if="sys.status === 'gray'" class="upload-btn-wrapper">
+                <el-button type="primary" :icon="Upload" size="small" class="upload-btn" @click.stop="handleUpload(sys)">
+                  {{ $t("welcome.data.upload") }}
+                </el-button>
+              </div>
+              <div v-else class="sys-icon" :class="sys.status">
+                <component :is="sys.icon" />
+              </div>
+              <div class="sys-info">
+                <span class="sys-name">{{ sys.name }}</span>
+                <span class="sys-desc">{{ sys.desc }}</span>
+                <div class="sys-status-row">
+                  <span class="sys-status">{{ sys.statusText }}</span>
+                  <span class="sys-time" v-if="sys.uploadTime">{{ sys.uploadTime }}</span>
+                </div>
+                <span class="sys-type-tag" v-if="sys.type === 'manual'">{{ $t("welcome.data.manual") }}</span>
+              </div>
+            </div>
+          </div>
+        </el-card>
+      </section>
+
+      <!-- 区块三：快捷导航（放在上面） -->
+      <section class="page-section" v-if="quickNavItems.length > 0">
+        <h2 class="section-title">{{ $t("welcome.quickNavigation") }}</h2>
+        <div class="quick-nav-container">
+          <div class="quick-nav-grid">
+            <div v-for="item in quickNavItems" :key="item.path" class="nav-item" @click="handleNavClick(item)">
+              <div class="nav-icon" :class="item.iconClass">
+                <el-icon :size="22"><component :is="item.icon" /></el-icon>
+              </div>
+              <div class="nav-content">
+                <div class="nav-title">{{ item.title }}</div>
+                <div class="nav-desc" v-if="item.desc">{{ item.desc }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 区块四：数据接入与质量（图表放在最下方） -->
+      <section class="page-section">
+        <h2 class="section-title">{{ $t("dashboard.dataMonitor.qualityTitle") }}（{{ $t("dashboard.dataMonitor.dataVolume") }}）</h2>
+        <el-card shadow="hover" class="chart-card-welcome">
+          <div class="chart-body-welcome">
+            <ECharts :option="dataVolumeChartOption" :height="280" />
+          </div>
+        </el-card>
+      </section>
     </template>
 
-    <!-- Quick Navigation Section -->
-    <div class="quick-nav-section animate__animated animate__fadeInUp" v-if="quickNavItems.length > 0">
-      <div class="quick-nav-container">
-        <div class="section-title">
-          <el-icon><Menu /></el-icon>
-          <span>{{ $t("welcome.quickNavigation") }}</span>
-        </div>
-        <div class="quick-nav-grid">
-          <div v-for="item in quickNavItems" :key="item.path" class="nav-item" @click="handleNavClick(item)">
-            <div class="nav-icon" :class="item.iconClass">
-              <el-icon :size="22">
-                <component :is="item.icon" />
-              </el-icon>
-            </div>
-            <div class="nav-content">
-              <div class="nav-title">{{ item.title }}</div>
-              <div class="nav-desc" v-if="item.desc">{{ item.desc }}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Main Content Area -->
-    <div class="dashboard-content animate__animated animate__fadeInUp animate__delay-1s">
-      <!-- Admin Dashboard -->
-      <template v-if="getRoleFromStorage() === 'admin'">
-        <el-row :gutter="20">
-          <el-col :span="16">
-            <el-card shadow="hover" class="status-card" id="step-admin-system">
-              <template #header>
-                <div class="card-header">
-                  <span
-                    ><el-icon><Monitor /></el-icon> {{ $t("welcome.systemStatus") }}</span
-                  >
-                  <el-tag :type="systemStatusSummary.type" effect="dark">{{ systemStatusSummary.text }}</el-tag>
-                </div>
-              </template>
-              <div class="system-grid">
-                <div
-                  v-for="sys in sourceSystems"
-                  :key="sys.name"
-                  class="system-item"
-                  :class="{ 'is-clickable': sys.type === 'manual' && sys.status !== 'gray' }"
-                  @click="sys.status !== 'gray' ? handleSystemClick(sys) : null"
-                >
-                  <!-- 灰色状态显示上传按钮 -->
-                  <div v-if="sys.status === 'gray'" class="upload-btn-wrapper">
-                    <el-button type="primary" :icon="Upload" size="small" class="upload-btn" @click.stop="handleUpload(sys)">
-                      {{ $t("welcome.data.upload") }}
-                    </el-button>
-                  </div>
-                  <!-- 其他状态显示图标 -->
-                  <div v-else class="sys-icon" :class="sys.status">
-                    <component :is="sys.icon" />
-                  </div>
-                  <div class="sys-info">
-                    <span class="sys-name">{{ sys.name }}</span>
-                    <span class="sys-desc">{{ sys.desc }}</span>
-                    <div class="sys-status-row">
-                      <span class="sys-status">{{ sys.statusText }}</span>
-                      <span class="sys-time" v-if="sys.uploadTime">{{ sys.uploadTime }}</span>
-                    </div>
-                    <span class="sys-type-tag" v-if="sys.type === 'manual'">{{ $t("welcome.data.manual") }}</span>
-                  </div>
-                </div>
-              </div>
-            </el-card>
-
-            <el-card shadow="hover" class="governance-card mt-20" id="step-admin-governance">
-              <template #header>
-                <div class="card-header">
-                  <span
-                    ><el-icon><List /></el-icon> {{ $t("welcome.governanceTasks") }}</span
-                  >
-                  <el-button link type="primary">{{ $t("welcome.viewAll") }}</el-button>
-                </div>
-              </template>
-              <ProTable
-                :columns="governanceColumns"
-                :data="governanceTasks"
-                :pagination="false"
-                :border="false"
-                :tool-button="false"
-              />
-            </el-card>
-          </el-col>
-
-          <el-col :span="8">
-            <!-- Data Governance Impact Card -->
-            <el-card shadow="hover" class="impact-card mb-20" id="step-admin-impact">
-              <template #header>
-                <div class="card-header">
-                  <span
-                    ><el-icon><DataLine /></el-icon> {{ $t("welcome.impact.title") }}</span
-                  >
-                </div>
-              </template>
-              <div class="impact-content">
-                <div class="impact-metrics">
-                  <div class="impact-item">
-                    <div class="impact-label">{{ $t("welcome.impact.cleanedData") }}</div>
-                    <div class="impact-value error">
-                      12,500 <el-icon><Bottom /></el-icon>
-                    </div>
-                  </div>
-                  <div class="impact-item">
-                    <div class="impact-label">{{ $t("welcome.impact.tagCoverage") }}</div>
-                    <div class="impact-value success">
-                      +35% <el-icon><Top /></el-icon>
-                    </div>
-                  </div>
-                </div>
-                <div class="impact-chart">
-                  <ECharts :option="impactChartOption" :height="200" />
-                </div>
-              </div>
-            </el-card>
-
-            <el-card shadow="hover" class="audit-card" id="step-admin-audit">
-              <template #header>
-                <div class="card-header">
-                  <span
-                    ><el-icon><Timer /></el-icon> {{ $t("welcome.recentSensitiveOperations") }}</span
-                  >
-                </div>
-              </template>
-              <el-timeline>
-                <el-timeline-item
-                  v-for="(activity, index) in auditLog"
-                  :key="index"
-                  :type="activity.type"
-                  :timestamp="activity.timestamp"
-                  :hollow="true"
-                >
-                  {{ activity.content }}
-                </el-timeline-item>
-              </el-timeline>
-            </el-card>
-          </el-col>
-        </el-row>
-      </template>
-
-      <!-- Business User Dashboard -->
-      <template v-else>
-        <el-row :gutter="20">
-          <el-col :span="24">
-            <div class="metrics-grid" id="step-user-metrics">
+    <!-- 业务用户视图 -->
+    <template v-else>
+      <section class="page-section">
+        <h2 class="section-title">业务概览</h2>
+        <div class="metrics-grid" id="step-user-metrics">
               <div class="metric-card">
                 <div class="metric-icon blue">
                   <el-icon><User /></el-icon>
@@ -257,59 +238,55 @@
                   </div>
                 </div>
               </div>
-            </div>
-          </el-col>
-        </el-row>
+        </div>
+      </section>
 
-        <el-row :gutter="20" class="mt-20">
-          <el-col :span="16">
-            <el-card shadow="hover" class="funnel-card" id="step-user-opportunities">
-              <template #header>
-                <div class="card-header">
-                  <span
-                    ><el-icon><TrendCharts /></el-icon> {{ $t("welcome.opportunityPipeline") }}</span
-                  >
-                </div>
-              </template>
-              <div class="opportunity-list">
-                <div v-for="opp in opportunities" :key="opp.name" class="opp-item">
-                  <div class="opp-info">
-                    <span class="opp-name">{{ opp.name }}</span>
-                    <span class="opp-desc">{{ opp.desc }}</span>
-                  </div>
-                  <div class="opp-action">
-                    <el-button type="primary" plain size="small" @click="handlePush(opp)">{{
-                      $t("welcome.pushToBDC")
-                    }}</el-button>
-                  </div>
-                </div>
+      <section class="page-section">
+        <h2 class="section-title">{{ $t("welcome.opportunityPipeline") }}</h2>
+        <el-card shadow="hover" class="funnel-card" id="step-user-opportunities">
+          <template #header>
+            <div class="card-header">
+              <span><el-icon><TrendCharts /></el-icon> {{ $t("welcome.opportunityPipeline") }}</span>
+            </div>
+          </template>
+          <div class="opportunity-list">
+            <div v-for="opp in opportunities" :key="opp.name" class="opp-item">
+              <div class="opp-info">
+                <span class="opp-name">{{ opp.name }}</span>
+                <span class="opp-desc">{{ opp.desc }}</span>
               </div>
-            </el-card>
-          </el-col>
-          <el-col :span="8">
-            <el-card shadow="hover" class="tasks-card">
-              <template #header>
-                <div class="card-header">
-                  <span
-                    ><el-icon><Bell /></el-icon> {{ $t("welcome.myTasks") }}</span
-                  >
-                </div>
-              </template>
-              <div class="task-list">
-                <div class="task-item" v-for="i in 5" :key="i">
-                  <el-checkbox>{{ $t("welcome.data.task.followUp", { id: 202400 + i }) }}</el-checkbox>
-                </div>
+              <div class="opp-action">
+                <el-button type="primary" plain size="small" @click="handlePush(opp)">
+                  {{ $t("welcome.pushToBDC") }}
+                </el-button>
               </div>
-            </el-card>
-          </el-col>
-        </el-row>
-      </template>
-    </div>
+            </div>
+          </div>
+        </el-card>
+      </section>
+
+      <section class="page-section" v-if="quickNavItems.length > 0">
+        <h2 class="section-title">{{ $t("welcome.quickNavigation") }}</h2>
+        <div class="quick-nav-container">
+          <div class="quick-nav-grid">
+            <div v-for="item in quickNavItems" :key="item.path" class="nav-item" @click="handleNavClick(item)">
+              <div class="nav-icon" :class="item.iconClass">
+                <el-icon :size="22"><component :is="item.icon" /></el-icon>
+              </div>
+              <div class="nav-content">
+                <div class="nav-title">{{ item.title }}</div>
+                <div class="nav-desc" v-if="item.desc">{{ item.desc }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, h } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useUserStore } from "@/stores/modules/user";
 import { useAuthStore } from "@/stores/modules/auth";
@@ -319,13 +296,11 @@ import {
   Guide,
   Monitor,
   List,
-  Timer,
   User,
   Star,
   Trophy,
   Money,
   TrendCharts,
-  Bell,
   Top,
   Bottom,
   VideoCamera,
@@ -358,13 +333,17 @@ import {
   Refresh,
   Ticket,
   Van,
-  DataLine,
-  Upload
+  Upload,
+  Download,
+  Filter,
+  Cpu,
+  Histogram,
+  Files,
+  Select,
+  MagicStick
 } from "@element-plus/icons-vue";
-import { ElMessage, ElNotification, ElTag, ElButton } from "element-plus";
+import { ElMessage, ElNotification } from "element-plus";
 import { useI18n } from "vue-i18n";
-import ProTable from "@/components/ProTable/index.vue";
-import { ColumnProps } from "@/components/ProTable/interface";
 import ECharts from "@/components/ECharts/index.vue";
 import type { ECOption } from "@/components/ECharts/config";
 
@@ -495,74 +474,12 @@ const handleUpload = (sys: any) => {
   ElMessage.info(t("welcome.data.upload.clickUpload"));
 };
 
-const governanceTasks = computed(() => [
-  { title: t("welcome.data.governance.mergeConflict"), priority: "High", time: "10m ago" },
-  { title: t("welcome.data.governance.dataQuality"), priority: "Medium", time: "1h ago" },
-  { title: t("welcome.data.governance.missingField"), priority: "Medium", time: "2h ago" }
-]);
-
-const auditLog = computed(() => [
-  { type: "warning" as const, content: t("welcome.data.audit.exported"), timestamp: "10:30" },
-  { type: "success" as const, content: t("welcome.data.audit.backup"), timestamp: "09:00" },
-  { type: "primary" as const, content: t("welcome.data.audit.policyUpdate"), timestamp: "Yesterday" }
-]);
-
 const opportunities = computed(() => [
   { name: t("welcome.data.opportunity.renewal"), desc: t("welcome.data.opportunity.renewalDesc") },
   { name: t("welcome.data.opportunity.birthday"), desc: t("welcome.data.opportunity.birthdayDesc") },
   { name: t("welcome.data.opportunity.serviceDue"), desc: t("welcome.data.opportunity.serviceDueDesc") },
   { name: t("welcome.data.opportunity.lostLead"), desc: t("welcome.data.opportunity.lostLeadDesc") }
 ]);
-
-// Impact Chart Option
-const impactChartOption = computed<ECOption>(() => {
-  return {
-    tooltip: {
-      trigger: "axis",
-      formatter: "{b}: {c} records"
-    },
-    grid: {
-      top: 10,
-      right: 10,
-      bottom: 20,
-      left: 40
-    },
-    xAxis: {
-      type: "category",
-      data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-      axisLine: { show: false },
-      axisTick: { show: false },
-      axisLabel: { color: "#909399", fontSize: 10 }
-    },
-    yAxis: {
-      type: "value",
-      splitLine: { show: true, lineStyle: { type: "dashed", color: "#E4E7ED" } },
-      axisLabel: { color: "#909399", fontSize: 10 }
-    },
-    series: [
-      {
-        data: [820, 932, 901, 934, 1290, 1330, 1320],
-        type: "line",
-        smooth: true,
-        showSymbol: false,
-        areaStyle: {
-          color: {
-            type: "linear",
-            x: 0,
-            y: 0,
-            x2: 0,
-            y2: 1,
-            colorStops: [
-              { offset: 0, color: "rgba(64, 158, 255, 0.2)" },
-              { offset: 1, color: "rgba(64, 158, 255, 0)" }
-            ]
-          }
-        },
-        itemStyle: { color: "#409EFF" }
-      }
-    ]
-  };
-});
 
 // 客户库统计数据
 const customerStats = ref({
@@ -572,6 +489,145 @@ const customerStats = ref({
   updatedCount: 234500,
   newMerged: 124,
   newUpdated: 532
+});
+
+// 源数据采集看板关键指标（合并自 dataMonitor，仅做首页概览）
+const sourceMonitorBrief = ref({
+  lastUpdate: "11:10:46",
+  totalProcessed: 125890,
+  totalVolume: "850 GB",
+  successCount: 125600,
+  mergeNeeded: 45,
+  autoMerged: 8560,
+  incremental: 1248,
+  pipelineStep: "批处理进行中",
+  pipelineStart: "02:00:00",
+  pipelineRemaining: "约 15 分钟",
+  dataVolume: "850 GB"
+});
+
+// 融合块：全量指标（4–8 个，紧凑展示）
+const fullVolumeIndicators = computed(() => {
+  const c = customerStats.value;
+  const b = sourceMonitorBrief.value;
+  return [
+    { label: t("customer.stats.total"), value: formatNumber(c.total), iconClass: "primary-bg" },
+    { label: t("customer.stats.mergedCount"), value: formatNumber(c.mergedCount), iconClass: "success-bg" },
+    { label: t("customer.stats.updatedCount"), value: formatNumber(c.updatedCount), iconClass: "info-bg" },
+    { label: t("dashboard.dataMonitor.backendCredit.totalProcessed"), value: formatNumber(b.totalProcessed), iconClass: "primary-bg" },
+    { label: t("dashboard.dataMonitor.backendCredit.totalVolume"), value: b.totalVolume, iconClass: "info-bg" },
+    { label: t("dashboard.dataMonitor.backendCredit.successCount"), value: formatNumber(b.successCount), iconClass: "success-bg" }
+  ];
+});
+
+// 融合块：增量指标（4–8 个，紧凑展示）
+const incrementalIndicators = computed(() => {
+  const c = customerStats.value;
+  const b = sourceMonitorBrief.value;
+  return [
+    { label: t("customer.stats.incremental"), value: "+" + formatNumber(c.incremental), iconClass: "warning-bg" },
+    { label: t("customer.stats.newMerged"), value: "+" + formatNumber(c.newMerged), iconClass: "purple-bg" },
+    { label: t("customer.stats.newUpdated"), value: "+" + formatNumber(c.newUpdated), iconClass: "primary-bg" },
+    { label: t("dashboard.dataMonitor.backendCredit.incremental"), value: "+" + formatNumber(b.incremental), iconClass: "warning-bg" },
+    { label: t("dashboard.dataMonitor.backendCredit.autoMerged"), value: formatNumber(b.autoMerged), iconClass: "purple-bg" },
+    { label: t("dashboard.dataMonitor.backendCredit.mergeNeeded"), value: String(b.mergeNeeded), iconClass: "info-bg" }
+  ];
+});
+
+// 全链路批处理（静态展示，不刷新）
+const pipelineData = ref({
+  currentStep: 2,
+  startTime: "02:00:00"
+});
+const pipelineStatusType = "success" as const;
+const pipelineSteps = computed(() => [
+  { title: t("dashboard.dataMonitor.steps.ingestion"), desc: "100/100", icon: Download },
+  { title: t("dashboard.dataMonitor.steps.cleaning"), desc: "99/100", icon: Filter },
+  { title: t("dashboard.dataMonitor.steps.identify"), desc: "98/100", icon: User },
+  { title: t("dashboard.dataMonitor.steps.tagging"), desc: "97/100", icon: Cpu },
+  { title: t("dashboard.dataMonitor.steps.dispatch"), desc: "96/100", icon: Connection }
+]);
+const getPipelineStepStatus = (index: number) => {
+  if (index < pipelineData.value.currentStep) return "completed";
+  if (index === pipelineData.value.currentStep) return "active";
+  return "pending";
+};
+const getStepStatusForElSteps = (index: number): "wait" | "process" | "finish" | "error" | "success" => {
+  if (index < pipelineData.value.currentStep) return "finish";
+  if (index === pipelineData.value.currentStep) return "process";
+  return "wait";
+};
+
+// 数据接入与质量 - 仅数据量柱状图（静态假数据）
+const dataVolumeSourceData = [1200, 932, 2013, 934, 1290, 430, 220];
+const dataVolumeSystemNames = ["DMS", "BDC", "WeCom", "App", "MiniP", "Evt", "3rd"];
+const dataVolumeChartOption = computed<ECOption>(() => {
+  const chartData = dataVolumeSourceData;
+  const total = chartData.reduce((sum: number, val: number) => sum + val, 0);
+  const xAxisData = chartData.map((val: number) => {
+    const percentage = total > 0 ? ((val / total) * 100).toFixed(1) : "0.0";
+    return `${percentage}%`;
+  });
+  return {
+    grid: { top: 40, right: 24, bottom: 32, left: 56, containLabel: false },
+    tooltip: {
+      trigger: "axis",
+      formatter: (params: any) => {
+        if (Array.isArray(params) && params[0]) {
+          const dataIndex = params[0].dataIndex;
+          const value = params[0].value;
+          const name = dataVolumeSystemNames[dataIndex] || "";
+          return `${name}<br/>${t("dashboard.dataMonitor.dataVolume")}: ${formatNumber(value)}`;
+        }
+        return "";
+      }
+    },
+    xAxis: {
+      type: "category",
+      data: xAxisData,
+      axisLine: { show: true, lineStyle: { color: "#E4E7ED" } },
+      axisTick: { show: false },
+      axisLabel: { color: "#909399", fontSize: 11, interval: 0 }
+    },
+    yAxis: {
+      type: "value",
+      axisLine: { show: false },
+      axisTick: { show: false },
+      splitLine: { lineStyle: { type: "dashed", color: "#E4E7ED" } },
+      axisLabel: { color: "#909399", fontSize: 11, formatter: (v: number) => formatNumber(v) }
+    },
+    series: [
+      {
+        name: t("dashboard.dataMonitor.dataVolume"),
+        type: "bar",
+        data: chartData,
+        barWidth: "50%",
+        showBackground: true,
+        backgroundStyle: { color: "rgba(180, 180, 180, 0.08)", borderRadius: [8, 8, 0, 0] },
+        itemStyle: {
+          borderRadius: [8, 8, 0, 0],
+          color: {
+            type: "linear",
+            x: 0,
+            y: 0,
+            x2: 0,
+            y2: 1,
+            colorStops: [
+              { offset: 0, color: "#409EFF" },
+              { offset: 1, color: "#a0cfff" }
+            ]
+          }
+        },
+        label: {
+          show: true,
+          position: "top",
+          color: "#606266",
+          fontSize: 11,
+          formatter: (params: any) => formatNumber(params.value)
+        }
+      }
+    ]
+  };
 });
 
 // 格式化数字
@@ -702,53 +758,6 @@ const handleNavClick = (item: { path: string; title: string }) => {
   }
 };
 
-// ProTable 列配置
-const governanceColumns = computed<ColumnProps[]>(() => [
-  {
-    prop: "title",
-    label: t("welcome.data.columns.task"),
-    align: "left"
-  },
-  {
-    prop: "priority",
-    label: t("welcome.data.columns.priority"),
-    width: 100,
-    render: ({ row }) => {
-      return h(
-        ElTag,
-        {
-          type: row.priority === "High" ? "danger" : "warning",
-          size: "small"
-        },
-        () => row.priority
-      );
-    }
-  },
-  {
-    prop: "time",
-    label: t("welcome.data.columns.time"),
-    width: 120,
-    align: "right"
-  },
-  {
-    prop: "operation",
-    label: t("welcome.data.action.fix"),
-    width: 80,
-    align: "right",
-    render: () => {
-      return h(
-        ElButton,
-        {
-          link: true,
-          type: "primary",
-          size: "small"
-        },
-        () => t("welcome.data.action.fix")
-      );
-    }
-  }
-]);
-
 const handlePush = (opp: any) => {
   ElMessage.success(t("welcome.pushingToBDC", { name: opp.name }));
 };
@@ -759,14 +768,6 @@ const startTour = () => {
     {
       element: "#step-admin-system",
       popover: { title: t("welcome.tour.systemHealth"), description: t("welcome.tour.systemHealthDesc") }
-    },
-    {
-      element: "#step-admin-governance",
-      popover: { title: t("welcome.tour.governance"), description: t("welcome.tour.governanceDesc") }
-    },
-    {
-      element: "#step-admin-audit",
-      popover: { title: t("welcome.tour.audit"), description: t("welcome.tour.auditDesc") }
     }
   ];
 
@@ -796,35 +797,21 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .welcome-container {
-  height: 100%;
+  min-height: 100%;
   padding: 20px;
   background-color: var(--el-bg-color-page);
-  overflow-y: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.welcome-container.no-scroll {
-  overflow: hidden;
+  overflow: visible;
 }
 
 .dashboard-content {
-  flex: 1;
-  overflow-y: auto;
-  /* Hide scrollbar for Chrome, Safari and Opera */
-  &::-webkit-scrollbar {
-    display: none;
-  }
-  /* Hide scrollbar for IE, Edge and Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+  /* 整页滚动：不设固定高度与内部滚动，由外层页面滚动 */
 }
 
 .welcome-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   padding: 20px 30px;
   background: linear-gradient(135deg, var(--el-color-primary-light-9) 0%, var(--el-bg-color) 100%);
   border-radius: 16px;
@@ -866,6 +853,123 @@ onMounted(() => {
     z-index: 1;
     display: flex;
     align-items: center;
+    gap: 20px;
+  }
+
+  .global-update {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    font-size: 12px;
+    color: var(--el-text-color-secondary);
+    .global-update-label {
+      font-weight: 500;
+    }
+    .global-update-time {
+      font-family: SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--el-color-primary);
+    }
+  }
+}
+
+/* 统一区块与标题 */
+.page-section {
+  margin-bottom: 28px;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+  margin: 0 0 16px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--el-border-color-lighter);
+}
+
+/* 客户库·源数据 融合块：全量/增量紧凑指标，不占大块 */
+.indicator-block {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.indicator-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.indicator-group-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--el-text-color-secondary);
+  margin: 0;
+  padding: 0 0 4px 0;
+}
+.indicator-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+}
+.indicator-mini-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--el-border-color-lighter);
+  background: var(--el-bg-color-overlay);
+  min-height: 52px;
+  transition: box-shadow 0.2s ease;
+  &:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+  .indicator-label {
+    font-size: 11px;
+    color: var(--el-text-color-secondary);
+    line-height: 1.3;
+    margin-bottom: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+  .indicator-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--el-text-color-primary);
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+  &.primary-bg { border-left: 3px solid var(--el-color-primary); }
+  &.success-bg { border-left: 3px solid var(--el-color-success); }
+  &.info-bg { border-left: 3px solid var(--el-color-info); }
+  &.warning-bg { border-left: 3px solid var(--el-color-warning); }
+  &.purple-bg { border-left: 3px solid #8e44ad; }
+}
+@media (max-width: 1200px) {
+  .indicator-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+@media (max-width: 768px) {
+  .indicator-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  .indicator-mini-card {
+    padding: 8px 12px;
+    min-height: 48px;
+    .indicator-value { font-size: 14px; }
+  }
+}
+
+.section-card {
+  margin-top: 16px;
+  &:first-of-type {
+    margin-top: 0;
   }
 }
 
@@ -883,8 +987,322 @@ onMounted(() => {
   }
 }
 
+/* 数据统计 - 6 个独立卡片 */
+.source-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.credit-card-welcome {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border-radius: 12px;
+  border: 1px solid var(--el-border-color-lighter);
+  background: var(--el-bg-color-overlay);
+  transition: all 0.3s ease;
+  min-height: 88px;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  .credit-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+
+    .el-icon {
+      font-size: 22px;
+    }
+  }
+
+  &.primary-bg .credit-icon {
+    background: linear-gradient(135deg, #ecf5ff, #c6e2ff);
+    color: var(--el-color-primary);
+  }
+  &.info-bg .credit-icon {
+    background: linear-gradient(135deg, #f4f4f5, #e9e9eb);
+    color: #909399;
+  }
+  &.success-bg .credit-icon {
+    background: linear-gradient(135deg, #f0f9eb, #d1edc4);
+    color: var(--el-color-success);
+  }
+  &.warning-bg .credit-icon {
+    background: linear-gradient(135deg, #fdf6ec, #faecd8);
+    color: var(--el-color-warning);
+  }
+  &.purple-bg .credit-icon {
+    background: linear-gradient(135deg, #f8effc, #e5d4f5);
+    color: #8e44ad;
+  }
+
+  .credit-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .credit-label {
+    font-size: 12px;
+    color: var(--el-text-color-secondary);
+    font-weight: 600;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .credit-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--el-text-color-primary);
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+}
+
+@media (max-width: 1200px) {
+  .source-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 768px) {
+  .source-stats-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .credit-card-welcome {
+    min-height: 76px;
+    padding: 12px 16px;
+    .credit-icon {
+      width: 42px;
+      height: 42px;
+      font-size: 20px;
+    }
+    .credit-value {
+      font-size: 18px;
+    }
+  }
+}
+
+/* 全链路批处理结果 - 沿用原看板样式 */
+.pipeline-card-welcome {
+  .pipeline-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      .header-icon {
+        font-size: 18px;
+        color: var(--el-color-primary);
+      }
+      .title-wrap {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .title {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--el-text-color-primary);
+      }
+      .title-desc {
+        font-size: 12px;
+        font-weight: 400;
+        color: var(--el-text-color-secondary);
+      }
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      .meta-info {
+        font-size: 12px;
+        color: var(--el-text-color-secondary);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        .dot-online {
+          width: 6px;
+          height: 6px;
+          background: var(--el-color-success);
+          border-radius: 50%;
+          animation: step-pulse-glow 2s infinite;
+        }
+      }
+    }
+  }
+
+  .pipeline-steps-wrapper {
+    padding: 16px 0 8px;
+  }
+
+  .pipeline-steps {
+    :deep(.el-step__main) {
+      margin-top: 20px !important;
+      padding-top: 0 !important;
+    }
+    :deep(.el-steps .el-step__head) {
+      margin-right: 16px !important;
+    }
+    :deep(.el-step__icon) {
+      width: 36px !important;
+      height: 36px !important;
+      min-width: 36px !important;
+      min-height: 36px !important;
+      border-width: 2px;
+      font-size: 16px;
+      border-radius: 50% !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      &.is-process {
+        border-color: var(--el-color-primary);
+        color: var(--el-color-primary);
+      }
+      &.is-finish {
+        border-color: var(--el-color-success);
+        background-color: var(--el-color-success);
+        color: #fff;
+      }
+      &.is-wait {
+        border-color: #e4e7ed;
+        background-color: #fff;
+        color: #cbd5e0;
+      }
+    }
+    :deep(.el-step__title) {
+      font-size: 14px;
+      font-weight: 700;
+      &.is-process {
+        color: var(--el-color-primary);
+      }
+      &.is-wait {
+        color: #a0aec0;
+      }
+    }
+    :deep(.el-step__line--inner) {
+      background: linear-gradient(90deg, var(--el-color-success) 0%, var(--el-color-primary) 100%);
+      border-radius: 2px;
+    }
+  }
+
+  .step-icon-custom {
+    position: relative;
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50% !important;
+    flex-shrink: 0;
+    &.completed {
+      background: var(--el-color-success);
+      color: #fff;
+    }
+    &.active {
+      background: var(--el-color-primary);
+      color: #fff;
+      box-shadow: 0 0 0 4px rgba(64, 158, 255, 0.2);
+    }
+    &.pending {
+      background: #fff;
+      color: #cbd5e0;
+    }
+    .step-pulse {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 2px solid var(--el-color-primary);
+      opacity: 0.6;
+      animation: step-pulse 2s ease-out infinite;
+    }
+  }
+
+  .step-description {
+    .step-desc-text {
+      font-size: 11px;
+      color: var(--el-text-color-secondary);
+      margin-bottom: 4px;
+    }
+    .step-processing {
+      font-size: 10px;
+      color: var(--el-color-primary);
+      font-weight: 600;
+      animation: pulse-text 1.5s ease-in-out infinite;
+      margin-top: 2px;
+    }
+  }
+}
+
+@keyframes step-pulse {
+  0% {
+    width: 100%;
+    height: 100%;
+    opacity: 0.6;
+  }
+  100% {
+    width: 150%;
+    height: 150%;
+    opacity: 0;
+  }
+}
+@keyframes step-pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(103, 194, 58, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(103, 194, 58, 0);
+  }
+}
+@keyframes pulse-text {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* 数据接入与质量 - 仅数据量图表 */
+.chart-card-welcome {
+  .chart-body-welcome {
+    width: 100%;
+    min-height: 280px;
+  }
+}
+
 .mt-20 {
   margin-top: 20px;
+}
+
+.mt-10 {
+  margin-top: 10px;
 }
 
 /* System Grid */
@@ -1188,43 +1606,13 @@ onMounted(() => {
   }
 }
 
-/* Tasks */
-.task-item {
-  padding: 12px 0;
-  border-bottom: 1px solid var(--el-border-color-lighter);
-  &:last-child {
-    border-bottom: none;
-  }
-}
-
-/* Quick Navigation - Professional To B Style */
-.quick-nav-section {
-  margin-bottom: 32px;
-}
-
+/* 快捷导航 */
 .quick-nav-container {
   background: var(--el-bg-color-overlay);
   border-radius: 12px;
   padding: 24px;
   border: 1px solid var(--el-border-color-light);
   box-shadow: var(--el-box-shadow-light);
-
-  .section-title {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--el-text-color-primary);
-    margin-bottom: 20px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--el-border-color-lighter);
-
-    .el-icon {
-      font-size: 18px;
-      color: var(--el-color-primary);
-    }
-  }
 }
 
 .quick-nav-grid {
@@ -1426,25 +1814,6 @@ onMounted(() => {
           display: none;
         }
       }
-    }
-  }
-}
-
-/* ProTable 样式优化 */
-.governance-card {
-  :deep(.table-main) {
-    box-shadow: none;
-    border: none;
-    padding: 0;
-  }
-
-  :deep(.el-table) {
-    background: transparent;
-  }
-
-  :deep(.el-table__body) {
-    tr {
-      background: transparent;
     }
   }
 }
@@ -1729,39 +2098,4 @@ onMounted(() => {
   }
 }
 
-.impact-content {
-  .impact-metrics {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-
-    .impact-item {
-      flex: 1;
-      text-align: center;
-      padding: 0 10px;
-
-      .impact-label {
-        font-size: 12px;
-        color: var(--el-text-color-secondary);
-        margin-bottom: 4px;
-      }
-
-      .impact-value {
-        font-size: 18px;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 4px;
-
-        &.error {
-          color: var(--el-color-danger);
-        }
-        &.success {
-          color: var(--el-color-success);
-        }
-      }
-    }
-  }
-}
 </style>

@@ -90,6 +90,8 @@ export namespace Lead {
     id?: string;
     name: string;
     description?: string;
+    // 批次号（用于标识一次规则生成或导入的业务批次）
+    batchNo?: string;
     triggerType: "segment" | "event" | "schedule"; // 触发类型：分群、事件、定时
     triggerConfig: {
       segmentId?: string; // 分群ID
@@ -104,6 +106,8 @@ export namespace Lead {
     leadType: string; // 生成的商机类型
     priority: "low" | "medium" | "high";
     pushTarget: PushTarget;
+    // 推送人数（该分发对应的已推送商机数量）
+    pushCount?: number;
     pushConfig?: {
       apiUrl?: string;
       headers?: Record<string, string>;
@@ -114,6 +118,8 @@ export namespace Lead {
     createdAt?: string;
     updatedAt?: string;
     auditStatus?: "pending" | "approved" | "rejected"; // 审核状态
+    // 创建方式：手工上传 / 平台生成
+    createMethod?: "manual_upload" | "system_generated";
   }
 
   // 联系人信息

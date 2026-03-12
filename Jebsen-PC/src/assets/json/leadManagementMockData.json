@@ -1072,6 +1072,7 @@
       "list": [
         {
           "id": "RULE-001",
+          "batchNo": "BATCH-202401-001",
           "name": "维保到期提醒规则",
           "description": "当车辆维保周期即将到期时（提前7天），自动生成商机",
           "triggerType": "event",
@@ -1087,18 +1088,21 @@
           },
           "leadType": "aftersales_cs",
           "priority": "high",
+          "pushCount": 120,
           "pushTarget": "BDC外呼系统",
           "pushConfig": {
             "apiUrl": "https://api.BDC外呼系统.example.com/leads",
             "retryTimes": 3
           },
           "enabled": true,
+          "createMethod": "system_generated",
           "creator": "系统管理员",
           "createdAt": "2024-01-10 10:00:00",
           "updatedAt": "2024-01-12 15:30:00"
         },
         {
           "id": "RULE-002",
+          "batchNo": "BATCH-202401-002",
           "name": "代金券到期提醒规则",
           "description": "当代金券剩余有效期<=3天时，自动生成商机",
           "triggerType": "event",
@@ -1114,18 +1118,21 @@
           },
           "leadType": "newcar_cs",
           "priority": "medium",
+          "pushCount": 85,
           "pushTarget": "BDC外呼系统",
           "pushConfig": {
             "apiUrl": "https://api.bdc.example.com/leads",
             "retryTimes": 2
           },
           "enabled": true,
+          "createMethod": "system_generated",
           "creator": "业务专员",
           "createdAt": "2024-01-08 09:00:00",
           "updatedAt": "2024-01-10 11:20:00"
         },
         {
           "id": "RULE-003",
+          "batchNo": "BATCH-202401-003",
           "name": "高价值客户营销规则",
           "description": "年消费>=8万元的高价值客户，自动生成营销商机",
           "triggerType": "segment",
@@ -1141,18 +1148,21 @@
           },
           "leadType": "cm_custom",
           "priority": "high",
+          "pushCount": 45,
           "pushTarget": "BDC外呼系统",
           "pushConfig": {
             "apiUrl": "https://api.BDC外呼系统.example.com/leads",
             "retryTimes": 3
           },
           "enabled": true,
+          "createMethod": "system_generated",
           "creator": "系统管理员",
           "createdAt": "2024-01-05 14:00:00",
           "updatedAt": "2024-01-08 16:00:00"
         },
         {
           "id": "RULE-004",
+          "batchNo": "BATCH-202312-001",
           "name": "流失预警规则",
           "description": "超过180天未到店的客户，自动生成流失预警商机",
           "triggerType": "event",
@@ -1168,18 +1178,21 @@
           },
           "leadType": "bdc_aftersales_recall",
           "priority": "high",
+          "pushCount": 32,
           "pushTarget": "BDC外呼系统",
           "pushConfig": {
             "apiUrl": "https://api.crm.example.com/leads",
             "retryTimes": 2
           },
           "enabled": true,
+          "createMethod": "system_generated",
           "creator": "业务专员",
           "createdAt": "2024-01-03 10:00:00",
           "updatedAt": "2024-01-05 09:30:00"
         },
         {
           "id": "RULE-005",
+          "batchNo": "BATCH-202311-UPLOAD-001",
           "name": "复购机会规则",
           "description": "根据客户历史购买周期，预测复购时间点并生成商机",
           "triggerType": "schedule",
@@ -1195,18 +1208,21 @@
           },
           "leadType": "bdc_renewal",
           "priority": "medium",
+          "pushCount": 60,
           "pushTarget": "BDC外呼系统",
           "pushConfig": {
             "apiUrl": "https://api.bdc.example.com/leads",
             "retryTimes": 2
           },
           "enabled": true,
+          "createMethod": "manual_upload",
           "creator": "系统管理员",
           "createdAt": "2024-01-01 08:00:00",
           "updatedAt": "2024-01-02 10:00:00"
         },
         {
           "id": "RULE-006",
+          "batchNo": "BATCH-202310-UPLOAD-002",
           "name": "升级机会规则",
           "description": "车辆使用>=5年且年消费>=6万元的客户，推荐升级车型",
           "triggerType": "segment",
@@ -1227,18 +1243,21 @@
           },
           "leadType": "bdc_campaign",
           "priority": "medium",
+          "pushCount": 40,
           "pushTarget": "BDC外呼系统",
           "pushConfig": {
             "apiUrl": "https://api.BDC外呼系统.example.com/leads",
             "retryTimes": 3
           },
           "enabled": false,
+          "createMethod": "manual_upload",
           "creator": "业务专员",
           "createdAt": "2023-12-28 15:00:00",
           "updatedAt": "2024-01-10 11:00:00"
         },
         {
           "id": "RULE-007",
+          "batchNo": "BATCH-202401-004",
           "name": "价值分层-钻石客户规则",
           "description": "价值分层为钻石客户，创建VIP关怀商机",
           "triggerType": "segment",
@@ -1251,18 +1270,21 @@
           },
           "leadType": "pcn_aftersales_campaign",
           "priority": "high",
+          "pushCount": 18,
           "pushTarget": "BDC外呼系统",
           "pushConfig": {
             "apiUrl": "https://api.crm.example.com/leads",
             "retryTimes": 2
           },
           "enabled": true,
+          "createMethod": "system_generated",
           "creator": "业务专员",
           "createdAt": "2024-01-11 09:00:00",
           "updatedAt": "2024-01-12 10:00:00"
         },
         {
           "id": "RULE-008",
+          "batchNo": "BATCH-202401-005",
           "name": "价值分层-黄金客户规则",
           "description": "黄金客户推荐保养增值套餐",
           "triggerType": "segment",
@@ -1275,18 +1297,21 @@
           },
           "leadType": "ttr_survey",
           "priority": "medium",
+          "pushCount": 26,
           "pushTarget": "BDC外呼系统",
           "pushConfig": {
             "apiUrl": "https://api.bdc.example.com/leads",
             "retryTimes": 2
           },
           "enabled": true,
+          "createMethod": "system_generated",
           "creator": "系统管理员",
           "createdAt": "2024-01-09 10:00:00",
           "updatedAt": "2024-01-10 14:00:00"
         },
         {
           "id": "RULE-009",
+          "batchNo": "BATCH-202312-003",
           "name": "价值分层-白银客户规则",
           "description": "白银客户关怀，自动推送基础保养优惠",
           "triggerType": "segment",
@@ -1299,18 +1324,21 @@
           },
           "leadType": "aftersales_cs",
           "priority": "medium",
+          "pushCount": 12,
           "pushTarget": "BDC外呼系统",
           "pushConfig": {
             "apiUrl": "https://api.BDC外呼系统.example.com/leads",
             "retryTimes": 2
           },
           "enabled": false,
+          "createMethod": "system_generated",
           "creator": "业务专员",
           "createdAt": "2024-01-07 08:00:00",
           "updatedAt": "2024-01-08 09:00:00"
         },
         {
           "id": "RULE-010",
+          "batchNo": "BATCH-202401-CAMP-001",
           "name": "BDC Campaign触达",
           "description": "BDC活动批次触达客户并生成商机",
           "triggerType": "event",
@@ -1322,14 +1350,17 @@
           },
           "leadType": "bdc_campaign",
           "priority": "medium",
+          "pushCount": 150,
           "pushTarget": "BDC外呼系统",
           "enabled": true,
+          "createMethod": "system_generated",
           "creator": "营销运营",
           "createdAt": "2024-01-11 10:00:00",
           "updatedAt": "2024-01-12 10:00:00"
         },
         {
           "id": "RULE-011",
+          "batchNo": "BATCH-202401-CHURN-001",
           "name": "BDC售后流失15个月",
           "description": "距上次到店>15个月客户，触发售后流失召回商机",
           "triggerType": "event",
@@ -1341,14 +1372,17 @@
           },
           "leadType": "bdc_aftersales_recall",
           "priority": "high",
+          "pushCount": 50,
           "pushTarget": "BDC外呼系统",
           "enabled": true,
+          "createMethod": "system_generated",
           "creator": "售后运营",
           "createdAt": "2024-01-10 09:00:00",
           "updatedAt": "2024-01-11 11:00:00"
         },
         {
           "id": "RULE-012",
+          "batchNo": "BATCH-202401-RECALL-001",
           "name": "BDC售后商机召回",
           "description": "上次商机未成交，触发二次召回",
           "triggerType": "event",
@@ -1360,14 +1394,17 @@
           },
           "leadType": "bdc_aftersales_recall",
           "priority": "medium",
+          "pushCount": 35,
           "pushTarget": "BDC外呼系统",
           "enabled": true,
+          "createMethod": "system_generated",
           "creator": "BDC运营",
           "createdAt": "2024-01-09 14:00:00",
           "updatedAt": "2024-01-10 09:00:00"
         },
         {
           "id": "RULE-013",
+          "batchNo": "BATCH-202401-POLICY-001",
           "name": "BDC续保商机",
           "description": "保单即将到期触发续保商机",
           "triggerType": "event",
@@ -1379,14 +1416,17 @@
           },
           "leadType": "bdc_renewal",
           "priority": "high",
+          "pushCount": 72,
           "pushTarget": "BDC外呼系统",
           "enabled": true,
+          "createMethod": "system_generated",
           "creator": "保险专员",
           "createdAt": "2024-01-08 10:00:00",
           "updatedAt": "2024-01-09 15:00:00"
         },
         {
           "id": "RULE-014",
+          "batchNo": "BATCH-202401-CM-001",
           "name": "CM自定义商机",
           "description": "CM自定义模板生成商机",
           "triggerType": "segment",
@@ -1398,14 +1438,17 @@
           },
           "leadType": "cm_custom",
           "priority": "medium",
+          "pushCount": 20,
           "pushTarget": "BDC外呼系统",
           "enabled": true,
+          "createMethod": "system_generated",
           "creator": "CM管理员",
           "createdAt": "2024-01-07 08:00:00",
           "updatedAt": "2024-01-08 08:30:00"
         },
         {
           "id": "RULE-015",
+          "batchNo": "BATCH-202401-PCN-001",
           "name": "PCN售后Campaign",
           "description": "PCN渠道售后活动批次",
           "triggerType": "event",
@@ -1417,14 +1460,17 @@
           },
           "leadType": "pcn_aftersales_campaign",
           "priority": "medium",
+          "pushCount": 55,
           "pushTarget": "BDC外呼系统",
           "enabled": true,
+          "createMethod": "system_generated",
           "creator": "渠道运营",
           "createdAt": "2024-01-06 11:00:00",
           "updatedAt": "2024-01-07 09:20:00"
         },
         {
           "id": "RULE-016",
+          "batchNo": "BATCH-202401-TTR-001",
           "name": "TTR调研",
           "description": "TTR体验调研触发回访",
           "triggerType": "schedule",
@@ -1436,14 +1482,17 @@
           },
           "leadType": "ttr_survey",
           "priority": "low",
+          "pushCount": 10,
           "pushTarget": "BDC外呼系统",
           "enabled": true,
+          "createMethod": "system_generated",
           "creator": "调研运营",
           "createdAt": "2024-01-05 10:00:00",
           "updatedAt": "2024-01-06 09:00:00"
         },
         {
           "id": "RULE-017",
+          "batchNo": "BATCH-202401-TEMPLATE-001",
           "name": "客群模板核验",
           "description": "客群模板核验批次生成复核商机",
           "triggerType": "segment",
@@ -1455,14 +1504,17 @@
           },
           "leadType": "newcar_cs",
           "priority": "medium",
+          "pushCount": 8,
           "pushTarget": "BDC外呼系统",
           "enabled": true,
+          "createMethod": "system_generated",
           "creator": "数据运营",
           "createdAt": "2024-01-04 09:00:00",
           "updatedAt": "2024-01-05 10:00:00"
         },
         {
           "id": "RULE-018",
+          "batchNo": "BATCH-202401-CSAT-001",
           "name": "售后满意度回访",
           "description": "售后服务完成后触发满意度回访商机",
           "triggerType": "event",
@@ -1474,14 +1526,17 @@
           },
           "leadType": "aftersales_cs",
           "priority": "low",
+          "pushCount": 30,
           "pushTarget": "BDC外呼系统",
           "enabled": true,
+          "createMethod": "system_generated",
           "creator": "售后客服",
           "createdAt": "2024-01-03 10:00:00",
           "updatedAt": "2024-01-04 11:00:00"
         },
         {
           "id": "RULE-019",
+          "batchNo": "BATCH-202401-CSAT-NEW-001",
           "name": "新车满意度回访",
           "description": "新车交付后满意度回访商机",
           "triggerType": "event",
@@ -1493,8 +1548,10 @@
           },
           "leadType": "newcar_cs",
           "priority": "medium",
+          "pushCount": 22,
           "pushTarget": "BDC外呼系统",
           "enabled": true,
+          "createMethod": "system_generated",
           "creator": "交付专员",
           "createdAt": "2024-01-02 09:00:00",
           "updatedAt": "2024-01-03 09:30:00"

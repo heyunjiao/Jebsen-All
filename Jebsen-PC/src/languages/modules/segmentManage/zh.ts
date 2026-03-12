@@ -54,7 +54,8 @@ export default {
       running: "计算中",
       active: "已启用",
       failed: "失败",
-      inactive: "已停用"
+      inactive: "已停用",
+      disabled: "已停用"
     },
     categoryOptions: {
       demography: "人口学",

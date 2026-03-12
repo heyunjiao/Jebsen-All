@@ -70,7 +70,7 @@
           <el-option v-for="tag in availableTags" :key="tag.tagId" :label="tag.tagName" :value="tag.tagId">
             <span>{{ tag.tagName }}</span>
             <el-tag :type="getCategoryType(tag.category)" size="small" style="margin-left: 8px">
-              {{ tag.category }}
+              {{ getCategoryFullPath(TAG_CATEGORY_OPTIONS, tag.category) || tag.category }}
             </el-tag>
           </el-option>
         </el-select>
@@ -129,6 +129,7 @@
 import { ref, watch, computed } from "vue";
 import { Plus, Delete } from "@element-plus/icons-vue";
 import type { RuleNode } from "./RuleEditor.vue";
+import { TAG_CATEGORY_OPTIONS, getCategoryFullPath, getCategoryType as getCategoryTypeFromConst } from "@/constants/tagCategory";
 
 const props = defineProps<{
   node: RuleNode;
@@ -149,25 +150,8 @@ const localNode = ref<RuleNode>(JSON.parse(JSON.stringify(props.node)));
 // 默认标签列表（如果没有传入）
 const availableTags = computed(() => props.availableTags || []);
 
-// 获取分类类型
-const getCategoryType = (category: string) => {
-  // 根据分类名称动态分配颜色类型
-  const categoryMap: Record<string, string> = {
-    意向级别: "primary",
-    车牌类型: "success",
-    所在城市: "warning",
-    特殊标识: "danger",
-    爱好: "info",
-    SC: "success",
-    续保: "warning",
-    保险到期月份: "info",
-    POC: "primary",
-    线上活动: "success",
-    保时捷: "warning",
-    新能源: "success"
-  };
-  return categoryMap[category] || "info";
-};
+// 获取分类类型（使用共享常量，支持多级分类）
+const getCategoryType = (category: string) => getCategoryTypeFromConst(category);
 
 // 标签选择变化
 const handleTagChange = () => {

@@ -7,6 +7,7 @@ export default {
     tagName: "標籤名稱",
     enterTagName: "請輸入標籤名稱",
     category: "標籤分類",
+    categoryPlaceholder: "請選擇分類",
     selectCategory: "請選擇標籤分類",
     tagType: "標籤類型",
     autoRule: "自動化規則",

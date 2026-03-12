@@ -10,7 +10,7 @@ export namespace TagManage {
   export type TagStatus = "draft" | "active" | "inactive" | "abandoned";
 
   // 标签类型
-  export type TagType = "auto" | "manual";
+  export type TagType = "auto" | "manual" | "file_upload";
 
   // 标签分类（根据标签名称前缀动态生成）
   export type TagCategory = string;
@@ -151,9 +151,4 @@ export const abandonTag = (params: { tagId: string }) => {
 // 模拟验证规则
 export const simulateRule = (params: TagManage.ReqSimulateParams) => {
   return http.post<TagManage.ResSimulate>(PORT1 + `/tag/simulate`, params);
-};
-
-// 版本回滚
-export const rollbackVersion = (params: { tagId: string; version: string }) => {
-  return http.post(PORT1 + `/tag/rollback`, params);
 };

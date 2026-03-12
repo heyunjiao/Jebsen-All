@@ -10,6 +10,7 @@ export default {
     tagDescription: "标签描述",
     enterTagDescription: "请输入标签描述",
     category: "标签分类",
+    categoryPlaceholder: "请选择分类",
     selectCategory: "请选择标签分类",
     tagType: "标签类型",
     autoRule: "自动化规则",

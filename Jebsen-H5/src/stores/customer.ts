@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { CustomerProfile, TagPool, MaintenanceRecord, TransactionRecord, VehicleRelation, Asset, ConflictResolution, Appointment, PlatformSource, Opportunity, OperationLog, InsuranceRecord, MarketingCampaign, FinancialLoanRecord } from '@/api/customer'
 import { customerApi } from '@/api/customer'
+import { mockFinancialLoanRecords, mockMarketingCampaigns } from '@/mock/data'
 import { showLoadingToast, closeToast, showToast } from 'vant'
 
 export const useCustomerStore = defineStore('customer', () => {
@@ -76,7 +77,7 @@ export const useCustomerStore = defineStore('customer', () => {
           name: { value: '深圳市望昕实业有限公司', isConflict: false },
           customerType: { value: '公司', isConflict: false },
           handlers: [
-            { id: 'H001', name: '汪洁', role: '采购主管', mobile: '13811112222' },
+            { id: 'H001', name: '汪洁', role: '采购主管', mobile: '13811112222', isPrimaryContact: true },
             { id: 'H002', name: '张雪', role: '财务经理', mobile: '13833334444' },
             { id: 'H003', name: '周杰', role: '行政总监', mobile: '13855556666' },
           ],
@@ -91,7 +92,7 @@ export const useCustomerStore = defineStore('customer', () => {
           mobile: {
             items: [
               { id: 'm1', mobile: '021-66668888', isPrimary: true, relationTagName: '公司电话' },
-              { id: 'm2', mobile: '13811112222', isPrimary: false, relationTagName: '使用人', businessTags: ['使用人'], vehicleLabel: 'Cayenne Turbo' },
+              { id: 'm2', mobile: '13811112222', isPrimary: false, relationTagName: '采购联系人', contactName: '汪洁', businessTags: ['购车人'], personRole: '购车人', isPrimaryContact: true, vehicleLabel: 'Cayenne Turbo' },
             ],
             isConflict: true,
             editable: true,
@@ -675,6 +676,10 @@ export const useCustomerStore = defineStore('customer', () => {
       return false
     } catch (error: any) {
       console.error('获取线下活动记录失败:', error)
+      // Fallback：接口不可用时使用本地 Mock 数据，至少保证 H5 Tab 能正常展示示例
+      if (page === 1) {
+        marketingCampaigns.value = [...mockMarketingCampaigns]
+      }
       return false
     }
   }
@@ -703,6 +708,10 @@ export const useCustomerStore = defineStore('customer', () => {
       return false
     } catch (error: any) {
       console.error('获取金融贷款记录失败:', error)
+      // Fallback：接口不可用时使用本地 Mock 数据
+      if (page === 1) {
+        financialLoanRecords.value = [...mockFinancialLoanRecords]
+      }
       return false
     }
   }
@@ -753,4 +762,3 @@ export const useCustomerStore = defineStore('customer', () => {
     setHandler,
   }
 })
-

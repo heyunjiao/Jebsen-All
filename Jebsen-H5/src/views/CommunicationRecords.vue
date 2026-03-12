@@ -1,7 +1,7 @@
 <template>
   <div class="communication-records-container">
     <van-nav-bar
-      :title="$t('customer.communicationRecords.title') || '沟通记录'"
+      title="沟通记录"
       left-arrow
       fixed
       placeholder
@@ -29,39 +29,23 @@
         class="communication-card"
       >
         <div class="card-header">
-          <div class="record-title">{{ record.type }}</div>
-          <van-tag :type="getTypeTag(record.type)" :size="'small' as any">
-            {{ record.type }}
+          <div class="record-title">{{ record.channel }}</div>
+          <van-tag :type="getTypeTag(record.channel)" :size="'small' as any">
+            {{ record.channel }}
           </van-tag>
         </div>
         <div class="card-content">
           <div class="info-row">
-            <span class="label">沟通方式：</span>
-            <span class="value">{{ record.type }}</span>
+            <span class="label">时间：</span>
+            <span class="value">{{ record.time }}</span>
           </div>
           <div class="info-row">
-            <span class="label">沟通时间：</span>
-            <span class="value">{{ record.communicationTime }}</span>
+            <span class="label">渠道：</span>
+            <span class="value">{{ record.channel }}</span>
           </div>
-          <div v-if="record.operator" class="info-row">
-            <span class="label">沟通人员：</span>
-            <span class="value">{{ record.operator }}</span>
-          </div>
-          <div v-if="record.duration" class="info-row">
-            <span class="label">沟通时长：</span>
-            <span class="value">{{ record.duration }}</span>
-          </div>
-          <div v-if="record.content" class="info-row">
+          <div class="info-row">
             <span class="label">沟通内容：</span>
             <span class="value">{{ record.content }}</span>
-          </div>
-          <div v-if="record.result" class="info-row">
-            <span class="label">沟通结果：</span>
-            <span class="value">{{ record.result }}</span>
-          </div>
-          <div v-if="record.notes" class="info-row">
-            <span class="label">备注：</span>
-            <span class="value">{{ record.notes }}</span>
           </div>
         </div>
       </div>
@@ -88,44 +72,30 @@ const pageSize = ref(5) // 每页加载 5 条
 const communicationRecords = ref([
   {
     id: 'COMM001',
-    type: '电话沟通',
-    communicationTime: '2025-01-16 14:30:00',
-    operator: 'Rebecca Z.',
-    duration: '15分钟',
+    channel: '电话',
+    time: '2025-01-16 14:30:00',
     content: '客户咨询车辆保养事宜，已安排预约',
-    result: '已预约',
-    notes: '客户对服务很满意',
   },
   {
     id: 'COMM002',
-    type: '微信沟通',
-    communicationTime: '2025-01-15 10:20:00',
-    operator: 'John D.',
-    duration: '8分钟',
+    channel: '微信',
+    time: '2025-01-15 10:20:00',
     content: '发送保养提醒信息',
-    result: '已发送',
-    notes: '',
   },
   {
     id: 'COMM003',
-    type: '现场沟通',
-    communicationTime: '2025-01-14 16:45:00',
-    operator: 'Alice W.',
-    duration: '25分钟',
+    channel: '到店',
+    time: '2025-01-14 16:45:00',
     content: '客户到店咨询新车购买事宜',
-    result: '已跟进',
-    notes: '客户意向较高，已安排试驾',
   },
 ])
 
 // 获取类型标签样式
 const getTypeTag = (type: string): any => {
   const typeMap: Record<string, any> = {
-    '电话沟通': 'primary',
-    '微信沟通': 'success',
-    '现场沟通': 'warning',
-    '邮件沟通': 'default',
-    '短信沟通': 'default',
+    电话: 'primary',
+    微信: 'success',
+    到店: 'warning',
   }
   return typeMap[type] || 'default'
 }
@@ -243,4 +213,3 @@ onMounted(async () => {
   text-align: center;
 }
 </style>
-

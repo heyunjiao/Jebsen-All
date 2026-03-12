@@ -48,6 +48,14 @@ export default {
     selectSegmentFirst: "請先選擇分群",
     enterSegmentNameRequired: "分群名稱不能為空",
     ruleConfigRequired: "請配置分群分發",
+    statusOptions: {
+      draft: "草稿",
+      running: "計算中",
+      active: "已啟用",
+      failed: "失敗",
+      inactive: "已停用",
+      disabled: "已停用"
+    },
     stats: {
       segmentTotal: "分群總數",
       totalMembers: "總成員數",

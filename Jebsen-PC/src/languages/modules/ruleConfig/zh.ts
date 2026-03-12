@@ -1,19 +1,22 @@
 export default {
   ruleConfig: {
     columns: {
+      batchNo: "批次号",
       name: "分发名称",
       description: "分发描述",
       triggerType: "触发类型",
       leadType: "商机类型",
+      pushCount: "推送人数",
       priority: "优先级",
       pushTarget: "推送目标",
       enabled: "启用状态",
       creator: "创建人",
       createdAt: "创建时间",
+      createMethod: "创建方式",
       operation: "操作"
     },
     buttons: {
-      add: "新增分发配置",
+      add: "新增分发查询",
       edit: "编辑",
       delete: "删除",
       cancel: "取消",
@@ -66,6 +69,10 @@ export default {
       status: {
         enable: "启用",
         disable: "禁用"
+      },
+      createMethod: {
+        manual_upload: "手工上传",
+        system_generated: "平台生成"
       },
       assign: {
         byStore: "按客户归属保时捷中心分配",

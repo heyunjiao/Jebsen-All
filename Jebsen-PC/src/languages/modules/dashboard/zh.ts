@@ -8,8 +8,10 @@ export default {
       slaEstimate: "预计完成",
       refresh: "刷新",
       refreshSuccess: "刷新成功",
-      pipelineTitle: "全链路批处理进度",
+      pipelineTitle: "全链路批处理结果",
+      pipelineResultDesc: "T+1 前一晚的结果",
       pipelineStart: "启动时间",
+      processing: "处理中",
       remaining: "预计剩余",
       qualityTitle: "数据接入与质量",
       cleanRate: "入库完成率",
@@ -118,7 +120,8 @@ export default {
         totalVolume: "数据总量",
         successCount: "成功处理",
         mergeNeeded: "需合并处理",
-        autoMerged: "程序自动合并"
+        autoMerged: "程序自动合并",
+        incremental: "本批增量"
       },
       qualityDescription: "数据质量监控",
       conflictDescription: "身份冲突待处理",

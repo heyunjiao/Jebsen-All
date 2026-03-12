@@ -15,11 +15,11 @@
               <span v-if="system.id" class="system-id">{{ system.id }}</span>
               <span class="system-name">（{{ system.name }}）</span>
             </div>
-            <!-- 分组选择器 -->
+            <!-- 客户123选择器 -->
             <div class="group-selector-mini" v-if="!props.readonly">
               <el-select v-model="systemGroupMap[system.code]" size="small" class="mini-select" @change="handleGroupChange">
-                <el-option label="分组 1" value="1" />
-                <el-option label="分组 2" value="2" />
+                <el-option label="客户123 1" value="1" />
+                <el-option label="客户123 2" value="2" />
                 <el-option label="不合并" value="none" />
               </el-select>
             </div>
@@ -94,7 +94,7 @@
       <el-table-column
         v-for="groupId in activeGroups"
         :key="groupId"
-        :label="activeGroups.length > 1 ? `分组 ${groupId} 采纳值` : '合并采纳值'"
+        :label="activeGroups.length > 1 ? `客户123 ${groupId} 采纳值` : '合并采纳值'"
         min-width="300"
         align="center"
         fixed="right"

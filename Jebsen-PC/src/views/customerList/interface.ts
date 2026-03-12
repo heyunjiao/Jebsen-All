@@ -49,6 +49,14 @@ export interface MultiValueItem {
   updateTime?: string; // 更新时间
   contactName?: string; // 联系人姓名（与 H5 一致）
   relationTagName?: string; // 关系标签：本人、配偶、公司电话等（与 H5 一致）
+  readonly?: boolean; // 是否只读（如售后订单同步）
+  personRole?: "购车人" | "送修人" | "联系人"; // 业务角色
+  linkedVehicleIds?: string[]; // 关联车辆
+  isPreferredRepairer?: boolean; // 是否为首选送修人
+  isPrimaryContact?: boolean; // 是否为首选联系人
+  slotKey?: "address1" | "address2" | "address3" | "address4"; // 地址槽位
+  weight?: number; // 地址权重
+  weightLabel?: string; // 地址权重文案
 }
 
 // 经办人信息（公司客户，与 H5 一致，多角色人员信息）
@@ -63,6 +71,19 @@ export interface HandlerInfo {
   city?: string; // 城市
   avatar?: string;
   latestOperation?: { operator: string; operationType: string; operationTime: string };
+  isPrimaryContact?: boolean;
+  isPreferredRepairer?: boolean;
+  readonly?: boolean;
+}
+
+export interface VehicleRelatedPerson {
+  id: string;
+  role: "购车人" | "送修人";
+  name: string;
+  phone?: string;
+  orderNo?: string;
+  readonly?: boolean;
+  isPreferred?: boolean;
 }
 
 // 客户类型定义（基于OneID的C360系统）
@@ -247,6 +268,7 @@ export interface Customer360View {
     status?: string; // 状态：自用、已售、维修中等
     /** 相关人员展示（与 H5 一致：使用人/联系人/送修人） */
     rolePerson?: { 使用人?: string; 联系人?: string; 送修人?: string };
+    relatedPersons?: VehicleRelatedPerson[];
     source?: string; // 来源系统
     newCarSeries?: string; // 新车车系
     newCarModel?: string; // 新车车型（完整）
@@ -271,6 +293,8 @@ export interface Customer360View {
   // 沟通记录（与 H5 一致）
   interactions: Array<{
     id: string;
+    channel?: string; // 沟通渠道（新模型）
+    time?: string; // 沟通时间（新模型）
     type: string; // 沟通方式：电话沟通、微信沟通、现场沟通等
     communicationTime?: string; // 沟通时间（H5）
     date?: string; // 兼容
@@ -284,15 +308,16 @@ export interface Customer360View {
   offlineActivities?: Array<{
     id: string;
     activityCode: string; // 活动编码
-    activityName: string; // 活动名称
-    activityType: string; // 活动类型
-    activityTime: string; // 活动时间
-    activityLocation: string; // 活动地点
-    organizer: string; // 组织者
-    uploader: string; // 上传人
+    activityDate?: string; // 活动日期（新模型）
+    activityName?: string; // 活动名称
+    activityType?: string; // 活动类型
+    activityTime?: string; // 活动时间
+    activityLocation?: string; // 活动地点
+    organizer?: string; // 组织者
+    uploader?: string; // 上传人
     validExamples?: number; // 有效参与人数
     activityDescription?: string; // 活动描述
-    status: "participated" | "not_participated"; // 参与状态：已参加/未参加
+    status?: "participated" | "not_participated"; // 参与状态：已参加/未参加
   }>;
   // 金融贷款（与 H5 FinancialLoanRecord 一致）
   financialLoans?: Array<{
@@ -372,11 +397,12 @@ export interface Customer360View {
   marketingCampaigns?: Array<{
     id: string;
     campaignCode: string;
-    campaignName: string;
-    campaignType: string;
-    activityTime: string;
+    activityDate?: string;
+    campaignName?: string;
+    campaignType?: string;
+    activityTime?: string;
     location?: string;
-    status: string;
+    status?: string;
     organizer?: string;
     uploader?: string;
     validExamples?: number;

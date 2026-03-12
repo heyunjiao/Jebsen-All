@@ -42,7 +42,7 @@
 
     <!-- 强力便捷切换工具 (支持拖拽)：仅非手机号多 OneId 时显示 -->
     <div 
-      v-if="!hasMultipleOneIds"
+      v-if="showQuickAccountToggle"
       class="fixed-account-toggle" 
       :style="{ top: floatingPos.y + 'px' }"
       @touchstart="onTouchStart"
@@ -83,7 +83,7 @@
 
       <!-- 公司视图：顶部企业级状态栏（功能保持与个人 alert-system 一致） -->
       <div
-        v-if="isCompany"
+        v-if="false"
         class="alert-system context-alert enterprise-alert"
       >
         <!-- 企业维度：经办人/账号存在冲突提示（点击仍然打开冲突解决弹窗） -->
@@ -113,7 +113,7 @@
       </div>
 
       <!-- [新增层级] 公司主体信息层：仅在公司账户下显示 -->
-      <div v-if="isCompany" class="company-identity-layer">
+      <div v-if="false" class="company-identity-layer">
         <div class="company-basic-info">
           <div class="comp-icon"><van-icon name="shop-o" /></div>
           <div class="comp-main">
@@ -187,10 +187,7 @@
       </div>
 
       <!-- 顶部状态栏系统：个人视图下保留原有提示 -->
-      <div
-        v-if="!isCompany"
-        class="alert-system context-alert"
-      >
+      <div class="alert-system context-alert" :class="{ 'enterprise-alert': isCompany }">
         <!-- 冲突提示 -->
         <van-notice-bar
           v-if="currentConflicts && currentConflicts.length > 0"
@@ -218,10 +215,7 @@
       </div>
 
       <!-- 核心画像层：个人视图显示，企业视图隐藏 -->
-      <div
-        v-if="!isCompany"
-        class="premium-header"
-      >
+      <div class="premium-header" :class="{ 'premium-header-company': isCompany }">
         <div class="watermark-bg"></div>
         <div class="header-main">
           <div class="avatar-wrapper">
@@ -235,11 +229,8 @@
                 <!-- 经办人姓名 + 经办人标签 + 同步信息（公司名称与 ONEID 已上移到白色公司区域） -->
                 <div class="name-main-row">
                   <h1>{{ currentAgentName }}</h1>
-                  <span
-                    v-if="isCompany"
-                    class="handler-role-pill"
-                  >
-                    经办人
+                  <span v-if="isCompany" class="handler-role-pill">
+                    公司客户
                   </span>
                   <!-- 仅个人视图下展示 VIP 车主头衔，避免与公司级标签重复 -->
                   <span
@@ -295,23 +286,21 @@
 
               <div class="meta-right">
                 <!-- 个人模式下：黑金卡片右上角继续显示 ONEID 与 [个人] -->
-                <template v-if="!isCompany">
-                  <span class="oneid-pill">ONEID：{{ currentAgentId }}</span>
-                  <span class="customer-type-badge">
-                    <van-icon
-                      :name="customerTypeIcon"
-                      class="identity-icon"
-                    />
-                    <span class="identity-text">个人</span>
-                  </span>
-                </template>
+                <span class="oneid-pill">ONEID：{{ currentAgentId }}</span>
+                <span class="customer-type-badge">
+                  <van-icon
+                    :name="customerTypeIcon"
+                    class="identity-icon"
+                  />
+                  <span class="identity-text">{{ customerTypeText }}</span>
+                </span>
               </div>
             </div>
-            <!-- 公司视图下，标签归属于公司区域，这里只在个人视图中展示 -->
-            <div
-              v-if="!isCompany"
-              class="header-tags"
-            >
+            <div v-if="isCompany" class="company-profile-meta">
+              <span v-if="companyDisplayName" class="company-profile-pill">公司：{{ companyDisplayName }}</span>
+              <span v-if="companyPrimaryContactName" class="company-profile-pill">首选联系人：{{ companyPrimaryContactName }}</span>
+            </div>
+            <div class="header-tags">
               <span
                 v-for="(tag, index) in displayedHeaderTags"
                 :key="index"
@@ -327,40 +316,43 @@
       </div>
       
 
-      <!-- 一、联系电话：号码列表，按身份 Tab 筛选；编辑仅含号码+主副号+联系人姓名+关系 -->
+      <!-- 一、联系电话：号码列表，按身份 / 经办人 Tab 筛选；编辑仅含号码+主副号+联系人姓名+关系 -->
       <div
         class="phone-card section-contact-phone"
         :class="{ 'is-company': isCompany }"
       >
-        <div class="section-title-inner">联系电话</div>
+        <div class="section-title-inner" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+          <span>联系电话</span>
+          <span
+            v-if="showMorePhonesLink && customerStore.profile?.mobile && 'items' in customerStore.profile.mobile && (customerStore.profile.mobile.editable || isCompany)"
+            style="font-size: 11px; color: #9ca3af; font-weight: 400; cursor: pointer;"
+            @click="openMobileEditorForAll"
+          >
+            查看更多 ›
+          </span>
+        </div>
         <!-- 企业视图：经办人 Chip Tab -->
         <div
-          v-if="isCompany && customerStore.profile?.handlers && customerStore.profile.handlers.length > 0"
+          v-if="isCompany && companyHandlers.length > 0"
           class="handler-tab-wrapper"
         >
           <div
-            v-for="handler in sortedCompanyHandlers"
+            v-for="handler in companyHandlers"
             :key="handler.id"
             class="handler-pill"
-            :class="{ active: customerStore.profile.selectedHandlerId === handler.id }"
-            @click="customerStore.setHandler(handler.id)"
+            :class="{ active: selectedHandler && selectedHandler.id === handler.id }"
+            @click="onSelectHandler(handler.id)"
           >
-            <span class="handler-name">{{ handler.name }}</span>
+            <span class="handler-name">{{ handler.name || '经办人' }}</span>
+            <span v-if="handler.role" class="handler-role-tag">{{ handler.role }}</span>
           </div>
         </div>
-        <!-- 个人视图：车主/送修人/联系人等不同身份 Chip，选谁显示谁 -->
+
+        <!-- 个人视图：身份 Chip Tab -->
         <div
           v-else-if="!isCompany && personalIdentities.length >= 2"
           class="handler-tab-wrapper"
-        >
-          <div
-            class="handler-pill"
-            :class="{ active: selectedPersonalIdentityId === null }"
-            @click="selectedPersonalIdentityId = null"
-          >
-            <span class="handler-name">默认</span>
-          </div>
-          <div
+        >          <div
             v-for="identity in personalIdentities"
             :key="identity.id"
             class="handler-pill"
@@ -368,7 +360,16 @@
             @click="selectedPersonalIdentityId = identity.id"
           >
             <span class="handler-name">{{ identity.label }}</span>
+            <span v-if="identity.isBuyer" class="handler-flag" style="color: #ed6a0c; background: rgba(255, 151, 106, 0.12);">购车人</span>
+            <span v-if="identity.isPreferredRepairer" class="handler-flag">首选送修人</span>
           </div>
+        </div>
+
+        <!-- 将设置首选送修人的操作转移到电话卡片中，与上方身份 Tab 联动更紧密 -->
+        <div v-if="showPreferredPersonAction && !isSelectedPreferredPerson" style="margin: 0 0 12px 0; display: flex; justify-content: flex-end;">
+          <span style="font-size: 12px; font-weight: 500; color: #94724a; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;" @click="markSelectedPersonAsPreferred">
+            <van-icon name="edit" /> {{ preferredPersonActionCta }}
+          </span>
         </div>
 
         <div class="phone-entry">
@@ -391,7 +392,7 @@
                 </span>
               </div>
               <span
-                v-if="customerStore.profile.mobile && 'items' in customerStore.profile.mobile && (customerStore.profile.mobile.editable || isCompany)"
+                v-if="!item.readonly && customerStore.profile.mobile && 'items' in customerStore.profile.mobile && (customerStore.profile.mobile.editable || isCompany)"
                 class="edit-icon"
                 @click="openMobileEditorForItem(item.id)"
               >✏️</span>
@@ -400,38 +401,37 @@
             <div v-if="index < displayedPhones.length - 1" class="phone-divider"></div>
           </div>
         </div>
-        <!-- 默认 tab 下有多于 2 条号码时：提示点击「查看更多」进入全部联系电话的查看与编辑 -->
-        <div
-          v-if="showMorePhonesLink && customerStore.profile?.mobile && 'items' in customerStore.profile.mobile && (customerStore.profile.mobile.editable || isCompany)"
-          class="phone-more-entry"
-          @click="openMobileEditorForAll"
-        >
-          <span class="phone-more-text">查看更多号码，去编辑</span>
-          <span class="phone-more-arrow">›</span>
-        </div>
       </div>
 
       <!-- 二、车辆信息（车）：列表 + 相关人员在此设置 使用人/送修人/联系人 -->
       <div class="container section-vehicles">
         <div class="block-h">
-          <span class="title-text">车辆信息 ({{ displayedVehiclesForCurrentTab.length }})</span>
-          <span class="block-more" @click="showVehicleDialog = true">查看更多 ›</span>
+          <span class="title-text">车辆列表 ({{ vehiclesForCurrentContext.length }})</span>
+          <span class="block-more" @click="openVehicleDialog()">查看列表 ›</span>
         </div>
         <div class="asset-box">
-          <div
-            v-for="vehicle in displayedVehiclesForCurrentTab"
-            :key="vehicle.id"
-            class="asset-row"
-          >
-            <span class="model-name ellipsis">{{ vehicle.vehicleModel }}</span>
-            <span class="plate-val ellipsis">{{ vehicle.licensePlate || '未知' }}</span>
-            <span class="vin-val ellipsis">{{ vehicle.vin || '未知' }}</span>
-            <span
-              class="status-text"
-              @click="openVehicleDialogAndEditStatus(vehicle.id)"
+          <template v-if="displayedVehiclesForCurrentTab.length > 0">
+            <div
+              v-for="vehicle in displayedVehiclesForCurrentTab"
+              :key="vehicle.id"
+              class="asset-row"
+              @click="openVehicleDialog()"
             >
-              {{ getVehicleStatusLabel(vehicle.status) }}
-            </span>
+              <span class="model-name ellipsis">{{ vehicle.vehicleModel }}</span>
+              <span class="plate-val ellipsis">{{ vehicle.licensePlate || '未知' }}</span>
+              <span class="vin-val ellipsis">{{ vehicle.vin || '未知' }}</span>
+              <div class="asset-row-actions">
+                <span
+                  class="status-text"
+                  @click.stop="openVehicleDialogAndEditStatus(vehicle.id)"
+                >
+                  {{ getVehicleStatusLabel(vehicle.status) }}
+                </span>
+              </div>
+            </div>
+          </template>
+          <div v-else class="section-empty">
+            暂无车辆信息
           </div>
         </div>
       </div>
@@ -459,9 +459,20 @@
             <div class="node-l">城市</div>
             <div class="node-v">{{ contactProfileCity }}</div>
           </div>
-          <div v-if="displayedAddresses.length > 0 || displayedEmails.length > 0" class="info-node info-node-summary">
-            <span v-if="displayedAddresses.length > 0" class="summary-chip">地址 {{ displayedAddresses.length }} 条<span v-if="displayedAddressLabels" class="summary-labels">（{{ displayedAddressLabels }}）</span></span>
-            <span v-if="displayedEmails.length > 0" class="summary-chip">邮箱 {{ displayedEmails.length }} 条<span v-if="displayedEmailLabels" class="summary-labels">（{{ displayedEmailLabels }}）</span></span>
+          <div v-if="isCompany" class="info-node">
+            <div class="node-l">客户类型</div>
+            <div class="node-v">公司客户</div>
+          </div>
+          <div v-if="isCompany && companyDisplayName" class="info-node">
+            <div class="node-l">公司名称</div>
+            <div class="node-v">{{ companyDisplayName }}</div>
+          </div>
+          <div v-if="isCompany && companyPrimaryContactName" class="info-node">
+            <div class="node-l">首选联系人</div>
+            <div class="node-v">{{ companyPrimaryContactName }}</div>
+          </div>
+          <div v-if="displayedAddresses.length > 0" class="info-node info-node-summary">
+            <span class="summary-chip">地址 {{ displayedAddresses.length }} 条<span v-if="displayedAddressLabels" class="summary-labels">（{{ displayedAddressLabels }}）</span></span>
           </div>
         </div>
       </div>
@@ -733,6 +744,7 @@
       v-if="customerStore.profile?.mobile && 'items' in customerStore.profile.mobile"
       v-model="showMobileManager"
       :mobile-data="customerStore.profile.mobile as MobileData"
+      :customer-type="isCompany ? 'company' : 'individual'"
       :initial-edit-item-id="mobileEditorEditItemId"
       @update="handleMobileUpdate"
     />
@@ -840,14 +852,19 @@
     <van-popup
       v-model:show="showVehicleDialog"
       position="bottom"
-      :style="{ height: '70%' }"
+      :style="{ height: '76%' }"
       round
       lock-scroll
     >
       <div class="vehicle-dialog">
         <div class="popup-header">
-          <h3>车辆信息</h3>
-          <van-icon name="cross" @click="showVehicleDialog = false" />
+          <div class="popup-header-main">
+            <h3>车辆列表</h3>
+            <span v-if="vehicleDialogSubtitle" class="popup-header-subtitle">{{ vehicleDialogSubtitle }}</span>
+          </div>
+          <div class="popup-header-actions">
+            <van-icon name="cross" @click="showVehicleDialog = false" />
+          </div>
         </div>
         <div class="popup-content">
           <div
@@ -862,10 +879,10 @@
                   <span v-if="vehicle.vin" class="vehicle-vin">{{ vehicle.vin }}</span>
                 </div>
               </div>
-              <div
-                class="vehicle-status-wrapper"
-                @click="editingVehicleStatusId = editingVehicleStatusId === vehicle.id ? null : vehicle.id"
-              >
+	              <div
+	                class="vehicle-status-wrapper"
+	                @click="editingVehicleStatusId = editingVehicleStatusId === vehicle.id ? null : vehicle.id"
+	              >
                 <van-tag
                   :type="getVehicleStatusType(vehicle.status)"
                   :size="'small' as any"
@@ -876,14 +893,14 @@
                 <van-icon
                   name="arrow-down"
                   class="status-arrow-icon"
-                  :class="{ 'is-expanded': editingVehicleStatusId === vehicle.id }"
-                />
-              </div>
-            </div>
-            <!-- 在当前弹窗内直接选状态，禁止二次弹窗 -->
-            <div
-              v-if="editingVehicleStatusId === vehicle.id"
-              class="vehicle-status-inline-picker"
+	                  :class="{ 'is-expanded': editingVehicleStatusId === vehicle.id }"
+	                />
+	              </div>
+	            </div>
+	            <!-- 在当前弹窗内直接选状态，禁止二次弹窗 -->
+	            <div
+	              v-if="editingVehicleStatusId === vehicle.id"
+	              class="vehicle-status-inline-picker"
             >
               <div class="vehicle-status-inline-picker-title">修改车辆状态</div>
               <div class="vehicle-status-inline-tags">
@@ -901,42 +918,38 @@
             </div>
             <div class="vehicle-info">
               <div class="vehicle-detail">
-                <!-- 相关人员（使用人/联系人/送修人）；个人视图下可点击设置关联号码 -->
+                <!-- 相关人员：仅展示购车人/送修人，来源于销售/售后订单，同步后只读 -->
                 <div class="vehicle-detail-section vehicle-detail-section-roles">
                   <div class="vehicle-detail-section-title">相关人员</div>
-                  <div class="vehicle-detail-grid">
-                    <div
-                      v-for="role in vehicleRoleLabels"
-                      :key="role"
-                      class="vehicle-info-row detail-info"
-                      :class="{ 'is-editable': canEditVehicleRole }"
-                      @click="canEditVehicleRole && openVehicleRolePicker(vehicle, role)"
-                    >
-                      <span class="label">{{ role }}：</span>
-                      <span class="value">{{ getVehicleRolePerson(vehicle, role) }}</span>
-                      <span v-if="canEditVehicleRole" class="role-set-link">设置</span>
+                  <div class="vehicle-detail-grid vehicle-person-grid">
+                    <div class="vehicle-info-row detail-info" style="grid-column: 1 / -1; display: flex; flex-direction: row; align-items: baseline;">
+                      <span class="label">购车人：</span>
+                      <span class="value" style="margin-left: 4px;">{{ getVehicleBuyerDisplay(vehicle) }}</span>
+                    </div>
+                    
+                    <div v-if="getVehicleRepairers(vehicle).length === 0" class="vehicle-info-row detail-info" style="grid-column: 1 / -1; display: flex; flex-direction: row; align-items: baseline;">
+                      <span class="label">送修人：</span>
+                      <span class="value vehicle-repairer-empty" style="margin-left: 4px;">暂无送修人</span>
                     </div>
                   </div>
-                  <!-- 在当前弹窗内直接选号码，禁止二次弹窗 -->
-                  <div
-                    v-if="editingVehicleRole && isSameVehicle(editingVehicleRole.vehicle, vehicle)"
-                    class="vehicle-role-inline-picker"
-                  >
-                    <div class="vehicle-role-inline-picker-title">
-                      为 {{ vehicle.vehicleModel || vehicle.licensePlate || '该车辆' }} 设置{{ editingVehicleRole.role }}
+                  
+                  <div v-if="getVehicleRepairers(vehicle).length > 0" class="vehicle-repairer-section">
+                    <div class="vehicle-info-row detail-info" style="margin-bottom: 8px; display: flex; flex-direction: row; align-items: baseline;">
+                      <span class="label">送修人：</span>
                     </div>
-                    <div class="vehicle-role-inline-tags">
-                      <span
-                        v-for="tag in vehicleRolePickerTags"
-                        :key="tag.value"
-                        class="vehicle-role-tag"
-                        :class="{ 'is-disabled': tag.disabled }"
-                        @click="!tag.disabled && onVehicleRoleSelect({ name: tag.label, value: tag.value })"
+                    <div class="vehicle-repairer-list" style="margin-top: -4px;">
+                      <div
+                        v-for="repairer in getVehicleRepairers(vehicle)"
+                        :key="repairer.id"
+                        class="vehicle-repairer-item"
+                        style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 12px; border-radius: 10px; background: #f7f8fa;"
                       >
-                        {{ tag.label }}
-                      </span>
+                        <span class="vehicle-repairer-name" style="font-size: 13px; font-weight: 600; color: #1f2937;">{{ repairer.name }}</span>
+                        <span class="vehicle-repairer-phone" style="font-size: 12px; color: #6b7280;">{{ formatMobile(repairer.phone) }}</span>
+                        <span v-if="repairer.isPreferred" class="vehicle-repairer-badge" style="padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; color: #0f766e; background: rgba(15, 118, 110, 0.12);">首选送修人</span>
+                        <span v-if="repairer.orderNo" class="vehicle-repairer-order" style="font-size: 12px; color: #6b7280;">{{ repairer.orderNo }}</span>
+                      </div>
                     </div>
-                    <div class="vehicle-role-inline-cancel" @click="editingVehicleRole = null">取消</div>
                   </div>
                 </div>
                 <div class="vehicle-detail-section">
@@ -1264,26 +1277,41 @@
               label="城市"
               placeholder="请输入城市"
             />
-            <!-- 地址（多个）：每项可打标签（内联选择，无二次弹窗）+ 省市区内联选择 -->
+            <!-- 地址（最多 4 条）：按排序体现优先级，可调整顺序或标记首选 -->
             <div class="basic-info-multi-section">
-              <div class="multi-section-label">地址（多个）</div>
+              <div class="multi-section-label">地址（最多4条）</div>
               <div v-for="(addr, idx) in basicInfoForm.addresses" :key="'addr-' + idx" class="multi-block">
                 <div class="multi-row multi-row-with-tag">
                   <div class="inline-tags">
+                    <span class="address-order-label">地址{{ idx + 1 }}</span>
                     <span
-                      v-for="lb in ADDRESS_LABELS"
-                      :key="lb"
-                      class="inline-tag"
-                      :class="{ active: addr.label === lb }"
-                      @click="setAddressLabel(idx, lb)"
-                    >{{ lb }}</span>
+                      v-if="idx > 0"
+                      class="address-order-link"
+                      @click="moveAddressUp(idx)"
+                    >
+                      上移
+                    </span>
+                    <span
+                      v-if="idx < basicInfoForm.addresses.length - 1"
+                      class="address-order-link"
+                      @click="moveAddressDown(idx)"
+                    >
+                      下移
+                    </span>
+                    <span
+                      class="address-primary-chip"
+                      :class="{ active: idx === 0 }"
+                      @click="setPrimaryAddress(idx)"
+                    >
+                      首选
+                    </span>
                   </div>
                   <span class="multi-remove" @click="removeBasicInfoAddress(idx)">删</span>
                 </div>
                 <div class="multi-row">
                   <van-field
                     :model-value="addr.address"
-                    :placeholder="'请选择省/市/区 ' + (idx + 1)"
+                    :placeholder="'请选择' + getAddressSlotMeta(addr.slotKey).label"
                     readonly
                     is-link
                     @click="toggleAreaInline(idx)"
@@ -1300,30 +1328,13 @@
                   />
                 </div>
               </div>
-              <van-button size="small" type="primary" plain @click="addBasicInfoAddress">+ 添加地址</van-button>
-            </div>
-            <!-- 邮箱（多个）：每项可打标签（内联选择，无二次弹窗） -->
-            <div class="basic-info-multi-section">
-              <div class="multi-section-label">邮箱（多个）</div>
-              <div v-for="(em, idx) in basicInfoForm.emails" :key="'email-' + idx" class="multi-row multi-row-with-tag">
-                <div class="inline-tags">
-                  <span
-                    v-for="lb in EMAIL_LABELS"
-                    :key="lb"
-                    class="inline-tag"
-                    :class="{ active: em.label === lb }"
-                    @click="setEmailLabel(idx, lb)"
-                  >{{ lb }}</span>
-                </div>
-                <van-field
-                  v-model="basicInfoForm.emails[idx].email"
-                  placeholder="邮箱"
-                  type="email"
-                  clearable
-                />
-                <span class="multi-remove" @click="removeBasicInfoEmail(idx)">删</span>
-              </div>
-              <van-button size="small" type="primary" plain @click="addBasicInfoEmail">+ 添加邮箱</van-button>
+              <van-button
+                size="small"
+                type="primary"
+                plain
+                :disabled="basicInfoForm.addresses.length >= ADDRESS_SLOTS.length"
+                @click="addBasicInfoAddress"
+              >+ 添加地址</van-button>
             </div>
             <van-field
               v-model="basicInfoForm.reason"
@@ -1397,6 +1408,15 @@ const showMobileManager = ref(false)
 const mobileEditorEditItemId = ref<string | null>(null)
 // 全部 tab 下保留完整「管理电话号码」弹窗；选中某身份（如李芳）时点编辑只显示红框表单
 const openMobileEditorForItem = (itemId: string) => {
+  const items =
+    customerStore.profile?.mobile && 'items' in customerStore.profile.mobile
+      ? (customerStore.profile.mobile as MobileData).items
+      : []
+  const target = items.find(item => item.id === itemId)
+  if (target?.readonly) {
+    showToast('送修人信息由售后订单同步，当前不可修改')
+    return
+  }
   mobileEditorEditItemId.value = selectedPersonalIdentityId.value ? itemId : null
   showMobileManager.value = true
 }
@@ -1589,9 +1609,16 @@ watch(
   },
   { immediate: true }
 )
-// 地址/邮箱标签选项（便于客户区分家庭住址、公司地址、工作邮箱等）
-const ADDRESS_LABELS = ['家庭', '公司', '其他']
-const EMAIL_LABELS = ['个人', '工作', '其他']
+// 地址只保留地址1-地址4，通过排序体现优先级
+const ADDRESS_SLOTS = [
+  { key: 'address1', label: '地址1' },
+  { key: 'address2', label: '地址2' },
+  { key: 'address3', label: '地址3' },
+  { key: 'address4', label: '地址4' },
+] as const
+const DEFAULT_ADDRESS_SLOT = ADDRESS_SLOTS[0]
+const getAddressSlotMeta = (slotKey?: string) =>
+  ADDRESS_SLOTS.find(slot => slot.key === slotKey) || DEFAULT_ADDRESS_SLOT
 // 性别仅能选择（仅允许「男」「女」，避免展示成「男女」等异常值）
 const GENDER_OPTIONS = ['男', '女'] as const
 const normalizeGender = (val: string): string => {
@@ -1609,10 +1636,26 @@ const basicInfoForm = ref({
   mobile: '',
   gender: '',
   city: '',
-  addresses: [] as { address: string; label: string }[],
-  emails: [] as { email: string; label: string }[],
+  addresses: [] as { address: string; label: string; slotKey: string }[],
   reason: '',
 })
+
+const showQuickAccountToggle = computed(() => false)
+
+const COMPANY_RELATION_TAGS = ['公司电话', '公司总机', '采购联系人', '财务联系人', '行政联系人', '其他公司关系', '售后送修人']
+const getProfileMobileItems = () => {
+  const mobile = customerStore.profile?.mobile
+  if (!mobile || !('items' in mobile)) return [] as MobileItem[]
+  return (mobile as MobileData).items
+}
+const getVehicleBuyerCandidate = () => {
+  const profileName = String(customerStore.profile?.name?.value || '')
+  for (const vehicle of customerStore.vehicles || []) {
+    const buyer = vehicle.relatedPersons?.find(person => person.role === '购车人' && person.name && person.name !== profileName)
+    if (buyer) return buyer
+  }
+  return null
+}
 
 // 手机号或座机：11位手机 / 带区号座机(0开头10-11位) / 7-8位本地
 const isPhoneOrLandline = (val: string) => /^(1[3-9]\d{9}|0\d{2,3}\d{7,8}|\d{7,8})$/.test((val || '').replace(/[\s-]/g, ''))
@@ -1624,11 +1667,19 @@ const mobileRules = [
 // 客户类型相关：多 OneId 时由选中项类型决定，否则由路由 type 或 profile 决定
 const isCompanyByRoute = computed(() => route.query.type === 'company')
 const isCompanyByOneId = computed(() => currentOneIdOption.value?.type === 'company')
+const hasCompanyFields = computed(() => {
+  const profile = customerStore.profile
+  if (!profile) return false
+  if (profile.customerType?.value === '公司') return true
+  if ((profile.handlers?.length ?? 0) > 0) return true
+  return getProfileMobileItems().some(item => COMPANY_RELATION_TAGS.includes(item.relationTagName || ''))
+})
 
 const isCompany = computed(() => {
+  if (hasCompanyFields.value) return true
   if (hasMultipleOneIds.value && currentOneIdOption.value)
     return currentOneIdOption.value.type === 'company'
-  return isCompanyByRoute.value || customerStore.profile?.customerType?.value === '公司'
+  return isCompanyByRoute.value
 })
 
 const customerTypeText = computed(() => {
@@ -1639,33 +1690,54 @@ const customerTypeIcon = computed(() => {
   return isCompany.value ? 'shop-o' : 'user-o'
 })
 
-// 公司经办人排序：送修人 / 联系人优先，车主最后
-const sortedCompanyHandlers = computed(() => {
-  const profile = customerStore.profile
-  const handlers = profile?.handlers || []
-  if (!isCompany.value || handlers.length === 0) return handlers
+// 公司视图：经办人列表
+const companyHandlers = computed(() => customerStore.profile?.handlers || [])
 
-  const rolePriority: Record<string, number> = {
-    '送修人': 1,
-    '联系人': 2,
-    '使用人': 3,
-    '车主': 4,
-  }
-
-  return [...handlers].sort((a, b) => {
-    const pa = rolePriority[a.role || ''] ?? 99
-    const pb = rolePriority[b.role || ''] ?? 99
-    return pa - pb
-  })
-})
-
-// 当前选中的经办人对象
-const selectedHandler = computed(() => {
-  const profile = customerStore.profile
-  if (isCompany.value && profile?.selectedHandlerId && profile.handlers) {
-    return profile.handlers.find(h => h.id === profile.selectedHandlerId) || null
+const companyBuyerIdentity = computed(() => {
+  const items = getProfileMobileItems()
+  const buyerItem = items.find(item => item.personRole === '购车人' || item.businessTags?.includes('购车人'))
+  if (buyerItem) return buyerItem
+  const vehicleBuyer = getVehicleBuyerCandidate()
+  if (vehicleBuyer) {
+    return {
+      id: vehicleBuyer.id,
+      contactName: vehicleBuyer.name,
+      mobile: vehicleBuyer.phone,
+      personRole: '购车人',
+    } as MobileItem
   }
   return null
+})
+
+const companyPrimaryContact = computed(() => {
+  const handlers = customerStore.profile?.handlers || []
+  return handlers.find(handler => handler.isPrimaryContact) || handlers[0] || null
+})
+
+const companyPortraitHandler = computed(() => {
+  const handlers = customerStore.profile?.handlers || []
+  if (!isCompany.value || handlers.length === 0) return null
+  const buyerName = companyBuyerIdentity.value?.contactName
+  if (buyerName) {
+    const matched = handlers.find(handler => handler.name === buyerName)
+    if (matched) return matched
+  }
+  return handlers.find(handler => handler.role === '购车人') || companyPrimaryContact.value
+})
+
+const companyDisplayName = computed(() => (isCompany.value ? String(customerStore.profile?.name?.value || '') : ''))
+const companyPrimaryContactName = computed(() => companyPrimaryContact.value?.name || '')
+
+// 当前画像主体对象：公司类型下优先使用选中的经办人（selectedHandlerId），无则回退到购车人/首选联系人
+const selectedHandler = computed(() => {
+  if (!isCompany.value) return null
+  const handlers = customerStore.profile?.handlers || []
+  const selectedId = customerStore.profile?.selectedHandlerId
+  if (selectedId && handlers.length > 0) {
+    const found = handlers.find(h => h.id === selectedId)
+    if (found) return found
+  }
+  return companyPortraitHandler.value
 })
 
 // 个人视图下的「身份」列表：按人分组，同一联系人（同一 contactName）只占一个 Tab，一人多号时选中该 Tab 展示该人全部号码
@@ -1686,6 +1758,8 @@ const personalIdentities = computed(() => {
       id: first.id,
       label: first.contactName || first.relationTagName || (first.mobile ? `尾号${String(first.mobile).slice(-4)}` : ''),
       role: first.businessTags?.[0] || '',
+      isBuyer: groupItems.some(item => item.personRole === '购车人' || item.businessTags?.includes('购车人')),
+      isPreferredRepairer: groupItems.some(item => item.isPreferredRepairer),
     }
   })
 })
@@ -1698,28 +1772,59 @@ const selectedPersonalIdentity = computed(() => {
   return (profile.mobile as MobileData).items.find((i: MobileItem) => i.id === selectedPersonalIdentityId.value) || null
 })
 
-// 当前画像主体姓名：公司=选中的经办人名；个人=与上方身份 Chip 联动，选谁显示谁（车主/送修人/联系人）
+// 监听 personalIdentities 的变化，如果没有选中项则默认选中第一项
+watch(personalIdentities, (newVal) => {
+  if (newVal.length > 0 && !selectedPersonalIdentityId.value) {
+    selectedPersonalIdentityId.value = newVal[0].id
+  }
+}, { immediate: true })
+
+// 当前画像主体姓名：公司=购车人/首选联系人；个人=始终使用画像主数据（不随任何 Tab / Chip 联动）
 const currentAgentName = computed(() => {
-  if (selectedHandler.value) return selectedHandler.value.name
-  if (!isCompany.value && selectedPersonalIdentity.value) {
-    return selectedPersonalIdentity.value.contactName || selectedPersonalIdentity.value.relationTagName || '—'
+  if (isCompany.value) {
+    return companyPortraitHandler.value?.name || companyBuyerIdentity.value?.contactName || '—'
   }
   return String(customerStore.profile?.name?.value || 'XX')
 })
 
-// 联系人档案区展示的年龄/性别/城市（公司=当前经办人；个人=画像主数据，与身份 Chip 选谁一致时后续可接按身份扩展）
+// 联系人档案区展示的年龄/性别/城市（公司=购车人/首选联系人；个人=画像主数据，与身份 Chip 选谁一致时后续可接按身份扩展）
 const contactProfileAge = computed(() => {
-  if (isCompany.value && selectedHandler.value?.age != null) return selectedHandler.value.age
+  if (isCompany.value && companyPortraitHandler.value?.age != null) return companyPortraitHandler.value.age
   return customerStore.profile?.age?.value ?? '未知'
 })
 const contactProfileGender = computed(() => {
-  if (isCompany.value && selectedHandler.value?.gender != null) return selectedHandler.value.gender
+  if (isCompany.value && companyPortraitHandler.value?.gender != null) return companyPortraitHandler.value.gender
   return customerStore.profile?.gender?.value ?? '未知'
 })
 const contactProfileCity = computed(() => {
-  if (isCompany.value && selectedHandler.value?.city != null) return selectedHandler.value.city
+  if (isCompany.value && companyPortraitHandler.value?.city != null) return companyPortraitHandler.value.city
   return customerStore.profile?.city?.value ?? '未知'
 })
+
+const showPreferredPersonAction = computed(() => {
+  return !!selectedPersonalIdentity.value && (selectedPersonalIdentity.value.personRole === '送修人' || selectedPersonalIdentity.value.businessTags?.includes('送修人'))
+})
+
+const isSelectedPreferredPerson = computed(() => !!selectedPersonalIdentity.value?.isPreferredRepairer)
+
+const preferredPersonActionLabel = computed(() => '首选送修人')
+const preferredPersonActionCta = computed(() => '标记为首选送修人')
+
+const markSelectedPersonAsPreferred = () => {
+  const profile = customerStore.profile
+  if (!profile) return
+  if (!profile.mobile || !('items' in profile.mobile) || !selectedPersonalIdentity.value) return
+  const items = (profile.mobile as MobileData).items
+  const selectedKey =
+    selectedPersonalIdentity.value.contactName ||
+    selectedPersonalIdentity.value.relationTagName ||
+    selectedPersonalIdentity.value.id
+  items.forEach(item => {
+    const itemKey = item.contactName || item.relationTagName || item.id
+    item.isPreferredRepairer = itemKey === selectedKey && (item.personRole === '送修人' || item.businessTags?.includes('送修人'))
+  })
+  showToast('已更新首选送修人')
+}
 
 // 当前显示的 ONEID（公司归属）
 const currentAgentId = computed(() => {
@@ -1746,9 +1851,9 @@ const isLoanExpiring = computed(() => {
   return customerStore.financialLoanRecords.some(r => r.status === '即将到期')
 })
 
-// 画像标签（包含动态计算的“贷款客户”）
+// 画像标签（包含动态计算的“贷款客户”；公司视图不随经办人切换）
 const portraitTags = computed(() => {
-  const profileTags = selectedHandler.value?.tags || customerStore.profile?.tags || []
+  const profileTags = customerStore.profile?.tags || []
   const tags = [...profileTags]
   if (customerStore.financialLoanRecords.length > 0 && !tags.includes('贷款客户')) {
     tags.push('贷款客户')
@@ -1759,16 +1864,12 @@ const portraitTags = computed(() => {
 // 地址（多个）：来自画像
 const displayedAddresses = computed(() => customerStore.profile?.addresses?.items ?? [])
 
-// 邮箱（多个）：来自画像
-const displayedEmails = computed(() => customerStore.profile?.emails?.items ?? [])
-
 // 地址/邮箱标签摘要（用于首屏展示，便于区分家庭、公司、工作等）
 const displayedAddressLabels = computed(() => {
-  const labels = displayedAddresses.value.map((i) => i.label).filter(Boolean)
-  return labels.length > 0 ? labels.join('、') : ''
-})
-const displayedEmailLabels = computed(() => {
-  const labels = displayedEmails.value.map((i) => i.label).filter(Boolean)
+  const labels = displayedAddresses.value.map((item) => {
+    const meta = getAddressSlotMeta(item.slotKey)
+    return `${meta.label}`
+  }).filter(Boolean)
   return labels.length > 0 ? labels.join('、') : ''
 })
 
@@ -1783,6 +1884,12 @@ const autoPortraitTagNames = computed(() => {
 
 const isAutoPortraitTag = (tag: string): boolean => {
   return autoPortraitTagNames.value.includes(tag)
+}
+
+// 公司视图：切换经办人
+const onSelectHandler = (handlerId: string) => {
+  if (!handlerId || !isCompany.value) return
+  customerStore.setHandler(handlerId)
 }
 
 // 判断号码项是否属于当前选中的经办人（公司视图下：选谁显示谁的联系方式）
@@ -1812,13 +1919,13 @@ const displayedPhones = computed(() => {
       }
     }
     // 公司视图且已选经办人：只展示属于当前经办人的号码（及公司级主号），实现「选谁显示谁」
-    if (isCompany.value && profile.selectedHandlerId && profile.handlers?.length) {
-      const handler = profile.handlers.find(h => h.id === profile.selectedHandlerId)
+    if (isCompany.value && selectedHandler.value) {
+      const handler = selectedHandler.value
       if (handler) {
         const handlerItems = items.filter((item: MobileItem) => isItemBelongToSelectedHandler(item, handler))
         // 公司电话可与当前经办人号码同时展示；若无匹配项则置空以走下方「经办人电话」回退
         if (handlerItems.length > 0) {
-          const companyPhone = items.find((item: MobileItem) => item.relationTagName === '公司电话')
+          const companyPhone = items.find((item: MobileItem) => ['公司电话', '公司总机'].includes(item.relationTagName || ''))
           const combined = companyPhone && !handlerItems.some((i: MobileItem) => i.id === companyPhone.id)
             ? [companyPhone, ...handlerItems]
             : handlerItems
@@ -1833,37 +1940,39 @@ const displayedPhones = computed(() => {
       // 按客户类型 + 业务角色（车主 / 送修人 / 联系人）计算联系优先级
       const itemsWithMeta = items.map((item, index) => {
         const businessTags = item.businessTags || []
-        const isOwner = businessTags.includes('车主')
+        const isBuyer = businessTags.includes('购车人')
         const isRepairer = businessTags.includes('送修人')
         const isContact = businessTags.includes('联系人')
 
         let priority = 99
 
         if (!isCompany.value) {
-          // 个人客户：优先联系车主，其次主号，再次其他
-          if (isOwner) {
+          if (item.isPreferredRepairer) {
             priority = 1
-          } else if (item.isPrimary) {
+          } else if (isBuyer) {
             priority = 2
-          } else if (isRepairer || isContact) {
+          } else if (item.isPrimary) {
             priority = 3
-          } else {
+          } else if (isRepairer || isContact) {
             priority = 4
+          } else {
+            priority = 5
           }
         } else {
-          // 公司客户：优先送修人/联系人，车主排序最后
-          if (isRepairer) {
+          if (isBuyer) {
             priority = 1
-          } else if (isContact) {
+          } else if (item.isPrimaryContact) {
             priority = 2
-          } else if (item.isPrimary) {
-            // 仍需保证一个清晰的主联系号码
+          } else if (item.isPreferredRepairer) {
             priority = 3
-          } else if (isOwner) {
-            // 明确将车主放在公司场景的最后
-            priority = 5
-          } else {
+          } else if (isContact) {
             priority = 4
+          } else if (item.isPrimary) {
+            priority = 5
+          } else if (isRepairer) {
+            priority = 6
+          } else {
+            priority = 7
           }
         }
 
@@ -1888,8 +1997,8 @@ const displayedPhones = computed(() => {
   }
 
   // 兼容：无 profile.mobile 或无匹配项时，企业视图回退到经办人电话 + 车辆标签
-  if (isCompany.value && profile.selectedHandlerId && profile.handlers) {
-    const handler = profile.handlers.find(h => h.id === profile.selectedHandlerId)
+  if (isCompany.value && selectedHandler.value) {
+    const handler = selectedHandler.value
     if (handler?.mobile) {
       const vehicleDescriptors: string[] = []
       if (Array.isArray((handler as any).vehicles)) {
@@ -1927,10 +2036,9 @@ const hasMorePhones = computed(() => {
 
 // 默认 tab 下只展示 2 条号码，多于 2 条时显示「查看更多」入口，点击打开全部联系电话弹窗进行查看/编辑
 const showMorePhonesLink = computed(() => {
-  if (isCompany.value || selectedPersonalIdentityId.value) return false
   if (!customerStore.profile?.mobile || !('items' in customerStore.profile.mobile)) return false
   const items = (customerStore.profile.mobile as MobileData).items
-  return items.length > 2
+  return items.length > 0
 })
 
 const openMobileEditorForAll = () => {
@@ -1983,6 +2091,15 @@ const nearestExpiringAsset = computed(() => {
   return sorted[0]
 })
 
+const getVehicleRelatedPersons = (vehicle: VehicleRelation) => vehicle.relatedPersons || []
+const getVehicleBuyerDisplay = (vehicle: VehicleRelation): string => {
+  const buyer = getVehicleRelatedPersons(vehicle).find(person => person.role === '购车人')
+  if (!buyer) return '暂无购车人'
+  return `${buyer.name} ${formatMobile(buyer.phone)}`
+}
+const getVehicleRepairers = (vehicle: VehicleRelation) =>
+  getVehicleRelatedPersons(vehicle).filter(person => person.role === '送修人')
+
 // ========== 车辆角色逻辑（车-角色-人） ==========
 // 规则：一人可关联多辆车、每车可担任多角色；数据存于 profile.vehicleRoleAssignments（vehicleId -> role -> mobileItemId），不占用 mobile.items。
 // 首页「车辆信息」：默认/公司 tab 显示全部车；选「某人」tab 时只显示「跟这人有关」的车（即 vehicleRoleAssignments 里任一角为该人任一条目 id 的车）。
@@ -2025,27 +2142,29 @@ const selectedPersonItemIds = computed(() => {
 
 /** 在 vehicleRoleAssignments 中，至少有一个角色被赋给这些 itemId 之一的车辆 id 集合 */
 const vehicleIdsLinkedToSelectedPerson = computed(() => {
-  ensureVehicleRoleAssignmentsMigrated()
   const profile = customerStore.profile
-  const map = (profile as any)?.vehicleRoleAssignments as Record<string, Record<string, string>> | undefined
-  const ids = new Set(selectedPersonItemIds.value)
-  if (!map || ids.size === 0) return new Set<string>()
+  if (!profile?.mobile || !('items' in profile.mobile) || !selectedPersonalIdentityId.value) return new Set<string>()
+  const items = (profile.mobile as MobileData).items
+  const selected = items.find((item: MobileItem) => item.id === selectedPersonalIdentityId.value)
+  if (!selected) return new Set<string>()
+  const selectedKey = selected.contactName || selected.relationTagName || selected.id
   const out = new Set<string>()
-  for (const [vehicleId, roles] of Object.entries(map)) {
-    for (const itemId of Object.values(roles || {})) {
-      if (ids.has(itemId)) {
-        out.add(vehicleId)
-        break
-      }
-    }
-  }
+  items.forEach(item => {
+    const itemKey = item.contactName || item.relationTagName || item.id
+    if (itemKey !== selectedKey) return
+    item.linkedVehicleIds?.forEach(id => out.add(id))
+  })
+  ;(customerStore.vehicles || []).forEach(vehicle => {
+    const matched = vehicle.relatedPersons?.some(person => person.name === (selected.contactName || selected.relationTagName))
+    if (matched) out.add(vehicle.id)
+  })
   return out
 })
 
 /** 公司类型：当前选中的经办人（tab）在任意角色下关联的车辆 id 集合（含 companyVehicleRoleAssignments 与 legacy handler.vehicles） */
 const vehicleIdsLinkedToSelectedHandler = computed(() => {
   const profile = customerStore.profile
-  const handlerId = profile?.selectedHandlerId
+  const handlerId = selectedHandler.value?.id
   if (!isCompany.value || !handlerId) return new Set<string>()
   const out = new Set<string>()
   const companyMap = (profile as any)?.companyVehicleRoleAssignments as Record<string, Record<string, string>> | undefined
@@ -2075,13 +2194,7 @@ const isSelectedPersonDefaultOwner = computed(() => {
   const items = (profile.mobile as MobileData).items
   const selected = items.find((i: MobileItem) => i.id === selectedPersonalIdentityId.value)
   if (!selected) return false
-  const defaultOwnerName =
-    (isCompany.value && profile.handlers?.[0]?.name) ||
-    (items.length > 0 && (items[0].contactName || items[0].relationTagName)) ||
-    (profile as any)?.name?.value ||
-    '车主'
-  const name = selected.contactName || selected.relationTagName || ''
-  return !!name && name === defaultOwnerName
+  return selected.personRole === '购车人' || selected.businessTags?.includes('购车人') || false
 })
 
 // 根据车辆查找所有相关人员（使用人/联系人/送修人/车主）
@@ -2209,7 +2322,7 @@ const vehicleRoleSheetActions = computed(() => {
 // 业务角色名（仅用于判断 relationTagName 是否为人名：为人名则展示，为角色则展示脱敏号码）
 const VEHICLE_ROLE_NAMES = ['使用人', '联系人', '送修人', '车主']
 // 首屏号码区域仅展示的关系标签（本人、配偶、公司电话等），不展示人名如汪洁、张雪
-const RELATION_TAGS_FOR_FIRST_SCREEN = ['本人', '配偶', '公司电话']
+const RELATION_TAGS_FOR_FIRST_SCREEN = ['本人', '配偶', '公司电话', '公司总机', '采购联系人', '财务联系人', '行政联系人']
 
 // 选择区展示：暂无 + 可选人。公司=暂无+全部经办人+公司电话；个人=暂无+号码列表（不含公司电话）。支持随时绑定或换人
 const vehicleRolePickerTags = computed(() => {
@@ -2412,74 +2525,28 @@ const onVehicleRoleSelect = async (action: { name: string; value: string }) => {
   }
 }
 
-// 显示的车辆（最多2辆）——公司模式下支持“车辆互见”，并标记经办人
-const displayedVehicles = computed(() => {
-  const profile = customerStore.profile
+// 当前上下文下的完整车辆集合：不做任何人与车的关联过滤，始终展示全部车辆
+const vehiclesForCurrentContext = computed(() => {
   const baseVehicles = customerStore.vehicles || []
 
   if (!baseVehicles || baseVehicles.length === 0) {
     return []
   }
 
-  // 公司模式：从 handlers 中反查每台车的经办人，附加 handlerName 字段
-  // 注意：mock 数据中 handlers.vehicles 的 id 与全局 vehicles 的 id 不同，需通过 vin / 车牌匹配
-  if (isCompany.value && profile?.handlers && profile.handlers.length > 0) {
-    const handlers = profile.handlers
-    const enhanced = baseVehicles.map((vehicle: any) => {
-      const owner = handlers.find(h =>
-        Array.isArray(h.vehicles) &&
-        h.vehicles.some((hv: any) =>
-          (hv.vin && vehicle.vin && hv.vin === vehicle.vin) ||
-          (hv.licensePlate && vehicle.licensePlate && hv.licensePlate === vehicle.licensePlate)
-        )
-      )
-      if (owner) {
-        return {
-          ...vehicle,
-          handlerName: owner.name,
-        }
-      }
-      return vehicle
-    })
-    return enhanced.slice(0, 2)
-  }
-
-  // 个人模式或无 handlers：保持原有逻辑（最多展示 2 辆）
-  return baseVehicles.slice(0, 2)
+  // 直接返回全部车辆，不按经办人/联系人做过滤
+  return baseVehicles
 })
 
-// 车辆信息弹窗内展示的列表：公司类型展示全部车辆（便于为每辆车设置多角色），个人类型与首页一致（最多2辆）
-const vehiclesInVehicleDialog = computed(() => {
-  const baseVehicles = customerStore.vehicles || []
-  if (!baseVehicles?.length) return []
-  if (isCompany.value && customerStore.profile?.handlers?.length) {
-    const handlers = customerStore.profile.handlers
-    return baseVehicles.map((vehicle: any) => {
-      const owner = handlers.find((h: any) =>
-        Array.isArray(h.vehicles) &&
-        h.vehicles.some((hv: any) => vehicleMatches(hv, vehicle))
-      )
-      return owner ? { ...vehicle, handlerName: owner.name } : vehicle
-    })
-  }
-  return displayedVehicles.value
-})
+// 首页只展示前两辆，完整列表放到车辆列表/360 弹层
+const displayedVehiclesForCurrentTab = computed(() => vehiclesForCurrentContext.value.slice(0, 2))
 
-// 当前 Tab 下应展示的车辆：公司选某人 = 仅显示该经办人在任意角色下关联的车；公司未选/全部 = 全部车；个人选某人 = 该人关联的车；个人默认 = 全部车
-const displayedVehiclesForCurrentTab = computed(() => {
-  const base = displayedVehicles.value
-  if (isCompany.value) {
-    const handlerId = customerStore.profile?.selectedHandlerId
-    if (!handlerId) return base
-    const linkedIds = vehicleIdsLinkedToSelectedHandler.value
-    const keyOf = (v: any) => v?.id || v?.vin || v?.licensePlate
-    return base.filter((v: any) => keyOf(v) && linkedIds.has(keyOf(v)))
-  }
-  if (!selectedPersonalIdentityId.value) return base
-  const linkedIds = vehicleIdsLinkedToSelectedPerson.value
-  if (linkedIds.size > 0) return base.filter((v: any) => v?.id && linkedIds.has(v.id))
-  if (isSelectedPersonDefaultOwner.value) return base
-  return []
+// 车辆信息弹窗内展示的列表：始终展示当前上下文下的完整车辆清单
+const allVehiclesInVehicleDialog = computed(() => vehiclesForCurrentContext.value)
+
+const vehiclesInVehicleDialog = computed(() => allVehiclesInVehicleDialog.value)
+
+const vehicleDialogSubtitle = computed(() => {
+  return allVehiclesInVehicleDialog.value.length > 0 ? `共 ${allVehiclesInVehicleDialog.value.length} 辆` : ''
 })
 
 // 头部标签：显示当前 ONEID 下的所有商机类型（不再单独注入 VIP 车主）
@@ -2489,9 +2556,7 @@ const displayedHeaderTags = computed(() => {
   // 1. 添加当前 ONEID 下的所有商机类型
   // 公司视图：直接使用 enterprise ONEID 对应的 customerStore.opportunities
   // 个人视图：优先使用经办人商机，其次使用全局 opportunities
-  const opps = isCompany.value
-    ? (customerStore.opportunities || [])
-    : (selectedHandler.value?.opportunities || customerStore.opportunities || [])
+  const opps = selectedHandler.value?.opportunities || customerStore.opportunities || []
 
   if (opps.length > 0) {
     const opportunityTypes = opps.map(opp => opp.type)
@@ -2763,9 +2828,8 @@ const latestOperationDisplay = computed(() => {
   const profile = customerStore.profile
   if (!profile) return null
   
-  if (isCompany.value && profile.selectedHandlerId && profile.handlers) {
-    const handler = profile.handlers.find(h => h.id === profile.selectedHandlerId)
-    if (handler?.latestOperation) return handler.latestOperation
+  if (isCompany.value && selectedHandler.value?.latestOperation) {
+    return selectedHandler.value.latestOperation
   }
   
   return profile.latestOperation || null
@@ -2776,9 +2840,8 @@ const currentConflicts = computed(() => {
   const profile = customerStore.profile
   if (!profile) return []
   
-  if (isCompany.value && profile.selectedHandlerId && profile.handlers) {
-    const handler = profile.handlers.find(h => h.id === profile.selectedHandlerId)
-    return handler?.nameMobileConflict || []
+  if (isCompany.value && selectedHandler.value?.nameMobileConflict) {
+    return selectedHandler.value.nameMobileConflict
   }
   
   return profile.nameMobileConflict || []
@@ -3406,9 +3469,14 @@ const openBasicInfoEditor = () => {
     const handler = selectedHandler.value
     const identity = selectedPersonalIdentity.value
     const addresses =
-      profile.addresses?.items?.map((i) => ({ address: i.address, label: i.label || '' })) ?? []
-    const emails =
-      profile.emails?.items?.map((i) => ({ email: i.email, label: i.label || '' })) ?? []
+      profile.addresses?.items?.map((item, index) => {
+        const meta = getAddressSlotMeta(item.slotKey || ADDRESS_SLOTS[index]?.key)
+        return {
+          address: item.address,
+          label: meta.label,
+          slotKey: meta.key,
+        }
+      }) ?? []
     const nameStr = handler
       ? handler.name
       : !isCompany.value && identity
@@ -3420,8 +3488,9 @@ const openBasicInfoEditor = () => {
       mobile: '', // 手机号已在MobileEditor中管理，这里不再使用
       gender: normalizeGender(handler ? (handler.gender as string) || '' : (profile.gender?.value as string) || ''),
       city: String(handler ? (handler.city || '') : (profile.city.value || '')),
-      addresses: addresses.length ? [...addresses] : [{ address: '', label: '' }],
-      emails: emails.length ? [...emails] : [{ email: '', label: '' }],
+      addresses: addresses.length
+        ? [...addresses]
+        : [{ address: '', label: DEFAULT_ADDRESS_SLOT.label, slotKey: DEFAULT_ADDRESS_SLOT.key }],
       reason: '',
     }
   }
@@ -3440,15 +3509,12 @@ const toggleAreaInline = (idx: number) => {
   showAreaInline.value = true
 }
 
-// 地址/邮箱标签：内联点击选择，无弹窗
-const setAddressLabel = (idx: number, label: string) => {
+// 地址槽位：根据下标自动分配标签，不再使用权重
+const setAddressSlot = (idx: number, slotKey: string) => {
+  const meta = getAddressSlotMeta(slotKey)
   if (basicInfoForm.value.addresses[idx] !== undefined) {
-    basicInfoForm.value.addresses[idx].label = label
-  }
-}
-const setEmailLabel = (idx: number, label: string) => {
-  if (basicInfoForm.value.emails[idx] !== undefined) {
-    basicInfoForm.value.emails[idx].label = label
+    basicInfoForm.value.addresses[idx].label = meta.label
+    basicInfoForm.value.addresses[idx].slotKey = meta.key
   }
 }
 
@@ -3480,18 +3546,49 @@ const onAreaConfirm = (first: any, second?: any) => {
 }
 
 const addBasicInfoAddress = () => {
-  basicInfoForm.value.addresses = [...basicInfoForm.value.addresses, { address: '', label: '' }]
+  if (basicInfoForm.value.addresses.length >= ADDRESS_SLOTS.length) return
+  const meta = ADDRESS_SLOTS[basicInfoForm.value.addresses.length] || DEFAULT_ADDRESS_SLOT
+  basicInfoForm.value.addresses = [
+    ...basicInfoForm.value.addresses,
+    { address: '', label: meta.label, slotKey: meta.key }
+  ]
 }
 const removeBasicInfoAddress = (idx: number) => {
   const next = basicInfoForm.value.addresses.filter((_, i) => i !== idx)
-  basicInfoForm.value.addresses = next.length ? next : [{ address: '', label: '' }]
+  basicInfoForm.value.addresses = next.length
+    ? next.map((item, index) => {
+        const meta = ADDRESS_SLOTS[index] || DEFAULT_ADDRESS_SLOT
+        return { ...item, label: meta.label, slotKey: meta.key }
+      })
+    : [{ address: '', label: DEFAULT_ADDRESS_SLOT.label, slotKey: DEFAULT_ADDRESS_SLOT.key }]
 }
-const addBasicInfoEmail = () => {
-  basicInfoForm.value.emails = [...basicInfoForm.value.emails, { email: '', label: '' }]
+
+// 调整地址顺序（上移/下移），通过排序体现优先级
+const moveAddressUp = (idx: number) => {
+  if (idx <= 0) return
+  const list = [...basicInfoForm.value.addresses]
+  const tmp = list[idx - 1]
+  list[idx - 1] = list[idx]
+  list[idx] = tmp
+  basicInfoForm.value.addresses = list
 }
-const removeBasicInfoEmail = (idx: number) => {
-  const next = basicInfoForm.value.emails.filter((_, i) => i !== idx)
-  basicInfoForm.value.emails = next.length ? next : [{ email: '', label: '' }]
+
+const moveAddressDown = (idx: number) => {
+  if (idx >= basicInfoForm.value.addresses.length - 1) return
+  const list = [...basicInfoForm.value.addresses]
+  const tmp = list[idx + 1]
+  list[idx + 1] = list[idx]
+  list[idx] = tmp
+  basicInfoForm.value.addresses = list
+}
+
+// 标记首选地址：将选中的地址移动到第一位
+const setPrimaryAddress = (idx: number) => {
+  if (idx <= 0) return
+  const list = [...basicInfoForm.value.addresses]
+  const [item] = list.splice(idx, 1)
+  list.unshift(item)
+  basicInfoForm.value.addresses = list
 }
 
 // 提交基础信息修改
@@ -3547,22 +3644,21 @@ const handleSaveBasicInfo = async () => {
     updateData.city = basicInfoForm.value.city
   }
 
-  // 地址、邮箱变更仅更新本地 profile（接口暂不支持）
+  // 地址变更仅更新本地 profile（接口暂不支持）
   const curItems = profile.addresses?.items ?? []
-  const curEmailItems = profile.emails?.items ?? []
   const newAddresses = basicInfoForm.value.addresses.filter((a) => a.address.trim())
-  const newEmails = basicInfoForm.value.emails.filter((e) => e.email.trim())
   const addressesChanged =
     newAddresses.length !== curItems.length ||
-    newAddresses.some((a, i) => a.address !== curItems[i]?.address || a.label !== (curItems[i]?.label ?? ''))
-  const emailsChanged =
-    newEmails.length !== curEmailItems.length ||
-    newEmails.some((e, i) => e.email !== curEmailItems[i]?.email || e.label !== (curEmailItems[i]?.label ?? ''))
+    newAddresses.some(
+      (a, i) =>
+        a.address !== curItems[i]?.address ||
+        a.slotKey !== curItems[i]?.slotKey
+    )
 
   // 检查是否有需要更新的字段（除了reason）
   const fieldsToUpdate = Object.keys(updateData).filter(key => key !== 'reason')
   const hasBasicFields = fieldsToUpdate.length > 0
-  if (!hasBasicFields && !addressesChanged && !emailsChanged) {
+  if (!hasBasicFields && !addressesChanged) {
     console.warn('[Home] 没有需要更新的字段')
     showToast('请至少修改一个字段后再提交')
     return
@@ -3577,20 +3673,14 @@ const handleSaveBasicInfo = async () => {
   })
 
   try {
-    // 先写回地址、邮箱到本地 profile（含标签）
-    if (addressesChanged || emailsChanged) {
+    // 先写回地址到本地 profile（按排序和首选标记）
+    if (addressesChanged) {
       if (!profile.addresses) (profile as any).addresses = { items: [] }
       profile.addresses.items = newAddresses.map((item, i) => ({
         id: profile.addresses!.items[i]?.id ?? `addr_${Date.now()}_${i}`,
         address: item.address.trim(),
         label: item.label || undefined,
-        isPrimary: i === 0,
-      }))
-      if (!profile.emails) (profile as any).emails = { items: [] }
-      profile.emails.items = newEmails.map((item, i) => ({
-        id: profile.emails!.items[i]?.id ?? `email_${Date.now()}_${i}`,
-        email: item.email.trim(),
-        label: item.label || undefined,
+        slotKey: item.slotKey as any,
         isPrimary: i === 0,
       }))
     }
@@ -3619,7 +3709,7 @@ const handleSaveBasicInfo = async () => {
         showToast(res.message || '提交失败，请重试')
       }
     } else {
-      showToast('地址/邮箱已更新')
+      showToast('地址权重已更新')
       showBasicInfoEditor.value = false
     }
   } catch (error: any) {
@@ -3656,9 +3746,13 @@ const handleCouponCardClick = () => {
   }
 }
 
+const openVehicleDialog = () => {
+  showVehicleDialog.value = true
+}
+
 // 首页卡片点击状态：打开车辆信息弹窗并直接展开该车状态内联选择（不二次弹窗）
 const openVehicleDialogAndEditStatus = (vehicleId: string) => {
-  showVehicleDialog.value = true
+  openVehicleDialog()
   nextTick(() => {
     editingVehicleStatusId.value = vehicleId
   })
@@ -3692,7 +3786,9 @@ const handleVehicleStatusChange = async (vehicleId: string, status: string) => {
 
 // 关闭车辆弹窗时收起内联状态选择
 watch(showVehicleDialog, (v) => {
-  if (!v) editingVehicleStatusId.value = null
+  if (!v) {
+    editingVehicleStatusId.value = null
+  }
 })
 
 // 切换到公司视图时清除个人身份选中，避免状态错位
@@ -4448,6 +4544,27 @@ onMounted(async () => {
   margin-top: 2px;
 }
 
+.company-profile-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+  position: relative;
+  z-index: 1;
+}
+
+.company-profile-pill {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
 .header-tags span {
   display: inline-flex;
   align-items: center;
@@ -4845,14 +4962,22 @@ onMounted(async () => {
 
 .asset-row {
   display: grid;
-  grid-template-columns: 1fr 1.3fr 1.8fr 40px;
+  grid-template-columns: 1fr 1.2fr 1.6fr auto;
   align-items: center;
   padding: 8px 14px;
   gap: 10px;
+  cursor: pointer;
 
   &:not(:last-child) {
     margin-bottom: 4px;
   }
+}
+
+.asset-row-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
 }
 
 .ellipsis {
@@ -4886,6 +5011,12 @@ onMounted(async () => {
   color: var(--text-sub);
   text-align: right;
   cursor: pointer;
+}
+
+.section-empty {
+  padding: 12px 14px;
+  font-size: 12px;
+  color: var(--text-sub);
 }
 
 // 账户权益：简化样式（紧凑版）
@@ -5579,7 +5710,27 @@ onMounted(async () => {
       color: var(--text-main);
       letter-spacing: -0.01em;
     }
-    
+
+    .popup-header-main {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .popup-header-subtitle {
+      font-size: 11px;
+      color: var(--text-sub);
+      line-height: 1.3;
+    }
+
+    .popup-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
     .van-icon {
       font-size: 16px;
       color: var(--text-sub);
@@ -6905,7 +7056,7 @@ onMounted(async () => {
     }
     .inline-tags {
       display: flex;
-      gap: 6px;
+      gap: 4px;
       flex-wrap: wrap;
       flex-shrink: 0;
     }
@@ -6936,6 +7087,34 @@ onMounted(async () => {
       text-align: right;
       cursor: pointer;
       padding: 4px 0;
+    }
+    .address-order-label {
+      font-size: 12px;
+      color: var(--text-sub);
+      margin-right: 4px;
+    }
+    .address-order-link {
+      font-size: 12px;
+      color: var(--theme-primary, #c9a227);
+      padding: 2px 4px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    .address-primary-chip {
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 10px;
+      border: 1px solid rgba(201, 162, 39, 0.3);
+      color: var(--text-sub);
+      background: rgba(0, 0, 0, 0.02);
+      cursor: pointer;
+      margin-left: 2px;
+      &.active {
+        background: rgba(201, 162, 39, 0.12);
+        color: var(--theme-primary, #c9a227);
+        border-color: rgba(201, 162, 39, 0.5);
+        font-weight: 500;
+      }
     }
     .van-button { margin-top: 6px; }
   }
@@ -7523,6 +7702,98 @@ onMounted(async () => {
   font-weight: 600;
 }
 
+.handler-flag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #94724a;
+  background: rgba(148, 114, 74, 0.12);
+}
+
+.contact-priority-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  margin-top: 12px;
+  border-radius: 12px;
+  background: #f8f5f1;
+}
+
+.priority-badge {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.priority-action {
+  font-size: 12px;
+  font-weight: 600;
+  color: #94724a;
+}
+
+.vehicle-person-grid {
+  gap: 10px;
+}
+
+.vehicle-repairer-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vehicle-repairer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vehicle-repairer-item {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f7f8fa;
+}
+
+.vehicle-repairer-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.vehicle-repairer-phone,
+.vehicle-repairer-order,
+.vehicle-relation-hint,
+.address-weight-text {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.vehicle-repairer-badge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #0f766e;
+  background: rgba(15, 118, 110, 0.12);
+}
+
+.vehicle-repairer-empty {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.address-weight-row {
+  margin-top: -4px;
+}
+
 .sync-info-content {
   padding: 12px;
   font-size: 12px;
@@ -7762,4 +8033,3 @@ onMounted(async () => {
   animation: status-pulse-red 1.5s infinite cubic-bezier(0.4, 0, 0.2, 1);
 }
 </style>
-

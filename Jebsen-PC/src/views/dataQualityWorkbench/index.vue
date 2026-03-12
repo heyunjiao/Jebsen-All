@@ -342,24 +342,6 @@
         </div>
       </template>
     </el-dialog>
-
-    <!-- 底部：操作追溯日志 -->
-    <el-card shadow="hover" class="audit-log-card table-box">
-      <template #header>
-        <div class="card-header">
-          <h2 class="card-title">{{ $t("dataQualityWorkbench.auditLog.title") }}</h2>
-        </div>
-      </template>
-      <pro-table
-        ref="auditLogTableRef"
-        :columns="auditLogColumns"
-        :request-api="loadAuditLogApi"
-        :init-param="{}"
-        :pagination="true"
-        :border="true"
-        :row-key="'uploadTime'"
-      />
-    </el-card>
   </div>
 </template>
 
@@ -368,14 +350,11 @@ import { ref, onMounted, computed } from "vue";
 import { ElMessage, ElMessageBox, type UploadFile, type UploadFiles } from "element-plus";
 import { useI18n } from "vue-i18n";
 import { WarningFilled, CircleCheck, Download, UploadFilled, Loading, Check, Bell, InfoFilled } from "@element-plus/icons-vue";
-import ProTable from "@/components/ProTable/index.vue";
-import { ColumnProps } from "@/components/ProTable/interface";
 import {
   uploadAndValidateFile,
   downloadTemplate as downloadTemplateApi,
   importValidData,
   submitAllData,
-  getAuditLog,
   type ValidationResult
 } from "@/api/modules/dataQualityWorkbench";
 import { PLATFORM_REPORTS, PLATFORM_METADATA } from "@/views/collection/constants";
@@ -451,90 +430,6 @@ const currentFileId = ref<string>(""); // 存储上传后的文件ID，用于后
 const uploadCompleted = ref(false);
 const completedTime = ref("");
 const completedRows = ref(0);
-
-// 今日完成状态（从操作日志中检查）
-const todayCompletedStatus = ref<Record<string, boolean>>({});
-// 今日已上传的文件信息
-const todayUploadedFiles = ref<Record<string, any>>({});
-
-// 检查今日是否已完成
-const isTodayCompleted = (dataSource: string): boolean => {
-  return todayCompletedStatus.value[dataSource] || false;
-};
-
-// 获取今日已上传的文件信息
-const getTodayUploadedFile = (dataSource: string) => {
-  return todayUploadedFiles.value[dataSource] || null;
-};
-
-// 检查今日完成状态
-const checkTodayCompleted = async () => {
-  try {
-    const mockData = await import("@/assets/json/dataQualityWorkbenchMockData.json");
-    if (mockData.default && mockData.default.auditLog && mockData.default.auditLog.data) {
-      const { list } = mockData.default.auditLog.data;
-      const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
-
-      // 重置状态
-      todayCompletedStatus.value = {};
-      todayUploadedFiles.value = {};
-
-      // 检查每个数据源今日是否有成功的上传记录
-      const dataSourceMap: Record<string, string> = {
-        dms: "DMS",
-        poas: "POAS",
-        wws: "WWS",
-        cap: "C@P",
-        voucher: "Voucher",
-        manual: "Manual Files"
-      };
-
-      Object.keys(dataSourceMap).forEach(key => {
-        const sourceName = dataSourceMap[key];
-        // 检查今日是否有成功的上传记录
-        const todayRecords = list.filter((item: any) => {
-          const uploadDate = item.uploadTime?.split(" ")[0]; // 提取日期部分
-          return (
-            uploadDate === today &&
-            item.dataSource === sourceName &&
-            item.uploadStatus === "success" &&
-            item.validationResult === "passed"
-          );
-        });
-
-        if (todayRecords.length > 0) {
-          // 取最新的一条记录
-          const latestRecord = todayRecords.sort((a: any, b: any) => {
-            return new Date(b.uploadTime).getTime() - new Date(a.uploadTime).getTime();
-          })[0];
-          todayCompletedStatus.value[key] = true;
-          todayUploadedFiles.value[key] = latestRecord;
-        }
-      });
-
-      // 为了演示效果，设置 C@P 为已完成（因为 mock 数据是历史数据）
-      // 实际项目中应该从真实 API 获取今日数据
-      // 这里为了演示，如果 C@P 有最近的成功记录，就标记为已完成
-      const capRecords = list.filter((item: any) => {
-        return item.dataSource === "C@P" && item.uploadStatus === "success" && item.validationResult === "passed";
-      });
-
-      // 如果有 C@P 的成功记录，标记为已完成（用于演示）
-      if (capRecords.length > 0) {
-        const latestCapRecord = capRecords.sort((a: any, b: any) => {
-          return new Date(b.uploadTime).getTime() - new Date(a.uploadTime).getTime();
-        })[0];
-        todayCompletedStatus.value["cap"] = true;
-        todayUploadedFiles.value["cap"] = latestCapRecord;
-      }
-
-      console.log("今日完成状态:", todayCompletedStatus.value);
-      console.log("今日已上传文件:", todayUploadedFiles.value);
-    }
-  } catch (error) {
-    console.error("检查今日完成状态失败:", error);
-  }
-};
 
 // 平台报表清单配置
 const currentPlatformReports = computed(() => {
@@ -642,178 +537,6 @@ const getColumnLabel = (column: string): string => {
   return columnNameMapping.value[column] || column;
 };
 
-// 操作追溯日志表格配置
-const auditLogTableRef = ref();
-const auditLogColumns: ColumnProps[] = [
-  {
-    prop: "uploadTime",
-    label: t("dataQualityWorkbench.auditLog.uploadTime"),
-    width: 180,
-    search: {
-      el: "date-picker",
-      props: {
-        type: "datetimerange",
-        "value-format": "YYYY-MM-DD HH:mm:ss"
-      }
-    }
-  },
-  {
-    prop: "dataSource",
-    label: t("dataQualityWorkbench.auditLog.dataSource"),
-    width: 150,
-    search: {
-      el: "select",
-      props: {
-        options: [
-          { label: "DMS", value: "DMS" },
-          { label: "POAS", value: "POAS" },
-          { label: "WWS", value: "WWS" },
-          { label: "C@P", value: "C@P" },
-          { label: "Voucher", value: "Voucher" },
-          { label: "Manual Files", value: "Manual Files" }
-        ]
-      }
-    }
-  },
-  {
-    prop: "fileName",
-    label: t("dataQualityWorkbench.auditLog.fileName"),
-    minWidth: 200,
-    search: {
-      el: "input",
-      props: {
-        placeholder: t("dataQualityWorkbench.auditLog.fileNamePlaceholder")
-      }
-    }
-  },
-  {
-    prop: "operator",
-    label: t("dataQualityWorkbench.auditLog.operator"),
-    width: 180,
-    search: {
-      el: "input",
-      props: {
-        placeholder: t("dataQualityWorkbench.auditLog.operatorPlaceholder")
-      }
-    }
-  },
-  {
-    prop: "validationResult",
-    label: t("dataQualityWorkbench.auditLog.validationResult"),
-    width: 120,
-    align: "center",
-    tag: true,
-    enum: [
-      { label: t("dataQualityWorkbench.auditLog.statusPassed"), value: "passed", tagType: "success" },
-      { label: t("dataQualityWorkbench.auditLog.statusFailed"), value: "failed", tagType: "danger" },
-      { label: t("dataQualityWorkbench.auditLog.statusPending"), value: "pending", tagType: "info" }
-    ],
-    search: {
-      el: "select",
-      props: {
-        options: [
-          { label: t("dataQualityWorkbench.auditLog.statusPassed"), value: "passed" },
-          { label: t("dataQualityWorkbench.auditLog.statusFailed"), value: "failed" },
-          { label: t("dataQualityWorkbench.auditLog.statusPending"), value: "pending" }
-        ]
-      }
-    }
-  },
-  {
-    prop: "uploadStatus",
-    label: t("dataQualityWorkbench.auditLog.uploadStatus"),
-    width: 120,
-    align: "center",
-    tag: true,
-    enum: [
-      { label: t("dataQualityWorkbench.auditLog.uploadSuccess"), value: "success", tagType: "success" },
-      { label: t("dataQualityWorkbench.auditLog.uploadFailed"), value: "failed", tagType: "danger" },
-      { label: t("dataQualityWorkbench.auditLog.uploadProcessing"), value: "processing", tagType: "warning" }
-    ],
-    search: {
-      el: "select",
-      props: {
-        options: [
-          { label: t("dataQualityWorkbench.auditLog.uploadSuccess"), value: "success" },
-          { label: t("dataQualityWorkbench.auditLog.uploadFailed"), value: "failed" },
-          { label: t("dataQualityWorkbench.auditLog.uploadProcessing"), value: "processing" }
-        ]
-      }
-    }
-  },
-  {
-    prop: "totalRows",
-    label: t("dataQualityWorkbench.auditLog.totalRows"),
-    width: 100,
-    align: "right"
-  },
-  {
-    prop: "successRows",
-    label: t("dataQualityWorkbench.auditLog.successRows"),
-    width: 100,
-    align: "right"
-  },
-  {
-    prop: "errorRows",
-    label: t("dataQualityWorkbench.auditLog.errorRows"),
-    width: 100,
-    align: "right"
-  }
-];
-
-// 操作追溯日志API请求函数（mock 数据由 API 拦截器处理）
-// useTable hook 期望返回格式: { data: { list: [...], total: ... } }
-const loadAuditLogApi = async (params: any) => {
-  // 直接导入 mock 数据，确保数据能正确显示
-  const mockData = await import("@/assets/json/dataQualityWorkbenchMockData.json");
-
-  if (mockData.default && mockData.default.auditLog && mockData.default.auditLog.data) {
-    const { list, total } = mockData.default.auditLog.data;
-
-    // 模拟分页
-    const page = params?.pageNum || params?.page || 1;
-    const pageSize = params?.pageSize || 10;
-    const start = (page - 1) * pageSize;
-    const end = start + pageSize;
-
-    const result = {
-      data: {
-        list: list.slice(start, end),
-        total: total || list.length
-      }
-    };
-
-    console.log("操作日志数据返回（直接使用 mock）:", result);
-    return result;
-  }
-
-  // 如果直接导入失败，尝试通过 API
-  try {
-    const res = await getAuditLog(params);
-
-    if (res && (res as any).data && (res as any).data.list) {
-      const result = {
-        data: {
-          list: (res as any).data.list || [],
-          total: (res as any).data.total || 0
-        }
-      };
-      console.log("操作日志数据返回（通过 API）:", result);
-      return result;
-    }
-  } catch (error) {
-    console.error("加载操作日志失败:", error);
-  }
-
-  // 返回空数据
-  return {
-    data: {
-      list: [],
-      total: 0
-    }
-  };
-};
-
 // 处理数据源变更
 const handleDataSourceChange = () => {
   fileList.value = [];
@@ -828,9 +551,6 @@ const handleDataSourceChange = () => {
   } else {
     activeReportId.value = "";
   }
-
-  // 重新检查今日完成状态
-  checkTodayCompleted();
 };
 
 // 下载通用模板
@@ -941,8 +661,6 @@ const handleReportFileChange = async (file: UploadFile, report: { id: string; na
           status: "uploaded",
           lastUploadTime: new Date().toLocaleString()
         };
-        // 检查整个平台是否完成
-        checkTodayCompleted();
       }
     } else {
       showErrorDialog([], res.msg || "上传失败");
@@ -1165,8 +883,6 @@ const handleImportData = async () => {
       }
       // 关闭预检弹窗
       handlePreCheckDialogClose();
-      // 检查整个平台是否完成
-      checkTodayCompleted();
     } else {
       ElMessage.error(res.msg || "数据入库失败");
     }
@@ -1322,13 +1038,6 @@ const simulateErrorFile = () => {
   console.log("模拟错误文件功能");
 };
 
-// 页面加载时检查今日完成状态
-onMounted(() => {
-  // 检查今日完成状态
-  checkTodayCompleted();
-  // 监听操作日志表格刷新，更新完成状态
-  // 可以通过定时器定期检查，或者在上传成功后刷新
-});
 </script>
 
 <style lang="scss" scoped>
@@ -1929,47 +1638,6 @@ onMounted(() => {
               font-weight: 500;
             }
           }
-        }
-      }
-    }
-  }
-
-  .audit-log-card {
-    margin-bottom: 20px;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.08);
-
-    :deep(.el-card__header) {
-      padding: 18px 24px;
-      border-bottom: 1px solid var(--el-border-color-lighter, #ebeef5);
-      background: linear-gradient(135deg, var(--el-bg-color-page, #fafbfc) 0%, var(--el-bg-color, #ffffff) 100%);
-    }
-
-    :deep(.el-card__body) {
-      padding: 24px;
-      background: var(--el-bg-color, #ffffff);
-    }
-
-    :deep(.el-table) {
-      border-radius: 4px;
-      overflow: hidden;
-
-      .el-table__header {
-        background: var(--el-bg-color-page, #f5f7fa);
-
-        th {
-          background: var(--el-bg-color-page, #f5f7fa);
-          color: var(--el-text-color-regular, #606266);
-          font-weight: 600;
-        }
-      }
-
-      .el-table__row {
-        transition: all 0.2s;
-
-        &:hover {
-          background: var(--el-bg-color-page, #f5f7fa);
         }
       }
     }

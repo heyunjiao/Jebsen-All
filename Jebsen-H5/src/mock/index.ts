@@ -1160,7 +1160,7 @@ export async function mockRequestInterceptor(
         {
           id: 'OPP000',
           oneId: 'C001',
-          type: '钻石客户',
+          type: 'CM 自定义',
           triggerRule: '高价值客户识别规则：累计消费超过100万',
           priority: '高',
           status: '待处理',
@@ -1174,7 +1174,7 @@ export async function mockRequestInterceptor(
         {
           id: 'OPP001',
           oneId: 'C001',
-          type: '首保流失15个月',
+          type: '保养潜在流失',
           triggerRule: '首保流失提醒规则',
           priority: '高',
           status: '待处理',
@@ -1188,7 +1188,7 @@ export async function mockRequestInterceptor(
         {
           id: 'OPP002',
           oneId: 'C001',
-          type: 'PCN 售后增项',
+          type: 'PCN售后 Campaign',
           triggerRule: 'PCN售后活动规则',
           priority: '高',
           status: '处理中',
@@ -1206,7 +1206,7 @@ export async function mockRequestInterceptor(
         {
           id: 'OPP_COMP_001',
           oneId: 'COMP001',
-          type: '企业大客户',
+          type: 'CM 自定义',
           triggerRule: '企业大客户规则：过去12个月企业累计消费≥500万',
           priority: '高',
           status: '待处理',
@@ -1220,7 +1220,7 @@ export async function mockRequestInterceptor(
         {
           id: 'OPP_COMP_002',
           oneId: 'COMP001',
-          type: '首保流失15个月',
+          type: '保养潜在流失',
           triggerRule: '企业名下车辆首保流失规则',
           priority: '高',
           status: '待处理',
@@ -1234,7 +1234,7 @@ export async function mockRequestInterceptor(
         {
           id: 'OPP_COMP_003',
           oneId: 'COMP001',
-          type: 'PCN 售后增项',
+          type: 'PCN售后 Campaign',
           triggerRule: 'PCN 企业售后活动规则',
           priority: '中',
           status: '处理中',
@@ -1248,7 +1248,7 @@ export async function mockRequestInterceptor(
         {
           id: 'OPP_COMP_004',
           oneId: 'COMP001',
-          type: '商务合作伙伴',
+          type: 'CM 自定义',
           triggerRule: '企业合作伙伴识别规则',
           priority: '中',
           status: '待处理',
@@ -1262,7 +1262,7 @@ export async function mockRequestInterceptor(
         {
           id: 'OPP_COMP_005',
           oneId: 'COMP001',
-          type: '企业车队升级机会',
+          type: 'CM 自定义',
           triggerRule: '企业名下车辆首保流失规则',
           priority: '中',
           status: '待处理',
@@ -1276,7 +1276,7 @@ export async function mockRequestInterceptor(
         {
           id: 'OPP_COMP_006',
           oneId: 'COMP001',
-          type: '企业保养关怀活动',
+          type: '定期保养',
           triggerRule: 'PCN 企业售后活动规则',
           priority: '中',
           status: '待处理',
@@ -1290,7 +1290,7 @@ export async function mockRequestInterceptor(
         {
           id: 'OPP_COMP_007',
           oneId: 'COMP001',
-          type: '企业轮胎关怀计划',
+          type: 'PCN售后 Campaign',
           triggerRule: '企业大客户规则：近三年持续复购',
           priority: '高',
           status: '处理中',
@@ -1304,7 +1304,7 @@ export async function mockRequestInterceptor(
         {
           id: 'OPP_COMP_008',
           oneId: 'COMP001',
-          type: '年度采购意向',
+          type: 'CM 自定义',
           triggerRule: '企业合作伙伴识别规则',
           priority: '中',
           status: '处理中',
@@ -1318,7 +1318,7 @@ export async function mockRequestInterceptor(
         {
           id: 'OPP_COMP_009',
           oneId: 'COMP001',
-          type: '重点维护企业',
+          type: 'CM 自定义',
           triggerRule: '企业名下车辆首保流失规则',
           priority: '中',
           status: '待处理',
@@ -1332,7 +1332,7 @@ export async function mockRequestInterceptor(
         {
           id: 'OPP_COMP_010',
           oneId: 'COMP001',
-          type: '高价值企业客户',
+          type: 'CM 自定义',
           triggerRule: 'PCN 企业售后活动规则',
           priority: '低',
           status: '待处理',
@@ -1462,4 +1462,3 @@ export async function mockRequestInterceptor(
   // 没有匹配到 Mock 规则，返回 null，让请求正常发送
   return null
 }
-

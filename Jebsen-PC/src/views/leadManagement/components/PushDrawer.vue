@@ -94,7 +94,7 @@
             <el-table-column prop="type" label="商机类型" width="120">
               <template #default="scope">
                 <el-tag size="small" type="primary">
-                  {{ getLeadTypeLabel(scope.row.type) }}
+                  {{ formatLeadTypeLabel(scope.row.type) }}
                 </el-tag>
               </template>
             </el-table-column>
@@ -220,6 +220,7 @@ import { ElMessage } from "element-plus";
 import { InfoFilled, Document } from "@element-plus/icons-vue";
 import { pushLeads } from "@/api/modules/lead";
 import type { Lead } from "@/api/modules/lead";
+import { getLeadTypeLabel as formatLeadTypeLabel } from "@/constants/leadTypes";
 import { PUSH_TARGET_OPTIONS } from "../interface";
 
 interface ContactInfo {
@@ -402,29 +403,10 @@ const getStatusTagType = (status: string) => {
 // 获取分类标签
 const getCategoryLabel = (category?: string) => {
   const categoryMap: Record<string, string> = {
-    diamond: "钻石客户",
-    gold: "黄金客户",
-    silver: "白银客户",
-    new_to_renew: "新转续",
-    renew_to_renew: "续转续",
-    in_repair_no_insurance: "在修不在保",
-    dormant: "沉睡",
-    pending_activation: "待激活",
-    active: "活跃"
+    general: "通用商机",
+    system: "系统商机"
   };
-  return category ? categoryMap[category] || category : "未知分类";
-};
-
-// 获取商机类型标签
-const getLeadTypeLabel = (type?: string) => {
-  const typeMap: Record<string, string> = {
-    maintenance: "维保",
-    insurance: "保险",
-    repair: "维修",
-    sales: "销售",
-    service: "服务"
-  };
-  return type ? typeMap[type] || type : "未知类型";
+  return category ? categoryMap[category] || formatLeadTypeLabel(category) : "未知分类";
 };
 
 const handleClose = () => {

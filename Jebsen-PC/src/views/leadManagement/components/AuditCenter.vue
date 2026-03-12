@@ -10,6 +10,12 @@
       :border="true"
       row-key="id"
     >
+      <template #leadType="scope">
+        <el-tag size="small" type="primary">
+          {{ getLeadTypeLabel(scope.row.leadType) }}
+        </el-tag>
+      </template>
+
       <!-- 操作类型列 -->
       <template #operation="scope">
         <el-tag :type="getOperationTagType(scope.row.operation) as any" size="small">
@@ -94,6 +100,7 @@ import ProTable from "@/components/ProTable/index.vue";
 import type { ColumnProps } from "@/components/ProTable/interface";
 import { getAuditLogList, getAuditLogDetail, reloadAuditLog } from "@/api/modules/lead";
 import type { Lead } from "@/api/modules/lead";
+import { getLeadTypeLabel, normalizeLeadTypeField, normalizeLeadTypeList } from "@/constants/leadTypes";
 import AuditDetail from "./AuditDetail.vue";
 
 const proTableRef = ref();
@@ -201,14 +208,21 @@ const columns = reactive<ColumnProps<Lead.AuditLog>[]>([
   }
 ]);
 
-const loadData = (params: any) => {
+const loadData = async (params: any) => {
   // 处理时间范围参数
   if (params.operateTime && Array.isArray(params.operateTime) && params.operateTime.length === 2) {
     params.startDate = params.operateTime[0];
     params.endDate = params.operateTime[1];
     delete params.operateTime;
   }
-  return getAuditLogList(params);
+  const res = await getAuditLogList(params);
+  return {
+    ...res,
+    data: {
+      ...res.data,
+      list: normalizeLeadTypeList(res.data?.list || [], "leadType")
+    }
+  };
 };
 
 // 查看详情
@@ -216,7 +230,7 @@ const viewDetail = async (row: Lead.AuditLog) => {
   try {
     // 获取完整详情（包含所有字段）
     const response = await getAuditLogDetail(row.id);
-    currentLog.value = response.data || response;
+    currentLog.value = normalizeLeadTypeField(response.data || response, "leadType");
     detailVisible.value = true;
     // 显示合规提示
     showComplianceWarning.value = true;
@@ -239,7 +253,7 @@ const handleDetailReload = () => {
   // 重新获取详情
   if (currentLog.value) {
     getAuditLogDetail(currentLog.value.id).then(response => {
-      currentLog.value = response.data || response;
+      currentLog.value = normalizeLeadTypeField(response.data || response, "leadType");
     });
   }
 };

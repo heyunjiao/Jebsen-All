@@ -177,6 +177,7 @@ import ECharts from "@/components/ECharts/index.vue";
 import { ECOption } from "@/components/ECharts/config";
 import { getDashboardStats } from "@/api/modules/lead";
 import type { Lead } from "@/api/modules/lead";
+import { getLeadTypeLabel, mergeLeadTypeMetrics } from "@/constants/leadTypes";
 import { LEAD_STATUS_OPTIONS, LEAD_TYPE_OPTIONS, PUSH_TARGET_OPTIONS } from "../interface";
 
 const { t } = useI18n();
@@ -322,6 +323,7 @@ const statusChartOption = computed<ECOption | null>(() => {
     pushed: "#e6a23c",
     processing: "#409eff",
     completed: "#67c23a",
+    followed: "#409eff",
     rejected: "#f56c6c",
     failed: "#f56c6c"
   };
@@ -435,6 +437,7 @@ const statusTrendOption = computed<ECOption | null>(() => {
     pushed: "#e6a23c",
     processing: "#409eff",
     completed: "#67c23a",
+    followed: "#409eff",
     rejected: "#f56c6c",
     failed: "#f56c6c"
   };
@@ -491,33 +494,8 @@ const statusTrendOption = computed<ECOption | null>(() => {
 
 // 获取类型标签
 const getTypeLabel = (type: string) => {
-  // 优先通过 i18n 获取翻译（支持多语言）
-  const i18nKey = `leadManagement.enums.leadType.${type}`;
-  const i18nLabel = t(i18nKey);
-  if (i18nLabel !== i18nKey) {
-    return i18nLabel;
-  }
-
-  // 如果 i18n 中没有，尝试从 LEAD_TYPE_OPTIONS 中查找
   const option = LEAD_TYPE_OPTIONS.find(opt => opt.value === type);
-  if (option) return option.label;
-
-  // 历史类型映射（已移除但看板需要显示的类型）
-  const historicalTypeMap: Record<string, string> = {
-    diamond: "钻石客户",
-    gold: "黄金客户",
-    silver: "白银客户",
-    bdc_aftersales_churn_15m: "BDC售后流失-15个月",
-    segment_template_validation: "客群模板核验"
-  };
-
-  // 如果找不到，尝试从历史类型映射中查找
-  if (historicalTypeMap[type]) {
-    return historicalTypeMap[type];
-  }
-
-  // 如果都找不到，直接返回原值
-  return type;
+  return option?.label || getLeadTypeLabel(type);
 };
 
 // 获取状态标签
@@ -549,7 +527,7 @@ const loadStats = async () => {
           processingCount: res.data.processingCount ?? 0,
           completedCount: res.data.completedCount ?? 0,
           successRate: res.data.successRate ?? 0,
-          byType: res.data.byType ?? [],
+          byType: mergeLeadTypeMetrics(res.data.byType ?? [], ["count"]),
           byStatus: res.data.byStatus ?? []
         };
       }

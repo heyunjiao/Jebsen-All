@@ -2,28 +2,14 @@
   <div class="table-box role-manage">
     <ProTable ref="proTable" :columns="columns" :request-api="getTableList" :data-callback="dataCallback" row-key="roleId">
       <!-- 表格 header 按钮 -->
-      <template #tableHeader="scope">
+      <template #tableHeader>
         <el-button type="primary" :icon="Plus" @click="handleAdd">{{ $t("system.add") }}</el-button>
-        <el-button
-          type="success"
-          plain
-          :icon="Edit"
-          :disabled="!scope.isSelected || scope.selectedListIds.length !== 1"
-          @click="handleUpdate()"
-        >
-          {{ $t("system.modify") }}
-        </el-button>
-        <el-button type="danger" plain :icon="Delete" :disabled="!scope.isSelected" @click="handleDelete()">
-          {{ $t("system.delete") }}
-        </el-button>
-        <el-button type="warning" plain :icon="Download" @click="handleExport">{{ $t("system.export") }}</el-button>
       </template>
       <!-- 表格操作 -->
       <template #operation="scope">
         <template v-if="scope.row.roleId !== 1">
           <div class="operation-center">
             <el-button type="primary" link :icon="Edit" @click="handleUpdate(scope.row)">{{ $t("system.modify") }}</el-button>
-            <el-button type="primary" link :icon="Delete" @click="handleDelete(scope.row)">{{ $t("system.delete") }}</el-button>
             <el-dropdown @command="command => handleCommand(command, scope.row)">
               <el-button type="primary" link :icon="More">更多</el-button>
               <template #dropdown>
@@ -86,14 +72,11 @@
       </template>
     </el-dialog>
 
-    <!-- 分配客户组件 (新增) -->
-    <el-dialog title="分配客户" v-model="openAuthUser" width="800px" append-to-body>
+    <!-- 分配用户组件 (新增) -->
+    <el-dialog title="分配用户" v-model="openAuthUser" width="800px" append-to-body>
       <ProTable ref="userTableRef" :columns="authUserColumns" :request-api="getAuthUserList" row-key="id" :pagination="true">
-        <template #tableHeader="scope">
-          <el-button type="primary" :icon="Plus" @click="handleAddAuthUser">添加客户</el-button>
-          <el-button type="danger" plain :icon="Delete" :disabled="!scope.isSelected" @click="handleDeleteAuthUser"
-            >批量取消授权</el-button
-          >
+        <template #tableHeader>
+          <el-button type="primary" :icon="Plus" @click="handleAddAuthUser">添加用户</el-button>
         </template>
         <template #operation="scope">
           <el-button type="danger" link :icon="Delete" @click="handleCancelAuthUser(scope.row)">取消授权</el-button>
@@ -106,7 +89,7 @@
 <script setup lang="tsx">
 import { ref, reactive, onMounted, nextTick } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { Plus, Edit, Delete, Download, More, Setting, User } from "@element-plus/icons-vue";
+import { Plus, Edit, Delete, More, Setting, User } from "@element-plus/icons-vue";
 import { useI18n } from "vue-i18n";
 import ProTable from "@/components/ProTable/index.vue";
 import { ProTableInstance, ColumnProps } from "@/components/ProTable/interface";
@@ -257,36 +240,33 @@ const getTableList = (params: any) => {
   });
 };
 
-// 表格配置项
+// 表格配置项（无序号、无编号、不支持排序）
 const columns = reactive<ColumnProps[]>([
-  { type: "selection", fixed: "left", width: 50 },
-  { type: "index", label: "#", width: 80 },
-  {
-    prop: "roleId",
-    label: t("system.roleId"),
-    width: 120
-  },
   {
     prop: "roleName",
     label: t("system.roleName"),
     width: 150,
+    sortable: false,
     search: { el: "input", props: { placeholder: t("system.enterRoleName") } }
   },
   {
     prop: "roleKey",
     label: t("system.permissionChar"),
     width: 150,
+    sortable: false,
     search: { el: "input", props: { placeholder: t("system.enterPermissionChar") } }
   },
   {
     prop: "roleSort",
     label: t("system.displayOrder"),
-    width: 100
+    width: 100,
+    sortable: false
   },
   {
     prop: "status",
     label: t("system.status"),
     width: 100,
+    sortable: false,
     enum: statusOptions,
     search: { el: "select", props: { placeholder: t("system.status"), clearable: true } },
     fieldNames: { label: "label", value: "value" },
@@ -305,6 +285,7 @@ const columns = reactive<ColumnProps[]>([
     prop: "createTime",
     label: t("system.createTime"),
     minWidth: 180,
+    sortable: false,
     search: {
       el: "date-picker",
       span: 2,
@@ -317,7 +298,7 @@ const columns = reactive<ColumnProps[]>([
       }
     }
   },
-  { prop: "operation", label: t("common.operation"), fixed: "right", minWidth: 200 }
+  { prop: "operation", label: t("common.operation"), fixed: "right", minWidth: 200, sortable: false }
 ]);
 
 // 查询菜单树结构（从真实菜单数据加载）
@@ -349,33 +330,6 @@ const getRoleMenuTreeselect = async (roleId: number) => {
       resolve({ checkedKeys, menus: mockMenuTree });
     }, 50);
   });
-};
-
-// 删除按钮操作
-const handleDelete = (row?: any) => {
-  const roleIds = row ? [row.roleId] : proTable.value?.selectedListIds || [];
-  if (roleIds.length === 0) {
-    ElMessage.warning("请选择要删除的角色");
-    return;
-  }
-  const roleNames = row ? [row.roleName] : (proTable.value?.selectedList || []).map((r: any) => r.roleName);
-  ElMessageBox.confirm(`确认要删除角色"${roleNames.join("、")}"吗？`, "提示", {
-    confirmButtonText: "确定",
-    cancelButtonText: "取消",
-    type: "warning"
-  })
-    .then(() => {
-      ElMessage.success("删除成功");
-      proTable.value?.getTableList();
-    })
-    .catch(() => {
-      // 客户取消删除
-    });
-};
-
-// 导出按钮操作
-const handleExport = () => {
-  ElMessage.info("导出功能开发中");
 };
 
 // 角色状态修改
@@ -513,21 +467,20 @@ const handleUpdate = async (row?: any) => {
   });
 };
 
-// ------------------ 分配客户相关逻辑 ------------------
+// ------------------ 分配用户相关逻辑 ------------------
 const openAuthUser = ref(false);
 const userTableRef = ref();
 
 const authUserColumns: ColumnProps[] = [
-  { type: "selection", fixed: "left", width: 50 },
-  { prop: "username", label: "客户名称" },
-  { prop: "nickName", label: "客户昵称" },
-  { prop: "email", label: "邮箱" },
-  { prop: "phonenumber", label: "手机" },
-  { prop: "createTime", label: "创建时间" },
-  { prop: "operation", label: "操作", fixed: "right", width: 150 }
+  { prop: "username", label: "用户名称", sortable: false },
+  { prop: "nickName", label: "用户昵称", sortable: false },
+  { prop: "email", label: "邮箱", sortable: false },
+  { prop: "phonenumber", label: "手机", sortable: false },
+  { prop: "createTime", label: "创建时间", sortable: false },
+  { prop: "operation", label: "操作", fixed: "right", width: 150, sortable: false }
 ];
 
-// 获取已分配该角色的客户列表 (Mock)
+// 获取已分配该角色的用户列表 (Mock)
 const getAuthUserList = (params: any) => {
   return new Promise(resolve => {
     setTimeout(() => {
@@ -558,17 +511,13 @@ const getAuthUserList = (params: any) => {
   });
 };
 
-// 分配客户操作
+// 分配用户操作
 const handleAuthUser = row => {
   openAuthUser.value = true;
 };
 
 const handleAddAuthUser = () => {
-  ElMessage.info("打开选择客户弹窗");
-};
-
-const handleDeleteAuthUser = () => {
-  ElMessage.success("批量取消授权成功");
+  ElMessage.info("打开选择用户弹窗");
 };
 
 const handleCancelAuthUser = row => {

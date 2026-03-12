@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { CustomerProfile, TagPool, MaintenanceRecord, TransactionRecord, VehicleRelation, Asset, ConflictResolution, Appointment, PlatformSource, Opportunity, OperationLog, InsuranceRecord, MarketingCampaign, FinancialLoanRecord } from '@/api/customer'
 import { customerApi } from '@/api/customer'
+import { normalizeOpportunityField, normalizeOpportunities } from '@/constants/opportunityTypes'
 import { mockFinancialLoanRecords, mockMarketingCampaigns } from '@/mock/data'
 import { showLoadingToast, closeToast, showToast } from 'vant'
 
@@ -20,6 +21,16 @@ export const useCustomerStore = defineStore('customer', () => {
   const marketingCampaigns = ref<MarketingCampaign[]>([])
   const financialLoanRecords = ref<FinancialLoanRecord[]>([])
   const loading = ref(false)
+
+  const normalizeProfileData = (data: CustomerProfile | null) => {
+    if (!data)
+      return data
+
+    return {
+      ...data,
+      opportunityType: normalizeOpportunityField(data.opportunityType),
+    }
+  }
 
   // 设置经办人
   const setHandler = (handlerId: string) => {
@@ -49,7 +60,7 @@ export const useCustomerStore = defineStore('customer', () => {
         console.log('[Store] opportunityType:', res.data.opportunityType)
         console.log('[Store] segmentType:', res.data.segmentType)
         console.log('[Store] totalConsumption:', res.data.totalConsumption)
-        profile.value = res.data
+        profile.value = normalizeProfileData(res.data)
         // 公司类型若接口未返回经办人列表，补全默认经办人，否则车辆相关人员只能选「公司电话」
         if (profile.value?.customerType?.value === '公司' && (!profile.value.handlers || profile.value.handlers.length === 0)) {
           (profile.value as any).handlers = [
@@ -72,7 +83,7 @@ export const useCustomerStore = defineStore('customer', () => {
       // Fallback: 使用本地数据
       console.log('使用 fallback 数据设置 profile, ID:', customerId)
       if (customerId === 'COMP001') {
-        profile.value = {
+        profile.value = normalizeProfileData({
           id: 'COMP001',
           name: { value: '深圳市望昕实业有限公司', isConflict: false },
           customerType: { value: '公司', isConflict: false },
@@ -97,9 +108,9 @@ export const useCustomerStore = defineStore('customer', () => {
             isConflict: true,
             editable: true,
           } as any
-        }
+        } as CustomerProfile)
       } else {
-        profile.value = {
+        profile.value = normalizeProfileData({
           id: 'C001',
           name: { value: '陈明', isConflict: false },
           age: { value: 35, isConflict: false },
@@ -116,7 +127,7 @@ export const useCustomerStore = defineStore('customer', () => {
           maintenanceRecords: { value: '3次保养', isConflict: false },
           tags: ['高意向', '置换需求'],
           customerType: { value: '个人', isConflict: false },
-        }
+        } as CustomerProfile)
       }
     } finally {
       loading.value = false
@@ -534,16 +545,16 @@ export const useCustomerStore = defineStore('customer', () => {
     try {
       const res = await customerApi.getOpportunities(customerId)
       if (res.code === 200) {
-        opportunities.value = [...res.data]
+        opportunities.value = normalizeOpportunities(res.data)
       }
     } catch (error: any) {
       console.error('获取商机信息失败:', error)
       // Fallback: 使用本地数据
-      opportunities.value = [
+      opportunities.value = normalizeOpportunities([
         {
           id: 'OPP000',
           oneId: 'C001',
-          type: '钻石客户',
+          type: 'CM 自定义',
           triggerRule: '高价值客户识别规则：累计消费超过100万',
           priority: '高',
           status: '待处理',
@@ -557,7 +568,7 @@ export const useCustomerStore = defineStore('customer', () => {
         {
           id: 'OPP001',
           oneId: 'C001',
-          type: '首保流失15个月',
+          type: '保养潜在流失',
           triggerRule: '首保流失提醒规则',
           priority: '高',
           status: '待处理',
@@ -571,7 +582,7 @@ export const useCustomerStore = defineStore('customer', () => {
         {
           id: 'OPP002',
           oneId: 'C001',
-          type: 'PCN 售后增项',
+          type: 'PCN售后 Campaign',
           triggerRule: 'PCN售后活动规则',
           priority: '高',
           status: '处理中',
@@ -582,7 +593,7 @@ export const useCustomerStore = defineStore('customer', () => {
           description: '活动内容：对网关控制单元（蓄电池传感器）重新编程\n活动完成率：30%\n距离目标差值（车）：30\n活动属性：30',
           source: 'CRM系统',
         },
-      ]
+      ])
     }
   }
 

@@ -94,12 +94,12 @@ const mockCustomerProfile: CustomerProfile = {
   tags: ['VIP 车主', '热', 'PMP邀约', '本市', '人保', '精确报价', '亲子', '品酒', '贷款客户', '贷款', '贷款即将到期', '准车主', '转介绍', '再购', '投诉', '预约'],
   // 新增字段
   opportunityType: {
-    value: '钻石客户',
+    value: 'CM 自定义',
     isConflict: false,
     sources: [
-      { origin: 'CRM', value: '钻石客户', time: '2025-10-01 10:30:00' },
-      { origin: 'WWS', value: '高价值商机', time: '2025-10-05 14:20:00' },
-      { origin: 'WWS', value: '置换需求', time: '2025-10-08 09:15:00' },
+      { origin: 'CRM', value: 'CM 自定义', time: '2025-10-01 10:30:00' },
+      { origin: 'WWS', value: 'PCN售后 Campaign', time: '2025-10-05 14:20:00' },
+      { origin: 'WWS', value: '新转续', time: '2025-10-08 09:15:00' },
     ],
   },
   segmentType: {
@@ -821,7 +821,7 @@ const mockOpportunities: Opportunity[] = [
   {
     id: 'OPP000',
     oneId: 'C001',
-    type: '钻石客户',
+    type: 'CM 自定义',
     triggerRule: '高价值客户识别规则：累计消费超过100万',
     priority: '高',
     status: '待处理',
@@ -835,7 +835,7 @@ const mockOpportunities: Opportunity[] = [
   {
     id: 'OPP001',
     oneId: 'C001',
-    type: '首保流失15个月',
+    type: '保养潜在流失',
     triggerRule: '首保流失提醒规则',
     priority: '高',
     status: '待处理',
@@ -849,7 +849,7 @@ const mockOpportunities: Opportunity[] = [
   {
     id: 'OPP002',
     oneId: 'C001',
-    type: 'PCN 售后增项',
+    type: 'PCN售后 Campaign',
     triggerRule: 'PCN售后活动规则',
     priority: '高',
     status: '处理中',

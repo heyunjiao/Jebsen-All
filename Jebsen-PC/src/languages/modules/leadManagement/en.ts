@@ -39,6 +39,7 @@ export default {
       pushStatus: "Push Status",
       assignedAdvisor: "Assigned SA/SC",
       createdAt: "Created At",
+      pushDate: "Push Date",
       operation: "Action"
     },
     buttons: {
@@ -73,12 +74,13 @@ export default {
     },
     enums: {
       status: {
-        pending: "Pending",
         pushed: "Pushed",
-        processing: "Processing",
-        completed: "Completed",
-        rejected: "Rejected",
-        failed: "Failed"
+        completed: "Converted",
+        followed: "Followed",
+        pending: "Followed",
+        processing: "Followed",
+        rejected: "Followed",
+        failed: "Followed"
       },
       pushStatus: {
         pending: "Pending",
@@ -89,17 +91,23 @@ export default {
         aftersales_cs: "After-sales Satisfaction Follow-up",
         newcar_cs: "New Car Satisfaction Follow-up",
         bdc_campaign: "BDC Campaign",
-        bdc_aftersales_recall: "BDC After-sales Opportunity Recruitment",
-        bdc_renewal: "BDC Renewal Opportunity",
         cm_custom: "CM Custom",
         pcn_aftersales_campaign: "PCN After-sales Campaign",
         ttr_survey: "TTR Research",
         new_to_renew: "New to Renew",
         renew_to_renew: "Renew to Renew",
         in_repair_no_insurance: "In Repair No Insurance",
-        dormant: "Dormant",
-        pending_activation: "Pending Activation",
-        active: "Active"
+        psp_expiry: "PSP Expiry",
+        maintenance_churn: "Maintenance Churn Risk",
+        no_visit_365d: "No Visit for 365 Days",
+        regular_maintenance_365d: "Regular Maintenance Customer No Service for 365 Days",
+        periodic_maintenance: "Periodic Maintenance",
+        first_insurance_2y: "First Insurance 2Y",
+        first_maintenance: "First Maintenance",
+        newcar_365d_no_maintenance: "New Car No Service for 365 Days",
+        newcar_warranty_expiry: "New Car Warranty Expiry",
+        extended_warranty_expiry: "Extended Warranty Expiry",
+        newcar_delivery_90d_revisit: "90-day New Car Delivery Follow-up"
       }
     },
     tracking: {
@@ -129,9 +137,9 @@ export default {
     },
     stats: {
       leadTotal: "Total Leads",
-      pendingCount: "Pending Count",
-      processingCount: "Processing Count",
-      completedCount: "Completed Count",
+      pushedCount: "Pushed",
+      completedCount: "Converted",
+      followedCount: "Followed",
       pushSuccessRate: "Push Success Rate"
     }
   }

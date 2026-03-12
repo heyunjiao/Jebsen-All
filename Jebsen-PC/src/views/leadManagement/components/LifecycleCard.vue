@@ -9,16 +9,13 @@
           </el-icon>
           <span class="card-title">{{ title }}</span>
         </div>
-        <el-badge :value="todayNew" :max="99" class="header-badge">
-          <span class="badge-text clickable" @click.stop="handleTodayNewClick">今日新增</span>
-        </el-badge>
       </div>
     </template>
 
     <!-- Body -->
     <div class="card-body">
       <div class="core-number">{{ totalCount.toLocaleString() }}</div>
-      <div class="sub-label">OneID 总数</div>
+      <div class="sub-label">总数</div>
 
       <div class="time-monitor">
         <div class="monitor-item">
@@ -61,19 +58,11 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{
   viewDetail: [category: string];
-  todayNew: [category: string];
 }>();
 
 const handleViewDetail = (e?: Event) => {
   e?.stopPropagation();
   emit("viewDetail", props.category);
-};
-
-const handleTodayNewClick = (e?: Event) => {
-  e?.stopPropagation();
-  if (props.todayNew > 0) {
-    emit("todayNew", props.category);
-  }
 };
 </script>
 
@@ -114,24 +103,6 @@ const handleTodayNewClick = (e?: Event) => {
       }
     }
 
-    .header-badge {
-      .badge-text {
-        font-size: 12px;
-        color: var(--el-text-color-secondary);
-        margin-right: 4px;
-
-        &.clickable {
-          cursor: pointer;
-          color: var(--el-color-primary);
-          transition: color 0.3s;
-
-          &:hover {
-            color: var(--el-color-primary-light-3);
-            text-decoration: underline;
-          }
-        }
-      }
-    }
   }
 
   .card-body {

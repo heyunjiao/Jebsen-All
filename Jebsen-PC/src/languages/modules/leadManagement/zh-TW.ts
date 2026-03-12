@@ -38,6 +38,7 @@ export default {
       pushStatus: "推送狀態",
       assignedAdvisor: "推送至SA/SC",
       createdAt: "創建時間",
+      pushDate: "推送日期",
       operation: "操作"
     },
     buttons: {
@@ -72,12 +73,13 @@ export default {
     },
     enums: {
       status: {
-        pending: "待處理",
         pushed: "已推送",
-        processing: "處理中",
-        completed: "已完成",
-        rejected: "已駁回",
-        failed: "失敗"
+        completed: "已成交",
+        followed: "已跟進",
+        pending: "已跟進",
+        processing: "已跟進",
+        rejected: "已跟進",
+        failed: "已跟進"
       },
       pushStatus: {
         pending: "待推送",
@@ -88,17 +90,23 @@ export default {
         aftersales_cs: "售後滿意度回訪",
         newcar_cs: "新車滿意度回訪",
         bdc_campaign: "BDC Campaign",
-        bdc_aftersales_recall: "BDC售後商機招攬",
-        bdc_renewal: "BDC續保商機",
         cm_custom: "CM 自定義",
         pcn_aftersales_campaign: "PCN售後 Campaign",
         ttr_survey: "TTR調研",
         new_to_renew: "新轉續",
         renew_to_renew: "續轉續",
         in_repair_no_insurance: "在修不在保",
-        dormant: "沉睡",
-        pending_activation: "待激活",
-        active: "活躍"
+        psp_expiry: "PSP到期",
+        maintenance_churn: "保養潛在流失",
+        no_visit_365d: "365天未進店",
+        regular_maintenance_365d: "定保客戶365天未保養",
+        periodic_maintenance: "定期保養",
+        first_insurance_2y: "首保2年",
+        first_maintenance: "首次保養",
+        newcar_365d_no_maintenance: "新車365天未保養",
+        newcar_warranty_expiry: "新車保修到期",
+        extended_warranty_expiry: "延保到期",
+        newcar_delivery_90d_revisit: "新車交付90天回訪"
       }
     },
     tracking: {
@@ -127,9 +135,9 @@ export default {
     },
     stats: {
       leadTotal: "商機總數",
-      pendingCount: "待處理數",
-      processingCount: "處理中數",
-      completedCount: "已完成數",
+      pushedCount: "已推送",
+      completedCount: "已成交",
+      followedCount: "已跟進",
       pushSuccessRate: "推送成功率"
     }
   }

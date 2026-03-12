@@ -8,7 +8,7 @@
       :default-value="initParam?.deptId"
       @change="changeTreeFilter"
     />
-    <!-- 客户表格 -->
+    <!-- 用户表格 -->
     <div class="table-box">
       <ProTable
         ref="proTable"
@@ -18,20 +18,8 @@
         :data-callback="dataCallback"
       >
         <!-- 表格 header 按钮 -->
-        <template #tableHeader="scope">
+        <template #tableHeader>
           <el-button type="primary" :icon="Plus" @click="handleAdd">新增</el-button>
-          <el-button
-            type="success"
-            plain
-            :icon="Edit"
-            :disabled="!scope.isSelected || scope.selectedListIds.length !== 1"
-            @click="handleUpdate()"
-          >
-            修改
-          </el-button>
-          <el-button type="danger" plain :icon="Delete" :disabled="!scope.isSelected" @click="handleDelete()">删除</el-button>
-          <el-button type="info" plain :icon="Upload" @click="handleImport">导入</el-button>
-          <el-button type="warning" plain :icon="Download" @click="handleExport">导出</el-button>
         </template>
         <!-- 表格操作 -->
         <template #operation="scope">
@@ -39,29 +27,20 @@
             <!-- 需要居中对齐 -->
             <div class="operation-center">
               <el-button type="primary" link :icon="Edit" @click="handleUpdate(scope.row)">修改</el-button>
-              <el-button type="primary" link :icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
-              <el-dropdown @command="command => handleCommand(command, scope.row)">
-                <el-button type="primary" link :icon="More">更多</el-button>
-                <template #dropdown>
-                  <el-dropdown-menu>
-                    <el-dropdown-item command="handleResetPwd" :icon="Key">重置密码</el-dropdown-item>
-                    <el-dropdown-item command="handleAuthRole" :icon="User">分配角色</el-dropdown-item>
-                  </el-dropdown-menu>
-                </template>
-              </el-dropdown>
+              <el-button type="primary" link :icon="User" @click="handleAuthRole(scope.row)">分配角色</el-button>
             </div>
           </template>
         </template>
       </ProTable>
     </div>
 
-    <!-- 添加或修改客户配置对话框 -->
+    <!-- 添加或修改用户配置对话框 -->
     <el-dialog :title="title" v-model="open" width="600px" append-to-body>
       <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
         <el-row>
           <el-col :span="12">
-            <el-form-item label="客户昵称" prop="nickName">
-              <el-input v-model="form.nickName" placeholder="请输入客户昵称" maxlength="30" />
+            <el-form-item label="用户昵称" prop="nickName">
+              <el-input v-model="form.nickName" placeholder="请输入用户昵称" maxlength="30" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -91,19 +70,19 @@
         </el-row>
         <el-row>
           <el-col :span="12">
-            <el-form-item v-if="form.userId == undefined" label="客户名称" prop="userName">
-              <el-input v-model="form.userName" placeholder="请输入客户名称" maxlength="30" />
+            <el-form-item v-if="form.userId == undefined" label="用户名称" prop="userName">
+              <el-input v-model="form.userName" placeholder="请输入用户名称" maxlength="30" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item v-if="form.userId == undefined" label="客户密码" prop="password">
-              <el-input v-model="form.password" placeholder="请输入客户密码" type="password" maxlength="20" show-password />
+            <el-form-item v-if="form.userId == undefined" label="用户密码" prop="password">
+              <el-input v-model="form.password" placeholder="请输入用户密码" type="password" maxlength="20" show-password />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row>
           <el-col :span="12">
-            <el-form-item label="客户性别">
+            <el-form-item label="用户性别">
               <el-select v-model="form.sex" placeholder="请选择性别" style="width: 100%">
                 <el-option v-for="dict in sexOptions" :key="dict.value" :label="dict.label" :value="dict.value" />
               </el-select>
@@ -160,35 +139,13 @@
         </div>
       </template>
     </el-dialog>
-
-    <!-- 客户导入对话框 -->
-    <el-dialog title="客户导入" v-model="upload.open" width="400px" append-to-body>
-      <el-upload ref="uploadRef" :limit="1" accept=".xlsx, .xls" :auto-upload="false" drag>
-        <el-icon class="el-icon--upload"><upload-filled /></el-icon>
-        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-        <template #tip>
-          <div class="el-upload__tip">
-            <el-checkbox v-model="upload.updateSupport" />是否更新已经存在的客户数据
-            <br />
-            <span>仅允许导入xls、xlsx格式文件。</span>
-            <el-link type="primary" :underline="false" style="font-size: 12px" @click="importTemplate">下载模板</el-link>
-          </div>
-        </template>
-      </el-upload>
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button type="primary" @click="submitFileForm">确 定</el-button>
-          <el-button @click="upload.open = false">取 消</el-button>
-        </div>
-      </template>
-    </el-dialog>
   </div>
 </template>
 
 <script setup lang="tsx">
 import { ref, reactive, onMounted } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { UploadFilled, Plus, Edit, Delete, Upload, Download, More, Key, User } from "@element-plus/icons-vue";
+import { Plus, Edit, User } from "@element-plus/icons-vue";
 import ProTable from "@/components/ProTable/index.vue";
 import TreeFilter from "@/components/TreeFilter/index.vue";
 import { ProTableInstance, ColumnProps } from "@/components/ProTable/interface";
@@ -211,7 +168,7 @@ const mockUserList = [
   {
     userId: 2,
     userName: "test",
-    nickName: "测试客户",
+    nickName: "测试用户",
     deptName: "研发部门",
     phonenumber: "15999999999",
     email: "test@163.com",
@@ -224,7 +181,7 @@ const mockUserList = [
   {
     userId: 3,
     userName: "demo",
-    nickName: "演示客户",
+    nickName: "演示用户",
     deptName: "市场部门",
     phonenumber: "15777777777",
     email: "demo@163.com",
@@ -297,7 +254,6 @@ const initParam = reactive<{ deptId?: string | number }>({
 const title = ref("");
 const open = ref(false);
 const formRef = ref();
-const uploadRef = ref();
 
 const form = reactive({
   userId: undefined,
@@ -312,11 +268,6 @@ const form = reactive({
   remark: undefined,
   postIds: [],
   roleIds: []
-});
-
-const upload = reactive({
-  open: false,
-  updateSupport: false
 });
 
 const deptOptions = ref(mockDeptTree);
@@ -338,43 +289,41 @@ const changeTreeFilter = (val: string) => {
   proTable.value.getTableList();
 };
 
-// 表格配置项
+// 表格配置项（无序号、无编号、不支持排序）
 const columns = reactive<ColumnProps[]>([
-  { type: "selection", fixed: "left", width: 50 },
-  { type: "index", label: "#", width: 80 },
-  {
-    prop: "userId",
-    label: "客户编号",
-    width: 120
-  },
   {
     prop: "userName",
-    label: "客户名称",
+    label: "用户名称",
     width: 150,
-    search: { el: "input", props: { placeholder: "请输入客户名称" } }
+    sortable: false,
+    search: { el: "input", props: { placeholder: "请输入用户名称" } }
   },
   {
     prop: "nickName",
-    label: "客户昵称",
-    width: 150
+    label: "用户昵称",
+    width: 150,
+    sortable: false
   },
   {
     prop: "deptName",
     label: "部门",
-    width: 150
+    width: 150,
+    sortable: false
   },
   {
     prop: "phonenumber",
     label: "手机号码",
     width: 120,
+    sortable: false,
     search: { el: "input", props: { placeholder: "请输入手机号码" } }
   },
   {
     prop: "status",
     label: "状态",
     width: 100,
+    sortable: false,
     enum: statusOptions,
-    search: { el: "select", props: { placeholder: "客户状态", clearable: true } },
+    search: { el: "select", props: { placeholder: "用户状态", clearable: true } },
     fieldNames: { label: "label", value: "value" },
     render: scope => {
       return (
@@ -391,6 +340,7 @@ const columns = reactive<ColumnProps[]>([
     prop: "createTime",
     label: "创建时间",
     minWidth: 160,
+    sortable: false,
     search: {
       el: "date-picker",
       span: 2,
@@ -403,7 +353,7 @@ const columns = reactive<ColumnProps[]>([
       }
     }
   },
-  { prop: "operation", label: "操作", fixed: "right", minWidth: 200 }
+  { prop: "operation", label: "操作", fixed: "right", minWidth: 300, sortable: false }
 ]);
 
 // 请求表格数据
@@ -446,13 +396,13 @@ const getTableList = (params: any) => {
 
 const rules = {
   userName: [
-    { required: true, message: "客户名称不能为空", trigger: "blur" },
-    { min: 2, max: 20, message: "客户名称长度必须介于 2 和 20 之间", trigger: "blur" }
+    { required: true, message: "用户名称不能为空", trigger: "blur" },
+    { min: 2, max: 20, message: "用户名称长度必须介于 2 和 20 之间", trigger: "blur" }
   ],
-  nickName: [{ required: true, message: "客户昵称不能为空", trigger: "blur" }],
+  nickName: [{ required: true, message: "用户昵称不能为空", trigger: "blur" }],
   password: [
-    { required: true, message: "客户密码不能为空", trigger: "blur" },
-    { min: 5, max: 20, message: "客户密码长度必须介于 5 和 20 之间", trigger: "blur" }
+    { required: true, message: "用户密码不能为空", trigger: "blur" },
+    { min: 5, max: 20, message: "用户密码长度必须介于 5 和 20 之间", trigger: "blur" }
   ],
   email: [{ type: "email", message: "请输入正确的邮箱地址", trigger: ["blur", "change"] }],
   phonenumber: [{ pattern: /^1[3|4|5|6|7|8|9][0-9]\d{8}$/, message: "请输入正确的手机号码", trigger: "blur" }]
@@ -465,10 +415,10 @@ const getDeptTree = () => {
   enabledDeptOptions.value = mockDeptTree;
 };
 
-// 客户状态修改
+// 用户状态修改
 const handleStatusChange = (row: any) => {
   const text = row.status === "0" ? "启用" : "停用";
-  ElMessageBox.confirm(`确认要"${text}""${row.userName}"客户吗？`, "提示", {
+  ElMessageBox.confirm(`确认要"${text}""${row.userName}"用户吗？`, "提示", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning"
@@ -507,26 +457,12 @@ const reset = () => {
   if (formRef.value) formRef.value.resetFields();
 };
 
-// 更多操作触发
-const handleCommand = (command, row) => {
-  switch (command) {
-    case "handleResetPwd":
-      handleResetPwd(row);
-      break;
-    case "handleAuthRole":
-      handleAuthRole(row);
-      break;
-    default:
-      break;
-  }
-};
-
 // 新增按钮操作
 const handleAdd = () => {
   reset();
   getDeptTree();
   open.value = true;
-  title.value = "添加客户";
+  title.value = "添加用户";
   form.password = "123456"; // 默认密码
 };
 
@@ -536,7 +472,7 @@ const handleUpdate = (row?: any) => {
   getDeptTree();
   const userId = row?.userId || (proTable.value?.selectedListIds && proTable.value.selectedListIds[0]);
   if (!userId) {
-    ElMessage.warning("请选择要修改的客户");
+    ElMessage.warning("请选择要修改的用户");
     return;
   }
   const user = mockUserList.find(item => item.userId === userId);
@@ -544,27 +480,11 @@ const handleUpdate = (row?: any) => {
     Object.assign(form, { ...user, password: "" });
   }
   open.value = true;
-  title.value = "修改客户";
-};
-
-// 重置密码按钮操作
-const handleResetPwd = row => {
-  ElMessageBox.prompt(`请输入"${row.userName}"的新密码`, "提示", {
-    confirmButtonText: "确定",
-    cancelButtonText: "取消",
-    inputPattern: /^.{5,20}$/,
-    inputErrorMessage: "客户密码长度必须介于 5 和 20 之间"
-  })
-    .then(({ value }) => {
-      ElMessage.success("修改成功，新密码是：" + value);
-    })
-    .catch(() => {
-      // 客户取消操作
-    });
+  title.value = "修改用户";
 };
 
 // 分配角色操作
-const handleAuthRole = () => {
+const handleAuthRole = (_row?: any) => {
   ElMessage.info("分配角色功能待实现");
 };
 
@@ -585,55 +505,6 @@ const submitForm = () => {
       }
     });
   }
-};
-
-// 删除按钮操作
-const handleDelete = (row?: any) => {
-  const userIds = row?.userId || proTable.value?.selectedListIds;
-  if (!userIds || (Array.isArray(userIds) && userIds.length === 0)) {
-    ElMessage.warning("请选择要删除的客户");
-    return;
-  }
-  ElMessageBox.confirm(`是否确认删除客户编号为"${Array.isArray(userIds) ? userIds.join(",") : userIds}"的数据项？`, "提示", {
-    confirmButtonText: "确定",
-    cancelButtonText: "取消",
-    type: "warning"
-  })
-    .then(() => {
-      ElMessage.success("删除成功");
-      proTable.value?.getTableList();
-      proTable.value?.clearSelection();
-    })
-    .catch(() => {
-      // 客户取消删除
-    });
-};
-
-// 导出按钮操作
-const handleExport = () => {
-  ElMessage.info("导出功能待实现");
-};
-
-// 导入按钮操作
-const handleImport = () => {
-  upload.open = true;
-};
-
-// 下载模板操作
-const importTemplate = () => {
-  ElMessage.info("下载模板功能待实现");
-};
-
-// 提交上传文件
-const submitFileForm = () => {
-  const file = uploadRef.value && uploadRef.value.uploadFiles;
-  if (!file || file.length === 0) {
-    ElMessage.error("请选择文件");
-    return;
-  }
-  ElMessage.success("导入成功");
-  upload.open = false;
-  proTable.value?.getTableList();
 };
 
 // 初始化

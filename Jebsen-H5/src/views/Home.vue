@@ -166,7 +166,7 @@
                 <van-icon name="cluster-o" class="trace-icon" @click="showPlatformFlow = true" />
               </div>
             </div>
-            <!-- 公司级标签（VIP车主、钻石客户、首保流失15个月、PCN售后增项等），跟随 ONEID 展示 -->
+            <!-- 公司级标签：展示当前 ONEID 下的标准商机类型 -->
             <div
               v-if="displayedHeaderTags.length > 0"
               class="company-header-tags"
@@ -231,13 +231,6 @@
                   <h1>{{ currentAgentName }}</h1>
                   <span v-if="isCompany" class="handler-role-pill">
                     公司客户
-                  </span>
-                  <!-- 仅个人视图下展示 VIP 车主头衔，避免与公司级标签重复 -->
-                  <span
-                    v-if="!isCompany && displayedHeaderTags.includes('VIP 车主')"
-                    class="handler-role-pill"
-                  >
-                    VIP车主
                   </span>
                   <!-- 同步监控与溯源入口：个人模式下仍在黑金卡展示 -->
                   <template v-if="!isCompany">
@@ -1391,6 +1384,12 @@ import { showToast, showLoadingToast, closeToast } from 'vant'
 import { areaList } from '@/utils/areaData'
 import { customerApi } from '@/api/customer'
 import type { TagPool, OneIdOption, MobileData, MobileItem, VehicleRelation } from '@/api/customer'
+import {
+  getOpportunityIcon,
+  getOpportunityTagType,
+  getOpportunityThemeClass,
+  normalizeOpportunityType,
+} from '@/constants/opportunityTypes'
 // 导入 Lucide 图标
 import { Phone, CarFront, Ticket, Tag, UserCircle, Edit2 } from 'lucide-vue-next'
 
@@ -2051,7 +2050,7 @@ const opportunityTypeList = computed(() => {
   if (!customerStore.opportunities || customerStore.opportunities.length === 0) {
     return []
   }
-  const types = customerStore.opportunities.map(opp => opp.type)
+  const types = customerStore.opportunities.map(opp => normalizeOpportunityType(opp.type))
   return Array.from(new Set(types)) // 去重
 })
 
@@ -2062,13 +2061,13 @@ const opportunityList = computed(() => {
   
   // 如果有 sources，提取所有不同的值
   if (opportunityType.sources && opportunityType.sources.length > 0) {
-    const values = opportunityType.sources.map(s => String(s.value))
+    const values = opportunityType.sources.map(s => normalizeOpportunityType(String(s.value)))
     // 去重并保持顺序
     return Array.from(new Set(values))
   }
   
   // 否则使用主值
-  return opportunityType.value ? [String(opportunityType.value)] : []
+  return opportunityType.value ? [normalizeOpportunityType(String(opportunityType.value))] : []
 })
 
 // 所有显示的资产（响应经办人切换）
@@ -2549,7 +2548,7 @@ const vehicleDialogSubtitle = computed(() => {
   return allVehiclesInVehicleDialog.value.length > 0 ? `共 ${allVehiclesInVehicleDialog.value.length} 辆` : ''
 })
 
-// 头部标签：显示当前 ONEID 下的所有商机类型（不再单独注入 VIP 车主）
+// 头部标签：显示当前 ONEID 下的所有标准商机类型
 const displayedHeaderTags = computed(() => {
   const tags: string[] = []
 
@@ -2559,7 +2558,7 @@ const displayedHeaderTags = computed(() => {
   const opps = selectedHandler.value?.opportunities || customerStore.opportunities || []
 
   if (opps.length > 0) {
-    const opportunityTypes = opps.map(opp => opp.type)
+    const opportunityTypes = opps.map(opp => normalizeOpportunityType(opp.type))
     tags.push(...opportunityTypes)
   }
 
@@ -2571,45 +2570,20 @@ const displayedHeaderTags = computed(() => {
 
 // 获取头部标签的样式类（商机类型）
 const getHeaderTagClass = (tag: string) => {
-  // 钻石客户使用 vip-tag 样式（琥珀金实色背景，黑色文字）
-  if (tag === '钻石客户') {
-    return 'vip-tag'
-  }
-
-  // 其他商机标签：统一基类为 biz-badge，不同类型叠加不同配色类
-  let themeClass = ''
-
-  const isType = (keywords: string[]) => keywords.some(k => tag.includes(k))
-
-  if (isType(['企业大客户', '高价值企业客户', '重点维护企业'])) {
-    themeClass = 'opp-tag-gold'
-  } else if (isType(['首保流失'])) {
-    themeClass = 'opp-tag-warning'
-  } else if (isType(['PCN'])) {
-    themeClass = 'opp-tag-purple'
-  } else if (isType(['商务合作伙伴', '年度采购意向'])) {
-    themeClass = 'opp-tag-blue'
-  } else if (isType(['企业车队升级机会'])) {
-    themeClass = 'opp-tag-teal'
-  } else if (isType(['企业保养关怀活动', '企业轮胎关怀计划'])) {
-    themeClass = 'opp-tag-green'
-  }
-
-  return themeClass ? `biz-badge ${themeClass}` : 'biz-badge'
+  return getOpportunityThemeClass(tag)
 }
 
 // 判断是否为商机标签
 const isOpportunityTag = (tag: string): boolean => {
-  // 所有标签（包括钻石客户）都是商机标签（从 opportunities 中提取）
+  // 头部区域仅展示商机标签
   return true
 }
 
 // 获取标签图标
 const getTagIcon = (tag: string): string | null => {
-  // 钻石客户显示钻石图标
-  if (tag === '钻石客户') {
-    return 'gem-o'
-  }
+  const opportunityIcon = getOpportunityIcon(tag)
+  if (opportunityIcon)
+    return opportunityIcon
   // 贷款即将到期显示时钟图标
   if (tag === '贷款即将到期') {
     return 'clock-o'
@@ -2949,8 +2923,8 @@ const getTagInfo = (tagName: string) => {
     }
   }
   
-  // 特殊标签处理："首保流失15个月"和"PCN售后"
-  const specialTags = ['首保流失15个月', 'PCN售后']
+  // 商机类标签保留强化描边
+  const specialTags = ['保养潜在流失', 'PCN售后 Campaign']
   const isSpecialTag = specialTags.includes(tagName)
   
   // 如果标签有color属性，使用自定义颜色（转换为浅色系）
@@ -3371,15 +3345,7 @@ const getAppointmentStatusType = (status: string): any => {
 
 // 获取商机类型标签类型（使用颜色标识）
 const getOpportunityTypeTagType = (type: string): any => {
-  const typeMap: Record<string, any> = {
-    '维保到期': 'warning',
-    '代金券到期': 'warning',
-    '高价值客户': 'danger',
-    '流失预警': 'danger',
-    '复购机会': 'success',
-    '升级机会': 'primary',
-  }
-  return typeMap[type] || 'primary'
+  return getOpportunityTagType(type)
 }
 
 // 获取商机状态类型
@@ -5666,7 +5632,7 @@ onMounted(async () => {
           transform: scale(0.95);
         }
         
-        // 特殊标签样式："首保流失15个月"和"PCN售后"
+        // 特殊标签样式：重点商机类标签
         &.special-tag {
           opacity: 0.85;
           font-weight: 500;

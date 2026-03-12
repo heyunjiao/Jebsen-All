@@ -434,6 +434,7 @@ const statusChartOption = computed<ECOption | null>(() => {
     pushed: "#e6a23c",
     processing: "#409eff",
     completed: "#67c23a",
+    followed: "#409eff",
     rejected: "#f56c6c",
     failed: "#f56c6c"
   };
@@ -547,6 +548,7 @@ const statusTrendOption = computed<ECOption | null>(() => {
     pushed: "#e6a23c",
     processing: "#409eff",
     completed: "#67c23a",
+    followed: "#409eff",
     rejected: "#f56c6c",
     failed: "#f56c6c"
   };

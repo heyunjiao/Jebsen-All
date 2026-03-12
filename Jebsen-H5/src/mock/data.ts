@@ -129,10 +129,10 @@ export const mockCustomerProfile: CustomerProfile = {
     ],
   },
   opportunityType: {
-    value: '高价值商机',
+    value: 'CM 自定义',
     isConflict: false,
     sources: [
-      { origin: 'CRM', value: '高价值商机', time: '2025-10-01 10:30:00' },
+      { origin: 'CRM', value: 'CM 自定义', time: '2025-10-01 10:30:00' },
     ],
   },
   segmentType: {
@@ -807,8 +807,8 @@ export const mockCompanyProfile: CustomerProfile = {
         { id: 'A_H003_1', type: 'voucher', name: '大客户礼包', amount: 50000, status: '未使用', validFrom: '2025-01-01', validTo: '2026-01-01', source: 'CRM' }
       ],
       opportunities: [
-        { id: 'O_H003_1', type: 'VIP 车主', triggerRule: '高价值', priority: '高', status: '待处理', createTime: '2025-01-16 10:00:00' },
-        { id: 'O_H003_2', type: '钻石客户', triggerRule: '高价值', priority: '高', status: '待处理', createTime: '2025-01-14 09:20:00' }
+        { id: 'O_H003_1', type: 'CM 自定义', triggerRule: '高价值', priority: '高', status: '待处理', createTime: '2025-01-16 10:00:00' },
+        { id: 'O_H003_2', type: 'BDC Campaign', triggerRule: '高价值', priority: '高', status: '待处理', createTime: '2025-01-14 09:20:00' }
       ]
     },
   ],

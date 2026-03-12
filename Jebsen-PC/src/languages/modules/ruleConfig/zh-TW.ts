@@ -14,6 +14,7 @@ export default {
     },
     buttons: {
       add: "新增分發配置",
+      addLead: "新增商機",
       edit: "編輯",
       delete: "刪除",
       cancel: "取消",
@@ -33,6 +34,7 @@ export default {
       selectTarget: "請選擇推送目標",
       selectStatus: "請選擇狀態",
       selectSegment: "請選擇分群",
+      selectPushRole: "請選擇推送角色",
       selectEventType: "請選擇事件類型",
       enterSchedule: "請輸入Cron表達式，如：0 9 * * * (每天9點)",
       leadTitle: "自動填入，如：維保召回商機",
@@ -51,17 +53,35 @@ export default {
         low: "低"
       },
       leadType: {
+        system: "系統商機",
         aftersales_cs: "售後滿意度回訪",
         newcar_cs: "新車滿意度回訪",
         bdc_campaign: "BDC Campaign",
-        bdc_aftersales_recall: "BDC售後商機招攬",
-        bdc_renewal: "BDC續保商機",
         cm_custom: "CM 自定義",
         pcn_aftersales_campaign: "PCN售後 Campaign",
-        ttr_survey: "TTR調研"
+        ttr_survey: "TTR調研",
+        new_to_renew: "新轉續",
+        renew_to_renew: "續轉續",
+        in_repair_no_insurance: "在修不在保",
+        psp_expiry: "PSP到期",
+        maintenance_churn: "保養潛在流失",
+        no_visit_365d: "365天未進店",
+        regular_maintenance_365d: "定保客戶365天未保養",
+        periodic_maintenance: "定期保養",
+        first_insurance_2y: "首保2年",
+        first_maintenance: "首次保養",
+        newcar_365d_no_maintenance: "新車365天未保養",
+        newcar_warranty_expiry: "新車保修到期",
+        extended_warranty_expiry: "延保到期",
+        newcar_delivery_90d_revisit: "新車交付90天回訪"
       },
       pushTarget: {
         BDC外呼系统: "BDC外呼系統"
+      },
+      pushRole: {
+        SA: "SA",
+        SC: "SC",
+        other: "其他"
       },
       status: {
         enable: "啟用",
@@ -92,6 +112,8 @@ export default {
       leadType: "商機類型",
       priority: "優先級",
       pushTarget: "推送目標",
+      pushPlatform: "推送平台",
+      pushRole: "推送角色",
       enabled: "啟用狀態",
       validity: "有效期",
       validityDays: "有效期（天）"

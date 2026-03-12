@@ -4,16 +4,9 @@
       <div class="dashboard-content">
         <div class="dashboard-section">
           <header class="section-title">
-            <span>价值分层</span>
+            <span>商机分区</span>
           </header>
-          <DashboardValue :date-range="dateRange" @refresh="handleRefresh" @navigate="handleNavigate" />
-        </div>
-
-        <div class="dashboard-section">
-          <header class="section-title">
-            <span>生命周期监控</span>
-          </header>
-          <DashboardLifecycle :date-range="dateRange" @refresh="handleRefresh" @navigate="handleNavigate" />
+          <DashboardOpportunity :date-range="dateRange" @refresh="handleRefresh" @navigate="handleNavigate" />
         </div>
       </div>
     </section>
@@ -23,8 +16,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import DashboardLifecycle from "./components/DashboardLifecycle.vue";
-import DashboardValue from "./components/DashboardValue.vue";
+import DashboardOpportunity from "./components/DashboardOpportunity.vue";
 
 const router = useRouter();
 const dateRange = ref<string[] | undefined>(undefined);

@@ -20,7 +20,7 @@
         </el-descriptions-item>
         <el-descriptions-item label="商机ID">{{ auditLog.leadId || "-" }}</el-descriptions-item>
         <el-descriptions-item label="客户姓名">{{ auditLog.customerName || "-" }}</el-descriptions-item>
-        <el-descriptions-item label="商机类型">{{ auditLog.leadType || "-" }}</el-descriptions-item>
+        <el-descriptions-item label="商机类型">{{ getLeadTypeLabel(auditLog.leadType) }}</el-descriptions-item>
         <el-descriptions-item label="推送目标系统">
           <el-tag v-if="auditLog.targetSystem" :type="getTargetSystemTagType(auditLog.targetSystem)">
             {{ getTargetSystemLabel(auditLog.targetSystem) }}
@@ -257,6 +257,7 @@ import {
 } from "@element-plus/icons-vue";
 import type { Lead } from "@/api/modules/lead";
 import { reloadAuditLog, exportAuditLog } from "@/api/modules/lead";
+import { getLeadTypeLabel } from "@/constants/leadTypes";
 
 interface Props {
   auditLog: Lead.AuditLog;

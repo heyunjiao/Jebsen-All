@@ -1,35 +1,51 @@
 import type { Lead } from "@/api/modules/lead";
+import {
+  BOARD_LEAD_TYPE_OPTIONS,
+  C360_LEAD_TYPE_VALUES,
+  GENERAL_LEAD_TYPE_VALUES,
+  getLeadTypeLabel,
+  normalizeLeadType
+} from "@/constants/leadTypes";
 
 // 重新导出 API 类型，方便页面使用
 export type { Lead };
+export { getLeadTypeLabel, normalizeLeadType };
 
-// 商机状态选项
+// 商机状态选项（列表筛选与展示：已推送、已成交、已跟进）
 export const LEAD_STATUS_OPTIONS = [
-  { label: "待处理", value: "pending" },
   { label: "已推送", value: "pushed" },
-  { label: "处理中", value: "processing" },
-  { label: "已完成", value: "completed" },
-  { label: "已拒绝", value: "rejected" },
-  { label: "失败", value: "failed" }
+  { label: "已成交", value: "completed" },
+  { label: "已跟进", value: "followed" }
 ] as const;
+
+/** 后端可能返回的旧状态到展示状态的映射（展示为 已推送/已成交/已跟进） */
+export const LEAD_STATUS_DISPLAY_MAP: Record<string, string> = {
+  pushed: "已推送",
+  completed: "已成交",
+  followed: "已跟进",
+  pending: "已跟进",
+  processing: "已跟进",
+  rejected: "已跟进",
+  failed: "已跟进"
+};
 
 // 商机类型选项
-export const LEAD_TYPE_OPTIONS = [
-  { label: "售后满意度回访", value: "aftersales_cs" },
-  { label: "新车满意度回访", value: "newcar_cs" },
-  { label: "BDC Campaign", value: "bdc_campaign" },
-  { label: "BDC售后商机招揽", value: "bdc_aftersales_recall" },
-  { label: "BDC续保商机", value: "bdc_renewal" },
-  { label: "CM 自定义", value: "cm_custom" },
-  { label: "PCN售后 Campaign", value: "pcn_aftersales_campaign" },
-  { label: "TTR调研", value: "ttr_survey" },
-  { label: "新转续", value: "new_to_renew" },
-  { label: "续转续", value: "renew_to_renew" },
-  { label: "在修不在保", value: "in_repair_no_insurance" },
-  { label: "沉睡", value: "dormant" },
-  { label: "待激活", value: "pending_activation" },
-  { label: "活跃", value: "active" }
-] as const;
+export const LEAD_TYPE_OPTIONS = BOARD_LEAD_TYPE_OPTIONS;
+
+/** 标准18个商机：17个标准商机 + 1个TTR商机（标准20个中的一栏） */
+export const STANDARD_18_LEAD_TYPES = LEAD_TYPE_OPTIONS.filter(
+  option => !GENERAL_LEAD_TYPE_VALUES.includes(option.value as (typeof GENERAL_LEAD_TYPE_VALUES)[number])
+);
+
+/** 通用商机：没有逻辑，使用商机通用模板上传 */
+export const GENERAL_LEAD_TYPES = LEAD_TYPE_OPTIONS.filter(option =>
+  GENERAL_LEAD_TYPE_VALUES.includes(option.value as (typeof GENERAL_LEAD_TYPE_VALUES)[number])
+);
+
+/** 360系统商机：C360自动生成 */
+export const C360_LEAD_TYPES = LEAD_TYPE_OPTIONS.filter(option =>
+  C360_LEAD_TYPE_VALUES.includes(option.value as (typeof C360_LEAD_TYPE_VALUES)[number])
+);
 
 // 推送目标选项
 export const PUSH_TARGET_OPTIONS = [{ label: "BDC外呼系统", value: "BDC外呼系统" }] as const;

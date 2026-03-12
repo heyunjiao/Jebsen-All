@@ -6,8 +6,8 @@ import { PORT1 } from "@/api/config/servicePort";
  * 商机管理接口类型定义
  */
 export namespace Lead {
-  // 商机状态
-  export type LeadStatus = "pending" | "pushed" | "processing" | "completed" | "rejected" | "failed";
+  // 商机状态（列表筛选用：pushed | completed | followed；后端可能仍返回 pending/processing 等，前端展示为 已跟进）
+  export type LeadStatus = "pushed" | "completed" | "followed" | "pending" | "processing" | "rejected" | "failed";
 
   // 推送目标系统
   export type PushTarget = "BDC外呼系统";

@@ -11,22 +11,13 @@
           <div class="stats-label">{{ t("leadManagement.stats.leadTotal") }}</div>
         </div>
       </div>
-      <div class="stats-card info-card">
-        <div class="stats-icon-wrapper">
-          <el-icon><Clock /></el-icon>
-        </div>
-        <div class="stats-content">
-          <div class="stats-number">{{ formatNumber(leadStats.pendingCount) }}</div>
-          <div class="stats-label">{{ t("leadManagement.stats.pendingCount") }}</div>
-        </div>
-      </div>
       <div class="stats-card warning-card">
         <div class="stats-icon-wrapper">
-          <el-icon><Loading /></el-icon>
+          <el-icon><Upload /></el-icon>
         </div>
         <div class="stats-content">
-          <div class="stats-number">{{ formatNumber(leadStats.processingCount) }}</div>
-          <div class="stats-label">{{ t("leadManagement.stats.processingCount") }}</div>
+          <div class="stats-number">{{ formatNumber(leadStats.pushedCount) }}</div>
+          <div class="stats-label">{{ t("leadManagement.stats.pushedCount") }}</div>
         </div>
       </div>
       <div class="stats-card success-card">
@@ -38,13 +29,13 @@
           <div class="stats-label">{{ t("leadManagement.stats.completedCount") }}</div>
         </div>
       </div>
-      <div class="stats-card success-card">
+      <div class="stats-card info-card">
         <div class="stats-icon-wrapper">
-          <el-icon><TrendCharts /></el-icon>
+          <el-icon><Loading /></el-icon>
         </div>
         <div class="stats-content">
-          <div class="stats-number">{{ leadStats.pushSuccessRate }} <span class="sub-value">%</span></div>
-          <div class="stats-label">{{ t("leadManagement.stats.pushSuccessRate") }}</div>
+          <div class="stats-number">{{ formatNumber(leadStats.followedCount) }}</div>
+          <div class="stats-label">{{ t("leadManagement.stats.followedCount") }}</div>
         </div>
       </div>
     </div>
@@ -74,18 +65,7 @@
       <!-- 商机类型列 -->
       <template #leadType="scope">
         <el-tag :type="getTypeTagType(scope.row.leadType)" size="small">
-          {{
-            $t(`leadManagement.enums.leadType.${scope.row.leadType}`) !== `leadManagement.enums.leadType.${scope.row.leadType}`
-              ? $t(`leadManagement.enums.leadType.${scope.row.leadType}`)
-              : scope.row.leadType
-          }}
-        </el-tag>
-      </template>
-
-      <!-- 优先级列 -->
-      <template #priority="scope">
-        <el-tag :type="getPriorityTagType(scope.row.priority)" size="small">
-          {{ getPriorityLabel(scope.row.priority) }}
+          {{ getLeadTypeLabel(scope.row.leadType) }}
         </el-tag>
       </template>
 
@@ -113,12 +93,9 @@
             currentLead.customerName
           }}</el-descriptions-item>
           <el-descriptions-item :label="$t('customer.phone')">{{ currentLead.phone || "-" }}</el-descriptions-item>
-          <el-descriptions-item :label="$t('leadManagement.columns.leadType')">{{ currentLead.leadType }}</el-descriptions-item>
-          <el-descriptions-item :label="$t('leadManagement.columns.priority')">
-            <el-tag :type="getPriorityTagType(currentLead.priority)" size="small">
-              {{ getPriorityLabel(currentLead.priority) }}
-            </el-tag>
-          </el-descriptions-item>
+          <el-descriptions-item :label="$t('leadManagement.columns.leadType')">{{
+            getLeadTypeLabel(currentLead.leadType)
+          }}</el-descriptions-item>
           <el-descriptions-item :label="$t('leadManagement.columns.status')">
             <el-tag :type="getStatusTagType(currentLead.status)" size="small">
               {{ getStatusLabel(currentLead.status) }}
@@ -149,13 +126,20 @@
 import { ref, reactive, computed } from "vue";
 import { useRoute } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { View, Upload, Refresh, Opportunity, Clock, Loading, Check, TrendCharts } from "@element-plus/icons-vue";
+import { View, Upload, Refresh, Opportunity, Loading, Check } from "@element-plus/icons-vue";
 import { useI18n } from "vue-i18n";
 import ProTable from "@/components/ProTable/index.vue";
 import type { ColumnProps } from "@/components/ProTable/interface";
 import { getLeadList, pushLeads, reloadLead } from "@/api/modules/lead";
 import type { Lead } from "@/api/modules/lead";
-import { LEAD_STATUS_OPTIONS, PRIORITY_OPTIONS, PUSH_TARGET_OPTIONS } from "../interface";
+import { getLeadTypeLabel, getLeadTypeTagType } from "@/constants/leadTypes";
+import {
+  LEAD_STATUS_OPTIONS,
+  LEAD_STATUS_DISPLAY_MAP,
+  PUSH_TARGET_OPTIONS,
+  GENERAL_LEAD_TYPES,
+  C360_LEAD_TYPES
+} from "../interface";
 import PushDrawer from "./PushDrawer.vue";
 
 const route = useRoute();
@@ -168,13 +152,12 @@ const selectedLeadIds = ref<string[]>([]);
 const defaultAdvisor = ref<{ id: string; name: string; role: string; department: string } | null>(null);
 const contactList = ref<any[]>([]);
 
-// 商机统计数据
+// 商机统计数据（状态为：已推送、已成交、已跟进）
 const leadStats = reactive({
   leadTotal: 0,
-  pendingCount: 0,
-  processingCount: 0,
+  pushedCount: 0,
   completedCount: 0,
-  pushSuccessRate: 0
+  followedCount: 0
 });
 
 // 格式化数字
@@ -190,9 +173,15 @@ const getInitialParams = () => {
     pageSize: 10
   };
 
-  // 处理分类过滤
+  // 处理分类过滤：单类型传 category=类型值；分组传 category=general/system，后端按分组返回该组下所有类型的商机
   if (query.category) {
     params.category = query.category;
+    // 若后端暂不支持分组，可传 leadType 逗号分隔多类型
+    if (query.category === "general") {
+      params.leadTypes = GENERAL_LEAD_TYPES.map(t => t.value);
+    } else if (query.category === "system") {
+      params.leadTypes = C360_LEAD_TYPES.map(t => t.value);
+    }
   }
 
   // 处理日期范围过滤
@@ -246,11 +235,6 @@ const columns = computed<ColumnProps<Lead.LeadInfo>[]>(() => [
     minWidth: 140
   },
   {
-    prop: "priority",
-    label: t("leadManagement.columns.priority"),
-    minWidth: 100
-  },
-  {
     prop: "status",
     label: t("leadManagement.columns.status"),
     minWidth: 100,
@@ -277,7 +261,7 @@ const columns = computed<ColumnProps<Lead.LeadInfo>[]>(() => [
   },
   {
     prop: "createdAt",
-    label: t("leadManagement.columns.createdAt"),
+    label: t("leadManagement.columns.pushDate"),
     minWidth: 180
   }
 ]);
@@ -293,17 +277,13 @@ const loadData = async (params: any) => {
   return res;
 };
 
-// 更新统计数据
+// 更新统计数据（已推送、已成交、已跟进）
 const updateStats = (list: Lead.LeadInfo[]) => {
   leadStats.leadTotal = list.length;
-  leadStats.pendingCount = list.filter(item => item.status === "pending").length;
-  leadStats.processingCount = list.filter(item => item.status === "processing").length;
+  leadStats.pushedCount = list.filter(item => item.status === "pushed").length;
   leadStats.completedCount = list.filter(item => item.status === "completed").length;
-
-  // 计算推送成功率
-  const pushedLeads = list.filter(item => item.pushStatus === "success");
-  const totalPushed = list.filter(item => item.pushStatus).length;
-  leadStats.pushSuccessRate = totalPushed > 0 ? Math.round((pushedLeads.length / totalPushed) * 100) : 0;
+  const followedStatuses = ["pending", "processing", "rejected", "failed", "followed"];
+  leadStats.followedCount = list.filter(item => followedStatuses.includes(item.status)).length;
 };
 
 // 刷新表格方法，供父组件调用
@@ -471,49 +451,21 @@ const handleReloadSingle = async (row: Lead.LeadInfo) => {
 };
 
 const getStatusLabel = (status: Lead.LeadStatus) => {
-  const option = LEAD_STATUS_OPTIONS.find(opt => opt.value === status);
-  return option?.label || status;
+  return LEAD_STATUS_DISPLAY_MAP[status] ?? LEAD_STATUS_OPTIONS.find(opt => opt.value === status)?.label ?? status;
 };
 
 const getStatusTagType = (status: Lead.LeadStatus): "primary" | "success" | "warning" | "danger" | "info" => {
-  const typeMap: Record<Lead.LeadStatus, "primary" | "success" | "warning" | "danger" | "info"> = {
-    pending: "info",
-    pushed: "warning",
-    processing: "primary",
-    completed: "success",
-    rejected: "danger",
-    failed: "danger"
-  };
-  return typeMap[status] || "info";
-};
-
-const getPriorityLabel = (priority: "low" | "medium" | "high") => {
-  const option = PRIORITY_OPTIONS.find(opt => opt.value === priority);
-  return option?.label || priority;
-};
-
-const getPriorityTagType = (priority: "low" | "medium" | "high"): "primary" | "success" | "warning" | "danger" | "info" => {
+  const displayStatus = LEAD_STATUS_DISPLAY_MAP[status] || status;
   const typeMap: Record<string, "primary" | "success" | "warning" | "danger" | "info"> = {
-    low: "info",
-    medium: "warning",
-    high: "danger"
+    已推送: "warning",
+    已成交: "success",
+    已跟进: "primary"
   };
-  return typeMap[priority] || "info";
+  return typeMap[displayStatus] || "info";
 };
 
 const getTypeTagType = (type: string): "primary" | "success" | "warning" | "danger" | "info" => {
-  const typeMap: Record<string, "primary" | "success" | "warning" | "danger" | "info"> = {
-    new_to_renew: "primary",
-    renew_to_renew: "success",
-    in_repair_no_insurance: "warning",
-    dormant: "info",
-    pending_activation: "danger",
-    active: "success",
-    diamond: "danger",
-    gold: "warning",
-    silver: "info"
-  };
-  return typeMap[type] || "primary";
+  return getLeadTypeTagType(type);
 };
 
 const getPushStatusLabel = (status: "pending" | "success" | "failed") => {

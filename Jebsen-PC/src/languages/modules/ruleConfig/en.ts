@@ -14,6 +14,7 @@ export default {
     },
     buttons: {
       add: "Add Distribution Config",
+      addLead: "Add Opportunity",
       edit: "Edit",
       delete: "Delete",
       cancel: "Cancel",
@@ -33,6 +34,7 @@ export default {
       selectTarget: "Select push target",
       selectStatus: "Select status",
       selectSegment: "Select segment",
+      selectPushRole: "Select push role",
       selectEventType: "Select event type",
       enterSchedule: "Enter Cron expression, e.g., 0 9 * * * (9 AM daily)",
       leadTitle: "Auto-filled, e.g., Maintenance Recall Lead",
@@ -51,19 +53,37 @@ export default {
         low: "Low"
       },
       leadType: {
+        system: "System Opportunity",
         aftersales_cs: "After-sales Satisfaction Follow-up",
         newcar_cs: "New Car Satisfaction Follow-up",
         bdc_campaign: "BDC Campaign",
-        bdc_aftersales_recall: "BDC After-sales Opportunity Recruitment",
-        bdc_renewal: "BDC Renewal Opportunity",
         cm_custom: "CM Custom",
         pcn_aftersales_campaign: "PCN After-sales Campaign",
-        ttr_survey: "TTR Research"
+        ttr_survey: "TTR Research",
+        new_to_renew: "New to Renew",
+        renew_to_renew: "Renew to Renew",
+        in_repair_no_insurance: "In Repair No Insurance",
+        psp_expiry: "PSP Expiry",
+        maintenance_churn: "Maintenance Churn Risk",
+        no_visit_365d: "No Visit for 365 Days",
+        regular_maintenance_365d: "Regular Maintenance Customer No Service for 365 Days",
+        periodic_maintenance: "Periodic Maintenance",
+        first_insurance_2y: "First Insurance 2Y",
+        first_maintenance: "First Maintenance",
+        newcar_365d_no_maintenance: "New Car No Service for 365 Days",
+        newcar_warranty_expiry: "New Car Warranty Expiry",
+        extended_warranty_expiry: "Extended Warranty Expiry",
+        newcar_delivery_90d_revisit: "90-day New Car Delivery Follow-up"
       },
       pushTarget: {
         BDC外呼系统: "BDC System",
         wechat: "WeCom",
         crm: "CRM System"
+      },
+      pushRole: {
+        SA: "SA",
+        SC: "SC",
+        other: "Other"
       },
       status: {
         enable: "Enabled",
@@ -94,6 +114,8 @@ export default {
       leadType: "Lead Type",
       priority: "Priority",
       pushTarget: "Push Target",
+      pushPlatform: "Push Platform",
+      pushRole: "Push Role",
       enabled: "Status",
       validity: "Validity",
       validityDays: "Validity (days)"

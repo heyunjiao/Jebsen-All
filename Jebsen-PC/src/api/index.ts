@@ -19,6 +19,10 @@ import leadManagementMockData from "@/assets/json/leadManagementMockData.json";
 import customerSegmentationMockData from "@/assets/json/customerSegmentationMockData.json";
 import collectionMockData from "@/assets/json/collectionMockData.json";
 import dataQualityWorkbenchMockData from "@/assets/json/dataQualityWorkbenchMockData.json";
+import {
+  mergeLeadTypeMetrics,
+  normalizeLeadTypeList
+} from "@/constants/leadTypes";
 
 export interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
   loading?: boolean;
@@ -35,6 +39,28 @@ const config = {
 };
 
 const axiosCanceler = new AxiosCanceler();
+
+const normalizeLeadListResponse = (listData: any, field = "leadType") => {
+  if (!listData?.data?.list) return listData;
+  return {
+    ...listData,
+    data: {
+      ...listData.data,
+      list: normalizeLeadTypeList(listData.data.list, field)
+    }
+  };
+};
+
+const normalizeDashboardResponse = (dashboard: any) => {
+  if (!dashboard?.data) return dashboard;
+  return {
+    ...dashboard,
+    data: {
+      ...dashboard.data,
+      byType: mergeLeadTypeMetrics(dashboard.data.byType || [], ["count"])
+    }
+  };
+};
 
 /**
  * @description 获取 Monitor 模块的 mock 数据
@@ -541,7 +567,7 @@ function getTagManageMockData(url: string, method: string, params: any) {
 function getLeadMockData(url: string, method: string, params: any) {
   // 商机列表接口
   if (url.includes("/lead/list")) {
-    let listData = JSON.parse(JSON.stringify(leadManagementMockData.leadList));
+    let listData = normalizeLeadListResponse(JSON.parse(JSON.stringify(leadManagementMockData.leadList)));
     const {
       pageNum = 1,
       pageSize = 10,
@@ -599,7 +625,7 @@ function getLeadMockData(url: string, method: string, params: any) {
   // 商机详情接口
   if (url.includes("/lead/detail/") && method === "get") {
     const leadId = url.split("/lead/detail/")[1];
-    const listData = leadManagementMockData.leadList.data.list;
+    const listData = normalizeLeadTypeList(leadManagementMockData.leadList.data.list as any[], "leadType");
     const detail = listData.find((item: any) => item.id === leadId);
     if (detail) {
       return {
@@ -632,12 +658,12 @@ function getLeadMockData(url: string, method: string, params: any) {
 
   // 看板统计接口
   if (url.includes("/lead/dashboard/stats") && method === "get") {
-    return leadManagementMockData.dashboard;
+    return normalizeDashboardResponse(JSON.parse(JSON.stringify(leadManagementMockData.dashboard)));
   }
 
   // 规则列表接口
   if (url.includes("/lead/rule/list")) {
-    let listData = JSON.parse(JSON.stringify(leadManagementMockData.ruleList));
+    let listData = normalizeLeadListResponse(JSON.parse(JSON.stringify(leadManagementMockData.ruleList)));
     const { pageNum = 1, pageSize = 10, enabled } = params || {};
 
     // 前端筛选
@@ -661,7 +687,7 @@ function getLeadMockData(url: string, method: string, params: any) {
   // 规则详情接口
   if (url.includes("/lead/rule/detail/") && method === "get") {
     const ruleId = url.split("/lead/rule/detail/")[1];
-    const listData = leadManagementMockData.ruleList.data.list;
+    const listData = normalizeLeadTypeList(leadManagementMockData.ruleList.data.list as any[], "leadType");
     const detail = listData.find((item: any) => item.id === ruleId);
     if (detail) {
       return {
@@ -694,7 +720,7 @@ function getLeadMockData(url: string, method: string, params: any) {
 
   // 审计日志列表接口
   if (url.includes("/lead/audit/list")) {
-    let listData = JSON.parse(JSON.stringify(leadManagementMockData.auditList));
+    let listData = normalizeLeadListResponse(JSON.parse(JSON.stringify(leadManagementMockData.auditList)));
     const { pageNum = 1, pageSize = 10, leadId, oneId, operation, targetSystem, operator, startDate, endDate } = params || {};
 
     // 前端筛选
@@ -736,7 +762,7 @@ function getLeadMockData(url: string, method: string, params: any) {
   // 审计日志详情接口
   if (url.includes("/lead/audit/detail/") && method === "get") {
     const auditId = url.split("/lead/audit/detail/")[1];
-    const listData = leadManagementMockData.auditList.data.list;
+    const listData = normalizeLeadTypeList(leadManagementMockData.auditList.data.list as any[], "leadType");
     const detail = listData.find((item: any) => item.id === auditId);
     if (detail) {
       return {

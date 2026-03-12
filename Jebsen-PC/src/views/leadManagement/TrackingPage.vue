@@ -17,7 +17,7 @@
         <el-tab-pane v-for="type in leadTypeOptions" :key="type.value" :name="type.value">
           <template #label>
             <span class="tab-label">
-              {{ $t(`leadManagement.enums.leadType.${type.value}`) }}
+              {{ getLeadTypeLabel(type.value) }}
               <el-badge
                 v-if="getTypeStats(type.value).pushed > 0"
                 :value="getTypeStats(type.value).pushed"
@@ -204,7 +204,7 @@
           <el-descriptions-item :label="$t('customer.phone')">{{ currentItem.phone || "-" }}</el-descriptions-item>
           <el-descriptions-item :label="$t('leadManagement.columns.leadType')">
             <el-tag :type="getTypeTagType(currentItem.leadType) as any" size="small">
-              {{ $t(`leadManagement.enums.leadType.${currentItem.leadType}`) }}
+              {{ getLeadTypeLabel(currentItem.leadType) }}
             </el-tag>
           </el-descriptions-item>
           <el-descriptions-item :label="$t('leadManagement.columns.ruleName')">{{ currentItem.ruleName }}</el-descriptions-item>
@@ -255,6 +255,12 @@ import type { ColumnProps } from "@/components/ProTable/interface";
 import { getLeadTrackingList, getLeadTrackingStats } from "@/api/modules/lead";
 import type { Lead } from "@/api/modules/lead";
 import { LEAD_TYPE_OPTIONS, PUSH_TARGET_OPTIONS } from "./interface";
+import {
+  getLeadTypeLabel,
+  getLeadTypeTagType,
+  mergeLeadTypeMetrics,
+  normalizeLeadTypeList
+} from "@/constants/leadTypes";
 import ECharts from "@/components/ECharts/index.vue";
 import { ECOption } from "@/components/ECharts/config";
 import leadTrackingMockData from "@/assets/json/leadTrackingMockData.json";
@@ -293,6 +299,7 @@ const initParam = reactive<Lead.ReqLeadTrackingParams>({
 // 选项数据
 const leadTypeOptions = LEAD_TYPE_OPTIONS;
 const pushTargetOptions = PUSH_TARGET_OPTIONS;
+const trackingMockList = normalizeLeadTypeList((leadTrackingMockData as any).trackingList.data.list || [], "leadType");
 
 // 表格列配置
 const columns: ColumnProps[] = [
@@ -387,7 +394,7 @@ const loadData = async (params: any) => {
 
   if (useMockData) {
     // 直接使用mock数据
-    let mockList = [...(leadTrackingMockData as any).trackingList.data.list];
+    let mockList = [...trackingMockList];
 
     // Add mock lostReason for demo purpose
     mockList.forEach((item: any) => {
@@ -434,11 +441,17 @@ const loadData = async (params: any) => {
   // 生产环境调用真实API
   try {
     const res = await getLeadTrackingList(queryParams);
-    return res;
+    return {
+      ...res,
+      data: {
+        ...res.data,
+        list: normalizeLeadTypeList(res.data?.list || [], "leadType")
+      }
+    };
   } catch (error) {
     console.error("API调用失败:", error);
     // API失败时也使用mock数据作为降级方案
-    let mockList = [...(leadTrackingMockData as any).trackingList.data.list];
+    let mockList = [...trackingMockList];
     const pageNum = queryParams.pageNum || 1;
     const pageSize = queryParams.pageSize || 10;
     const start = (pageNum - 1) * pageSize;
@@ -471,7 +484,7 @@ const loadStats = async () => {
 
   if (useMockData) {
     // 使用 mock 列表数据动态计算统计信息，确保与业务数据一致
-    const allList = (leadTrackingMockData as any).trackingList.data.list as Lead.LeadTrackingItem[];
+    const allList = trackingMockList as Lead.LeadTrackingItem[];
 
     // 按筛选条件过滤
     const filteredList = allList.filter(item => {
@@ -560,12 +573,18 @@ const loadStats = async () => {
   // 生产环境调用真实API
   try {
     const res = await getLeadTrackingStats(params);
-    Object.assign(stats, res.data);
+    Object.assign(stats, {
+      ...res.data,
+      byType: mergeLeadTypeMetrics(res.data?.byType || [], ["pushed", "converted", "orderCount", "orderAmount"])
+    });
   } catch (error) {
     console.error("加载统计数据失败，使用mock数据:", error);
     // API失败时使用mock数据
     const mockData = (leadTrackingMockData as any).trackingStats.data;
-    Object.assign(stats, mockData);
+    Object.assign(stats, {
+      ...mockData,
+      byType: mergeLeadTypeMetrics(mockData?.byType || [], ["pushed", "converted", "orderCount", "orderAmount"])
+    });
   }
 };
 
@@ -618,18 +637,7 @@ const formatDateTime = (dateStr: string) => {
 
 // 获取类型标签类型
 const getTypeTagType = (type: string) => {
-  const map: Record<string, string> = {
-    new_to_renew: "primary",
-    renew_to_renew: "success",
-    in_repair_no_insurance: "warning",
-    dormant: "info",
-    pending_activation: "danger",
-    active: "success",
-    diamond: "danger",
-    gold: "warning",
-    silver: "info"
-  };
-  return map[type] || "info";
+  return getLeadTypeTagType(type);
 };
 
 // 获取推送目标标签
@@ -673,7 +681,7 @@ const typeChartOption = computed<ECOption | null>(() => {
 
   const typeLabels = stats.byType.map(item => {
     const typeOption = leadTypeOptions.find(opt => opt.value === item.type);
-    return typeOption ? t(`leadManagement.enums.leadType.${item.type}`) : item.type;
+    return typeOption ? getLeadTypeLabel(item.type) : getLeadTypeLabel(item.type);
   });
 
   return {

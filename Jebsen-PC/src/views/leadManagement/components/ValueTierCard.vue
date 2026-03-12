@@ -16,7 +16,7 @@
     <!-- Body -->
     <div class="card-body">
       <div class="core-number">{{ totalCount.toLocaleString() }}</div>
-      <div class="sub-label">OneID 总数</div>
+      <div class="sub-label">总数</div>
 
       <div class="time-monitor">
         <div class="monitor-item">

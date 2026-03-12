@@ -278,20 +278,8 @@ import ProTable from "@/components/ProTable/index.vue";
 import { ProTableInstance, ColumnProps } from "@/components/ProTable/interface";
 import type { TagManage } from "@/api/modules/tagManage";
 import RuleEditor, { type RuleNode } from "./components/RuleEditor.vue";
-import {
-  getTagList,
-  getTagDetail,
-  addTag,
-  editTag,
-  publishTag,
-  disableTag,
-  simulateRule
-} from "@/api/modules/tagManage";
-import {
-  TAG_CATEGORY_OPTIONS,
-  getCategoryFullPath,
-  getCategoryType
-} from "@/constants/tagCategory";
+import { getTagList, getTagDetail, addTag, editTag, publishTag, disableTag, simulateRule } from "@/api/modules/tagManage";
+import { TAG_CATEGORY_OPTIONS, getCategoryFullPath, getCategoryType } from "@/constants/tagCategory";
 
 // ProTable 实例
 const proTable = ref<ProTableInstance>();

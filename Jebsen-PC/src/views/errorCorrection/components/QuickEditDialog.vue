@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     :model-value="visible"
-    :title="t('errorCorrection.common.correctionTitle')"
+    :title="isAssociationException ? '关联性异常详情' : t('errorCorrection.common.correctionTitle')"
     width="700px"
     :close-on-click-modal="false"
     append-to-body
@@ -16,8 +16,8 @@
         </template>
       </el-alert>
 
-      <!-- 处理信息 -->
-      <div class="section">
+      <!-- 处理信息（关联性异常不展示，只保留简单提示） -->
+      <div class="section" v-if="!isAssociationException">
         <div class="section-title">
           <el-icon><InfoFilled /></el-icon>
           {{ t("errorCorrection.quickEdit.processInfo") }}
@@ -70,63 +70,14 @@
       </div>
     </template>
 
-    <!-- 编辑模式：原有表单 -->
+    <!-- 编辑模式：原有表单（仅提示，不再展示报错字段列表或按字段录入） -->
     <template v-else>
       <el-alert :title="t('errorCorrection.quickEdit.alertTitle')" type="warning" show-icon :closable="false" class="mb-16">
         <template #default>
-          {{ t("errorCorrection.quickEdit.alertDesc", { field: task?.errorField || "" }) }}
+          {{ t("errorCorrection.quickEdit.alertDescNoField") }}
         </template>
       </el-alert>
     </template>
-
-    <!-- 原始数据展示 -->
-    <div class="section">
-      <div class="section-title">
-        <el-icon><Document /></el-icon>
-        {{ t("errorCorrection.quickEdit.originalData") }}
-      </div>
-      <el-card shadow="hover" class="code-card">
-        <pre class="json-view">{{ formatJson(task?.originalData) }}</pre>
-      </el-card>
-    </div>
-
-    <!-- 报错字段 -->
-    <div class="section">
-      <div class="section-title">
-        <el-icon><Warning /></el-icon>
-        {{ t("errorCorrection.quickEdit.errorFields") }}
-      </div>
-      <div class="error-fields">
-        <el-tag type="danger" v-for="field in errorFields" :key="field">
-          {{ field }}
-        </el-tag>
-      </div>
-    </div>
-
-    <!-- 修正表单（仅编辑模式显示） -->
-    <div class="section" v-if="!task?.readonly">
-      <div class="section-title">
-        <el-icon><Edit /></el-icon>
-        {{ t("errorCorrection.quickEdit.correction") }}
-      </div>
-      <el-form :model="form" label-width="100px">
-        <el-form-item v-for="field in errorFields" :key="field" :label="field">
-          <el-input v-model="form.corrections[field]" :placeholder="t('errorCorrection.quickEdit.enterCorrectValue')" clearable />
-          <div class="field-hint">
-            {{ t("errorCorrection.quickEdit.currentValue") }}:
-            <code>{{ getFieldValue(field) }}</code>
-            <span class="source-tag-inline" v-if="task?.sourceSystem">
-              Source: {{ task.sourceSystem }} <template v-if="task.sourceId"> (ID: {{ task.sourceId }})</template>
-            </span>
-          </div>
-          <div class="field-hint" v-if="task?.suggestedFix && field === task?.errorField">
-            <el-text type="info" size="small">
-              {{ t("errorCorrection.quickEdit.suggestedFix") }}: <code>{{ task.suggestedFix }}</code>
-            </el-text>
-          </div>
-        </el-form-item>
-      </el-form>
-    </div>
 
     <template #footer>
       <div class="dialog-footer-buttons">
@@ -153,8 +104,7 @@ import { Document, Warning, Edit, InfoFilled, CircleCheck } from "@element-plus/
 export interface QuickEditTask {
   id: string;
   taskNo: string;
-  errorField: string;
-  errorFields?: string[];
+  // 不再在前端展示或按字段录入“报错字段”信息，只保留必要的上下文字段
   originalData: Record<string, any>;
   errorType: string;
   errorMessage: string;
@@ -189,27 +139,9 @@ const saving = ref(false);
 const ignoring = ref(false);
 
 const form = reactive({
+  // 已不再按字段维度收集修正，仅保留结构以便后续根据新需求扩展
   corrections: {} as Record<string, string>
 });
-
-const errorFields = computed(() => {
-  if (!props.task) return [];
-  return props.task.errorFields || [props.task.errorField];
-});
-
-const formatJson = (data: any) => {
-  if (!data) return "{}";
-  try {
-    return JSON.stringify(data, null, 2);
-  } catch {
-    return String(data);
-  }
-};
-
-const getFieldValue = (field: string) => {
-  if (!props.task?.originalData) return "-";
-  return props.task.originalData[field] || "-";
-};
 
 // 获取状态标签
 const getStatusLabel = () => {
@@ -255,14 +187,9 @@ const getStatusTagType = (): "success" | "warning" | "info" | "danger" => {
 
 watch(
   () => props.task,
-  newTask => {
-    if (newTask) {
-      // 初始化修正表单
-      form.corrections = {};
-      errorFields.value.forEach(field => {
-        form.corrections[field] = "";
-      });
-    }
+  () => {
+    // 暂不按字段维度初始化修正表单
+    form.corrections = {};
   },
   { immediate: true }
 );

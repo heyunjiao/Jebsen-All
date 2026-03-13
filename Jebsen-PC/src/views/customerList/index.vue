@@ -173,7 +173,6 @@
     <Profile360View
       v-model="show360View"
       :profile-data="current360Data"
-      @feedback="submitFeedback"
       @export="handleExport360"
       @vehicle-status-change="onVehicleStatusChange"
       @vehicle-role-change="onVehicleRoleChange"
@@ -367,6 +366,16 @@ const baseColumns: ColumnProps<Customer>[] = [
       el: "input",
       label: t("customer.name"),
       props: { placeholder: t("customer.placeholder.name") }
+    }
+  },
+  {
+    prop: "companyName",
+    label: t("customer.company.name"),
+    minWidth: 140,
+    render: scope => {
+      const row = scope.row as Customer;
+      const display = row.companyName || TABLE_EMPTY_PLACEHOLDER;
+      return display === TABLE_EMPTY_PLACEHOLDER ? h("span", { class: "table-cell-empty" }, display) : display;
     }
   },
   {
@@ -996,7 +1005,10 @@ const generateMockData = (pageNum: number, pageSize: number, filters: any = {}) 
       oneId: oneId,
       userId: `C${String(i + 1).padStart(3, "0")}`,
       customerType,
-      name: customerType === "company" ? `上汽通用汽车销售有限公司客户${i + 1}` : `客户${i + 1}`,
+      // 画像一定围绕人：无论个人 / 公司，name 始终代表客户姓名
+      name: `客户${i + 1}`,
+      // 公司 / 个人的区分仅通过一个公司名称字段 string 表达
+      companyName: customerType === "company" ? `上汽通用汽车销售有限公司${Math.floor(i / 5) + 1}号公司` : undefined,
       // 仅个人客户有性别/年龄段/家庭状态；公司客户不填，列表显示 —
       ...(customerType === "individual"
         ? {
@@ -1027,7 +1039,7 @@ const generateMockData = (pageNum: number, pageSize: number, filters: any = {}) 
               {
                 value: `138${String(Math.floor(Math.random() * 9000) + 1000)}${String(Math.floor(Math.random() * 9000) + 1000)}`,
                 source: "DMS",
-                isPrimary: true,
+                isPreferred: true,
                 updateTime: "2024-12-15 10:30:00",
                 relationTagName:
                   customerType === "company" ? companyRelationTag : individualRelationTags[i % individualRelationTags.length]
@@ -1483,7 +1495,7 @@ const buildProfilePhones = (row: Customer) => {
       {
         value: "021-58886688",
         source: "CRM",
-        isPrimary: true,
+        isPreferred: true,
         relationTagName: "公司总机"
       },
       {
@@ -1509,7 +1521,7 @@ const buildProfilePhones = (row: Customer) => {
     {
       value: primaryValue,
       source: "Golden Record",
-      isPrimary: true,
+      isPreferred: true,
       relationTagName: "本人",
       contactName: row.name,
       personRole: "购车人"
@@ -1567,9 +1579,30 @@ const buildProfileVehicles = (row: Customer, selectedVehicle?: VehicleListRow | 
   const licensePlate = selectedVehicle?.licensePlate || getDisplayValue(row.licensePlate) || "沪A12345";
   const vin = selectedVehicle?.vin || getDisplayValue(row.vinInfo) || "WP0ZZZ99ZTS392124";
   const purchaseDate = selectedVehicle?.purchaseDate || row.createdAt?.slice(0, 10) || "2024-01-01";
-  const buyerPhone = typeof row.phone === "string" ? row.phone : row.phone?.[0]?.value || "";
-  const buyerName = row.customerType === "company" ? row.handlers?.[0]?.name || "王敏" : row.name;
-  const repairerBaseName = row.customerType === "company" ? row.handlers?.[1]?.name || "周杰" : `${row.name}的送修人A`;
+  const primaryPhone = typeof row.phone === "string" ? row.phone : row.phone?.[0]?.value || "";
+
+  // 公司：多名购车人 + 多名送修人；个人：一名购车人 + 多名送修人
+  const buyers: Array<{ id: string; role: "购车人"; name: string; phone?: string }> =
+    row.customerType === "company"
+      ? [
+          { id: "P-BUYER-1", role: "购车人", name: row.handlers?.[0]?.name || "王敏", phone: primaryPhone },
+          { id: "P-BUYER-2", role: "购车人", name: "张磊", phone: "13800138001" },
+          { id: "P-BUYER-3", role: "购车人", name: "陈芳", phone: "13800138002" }
+        ]
+      : [{ id: "P-BUYER-1", role: "购车人", name: row.name, phone: primaryPhone }];
+
+  const repairers: Array<{ id: string; role: "送修人"; name: string; phone?: string; readonly?: boolean; isPreferred?: boolean }> =
+    row.customerType === "company"
+      ? [
+          { id: "P-REPAIR-1", role: "送修人", name: row.handlers?.[1]?.name || "周杰", phone: "13900008888", readonly: true, isPreferred: true },
+          { id: "P-REPAIR-2", role: "送修人", name: "李海", phone: "13700007777", readonly: true },
+          { id: "P-REPAIR-3", role: "送修人", name: "赵明", phone: "13600006666", readonly: true },
+          { id: "P-REPAIR-4", role: "送修人", name: "钱伟", phone: "13500005555", readonly: true }
+        ]
+      : [
+          { id: "P-REPAIR-1", role: "送修人", name: `${row.name}的送修人A`, phone: "13900008888", readonly: true, isPreferred: true },
+          { id: "P-REPAIR-2", role: "送修人", name: `${row.name}的送修人B`, phone: "13700007777", readonly: true }
+        ];
 
   return [
     {
@@ -1580,31 +1613,7 @@ const buildProfileVehicles = (row: Customer, selectedVehicle?: VehicleListRow | 
       vin,
       purchaseDate,
       status: selectedVehicle?.status || "自用",
-      relatedPersons: [
-        {
-          id: "P-BUYER-1",
-          role: "购车人",
-          name: buyerName,
-          phone: buyerPhone
-        },
-        {
-          id: "P-REPAIR-1",
-          role: "送修人",
-          name: repairerBaseName,
-          phone: "13900008888",
-          orderNo: "SO20260311001",
-          readonly: true,
-          isPreferred: true
-        },
-        {
-          id: "P-REPAIR-2",
-          role: "送修人",
-          name: row.customerType === "company" ? "李海" : `${row.name}的送修人B`,
-          phone: "13700007777",
-          orderNo: "SO20260311002",
-          readonly: true
-        }
-      ],
+      relatedPersons: [...buyers, ...repairers],
       source: "DMS",
       newCarSeries: row.carSeriesModel.split(" ")[0] || "保时捷",
       newCarModel: row.carSeriesModel,
@@ -2031,6 +2040,41 @@ const viewProfile360 = async (sourceRow: Customer | VehicleListRow) => {
       avgVisitInterval: 45,
       projectPreferenceRank
     },
+    // 客户价值（示例 Mock，可按真实口径覆盖）
+    valueInfo: {
+      compositeScore: 85,
+      postSalesSelfPaidAmount: Number((row.annualConsumption * 0.6).toFixed(0)),
+      addonPurchaseAmount: Number((row.annualConsumption * 0.2).toFixed(0)),
+      isSalesDiamond: true,
+      isAftersalesDiamond: true,
+      isActiveAfterSales: row.visitCount90Days > 0,
+      isDormant: false,
+      isLost: false
+    },
+    // 销售 / 售后行为（示例 Mock）
+    behaviorInfo: {
+      hasUpgradeOrReplace: false,
+      hasReferralBehavior: false,
+      purchaseAmount: Number((row.annualConsumption * 3).toFixed(0)),
+      optionAmount: 20000,
+      addonProductAmount: 8000,
+      serviceFrequencyLastYear: 4,
+      lastMaintenanceStore: row.primaryStoreName || "上海浦东保时捷中心",
+      lastMaintenanceDate: row.lastVisitTime,
+      repairAmountLastYear: 6000,
+      accidentRepairCountLastYear: 0,
+      isOnScheduleMaintenance: true,
+      isStandardMaintenance: true,
+      hasComplaintWithin6Months: false,
+      hasReturnWithin12Months: true
+    },
+    // 风控状态（示例 Mock）
+    riskStatus: {
+      hasComplaint6Months: row.hasComplaintLastYear,
+      churnRiskLevel: "中",
+      isVehicleSold: false,
+      isRemoteUse: false
+    },
     statistics: {
       firstOrderDate: "2023-01-15",
       lastOrderDate: row.lastVisitTime,
@@ -2112,13 +2156,19 @@ const viewProfile360 = async (sourceRow: Customer | VehicleListRow) => {
       operationType: "人工更新",
       operationTime: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
     },
+    // 数据状态监控：与欢迎页保持一致，只展示大节点，时间固定为昨日本批
     platformSyncStatus: [
-      { name: "DMS", status: "success" as const },
+      { name: "POAS", status: "success" as const },
+      { name: "WWS", status: "success" as const },
+      { name: "C@P系统", status: "success" as const },
+      { name: "Voucher", status: "success" as const },
+      { name: "Manual Files", status: "success" as const },
       { name: "BDC", status: "success" as const },
-      { name: "CRM", status: "success" as const },
-      { name: "Voucher", status: "success" as const }
+      { name: "DMS", status: "success" as const },
+      { name: "WeCom", status: "success" as const }
     ],
-    syncTime: new Date().toLocaleString("zh-CN"),
+    // 显示“昨日本批同步 09:00”，强调监控数据为昨天的批数据
+    syncTime: "昨日本批同步 09:00",
     handlers: buildProfileHandlers(row),
     selectedHandlerId: row.customerType === "company" ? "H001" : undefined,
     marketingCampaigns: [

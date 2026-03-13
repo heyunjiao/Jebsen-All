@@ -45,12 +45,16 @@ export interface DataConflict {
 export interface MultiValueItem {
   value: string; // 字段值
   source: string; // 来源系统（DMS、BDC、CRM等）或"黄金记录"
-  isPrimary?: boolean; // 是否为主值
+  /** @deprecated 电话场景请用 isPreferred；仅保留兼容 */
+  isPrimary?: boolean;
+  /** 是否为优选号码（仅用于电话；同一人多号码时最多一个为 true，用于展示与触达优先） */
+  isPreferred?: boolean;
   updateTime?: string; // 更新时间
   contactName?: string; // 联系人姓名（与 H5 一致）
   relationTagName?: string; // 关系标签：本人、配偶、公司电话等（与 H5 一致）
   readonly?: boolean; // 是否只读（如售后订单同步）
-  personRole?: "购车人" | "送修人" | "联系人"; // 业务角色
+  /** 业务角色（与标准枚举对齐，仅区分购车人 / 送修人） */
+  personRole?: "购车人" | "送修人";
   linkedVehicleIds?: string[]; // 关联车辆
   isPreferredRepairer?: boolean; // 是否为首选送修人
   isPrimaryContact?: boolean; // 是否为首选联系人
@@ -86,6 +90,70 @@ export interface VehicleRelatedPerson {
   isPreferred?: boolean;
 }
 
+// 客户价值信息（对应“客户价值”模块）
+export interface CustomerValueInfo {
+  /** 客户价值综合评分 */
+  compositeScore?: number;
+  /** 售后自费金额 */
+  postSalesSelfPaidAmount?: number;
+  /** 附加购买金额（选装及增值服务） */
+  addonPurchaseAmount?: number;
+  /** 销售钻石客户标记 */
+  isSalesDiamond?: boolean;
+  /** 售后钻石客户标记 */
+  isAftersalesDiamond?: boolean;
+  /** 普通活跃售后客户标记 */
+  isActiveAfterSales?: boolean;
+  /** 休眠客户标记 */
+  isDormant?: boolean;
+  /** 流失客户标记 */
+  isLost?: boolean;
+}
+
+// 销售 / 售后行为信息
+export interface CustomerBehaviorInfo {
+  /** 是否存在增购 / 换购行为 */
+  hasUpgradeOrReplace?: boolean;
+  /** 是否推荐过其他客户 */
+  hasReferralBehavior?: boolean;
+  /** 购车金额（主车） */
+  purchaseAmount?: number;
+  /** 选配金额 */
+  optionAmount?: number;
+  /** 购买附加产品金额 */
+  addonProductAmount?: number;
+  /** 最近一年入厂频次 */
+  serviceFrequencyLastYear?: number;
+  /** 最近一次保养门店 */
+  lastMaintenanceStore?: string;
+  /** 最近一次保养时间 */
+  lastMaintenanceDate?: string;
+  /** 最近一年自费维修金额 */
+  repairAmountLastYear?: number;
+  /** 最近一年事故维修次数 */
+  accidentRepairCountLastYear?: number;
+  /** 是否按时保养（厂家周期内） */
+  isOnScheduleMaintenance?: boolean;
+  /** 是否按标准保养 */
+  isStandardMaintenance?: boolean;
+  /** 投诉 6 个月内是否已关闭 */
+  hasComplaintWithin6Months?: boolean;
+  /** 12 个月内是否回厂 */
+  hasReturnWithin12Months?: boolean;
+}
+
+// 风控状态信息
+export interface RiskStatusInfo {
+  /** 6 个月内是否有投诉记录 */
+  hasComplaint6Months?: boolean;
+  /** 流失风险等级：高 / 中 / 低 */
+  churnRiskLevel?: "高" | "中" | "低";
+  /** 车辆是否已完成过户 / 已售出 */
+  isVehicleSold?: boolean;
+  /** 车辆是否异地长期使用 */
+  isRemoteUse?: boolean;
+}
+
 // 客户类型定义（基于OneID的C360系统）
 // 个人与公司共用同一列表结构；性别/年龄段/家庭状态仅个人客户有，公司客户为空，详情见 handlers
 export interface Customer {
@@ -115,6 +183,8 @@ export interface Customer {
   vinInfo: string | MultiValueItem[]; // VIN信息（支持多值）
   licensePlate: string | MultiValueItem[]; // 车牌号（支持多值）
   carSeriesModel: string;
+  /** 公司名称（有值则视为公司客户，仅用来区分个人/公司，不再维护完整公司档案） */
+  companyName?: string;
   currentMileage: number;
   serviceHabit: string;
 
@@ -129,6 +199,16 @@ export interface Customer {
   primaryStoreId?: string;
   /** 主服务门店名称 */
   primaryStoreName?: string;
+  /** 业务主体唯一标识（BPID） */
+  bpid?: string;
+  /** 出生日期（yyyy-MM-dd） */
+  birthDate?: string;
+  /** 居住区域（省市区文本或编码） */
+  residenceArea?: string;
+  /** 客户年龄（整型） */
+  age?: number;
+  /** 客户身份类型：准车主 / 车主 / 曾用车主等 */
+  identityType?: string;
   createdAt: string; // 客户创建时间
   updatedAt: string; // 最后更新时间
   // 公司客户相关字段
@@ -393,6 +473,12 @@ export interface Customer360View {
   syncTime?: string;
   conflictAlert?: boolean; // 是否存在冲突提示
   latestOperation?: { operator: string; operationType: string; operationTime: string };
+  // 客户价值（聚合自销售 / 售后 / 资产）
+  valueInfo?: CustomerValueInfo;
+  // 销售 / 售后行为
+  behaviorInfo?: CustomerBehaviorInfo;
+  // 风控状态
+  riskStatus?: RiskStatusInfo;
   // 营销活动（H5 独立 Tab，与线下活动区分）
   marketingCampaigns?: Array<{
     id: string;

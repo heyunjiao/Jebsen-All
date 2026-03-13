@@ -50,8 +50,23 @@ export const TAG_CATEGORY_OPTIONS: CategoryOption[] = [
         value: "爱好",
         label: "爱好",
         children: [
-          { value: "运动", label: "运动" },
-          { value: "旅游", label: "旅游" }
+          {
+            value: "运动",
+            label: "运动",
+            children: [
+              { value: "运动-球类-足球", label: "球类 / 足球" },
+              { value: "运动-球类-篮球", label: "球类 / 篮球" },
+              { value: "运动-户外-越野跑", label: "户外 / 越野跑" }
+            ]
+          },
+          {
+            value: "旅游",
+            label: "旅游",
+            children: [
+              { value: "旅游-国内-海岛", label: "国内 / 海岛游" },
+              { value: "旅游-国外-欧洲", label: "出境 / 欧洲" }
+            ]
+          }
         ]
       }
     ]
@@ -60,9 +75,30 @@ export const TAG_CATEGORY_OPTIONS: CategoryOption[] = [
     value: "车",
     label: "车",
     children: [
-      { value: "车牌类型", label: "车牌类型" },
-      { value: "所在城市", label: "所在城市" },
-      { value: "保时捷", label: "保时捷" },
+      {
+        value: "车牌类型",
+        label: "车牌类型",
+        children: [
+          { value: "车牌-新能源-绿牌", label: "新能源 / 绿牌" },
+          { value: "车牌-普通-蓝牌", label: "普通 / 蓝牌" }
+        ]
+      },
+      {
+        value: "所在城市",
+        label: "所在城市",
+        children: [
+          { value: "城市-一线-上海", label: "一线 / 上海" },
+          { value: "城市-一线-北京", label: "一线 / 北京" }
+        ]
+      },
+      {
+        value: "保时捷",
+        label: "保时捷",
+        children: [
+          { value: "保时捷-跑车-911", label: "跑车 / 911" },
+          { value: "保时捷-SUV-卡宴", label: "SUV / 卡宴" }
+        ]
+      },
       { value: "新能源", label: "新能源" }
     ]
   },
@@ -70,13 +106,64 @@ export const TAG_CATEGORY_OPTIONS: CategoryOption[] = [
     value: "业务",
     label: "业务",
     children: [
-      { value: "意向级别", label: "意向级别" },
-      { value: "特殊标识", label: "特殊标识" },
-      { value: "续保", label: "续保" },
-      { value: "保险到期月份", label: "保险到期月份" },
-      { value: "POC", label: "POC" },
-      { value: "线上活动", label: "线上活动" },
-      { value: "SC", label: "SC" }
+      {
+        value: "意向级别",
+        label: "意向级别",
+        children: [
+          { value: "意向-高", label: "高意向" },
+          { value: "意向-中", label: "中意向" },
+          { value: "意向-低", label: "低意向" }
+        ]
+      },
+      {
+        value: "特殊标识",
+        label: "特殊标识",
+        children: [
+          { value: "特殊-限时优惠", label: "限时优惠" },
+          { value: "特殊-VIP", label: "VIP 身份" }
+        ]
+      },
+      {
+        value: "续保",
+        label: "续保",
+        children: [
+          { value: "续保-到期-3个月内", label: "到期前 3 个月内" },
+          { value: "续保-到期-已过期", label: "续保已过期" }
+        ]
+      },
+      {
+        value: "保险到期月份",
+        label: "保险到期月份",
+        children: [
+          { value: "保险到期-本月", label: "本月到期" },
+          { value: "保险到期-本季度", label: "本季度到期" }
+        ]
+      },
+      {
+        value: "POC",
+        label: "POC",
+        children: [
+          { value: "POC-高", label: "高价值 POC" },
+          { value: "POC-中", label: "中价值 POC" }
+        ]
+      },
+      {
+        value: "线上活动",
+        label: "线上活动",
+        children: [
+          { value: "线上-试驾活动", label: "线上试驾活动" },
+          { value: "线上-金融活动", label: "线上金融活动" }
+        ]
+      },
+      {
+        value: "SC",
+        label: "SC",
+        children: [
+          { value: "SC-高", label: "高 SC 等级" },
+          { value: "SC-中", label: "中 SC 等级" },
+          { value: "SC-低", label: "低 SC 等级" }
+        ]
+      }
     ]
   }
 ];

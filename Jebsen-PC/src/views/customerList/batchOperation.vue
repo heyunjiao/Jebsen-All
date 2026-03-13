@@ -70,7 +70,7 @@
       <ImportExcel ref="dialogRef" />
 
       <!-- 360度全景视图 -->
-      <Profile360View v-model="show360View" :profile-data="current360Data" @feedback="submitFeedback" @export="handleExport360" />
+      <Profile360View v-model="show360View" :profile-data="current360Data" @export="handleExport360" />
 
       <!-- 纠错反馈弹窗 -->
       <FeedbackDialog v-model="showFeedbackDialog" :customer="currentCustomer" @submit="handleFeedbackSubmit" />

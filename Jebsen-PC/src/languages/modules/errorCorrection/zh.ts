@@ -140,7 +140,7 @@ export default {
     table: {
       taskNo: "任务编号",
       oneId: "OneID",
-      customerName: "真实姓名",
+      customerName: "客户姓名",
       errorType: "异常类型",
       status: "状态",
       severity: "严重程度",
@@ -207,8 +207,8 @@ export default {
       phoneVerified: "已验证",
       phoneUnverified: "未验证",
       phoneInvalid: "无效",
-      phonePrimary: "主号码",
-      setAsPrimary: "设为主号码",
+      phonePrimary: "优选号码",
+      setAsPrimary: "设为优选号码",
       deletePhone: "删除",
       phoneFormatError: "手机号格式不正确",
       phoneRequired: "请输入手机号",
@@ -217,7 +217,7 @@ export default {
       phoneAddSuccess: "手机号添加成功",
       phoneUpdateSuccess: "手机号更新成功",
       phoneDeleteSuccess: "手机号删除成功",
-      phoneSetPrimarySuccess: "已设为主号码",
+      phoneSetPrimarySuccess: "已设为优选号码",
       confirmDeletePhone: "确认删除该手机号？",
       // 标签管理相关
       tagManagement: "标签管理",
@@ -410,7 +410,7 @@ export default {
       servicePreference: "服务偏好",
       remarks: "备注信息",
       // 客户信息字段
-      customerName: "真实姓名",
+      customerName: "客户姓名",
       phone: "手机号码",
       jobTitle: "职位",
       company: "公司",

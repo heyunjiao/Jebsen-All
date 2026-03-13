@@ -44,12 +44,12 @@
       },
       "children": [
         {
-          "path": "/dataProcess/errorCorrection",
-          "name": "errorCorrection",
-          "component": "/errorCorrection/index",
+          "path": "/dataProcess/dataQualityWorkbench",
+          "name": "dataQualityWorkbench",
+          "component": "/dataQualityWorkbench/index",
           "meta": {
-            "icon": "WarningFilled",
-            "title": "异常中心",
+            "icon": "DocumentChecked",
+            "title": "数据文件上传",
             "isLink": "",
             "isHide": false,
             "isFull": false,
@@ -58,12 +58,12 @@
           }
         },
         {
-          "path": "/dataProcess/dataQualityWorkbench",
-          "name": "dataQualityWorkbench",
-          "component": "/dataQualityWorkbench/index",
+          "path": "/dataProcess/errorCorrection",
+          "name": "errorCorrection",
+          "component": "/errorCorrection/index",
           "meta": {
-            "icon": "DocumentChecked",
-            "title": "数据文件上传",
+            "icon": "WarningFilled",
+            "title": "异常中心",
             "isLink": "",
             "isHide": false,
             "isFull": false,

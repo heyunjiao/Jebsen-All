@@ -824,7 +824,7 @@ export default {
     table: {
       taskNo: "任务编号",
       oneId: "OneID",
-      customerName: "真实姓名",
+      customerName: "客户姓名",
       errorType: "异常类型",
       status: "状态",
       severity: "严重程度",
@@ -1083,7 +1083,7 @@ export default {
       servicePreference: "服务偏好",
       remarks: "备注信息",
       // 客户信息字段
-      customerName: "真实姓名",
+      customerName: "客户姓名",
       phone: "手机号码",
       gender: "性别",
       ageGroup: "年龄段",
@@ -1635,7 +1635,7 @@ export default {
     },
     columns: {
       oneId: "OneID",
-      customerName: "真实姓名",
+      customerName: "客户姓名",
       leadType: "商机类型",
       ruleName: "触发规则",
       priority: "优先级",
@@ -2504,7 +2504,7 @@ export default {
     columnMapping: {
       VIN: "VIN码",
       Phone: "手机号",
-      Customer_Name: "真实姓名",
+      Customer_Name: "客户姓名",
       Model: "车型",
       Dealer_Code: "经销商代码",
       Sales_Consultant: "销售顾问",

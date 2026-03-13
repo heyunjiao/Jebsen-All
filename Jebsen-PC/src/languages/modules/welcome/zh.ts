@@ -45,7 +45,7 @@ export default {
     data: {
       status: {
         online: "在线",
-        synced: "已同步",
+        synced: "昨日本批同步完成",
         delay: "延迟",
         active: "活跃",
         uploaded: "采集成功",

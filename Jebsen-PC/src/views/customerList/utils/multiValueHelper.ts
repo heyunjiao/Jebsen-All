@@ -23,17 +23,17 @@ export function convertToSensitiveValueItems(
     ];
   }
 
-  // 如果是数组，转换为 SensitiveValueItem 格式
+  // 如果是数组，转换为 SensitiveValueItem 格式（isPrimary 表示优选/主值，兼容 isPreferred）
   return fieldValue.map(item => ({
     value: item.value,
     source: item.source || "未知来源",
-    isPrimary: item.isPrimary || false,
+    isPrimary: !!(item.isPreferred ?? item.isPrimary),
     updateTime: item.updateTime
   }));
 }
 
 /**
- * 获取主值（用于显示）
+ * 获取展示用首选值（电话场景为优选号码，兼容 isPreferred / isPrimary）
  */
 export function getPrimaryValue(fieldValue: string | MultiValueItem[] | undefined): string {
   if (!fieldValue) {
@@ -44,12 +44,10 @@ export function getPrimaryValue(fieldValue: string | MultiValueItem[] | undefine
     return fieldValue;
   }
 
-  // 从数组中查找主值
-  const primaryItem = fieldValue.find(item => item.isPrimary);
-  if (primaryItem) {
-    return primaryItem.value;
+  const preferredItem = fieldValue.find(item => item.isPreferred ?? item.isPrimary);
+  if (preferredItem) {
+    return preferredItem.value;
   }
 
-  // 如果没有主值，返回第一个值
   return fieldValue.length > 0 ? fieldValue[0].value : "";
 }

@@ -18,10 +18,6 @@
               <span>{{ t("errorCorrection.errorType.all") }}</span>
               <el-badge :value="errorTypeCounts.all" :max="99" class="filter-badge" />
             </el-radio-button>
-            <el-radio-button value="h5Feedback">
-              <span>人工反馈</span>
-              <el-badge :value="errorTypeCounts.h5Feedback" :max="99" class="filter-badge" type="warning" />
-            </el-radio-button>
             <el-radio-button value="validity">
               <span>{{ t("errorCorrection.taxonomy.validity.name") }}</span>
               <el-badge :value="errorTypeCounts.validity" :max="99" class="filter-badge" type="warning" />
@@ -132,12 +128,12 @@
                 v-for="(phone, index) in mobileData.phones"
                 :key="index"
                 class="phone-item"
-                :class="{ primary: phone.isPrimary, conflict: phone.hasConflict }"
+                :class="{ primary: phone.isPreferred, conflict: phone.hasConflict }"
               >
                 <div class="phone-info">
                   <span class="phone-number">{{ phone.number }}</span>
                   <span class="phone-source">{{ phone.source }}</span>
-                  <el-tag v-if="phone.isPrimary" size="small" type="success" class="phone-tag">
+                  <el-tag v-if="phone.isPreferred" size="small" type="success" class="phone-tag">
                     {{ t("errorCorrection.mobile.phonePrimary") }}
                   </el-tag>
                   <el-tag v-if="phone.hasConflict" size="small" type="danger" class="phone-tag">
@@ -368,13 +364,13 @@
                 v-for="(phone, index) in mobileData.phones"
                 :key="index"
                 class="phone-item-dialog"
-                :class="{ primary: phone.isPrimary, conflict: phone.hasConflict }"
+                :class="{ primary: phone.isPreferred, conflict: phone.hasConflict }"
               >
                 <div class="phone-item-info">
                   <div class="phone-number-dialog">{{ phone.number }}</div>
                   <div class="phone-meta">
                     <span class="phone-source-dialog">{{ phone.source }}</span>
-                    <el-tag v-if="phone.isPrimary" size="small" type="success">{{
+                    <el-tag v-if="phone.isPreferred" size="small" type="success">{{
                       t("errorCorrection.mobile.phonePrimary")
                     }}</el-tag>
                     <el-tag v-if="phone.hasConflict" size="small" type="danger">{{
@@ -383,7 +379,7 @@
                   </div>
                 </div>
                 <div class="phone-actions">
-                  <el-button v-if="!phone.isPrimary" text type="primary" size="small" @click="setPrimaryPhone(phone)">
+                  <el-button v-if="!phone.isPreferred" text type="primary" size="small" @click="setPreferredPhone(phone)">
                     {{ t("errorCorrection.mobile.setAsPrimary") }}
                   </el-button>
                   <el-button text type="danger" size="small" @click="deletePhone(phone)">
@@ -467,16 +463,21 @@ interface ExceptionTask {
   score?: number;
   category: ExceptionCategory; // 异常大类
   subType: ExceptionSubType; // 异常细分类型
-  errorField: string;
+  // 不再在前端展示或依赖“报错字段”，仅保留错误描述
   errorMessage: string;
+  // 严重程度
+  severity?: "high" | "medium" | "low" | string;
   sourceSystem: string;
   targetSystem?: string;
   status: TaskStatus;
   updateTime: string;
+  // 处理人、创建时间等元数据
+  handler?: string;
+  createTime: string;
+  slaDeadline?: string;
   sourceId?: string; // 源系统ID
-  // 原始数据和错误字段
+  // 原始数据
   originalData?: Record<string, any>;
-  errorFields?: string[];
   // H5 提交的纠错明细（与 H5 submitFieldCorrection 一致）
   correction?: {
     field: string;
@@ -521,11 +522,7 @@ const errorTypeCounts = computed(() => {
     uniqueness: list.filter(t => t.category === "uniqueness").length,
     completeness: list.filter(t => t.category === "completeness").length,
     consistency: list.filter(t => t.category === "consistency").length,
-    compliance: list.filter(t => t.category === "compliance").length,
-    h5Feedback: list.filter(t => {
-      const isH5 = t.errorField === "H5_FEEDBACK" || t.errorMessage?.includes("H5") || t.sourceSystem === "H5";
-      return isH5;
-    }).length
+    compliance: list.filter(t => t.category === "compliance").length
   };
 });
 
@@ -723,11 +720,6 @@ const columns = computed<ColumnProps<ExceptionTask>[]>(() => {
     }
   });
 
-  // 只有在「已处理」+「全部」tab 时才显示【主要问题】列
-  if (activeStatusTab.value === "processed" && activeErrorType.value === "all") {
-    baseColumns.push({ prop: "errorField", label: t("errorCorrection.table.mainIssue"), minWidth: 180 });
-  }
-
   baseColumns.push(
     {
       prop: "sourceSystem",
@@ -800,17 +792,9 @@ const fetchTaskList = (params: any) => {
     list = list.filter(item => item.status === "processed");
   }
 
-  // 2. 根据错误类型 Tab 筛选（5大类 + H5反馈）
+  // 2. 根据错误类型 Tab 筛选（四大类）
   if (activeErrorType.value && activeErrorType.value !== "all") {
-    if (activeErrorType.value === "h5Feedback") {
-      // H5 反馈：通过 errorField、errorMessage 或 sourceSystem 判断
-      list = list.filter(item => {
-        const isH5 = item.errorField === "H5_FEEDBACK" || item.errorMessage?.includes("H5") || item.sourceSystem === "H5";
-        return isH5;
-      });
-    } else {
-      list = list.filter(item => item.category === activeErrorType.value);
-    }
+    list = list.filter(item => item.category === activeErrorType.value);
   }
 
   // 3. 应用其他搜索筛选条件
@@ -839,44 +823,41 @@ const openTaskDialog = (task: ExceptionTask) => {
   // 判断是否为已处理状态（在已处理tab下，或者任务状态为已处理）
   const isProcessed = activeStatusTab.value === "processed" || task.status === "processed";
 
-  // 如果当前在 H5 反馈 Tab 下，直接打开 FeedbackResolutionDrawer
-  if (activeErrorType.value === "h5Feedback") {
-    const isH5 = task.errorField === "H5_FEEDBACK" || task.errorMessage?.includes("H5") || task.sourceSystem === "H5";
-    if (isH5) {
-      currentFeedbackTask.value = {
-        taskId: task.taskNo,
-        status: (() => {
-          const statusMap: Record<TaskStatus, "pending" | "inProgress" | "resolved" | "rejected"> = {
-            pending: "pending",
-            processed: "resolved"
-          };
-          return statusMap[task.status];
-        })(),
-        reporter: {
-          name: task.handler || "业务员",
-          avatar: "https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png",
-          time: task.createTime
-        },
-        feedbackText: task.errorMessage || "",
-        correction: task.correction,
-        goldenRecord: {
-          name: task.originalData?.name ?? task.sourceName ?? "",
-          phone: task.originalData?.phone || "",
-          title: task.originalData?.title || "",
-          company: task.originalData?.company || "",
-          tags: task.originalData?.tags || [],
-          sources: task.originalData?.fieldSources || {
-            name: { system: task.sourceSystem, id: task.sourceId },
-            phone: { system: task.sourceSystem, id: task.sourceId },
-            title: { system: task.sourceSystem, id: task.sourceId },
-            company: { system: task.sourceSystem, id: task.sourceId }
-          }
-        },
-        slaDeadline: task.slaDeadline
-      };
-      feedbackDrawerVisible.value = true;
-      return;
-    }
+  // 人工反馈（来源为 H5）：统一用 FeedbackResolutionDrawer 处理，其大类已归入四大类之一（如有效性）
+  if (task.sourceSystem === "H5") {
+    currentFeedbackTask.value = {
+      taskId: task.taskNo,
+      status: (() => {
+        const statusMap: Record<TaskStatus, "pending" | "inProgress" | "resolved" | "rejected"> = {
+          pending: "pending",
+          processed: "resolved"
+        };
+        return statusMap[task.status];
+      })(),
+      reporter: {
+        name: task.handler || "业务员",
+        avatar: "https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png",
+        time: task.createTime
+      },
+      feedbackText: task.errorMessage || "",
+      correction: task.correction,
+      goldenRecord: {
+        name: task.originalData?.name ?? task.sourceName ?? "",
+        phone: task.originalData?.phone || "",
+        title: task.originalData?.title || "",
+        company: task.originalData?.company || "",
+        tags: task.originalData?.tags || [],
+        sources: task.originalData?.fieldSources || {
+          name: { system: task.sourceSystem, id: task.sourceId },
+          phone: { system: task.sourceSystem, id: task.sourceId },
+          title: { system: task.sourceSystem, id: task.sourceId },
+          company: { system: task.sourceSystem, id: task.sourceId }
+        }
+      },
+      slaDeadline: task.slaDeadline
+    };
+    feedbackDrawerVisible.value = true;
+    return;
   }
 
   switch (task.category) {
@@ -891,7 +872,7 @@ const openTaskDialog = (task: ExceptionTask) => {
           sourceName: task.sourceName,
           targetName: task.targetName || task.sourceName,
           score: task.score || 0,
-          conflictField: task.errorField,
+          conflictField: "", // 不再展示具体报错字段
           sourceSystem: task.sourceSystem,
           conflictType: "系统自动检测",
           status: (() => {
@@ -920,12 +901,10 @@ const openTaskDialog = (task: ExceptionTask) => {
       } else if (task.subType === "primary_key_conflict") {
         // 主键冲突
         if (isProcessed) {
-          // 已处理：显示查看弹窗
+          // 已处理：仅展示处理结果，不再展示报错字段
           currentQuickEditTask.value = {
             id: task.id,
             taskNo: task.taskNo,
-            errorField: task.errorField,
-            errorFields: task.errorFields,
             originalData: task.originalData || {},
             errorType: task.category,
             errorMessage: task.errorMessage,
@@ -946,12 +925,10 @@ const openTaskDialog = (task: ExceptionTask) => {
       break;
     case "validity":
     case "completeness":
-      // 有效性异常和完整性异常：使用快速编辑
+      // 有效性异常和完整性异常：使用快速编辑，不展示报错字段
       currentQuickEditTask.value = {
         id: task.id,
         taskNo: task.taskNo,
-        errorField: task.errorField,
-        errorFields: task.errorFields,
         originalData: task.originalData || {},
         errorType: task.category,
         errorMessage: task.errorMessage,
@@ -971,12 +948,10 @@ const openTaskDialog = (task: ExceptionTask) => {
       quickEditVisible.value = true;
       break;
     case "consistency":
-      // 关联性异常：仅支持查看，不支持在异常中心内处理
+      // 关联性异常：仅支持查看，不支持在异常中心内处理；不展示报错字段
       currentQuickEditTask.value = {
         id: task.id,
         taskNo: task.taskNo,
-        errorField: task.errorField,
-        errorFields: task.errorFields,
         originalData: task.originalData || {},
         errorType: task.category,
         errorMessage: task.errorMessage,
@@ -991,83 +966,35 @@ const openTaskDialog = (task: ExceptionTask) => {
       quickEditVisible.value = true;
       break;
     case "compliance":
-      // 合规性异常：授权缺失或 H5 反馈
-      // 检查是否为 H5 提交的数据纠错反馈（通过 errorField 或 errorMessage 判断）
-      const isH5Feedback = task.errorField === "H5_FEEDBACK" || task.errorMessage?.includes("H5") || task.sourceSystem === "H5";
-      if (isH5Feedback) {
-        // H5 提交的数据纠错反馈：使用 FeedbackResolutionDrawer
-        currentFeedbackTask.value = {
-          taskId: task.taskNo,
-          oneId: task.oneId,
-          status: (() => {
-            const statusMap: Record<TaskStatus, "pending" | "inProgress" | "resolved" | "rejected"> = {
-              pending: "pending",
-              draft: "pending",
-              processing: "inProgress",
-              resolved: "resolved",
-              rejected: "rejected",
-              ignored: "rejected"
-            };
-            return statusMap[task.status];
-          })(),
-          reporter: {
-            name: task.handler || "业务员",
-            avatar: "https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png",
-            time: task.createTime
-          },
-          feedbackText: task.errorMessage || "客户张伟手机号错了，应该是 13912345678，而且他现在是采购经理了。",
-          correction: task.correction,
-          goldenRecord: {
-            name: task.originalData?.name ?? task.sourceName ?? "",
-            phone: task.originalData?.phone || "",
-            title: task.originalData?.title || "",
-            company: task.originalData?.company || "",
-            tags: task.originalData?.tags || [],
-            sources: task.originalData?.fieldSources || {
-              name: { system: task.sourceSystem, id: task.sourceId },
-              phone: { system: task.sourceSystem, id: task.sourceId },
-              title: { system: task.sourceSystem, id: task.sourceId },
-              company: { system: task.sourceSystem, id: task.sourceId }
-            }
-          },
-          slaDeadline: task.slaDeadline
+      // 合规性异常：授权缺失（人工反馈已归入有效性，由上方 sourceSystem===H5 统一处理）
+      if (isProcessed) {
+        currentQuickEditTask.value = {
+          id: task.id,
+          taskNo: task.taskNo,
+          originalData: task.originalData || {},
+          errorType: task.category,
+          errorMessage: task.errorMessage,
+          readonly: true,
+          status: task.status,
+          handler: task.handler,
+          createTime: task.createTime,
+          updateTime: task.updateTime
         };
-        feedbackDrawerVisible.value = true;
+        quickEditVisible.value = true;
       } else {
-        // 合规性异常：授权缺失
-        if (isProcessed) {
-          // 已处理：显示查看弹窗
-          currentQuickEditTask.value = {
-            id: task.id,
-            taskNo: task.taskNo,
-            errorField: task.errorField,
-            errorFields: task.errorFields,
-            originalData: task.originalData || {},
-            errorType: task.category,
-            errorMessage: task.errorMessage,
-            readonly: true,
-            status: task.status,
-            handler: task.handler,
-            createTime: task.createTime,
-            updateTime: task.updateTime
-          };
-          quickEditVisible.value = true;
-        } else {
-          // 未处理：显示操作弹窗
-          ElMessageBox.confirm(`授权缺失：${task.errorMessage}\n\n该数据将被冻结，暂时保留但不可用于营销。`, "合规性异常处理", {
-            confirmButtonText: "确认冻结",
-            cancelButtonText: "取消",
-            type: "warning"
-          }).then(() => {
-            const idx = baseTasks.findIndex(t => t.id === task.id);
-            if (idx !== -1) {
-              baseTasks[idx].status = "processed";
-              baseTasks[idx].updateTime = new Date().toLocaleString("zh-CN");
-              ElMessage.success("数据已冻结");
-              tableRef.value?.getTableList();
-            }
-          });
-        }
+        ElMessageBox.confirm(`授权缺失：${task.errorMessage}\n\n该数据将被冻结，暂时保留但不可用于营销。`, "合规性异常处理", {
+          confirmButtonText: "确认冻结",
+          cancelButtonText: "取消",
+          type: "warning"
+        }).then(() => {
+          const idx = baseTasks.findIndex(t => t.id === task.id);
+          if (idx !== -1) {
+            baseTasks[idx].status = "processed";
+            baseTasks[idx].updateTime = new Date().toLocaleString("zh-CN");
+            ElMessage.success("数据已冻结");
+            tableRef.value?.getTableList();
+          }
+        });
       }
       break;
   }
@@ -1232,9 +1159,9 @@ const mobileData = reactive({
   // 手机号数据
   phoneConflict: true,
   phones: [
-    { number: "138****5678", source: "DMS", isPrimary: true, hasConflict: false },
-    { number: "139****1234", source: "CRM", isPrimary: false, hasConflict: true },
-    { number: "150****6988", source: "APP", isPrimary: false, hasConflict: true }
+    { number: "138****5678", source: "DMS", isPreferred: true, hasConflict: false },
+    { number: "139****1234", source: "CRM", isPreferred: false, hasConflict: true },
+    { number: "150****6988", source: "APP", isPreferred: false, hasConflict: true }
   ],
   // 数据冲突（不包含手机号，手机号冲突在phones中处理）
   conflicts: [
@@ -1395,17 +1322,17 @@ const savePhone = () => {
   mobileData.phones.push({
     number: phoneForm.number,
     source: phoneForm.source,
-    isPrimary: false,
+    isPreferred: false,
     hasConflict: false
   });
   phoneDialogVisible.value = false;
   ElMessage.success(t("errorCorrection.mobile.phoneAddSuccess"));
 };
 
-// 设置主号码
-const setPrimaryPhone = (phone: any) => {
+// 设置优选号码（多号码时仅能设置一个）
+const setPreferredPhone = (phone: any) => {
   mobileData.phones.forEach((p: any) => {
-    p.isPrimary = p === phone;
+    p.isPreferred = p === phone;
   });
   ElMessage.success(t("errorCorrection.mobile.phoneSetPrimarySuccess"));
 };

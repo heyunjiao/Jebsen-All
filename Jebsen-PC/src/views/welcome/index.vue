@@ -100,7 +100,7 @@
                 <div class="system-group-header">
                   <div>
                     <div class="system-group-title">{{ $t("welcome.data.manualGroupTitle") }}</div>
-                    <div class="system-group-meta">已到位 {{ manualUploadedCount }} / {{ manualSystems.length }}</div>
+                    <div class="system-group-meta">昨日本批到位 {{ manualUploadedCount }} / {{ manualSystems.length }}</div>
                   </div>
                   <span class="group-badge group-badge-primary">{{ $t("welcome.data.manual") }}</span>
                 </div>
@@ -147,7 +147,7 @@
                 <div class="system-group-header">
                   <div>
                     <div class="system-group-title">{{ $t("welcome.data.autoGroupTitle") }}</div>
-                    <div class="system-group-meta">在线 {{ autoSyncedCount }} / {{ autoSystems.length }}</div>
+                    <div class="system-group-meta">昨日本批同步 {{ autoSyncedCount }} / {{ autoSystems.length }}</div>
                   </div>
                   <span class="group-badge group-badge-success">{{ $t("welcome.data.auto") }}</span>
                 </div>
@@ -191,14 +191,9 @@
                 <span class="pipeline-stage-index">0{{ index + 1 }}</span>
               </div>
               <div class="pipeline-stage-title">{{ step.title }}</div>
-              <div class="pipeline-stage-main">{{ step.main }}</div>
+              <!-- 主界面只展示数字，鼠标悬浮时再展示完整说明 -->
               <el-tooltip placement="top" effect="dark" :content="step.detail">
-                <div class="pipeline-stage-detail">
-                  <span>查看说明</span>
-                  <el-icon class="step-detail-icon">
-                    <Document />
-                  </el-icon>
-                </div>
+                <div class="pipeline-stage-main">{{ step.main }}</div>
               </el-tooltip>
             </div>
           </div>
@@ -356,121 +351,135 @@ const welcomeMessage = computed(() => {
 const isAdmin = computed(() => getRoleFromStorage() === "admin");
 
 // 当日数据采集来源（按你的图：系统名称 + 表名）
+// - type = "manual" 表示当日手工上传，点击需要跳转到数据质量工作台并自动弹出对应报表的上传框
+// - type = "auto" 表示 T+1 / 实时系统同步结果，只查看同步状态
 const sourceSystems = computed(() => [
   // 手工表（Manual）
   {
     name: "POAS",
     type: "manual",
+    reportSource: "poas",
     reportId: "poas_opp",
     status: "success",
     statusText: t("welcome.data.status.uploaded"),
     desc: "商机表",
-    uploadTime: "10:30",
+    uploadTime: "昨日 18:00",
     icon: Tickets
   },
   {
     name: "WWS",
     type: "manual",
+    reportSource: "wws",
     reportId: "wws_activity",
     status: "success",
     statusText: t("welcome.data.status.uploaded"),
     desc: "活动列表",
-    uploadTime: "10:45",
+    uploadTime: "昨日 18:00",
     icon: Monitor
   },
   {
     name: "C@P系统",
     type: "manual",
+    reportSource: "cap",
     reportId: "cap_vehicle",
     status: "success",
     statusText: t("welcome.data.status.uploaded"),
     desc: "车辆报告",
-    uploadTime: "11:00",
+    uploadTime: "昨日 18:00",
     icon: Upload
   },
   {
     name: "Voucher",
     type: "manual",
+    reportSource: "voucher",
     reportId: "voucher_member_addon_sales",
     status: "success",
     statusText: t("welcome.data.status.uploaded"),
     desc: "会员附加销售报表",
-    uploadTime: "11:15",
+    uploadTime: "昨日 18:00",
     icon: Ticket
   },
   {
     name: "Voucher",
     type: "manual",
+    reportSource: "voucher",
     reportId: "voucher_balance_detail",
     status: "success",
     statusText: t("welcome.data.status.uploaded"),
     desc: "优惠券余额报表明细",
-    uploadTime: "11:20",
+    uploadTime: "昨日 18:00",
     icon: Ticket
   },
   {
     name: "Voucher",
     type: "manual",
+    reportSource: "voucher",
     reportId: "voucher_first_owner_info",
     status: "success",
     statusText: t("welcome.data.status.uploaded"),
     desc: "首任车主信息",
-    uploadTime: "11:25",
+    uploadTime: "昨日 18:00",
     icon: Ticket
   },
   {
     name: "Manual Files",
     type: "manual",
+    reportSource: "manual",
     reportId: "manual_ins_renewal_sales",
     status: "success",
     statusText: t("welcome.data.status.uploaded"),
     desc: "续保销售记录",
-    uploadTime: "09:30",
+    uploadTime: "昨日 18:00",
     icon: Document
   },
   {
     name: "Manual Files",
     type: "manual",
+    reportSource: "manual",
     reportId: "manual_ins_new_sales",
     status: "success",
     statusText: t("welcome.data.status.uploaded"),
     desc: "新保销售记录",
-    uploadTime: "09:45",
+    uploadTime: "昨日 18:00",
     icon: Document
   },
   {
     name: "Manual Files",
     type: "manual",
+    reportSource: "manual",
     reportId: "manual_client_base_table",
     status: "success",
     statusText: t("welcome.data.status.uploaded"),
     desc: "客户基盘表",
-    uploadTime: "10:00",
+    uploadTime: "昨日 18:00",
     icon: Document
   },
   {
     name: "Manual Files",
     type: "manual",
+    reportSource: "manual",
     reportId: "manual_replace_approval",
     status: "success",
     statusText: t("welcome.data.status.uploaded"),
     desc: "推荐置换再购审批记录",
-    uploadTime: "10:10",
+    uploadTime: "昨日 18:00",
     icon: Document
   },
   {
     name: "Manual Files",
     type: "manual",
+    reportSource: "manual",
     reportId: "manual_offline_marketing_segment",
     status: "success",
     statusText: t("welcome.data.status.uploaded"),
     desc: "线下营销/社群活动分群",
-    uploadTime: "10:20",
+    uploadTime: "昨日 18:00",
     icon: Document
   },
   {
     name: "Manual Files",
     type: "manual",
+    reportSource: "manual",
     reportId: "manual_generic_opportunity",
     status: "gray",
     statusText: t("welcome.data.status.pendingUpload"),
@@ -484,8 +493,8 @@ const sourceSystems = computed(() => [
     type: "auto",
     status: "success",
     statusText: t("welcome.data.status.synced"),
-    desc: "BDC 外呼系统数据",
-    uploadTime: "实时",
+    desc: "BDC 外呼系统数据（昨日本批）",
+    uploadTime: "T+1 09:00",
     icon: Service
   },
   {
@@ -493,8 +502,8 @@ const sourceSystems = computed(() => [
     type: "auto",
     status: "success",
     statusText: t("welcome.data.status.synced"),
-    desc: "DMS 主数据",
-    uploadTime: "实时",
+    desc: "DMS 主数据（昨日本批）",
+    uploadTime: "T+1 09:00",
     icon: Monitor
   },
   {
@@ -502,8 +511,8 @@ const sourceSystems = computed(() => [
     type: "auto",
     status: "success",
     statusText: t("welcome.data.status.synced"),
-    desc: "企业微信互动数据",
-    uploadTime: "实时",
+    desc: "企业微信互动数据（昨日本批）",
+    uploadTime: "T+1 09:00",
     icon: Connection
   }
 ]);
@@ -539,11 +548,15 @@ const systemStatusSummary = computed<{ text: string; type: StatusTagType }>(() =
 });
 
 const openWorkbenchUpload = (reportId?: string) => {
+  const targetReportId = reportId || "manual_generic_opportunity";
+
   router.push({
     path: "/dataProcess/dataQualityWorkbench",
     query: {
-      reportId,
-      openPicker: reportId ? "1" : undefined
+      reportId: targetReportId,
+      openPicker: "1",
+      // 每次点击都带一个不同的 token，确保路由变更能够触发对端 watcher
+      pickerToken: Date.now().toString()
     }
   });
 };
@@ -611,25 +624,25 @@ const pipelineSteps = computed(() => {
   return [
     {
       title: "源数据导入",
-      main: `已导入源表数 8 / 计划源表数 10`,
+      main: "8 / 10",
       detail: "本批次计划导入 10 张源表，当前已成功导入 8 张，其余 2 张待下批处理。",
       icon: Download
     },
     {
       title: "清洗通过",
-      main: `清洗合格客户记录数 ${formatNumber(118920)} / 接收客户记录数 ${formatNumber(125890)}`,
+      main: `${formatNumber(118920)} / ${formatNumber(125890)}`,
       detail: "共接收到 125,890 条客户记录，其中 118,920 条通过清洗校验，其余记录存在必填缺失或格式异常。",
       icon: Filter
     },
     {
       title: "参与合并",
-      main: `新增主数据客户数 ${formatNumber(2345)} / 更新主数据客户数 ${formatNumber(9840)}`,
+      main: `${formatNumber(2345)} / ${formatNumber(9840)}`,
       detail: "识别出 2,345 名新增主数据客户，并对 9,840 名既有客户进行了主数据属性更新。",
       icon: User
     },
     {
       title: "新增冲突",
-      main: `本批产生的冲突客户数 ${formatNumber(86)}`,
+      main: formatNumber(86),
       detail: "在本批处理中产生 86 名冲突客户，等待人工或规则进一步复核处理。",
       icon: WarningFilled
     }

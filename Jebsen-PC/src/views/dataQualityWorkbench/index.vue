@@ -539,23 +539,21 @@ const triggerCurrentUploadPicker = async () => {
   }
 };
 
+// 监听整条 query，配合 pickerToken，保证每次从欢迎页点击都会触发一次上传选择框
 watch(
-  [allReports, () => route.query.reportId, () => route.query.openPicker],
-  async ([reports, reportIdQuery, openPickerQuery]) => {
+  () => route.query,
+  async query => {
+    const reports = allReports.value;
     if (!reports.length) return;
 
-    const requestedReportId = resolveQueryString(reportIdQuery);
+    const requestedReportId = resolveQueryString(query.reportId);
     if (requestedReportId && reports.some(report => report.id === requestedReportId)) {
       activeReportId.value = requestedReportId;
     }
 
-    if (resolveQueryString(openPickerQuery) !== "1") return;
-
-    await triggerCurrentUploadPicker();
-
-    const nextQuery = { ...route.query };
-    delete nextQuery.openPicker;
-    router.replace({ query: nextQuery });
+    if (resolveQueryString(query.openPicker) === "1") {
+      await triggerCurrentUploadPicker();
+    }
   },
   { immediate: true }
 );
@@ -690,17 +688,19 @@ const downloadReportTemplate = async (report: { id: string; name: string }) => {
   }
 };
 
-// 模拟检查维修记录是否能在主数据库中匹配（通过客户手机号）
+// 模拟检查订单是否能在主数据库中匹配（通过 VIN）
 const checkDataAssociation = async (vin?: string, customerPhone?: string): Promise<boolean> => {
-  // 模拟API调用，检查客户手机号是否能在主数据库中匹配
+  // 模拟API调用，检查 VIN 是否能在车辆主数据中匹配
   // 实际项目中应该调用真实API
   await new Promise(resolve => setTimeout(resolve, 100)); // 模拟网络延迟
 
-  // 模拟逻辑：如果客户手机号为空，或者包含特定字符（如"TEST"），则认为无法匹配
-  if (customerPhone && customerPhone.includes("TEST")) return false;
+  // 关联性异常（未能匹配到 VIN）：
+  // - VIN 为空
+  // - 或者 VIN 中包含特定标记（如 "UNMATCH"）
+  if (!vin || vin.trim() === "" || vin.includes("UNMATCH")) return false;
 
-  // 模拟：随机返回一些无法匹配的情况（约20%的数据无法匹配）
-  return Math.random() > 0.2;
+  // 其他情况认为可以正常关联
+  return true;
 };
 
 // 处理报表文件上传（增加预检功能）
@@ -776,31 +776,40 @@ const performPreCheck = async (file: File, report: { id: string; name: string })
 
   try {
     // 模拟读取Excel文件（实际项目中应该使用xlsx库解析）
-    // 这里我们模拟一个预检结果
+    // 这里我们模拟一个预检结果：订单与车辆主数据的关联性检查（按 VIN）
     await new Promise(resolve => setTimeout(resolve, 1500)); // 模拟预检过程
 
-    // 模拟预检结果数据（维修记录）- 只保留一条记录，手机号错误
+    // mock 两条“未能匹配到 VIN 的订单数据”
     const mockData = [
       {
         rowIndex: 2,
-        Service_Order_No: "SV20240115001",
-        Service_Date: "2024-01-15",
-        Customer_Phone: "TEST12345678",
-        Service_Type: "定期保养",
-        Service_Amount: "2500.00",
-        Car_Model: "911 Carrera",
-        Mileage: "15000",
+        Order_No: "SO-202501-001",
+        Order_Date: "2025-01-05",
+        Customer_Name: "张三",
+        Phone: "13812345678",
+        VIN: "",
+        Model: "Macan",
         Dealer_Code: "BJ001",
-        Service_Consultant: "李顾问",
+        errors: []
+      },
+      {
+        rowIndex: 3,
+        Order_No: "SO-202501-002",
+        Order_Date: "2025-01-06",
+        Customer_Name: "李四",
+        Phone: "13912345679",
+        VIN: "UNMATCH1234567890",
+        Model: "Cayenne",
+        Dealer_Code: "SH002",
         errors: []
       }
     ];
 
-    // 检查维修记录的客户手机号关联
+    // 按 VIN 检查订单与车辆主数据的关联性
     const errorRows: any[] = [];
     for (const row of mockData) {
-      const customerPhone = row.Customer_Phone;
-      const canAssociate = await checkDataAssociation(undefined, customerPhone);
+      const vin = row.VIN;
+      const canAssociate = await checkDataAssociation(vin);
 
       if (!canAssociate) {
         errorRows.push({

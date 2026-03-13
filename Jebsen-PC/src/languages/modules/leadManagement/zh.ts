@@ -29,7 +29,7 @@ export default {
     },
     columns: {
       oneId: "OneID",
-      customerName: "真实姓名",
+      customerName: "客户姓名",
       leadType: "商机类型",
       ruleName: "触发规则",
       priority: "优先级",

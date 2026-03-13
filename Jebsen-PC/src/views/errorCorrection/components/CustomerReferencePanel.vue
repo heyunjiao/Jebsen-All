@@ -95,8 +95,7 @@
               <el-tag type="info" size="small" class="phone-tag">
                 {{ phoneItem.value }}
               </el-tag>
-              <span v-if="phoneItem.isPrimary" class="relation-tag primary">{{ t("customer.profile360.primary") }}</span>
-              <span v-else class="relation-tag secondary">{{ t("customer.profile360.secondary") }}</span>
+              <span v-if="phoneItem.isPreferred" class="relation-tag preferred">{{ t("customer.profile360.preferredNumber") }}</span>
             </span>
           </div>
         </el-descriptions-item>
@@ -501,7 +500,7 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const phoneValues = computed(() => [{ value: props.customerInfo.phone, isPrimary: true }]);
+const phoneValues = computed(() => [{ value: props.customerInfo.phone, isPreferred: true }]);
 
 const activeInfoTab = ref("transactions");
 const transactionSearch = ref("");
@@ -725,12 +724,9 @@ const getAssetStatusTagType = (status: string): any => {
       font-size: 12px;
       color: #909399;
 
-      &.primary {
+      &.preferred {
         font-weight: 500;
         color: #409eff;
-      }
-      &.secondary {
-        color: #909399;
       }
     }
   }

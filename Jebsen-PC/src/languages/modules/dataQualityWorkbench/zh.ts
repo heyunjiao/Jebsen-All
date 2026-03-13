@@ -164,7 +164,7 @@ export default {
     columnMapping: {
       VIN: "VIN码",
       Phone: "手机号",
-      Customer_Name: "真实姓名",
+      Customer_Name: "客户姓名",
       Model: "车型",
       Dealer_Code: "经销商代码",
       Sales_Consultant: "销售顾问",

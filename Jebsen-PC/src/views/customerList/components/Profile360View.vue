@@ -10,11 +10,6 @@
     <template #header>
       <div class="drawer-header">
         <span>{{ $t("customer.profile360.title") }}</span>
-        <div class="drawer-header-actions" v-if="profileData">
-          <el-button link size="small" :icon="ChatDotSquare" @click="handleFeedbackClick">
-            {{ $t("customer.feedback.title") }}
-          </el-button>
-        </div>
       </div>
     </template>
     <div v-if="profileData" class="profile-360-container customer-reference-panel">
@@ -52,150 +47,8 @@
           </div>
         </div>
       </el-card>
-      <!-- 公司信息（如果客户属于公司） -->
-      <el-card v-if="profileData.company" shadow="never" class="reference-card company-card">
-        <template #header>
-          <div class="card-header">
-            <div class="card-header-left">
-              <div class="header-icon-wrapper company-icon">
-                <el-icon><OfficeBuilding /></el-icon>
-              </div>
-              <span>{{ $t("customer.company.title") }}</span>
-              <!-- 公司生命周期状态：在标题旁显示，编辑时在这里切换 -->
-              <div class="company-status-wrapper" v-if="profileData.company">
-                <template v-if="!isCompanyEditMode">
-                  <el-tag
-                    v-if="companyStatusValue"
-                    :type="getStatusType(companyStatusValue as LifecycleStatus)"
-                    size="small"
-                    class="company-status-tag"
-                  >
-                    {{ getStatusLabel(companyStatusValue as LifecycleStatus) }}
-                  </el-tag>
-                </template>
-                <el-select
-                  v-else
-                  v-model="companyForm.lifecycleStatus"
-                  :placeholder="$t('customer.maintenance.selectStatus')"
-                  size="small"
-                  class="company-status-select"
-                >
-                  <el-option :label="$t('customer.lifecycleStatusOptions.active')" value="active" />
-                  <el-option :label="$t('customer.lifecycleStatusOptions.inactive')" value="inactive" />
-                </el-select>
-              </div>
-            </div>
-            <div class="card-header-right">
-              <el-button v-if="!isCompanyEditMode" link type="primary" size="small" :icon="Edit" @click="enterCompanyEditMode">
-                {{ $t("customer.profile360.editBasicInfo") }}
-              </el-button>
-              <template v-else>
-                <el-button link type="primary" size="small" :icon="Check" @click="handleSubmitCompanyInfo">
-                  {{ $t("customer.profile360.submit") }}
-                </el-button>
-                <el-button link size="small" :icon="Close" @click="exitCompanyEditMode">
-                  {{ $t("customer.profile360.cancel") }}
-                </el-button>
-              </template>
-            </div>
-          </div>
-        </template>
-        <el-descriptions :column="2" border size="small">
-          <el-descriptions-item :label="$t('customer.company.name')">
-            <div class="description-value">
-              <el-icon class="value-icon"><OfficeBuilding /></el-icon>
-              <template v-if="!isCompanyEditMode">
-                <span>{{ profileData.company.name }}</span>
-              </template>
-              <el-input v-else v-model="companyForm.name" :placeholder="$t('customer.company.name')" size="small" />
-            </div>
-          </el-descriptions-item>
-          <el-descriptions-item :label="$t('customer.company.oneId')">
-            <div class="description-value">
-              <el-icon class="value-icon"><CopyDocument /></el-icon>
-              <span>{{ profileData.company.oneId }}</span>
-            </div>
-          </el-descriptions-item>
-          <el-descriptions-item :label="$t('customer.company.address')" :span="2">
-            <div class="description-value">
-              <el-icon class="value-icon"><Location /></el-icon>
-              <template v-if="!isCompanyEditMode">
-                <span>{{ profileData.company.address || "-" }}</span>
-              </template>
-              <el-input v-else v-model="companyForm.address" :placeholder="$t('customer.company.address')" size="small" />
-            </div>
-          </el-descriptions-item>
-          <el-descriptions-item :label="$t('customer.company.phone')" :span="2">
-            <div class="description-value">
-              <el-icon class="value-icon"><Phone /></el-icon>
-              <template v-if="!isCompanyEditMode">
-                <template v-if="typeof profileData.company.phone === 'string'">
-                  <span>{{ profileData.company.phone }}</span>
-                </template>
-                <template v-else-if="Array.isArray(profileData.company.phone)">
-                  <div class="phone-tags-container">
-                    <el-tag
-                      v-for="(phoneItem, index) in profileData.company.phone"
-                      :key="index"
-                      type="info"
-                      size="small"
-                      class="phone-tag"
-                    >
-                      {{ typeof phoneItem === "string" ? phoneItem : phoneItem.value }}
-                    </el-tag>
-                  </div>
-                </template>
-                <span v-else>-</span>
-              </template>
-              <el-input v-else v-model="companyForm.phone" :placeholder="$t('customer.company.phone')" size="small" />
-            </div>
-          </el-descriptions-item>
-          <el-descriptions-item :label="$t('customer.company.contactPerson')">
-            <div class="description-value">
-              <el-icon class="value-icon"><UserFilled /></el-icon>
-              <template v-if="!isCompanyEditMode">
-                <span>{{ profileData.company.contactPerson || "-" }}</span>
-              </template>
-              <el-input
-                v-else
-                v-model="companyForm.contactPerson"
-                :placeholder="$t('customer.company.contactPerson')"
-                size="small"
-              />
-            </div>
-          </el-descriptions-item>
-        </el-descriptions>
-        <!-- 层级连接指示器 -->
-        <div class="hierarchy-indicator">
-          <div class="indicator-line"></div>
-          <div class="indicator-icon">
-            <el-icon><Connection /></el-icon>
-          </div>
-          <div class="indicator-text">{{ $t("customer.company.relatedCustomer") }}</div>
-        </div>
-      </el-card>
-
-      <!-- 公司客户：经办人 Tab（人名+角色）切换，与 H5 一致；切换后下方联系人档案动态展示 -->
-      <div
-        v-if="profileData.company && profileData.handlers && profileData.handlers.length > 0"
-        class="handler-selector-block handler-pill-wrapper"
-      >
-        <div
-          v-for="h in profileData.handlers"
-          :key="h.id"
-          class="handler-pill"
-          :class="{ active: selectedHandlerIdLocal === h.id }"
-          @click="selectedHandlerIdLocal = h.id"
-        >
-          <span class="handler-name">{{ h.name }}</span>
-          <span v-if="h.role" class="handler-role-tag">{{ h.role }}</span>
-          <span v-if="h.isPrimaryContact" class="handler-flag">首选联系人</span>
-          <span v-else-if="h.isPreferredRepairer" class="handler-flag">首选送修人</span>
-        </div>
-      </div>
-
       <!-- 客户基本信息（联系人档案） -->
-      <el-card shadow="never" class="reference-card" :class="{ 'customer-under-company': profileData.company }">
+      <el-card shadow="never" class="reference-card">
         <template #header>
           <div class="card-header">
             <div class="card-header-left">
@@ -203,9 +56,14 @@
                 <el-icon><User /></el-icon>
               </div>
               <span>{{ contactArchiveTitle }}</span>
-              <el-tag v-if="profileData.company" type="info" size="small" class="company-relation-tag">
+              <el-tag
+                v-if="profileData.customer && profileData.customer.companyName"
+                type="info"
+                size="small"
+                class="company-relation-tag"
+              >
                 <el-icon class="tag-icon"><Connection /></el-icon>
-                <span>{{ $t("customer.company.belongsTo") }}: {{ profileData.company.name }}</span>
+                <span>{{ $t("customer.company.belongsTo") }}: {{ profileData.customer.companyName }}</span>
               </el-tag>
             </div>
             <div class="card-header-right">
@@ -231,7 +89,7 @@
           </div>
         </template>
         <el-descriptions :column="2" border size="small">
-          <el-descriptions-item v-if="!(isCompanyCustomer && selectedHandler)" label="OneID">
+          <el-descriptions-item label="OneID">
             {{ (currentDisplayCustomer || profileData.customer).oneId }}
             <el-button link type="primary" size="small" :icon="CopyDocument" @click="copyOneId" style="margin-left: 8px" />
           </el-descriptions-item>
@@ -248,10 +106,9 @@
                   <el-tag type="info" size="small" class="phone-tag">
                     {{ phoneItem.value }}
                   </el-tag>
-                  <span v-if="phoneItem.isPrimary" class="relation-tag primary">{{
-                    $t("customer.profile360.primary") || "主号"
+                  <span v-if="phoneItem.isPreferred" class="relation-tag preferred">{{
+                    $t("customer.profile360.preferredNumber")
                   }}</span>
-                  <span v-else class="relation-tag secondary">{{ $t("customer.profile360.secondary") || "副号" }}</span>
                   <span v-if="phoneItem.relationTagName" class="relation-tag">{{ phoneItem.relationTagName }}</span>
                   <span v-if="phoneItem.isPrimaryContact" class="relation-tag highlight">首选联系人</span>
                   <span v-if="phoneItem.isPreferredRepairer" class="relation-tag highlight">首选送修人</span>
@@ -280,13 +137,14 @@
                   <el-option v-for="opt in relationTagOptions" :key="opt.value" :label="opt.label" :value="opt.value" />
                 </el-select>
                 <el-radio-group
-                  :model-value="basicInfoForm.primaryPhoneIndex === index ? 'primary' : 'secondary'"
+                  v-model="basicInfoForm.preferredPhoneIndex"
                   size="small"
-                  @update:model-value="val => onPhonePrimarySecondaryChange(index, String(val))"
                   :disabled="basicInfoForm.phoneReadonly[index]"
+                  class="preferred-radio-group"
                 >
-                  <el-radio label="primary">{{ $t("customer.profile360.primary") }}</el-radio>
-                  <el-radio label="secondary">{{ $t("customer.profile360.secondary") }}</el-radio>
+                  <el-radio :value="index" :label="index">
+                    {{ $t("customer.profile360.setAsPreferred") }}
+                  </el-radio>
                 </el-radio-group>
                 <el-button
                   type="danger"
@@ -386,6 +244,85 @@
         </el-descriptions>
       </el-card>
 
+      <!-- 客户价值 -->
+      <el-card v-if="profileData.valueInfo" shadow="never" class="reference-card">
+        <template #header>
+          <div class="card-header">
+            <div class="card-header-left">
+              <el-icon><Medal /></el-icon>
+              <span>{{ $t("customer.profile360.customerValue") }}</span>
+            </div>
+          </div>
+        </template>
+        <el-descriptions :column="3" border size="small">
+          <el-descriptions-item :label="$t('customer.profile360.compositeScore')">
+            {{ profileData.valueInfo?.compositeScore ?? "—" }}
+          </el-descriptions-item>
+          <el-descriptions-item :label="$t('customer.profile360.postSalesSelfPaidAmount')">
+            {{ profileData.valueInfo?.postSalesSelfPaidAmount != null ? formatCurrency(profileData.valueInfo!.postSalesSelfPaidAmount!) : "—" }}
+          </el-descriptions-item>
+          <el-descriptions-item :label="$t('customer.profile360.addonPurchaseAmount')">
+            {{ profileData.valueInfo?.addonPurchaseAmount != null ? formatCurrency(profileData.valueInfo!.addonPurchaseAmount!) : "—" }}
+          </el-descriptions-item>
+          <el-descriptions-item :label="$t('customer.profile360.isSalesDiamond')">
+            <el-tag v-if="profileData.valueInfo?.isSalesDiamond" type="warning" size="small">
+              {{ $t("common.yes") }}
+            </el-tag>
+            <span v-else>—</span>
+          </el-descriptions-item>
+          <el-descriptions-item :label="$t('customer.profile360.isAftersalesDiamond')">
+            <el-tag v-if="profileData.valueInfo?.isAftersalesDiamond" type="primary" size="small">
+              {{ $t("common.yes") }}
+            </el-tag>
+            <span v-else>—</span>
+          </el-descriptions-item>
+          <el-descriptions-item :label="$t('customer.profile360.activitySegment')">
+            <span v-if="profileData.valueInfo?.isLost">{{ $t("customer.profile360.segmentLost") }}</span>
+            <span v-else-if="profileData.valueInfo?.isDormant">{{ $t("customer.profile360.segmentDormant") }}</span>
+            <span v-else-if="profileData.valueInfo?.isActiveAfterSales">{{ $t("customer.profile360.segmentActive") }}</span>
+            <span v-else>—</span>
+          </el-descriptions-item>
+        </el-descriptions>
+      </el-card>
+
+      <!-- 销售 / 售后行为 -->
+      <el-card v-if="profileData.behaviorInfo" shadow="never" class="reference-card">
+        <template #header>
+          <div class="card-header">
+            <div class="card-header-left">
+              <el-icon><TrendCharts /></el-icon>
+              <span>{{ $t("customer.profile360.behavior") }}</span>
+            </div>
+          </div>
+        </template>
+        <el-descriptions :column="3" border size="small">
+          <el-descriptions-item :label="$t('customer.profile360.purchaseAmount')">
+            {{ profileData.behaviorInfo?.purchaseAmount != null ? formatCurrency(profileData.behaviorInfo!.purchaseAmount!) : "—" }}
+          </el-descriptions-item>
+          <el-descriptions-item :label="$t('customer.profile360.optionAmount')">
+            {{ profileData.behaviorInfo?.optionAmount != null ? formatCurrency(profileData.behaviorInfo!.optionAmount!) : "—" }}
+          </el-descriptions-item>
+          <el-descriptions-item :label="$t('customer.profile360.addonProductAmount')">
+            {{ profileData.behaviorInfo?.addonProductAmount != null ? formatCurrency(profileData.behaviorInfo!.addonProductAmount!) : "—" }}
+          </el-descriptions-item>
+          <el-descriptions-item :label="$t('customer.profile360.serviceFrequencyLastYear')">
+            {{ profileData.behaviorInfo?.serviceFrequencyLastYear ?? "—" }}
+          </el-descriptions-item>
+          <el-descriptions-item :label="$t('customer.profile360.lastMaintenanceStore')">
+            {{ profileData.behaviorInfo?.lastMaintenanceStore || "—" }}
+          </el-descriptions-item>
+          <el-descriptions-item :label="$t('customer.profile360.lastMaintenanceDate')">
+            {{ profileData.behaviorInfo?.lastMaintenanceDate || "—" }}
+          </el-descriptions-item>
+          <el-descriptions-item :label="$t('customer.profile360.repairAmountLastYear')">
+            {{ profileData.behaviorInfo?.repairAmountLastYear != null ? formatCurrency(profileData.behaviorInfo!.repairAmountLastYear!) : "—" }}
+          </el-descriptions-item>
+          <el-descriptions-item :label="$t('customer.profile360.accidentRepairCountLastYear')">
+            {{ profileData.behaviorInfo?.accidentRepairCountLastYear ?? "—" }}
+          </el-descriptions-item>
+        </el-descriptions>
+      </el-card>
+
       <!-- 商机信息（个人：商机信息；企业：企业商机信息，与联系人档案联动展示） -->
       <el-card v-if="opportunityInfoList.length > 0 || isCompanyCustomer" shadow="never" class="reference-card">
         <template #header>
@@ -470,7 +407,7 @@
                         <el-icon v-else><User /></el-icon>
                         {{ getTagOriginLabel(category, tag) }}
                       </span>
-                      <span class="tag-text">{{ tag }}</span>
+                      <span class="tag-text">{{ getCategoryFullPath(TAG_CATEGORY_OPTIONS, tag) || tag }}</span>
                     </el-tag>
                   </div>
                 </div>
@@ -478,41 +415,53 @@
             </div>
           </template>
           <template v-else>
-            <!-- 查看模式：只显示已选中的标签 -->
-            <template v-if="selectedTags && Object.keys(selectedTags).length > 0">
-              <div class="tags-flow">
-                <template v-for="(tags, category) in selectedTags" :key="category">
-                  <template v-if="tags && Array.isArray(tags) && tags.length > 0">
-                    <div class="category-tags-group">
-                      <div class="category-header">
-                        <span class="category-name">
-                          {{ getCategoryDisplayLabel(category) }}
-                        </span>
-                      </div>
-                      <div class="tags-list">
-                        <el-tag
-                          v-for="tag in tags"
-                          :key="tag"
-                          size="small"
-                          :class="['category-tag', `category-tag-${getCategoryColorIndex(category)}`]"
-                        >
-                          <span class="tag-origin" :class="getTagOriginClass(category, tag)">
-                            <el-icon v-if="getTagOriginClass(category, tag) === 'auto'"><MagicStick /></el-icon>
-                            <el-icon v-else><User /></el-icon>
-                            {{ getTagOriginLabel(category, tag) }}
-                          </span>
-                          <span class="tag-text">{{ tag }}</span>
-                        </el-tag>
-                      </div>
+            <!-- 查看模式：已选中的画像标签 + 风控状态（同一卡片内，标签样式一致） -->
+            <div class="tags-flow">
+              <template v-for="(tags, category) in selectedTags" :key="category">
+                <template v-if="tags && Array.isArray(tags) && tags.length > 0">
+                  <div class="category-tags-group">
+                    <div class="category-header">
+                      <span class="category-name">
+                        {{ getCategoryDisplayLabel(category) }}
+                      </span>
                     </div>
-                  </template>
+                    <div class="tags-list">
+                      <el-tag
+                        v-for="tag in tags"
+                        :key="tag"
+                        size="small"
+                        :class="['category-tag', `category-tag-${getCategoryColorIndex(category)}`]"
+                      >
+                        <span class="tag-origin" :class="getTagOriginClass(category, tag)">
+                          <el-icon v-if="getTagOriginClass(category, tag) === 'auto'"><MagicStick /></el-icon>
+                          <el-icon v-else><User /></el-icon>
+                          {{ getTagOriginLabel(category, tag) }}
+                        </span>
+                        <span class="tag-text">{{ getCategoryFullPath(TAG_CATEGORY_OPTIONS, tag) || tag }}</span>
+                      </el-tag>
+                    </div>
+                  </div>
                 </template>
+              </template>
+              <!-- 风控状态：作为标签分组展示在同一卡片内 -->
+              <div v-if="riskStatusTags.length > 0" class="category-tags-group">
+                <div class="category-header">
+                  <span class="category-name">{{ $t("customer.profile360.riskStatus") }}</span>
+                </div>
+                <div class="tags-list">
+                  <el-tag
+                    v-for="item in riskStatusTags"
+                    :key="item.key"
+                    size="small"
+                    :type="item.type"
+                    :class="['category-tag', 'risk-status-tag']"
+                  >
+                    <span class="tag-text">{{ item.label }}</span>
+                  </el-tag>
+                </div>
               </div>
-              <div v-if="!hasSelectedTags" class="empty-tags">
-                <span class="empty-text">{{ $t("common.noData") }}</span>
-              </div>
-            </template>
-            <div v-else class="empty-tags">
+            </div>
+            <div v-if="!hasSelectedTags && riskStatusTags.length === 0" class="empty-tags">
               <span class="empty-text">{{ $t("common.noData") }}</span>
             </div>
           </template>
@@ -802,9 +751,17 @@
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column :label="$t('customer.profile360.vehicleBuyer')" min-width="140">
+            <el-table-column :label="$t('customer.profile360.vehicleBuyer')" min-width="180">
               <template #default="scope">
-                <div class="vehicle-person-cell">{{ getVehicleBuyer(scope.row) }}</div>
+                <div class="vehicle-repairer-cell">
+                  <template v-if="getVehicleBuyers(scope.row).length > 0">
+                    <div v-for="buyer in getVehicleBuyers(scope.row)" :key="buyer.id" class="vehicle-repairer-chip">
+                      <span>{{ buyer.name }}</span>
+                      <span v-if="buyer.phone" class="vehicle-repairer-phone">{{ buyer.phone }}</span>
+                    </div>
+                  </template>
+                  <span v-else>暂无购车人</span>
+                </div>
               </template>
             </el-table-column>
             <el-table-column :label="$t('customer.profile360.vehicleRepairers')" min-width="220">
@@ -1030,11 +987,10 @@ import {
   Location,
   Phone,
   UserFilled,
-  ChatDotSquare,
   MagicStick
 } from "@element-plus/icons-vue";
 import { useI18n } from "vue-i18n";
-import { Customer360View, LifecycleStatus } from "../interface";
+import { Customer360View, LifecycleStatus, VehicleRelatedPerson } from "../interface";
 import LineageView from "./LineageView.vue";
 import { TAG_CATEGORY_OPTIONS, getCategoryFullPath } from "@/constants/tagCategory";
 import ProTable from "@/components/ProTable/index.vue";
@@ -1052,7 +1008,6 @@ const props = defineProps<Props>();
 
 const emit = defineEmits<{
   "update:modelValue": [value: boolean];
-  feedback: [customer: Customer360View["customer"]];
   export: [];
   /** 与 H5 一致：修改车辆状态 */
   vehicleStatusChange: [vehicleId: string, status: string];
@@ -1069,53 +1024,22 @@ const transactionTypeFilter = ref("");
 const isBasicInfoEditMode = ref(false);
 const isTagsEditMode = ref(false);
 const isVehicleEditMode = ref(false);
-const isCompanyEditMode = ref(false);
-// 公司客户当前选中的经办人（与 H5 一致）
-const selectedHandlerIdLocal = ref<string>("");
 // 车辆信息 Tab：与 H5 一致的修改功能
 const editingVehicleStatusId = ref<string | null>(null);
 const editingVehicleRole = ref<{ vehicle: Customer360View["vehicles"][number]; role: string } | null>(null);
 
-// 是否为公司客户（用于展示多角色人员信息卡片）
+// 是否为公司客户：仅依赖客户类型，不再维护公司档案和经办人列表
 const isCompanyCustomer = computed(() => {
   const data = props.profileData;
   if (!data) return false;
-  return !!(data.company || (data.customer && (data.customer as { customerType?: string }).customerType === "company"));
+  return (data.customer as { customerType?: string }).customerType === "company";
 });
 
-// 当前选中的经办人（公司客户时用于切换展示的联系人基本信息）
-const selectedHandler = computed(() => {
-  const handlers = props.profileData?.handlers;
-  const id = selectedHandlerIdLocal.value;
-  if (!id || !handlers?.length) return null;
-  return handlers.find((h: { id: string }) => h.id === id) ?? null;
-});
-
-const handleFeedbackClick = () => {
-  if (!props.profileData) return;
-  emit("feedback", props.profileData.customer);
-};
-
-// 当前展示的“客户”信息：公司类型且选中经办人时为该经办人，否则为 profileData.customer（与 H5 按角色切换一致）
+// 当前展示的“客户”信息：公司类型也统一展示 OneID 客户本身（不再按经办人切换）
 const currentDisplayCustomer = computed(() => {
   const data = props.profileData;
   if (!data) return null;
   const customer = data.customer;
-  // 公司内联系人无独立 OneID，仅公司主体有；联系人通过 id + 所属公司 oneId 标识
-  if (isCompanyCustomer.value && selectedHandler.value) {
-    const h = selectedHandler.value as import("@/views/customerList/interface").HandlerInfo;
-    return {
-      oneId: undefined as string | undefined,
-      name: h.name ?? "",
-      ageGroup: h.age != null ? String(h.age) : "",
-      gender: (h.gender as string) ?? "",
-      city: (h.city as string) ?? "",
-      familyStatus: (customer.familyStatus as string) ?? "",
-      address: customer.address,
-      phone: customer.phone,
-      role: h.role
-    };
-  }
   return { ...customer, role: (customer as { role?: string }).role };
 });
 
@@ -1144,8 +1068,9 @@ function handleVehicleStatusChange(vehicleId: string, status: string) {
   emit("vehicleStatusChange", vehicleId, status);
 }
 
-const getVehicleBuyer = (vehicle: Customer360View["vehicles"][number]) =>
-  vehicle.relatedPersons?.find(person => person.role === "购车人")?.name || "暂无";
+/** 车辆下所有购车人（公司可有多名） */
+const getVehicleBuyers = (vehicle: Customer360View["vehicles"][number]) =>
+  vehicle.relatedPersons?.filter((person): person is VehicleRelatedPerson & { id: string } => person.role === "购车人") ?? [];
 
 const getVehicleRepairers = (vehicle: Customer360View["vehicles"][number]) =>
   vehicle.relatedPersons?.filter(person => person.role === "送修人") || [];
@@ -1200,7 +1125,8 @@ const basicInfoForm = ref<{
   phoneList: string[];
   phoneRelationTags: string[]; // 每个号码的关系标签 key（与 H5 一致）
   phoneReadonly: boolean[];
-  primaryPhoneIndex: number;
+  /** 优选号码所在行下标（多号码时仅能设置一个） */
+  preferredPhoneIndex: number;
   lifecycleStatus: LifecycleStatus;
   originalLifecycleStatus: LifecycleStatus;
 }>({
@@ -1213,7 +1139,7 @@ const basicInfoForm = ref<{
   phoneList: [],
   phoneRelationTags: [],
   phoneReadonly: [],
-  primaryPhoneIndex: 0,
+  preferredPhoneIndex: 0,
   lifecycleStatus: "active",
   originalLifecycleStatus: "active"
 });
@@ -1250,97 +1176,55 @@ const companyStatusValue = computed(() => {
 const editModeSelectedTags = ref<Record<string, string[]>>({});
 
 // 所有可用的标签分类（用于编辑模式下显示所有可选标签）
+// 说明：这里的 tag 值统一使用「叶子编码」，与 TAG_CATEGORY_OPTIONS 中的 value 对齐，
+// 这样在展示时可以通过 getCategoryFullPath 还原多级路径。
 const allCategoryTags: Record<string, string[]> = {
-  意向级别: ["冷", "暖", "热"],
+  // 业务 / 意向级别
+  意向级别: ["意向-高", "意向-中", "意向-低"],
+  // 业务 / SC
   "SC【必选】": [
-    "PMP邀约",
-    "全款",
-    "员工介绍",
-    "市场活动",
-    "新车",
-    "易手车",
-    "老客介绍",
-    "老客重购",
-    "自然客流",
-    "贷款",
-    "销售邀约",
-    "公牌",
-    "其他"
+    "SC-高",
+    "SC-中",
+    "SC-低"
   ],
+  // 业务 / SA（示例：仍然用原始文案，后续可按需接入多级配置）
   "SA【必选】": ["本市", "省内外市", "私牌"],
+  // 业务 / 续保
   "续保【必选】": [
-    "人保",
-    "人寿",
-    "保险到期月份-10月",
-    "保险到期月份-11月",
-    "保险到期月份-12月",
-    "保险到期月份-1月",
-    "保险到期月份-2月",
-    "保险到期月份-3月",
-    "保险到期月份-4月",
-    "保险到期月份-5月",
-    "保险到期月份-6月",
-    "保险到期月份-7月",
-    "保险到期月份-8月",
-    "保险到期月份-9月",
-    "其他",
-    "在修不在保",
-    "太保",
-    "平安",
-    "新保",
-    "续保",
-    "太平",
-    "大地"
+    "续保-到期-3个月内",
+    "续保-到期-已过期"
   ],
-  "POC【必选】": ["其他评估", "区间报价", "售后评估", "精确报价", "销售评估"],
+  // 业务 / POC
+  "POC【必选】": ["POC-高", "POC-中"],
   免打扰车主: ["车主免打扰"],
-  线上活动: ["8月再购活动抽奖"],
+  // 业务 / 线上活动
+  线上活动: ["线上-试驾活动", "线上-金融活动"],
   "爱好(≥1项)": ["亲子", "品酒", "宠物", "潮玩", "自驾游", "艺术文化", "赛车", "运动", "高尔夫"],
   服务偏好: ["下午联系", "微信沟通", "需要代步车", "预约保养", "周末有空", "喜欢喝茶", "关注新款", "预算充足", "偏好SUV"]
 };
 
-// 转换数据格式（公司类型且选中经办人时展示该经办人手机号，与 H5 一致）
+// 转换数据格式：根据当前客户手机号（支持多值）生成展示列表
 const phoneValues = computed(() => {
   if (!props.profileData) return [];
-  if (isCompanyCustomer.value && selectedHandler.value) {
-    const h = selectedHandler.value as {
-      mobile?: string;
-      role?: string;
-      isPrimaryContact?: boolean;
-      isPreferredRepairer?: boolean;
-      readonly?: boolean;
-    };
-    if (h.mobile) {
-      return [
-        {
-          value: h.mobile,
-          source: "DMS",
-          isPrimary: true,
-          updateTime: "",
-          relationTagName: h.role,
-          isPrimaryContact: h.isPrimaryContact,
-          isPreferredRepairer: h.isPreferredRepairer,
-          readonly: h.readonly
-        }
-      ];
-    }
-    return [];
-  }
   const phone = props.profileData.customer.phone;
   if (typeof phone === "string") {
-    return [{ value: phone, source: "DMS", isPrimary: true, updateTime: "" }];
+    return [{ value: phone, source: "DMS", isPreferred: true, updateTime: "" }];
   }
   if (Array.isArray(phone)) {
-    return phone.map((item, index) => ({
-      value: typeof item === "string" ? item : item.value,
-      source: typeof item === "object" ? item.source || "DMS" : "DMS",
-      isPrimary: typeof item === "object" ? !!item.isPrimary : index === 0,
-      updateTime: typeof item === "object" ? item.updateTime || "" : "",
-      relationTagName: typeof item === "object" ? item.relationTagName : undefined,
-      isPreferredRepairer: typeof item === "object" ? item.isPreferredRepairer : false,
-      isPrimaryContact: typeof item === "object" ? item.isPrimaryContact : false,
-      readonly: typeof item === "object" ? item.readonly : false
-    }));
+    return phone.map((item, index) => {
+      const obj = typeof item === "object" ? item : null;
+      const isPreferred = obj ? !!(obj.isPreferred ?? obj.isPrimary) : index === 0;
+      return {
+        value: typeof item === "string" ? item : item.value,
+        source: obj?.source || "DMS",
+        isPreferred,
+        updateTime: obj?.updateTime || "",
+        relationTagName: obj?.relationTagName,
+        isPreferredRepairer: obj?.isPreferredRepairer ?? false,
+        isPrimaryContact: obj?.isPrimaryContact ?? false,
+        readonly: obj?.readonly ?? false
+      };
+    });
   }
   return [];
 });
@@ -1516,16 +1400,6 @@ const filteredTransactions = computed(() => {
 
   return result;
 });
-
-watch(
-  () => props.profileData,
-  data => {
-    if (data?.selectedHandlerId) selectedHandlerIdLocal.value = data.selectedHandlerId;
-    else if (data?.handlers?.length) selectedHandlerIdLocal.value = data.handlers[0].id;
-    else selectedHandlerIdLocal.value = "";
-  },
-  { immediate: true }
-);
 
 watch(
   () => props.modelValue,
@@ -1712,6 +1586,30 @@ const hasSelectedTags = computed(() => {
   return false;
 });
 
+// 风控状态转为标签列表（在画像标签卡片内展示，与其它分类样式一致）
+const riskStatusTags = computed(() => {
+  const risk = props.profileData?.riskStatus;
+  if (!risk) return [];
+  const list: Array<{ key: string; label: string; type: "danger" | "warning" | "info" }> = [];
+  if (risk.hasComplaint6Months) {
+    list.push({ key: "complaint6m", label: t("customer.profile360.hasComplaint6Months"), type: "danger" });
+  }
+  if (risk.churnRiskLevel) {
+    list.push({
+      key: "churn",
+      label: `${t("customer.profile360.churnRiskLevel")}：${risk.churnRiskLevel}`,
+      type: "warning"
+    });
+  }
+  if (risk.isVehicleSold) {
+    list.push({ key: "vehicleSold", label: t("customer.profile360.isVehicleSold"), type: "info" });
+  }
+  if (risk.isRemoteUse) {
+    list.push({ key: "remoteUse", label: t("customer.profile360.isRemoteUse"), type: "info" });
+  }
+  return list;
+});
+
 // 获取分类显示名称（去掉【必选】等标记）
 const getCategoryDisplayName = (category: string): string => {
   return category
@@ -1794,8 +1692,8 @@ const enterBasicInfoEditMode = () => {
 
   const phones = phoneValues.value;
   const phoneList = phones.length > 0 ? phones.map(p => p.value) : [""];
-  const primaryIdx = phones.findIndex(p => p.isPrimary);
-  const primaryPhoneIndex = primaryIdx >= 0 ? primaryIdx : 0;
+  const preferredIdx = phones.findIndex(p => p.isPreferred ?? p.isPrimary);
+  const preferredPhoneIndex = preferredIdx >= 0 ? preferredIdx : 0;
   const phoneRelationTags = phoneList.map((_, i) => {
     const name = phones[i]?.relationTagName;
     if (!name) return "";
@@ -1822,26 +1720,13 @@ const enterBasicInfoEditMode = () => {
     phoneList,
     phoneRelationTags,
     phoneReadonly: phoneList.map((_, index) => !!phones[index]?.readonly),
-    primaryPhoneIndex,
+    preferredPhoneIndex,
     lifecycleStatus: (props.profileData?.customer.lifecycleStatus as LifecycleStatus) ?? "active",
     originalLifecycleStatus: (props.profileData?.customer.lifecycleStatus as LifecycleStatus) ?? "active"
   };
 
   isBasicInfoEditMode.value = true;
 };
-
-/** 每行「主号/副号」单选变更：主号唯一，选副号时把主号落到其他行 */
-function onPhonePrimarySecondaryChange(rowIndex: number, value: string) {
-  if (value === "primary") {
-    basicInfoForm.value.primaryPhoneIndex = rowIndex;
-    return;
-  }
-  // 选「副号」：把主号设到其他任意一行（优先 0，否则第一个非当前行）
-  const len = basicInfoForm.value.phoneList.length;
-  if (len <= 1) return;
-  const next = Array.from({ length: len }, (_, j) => j).find(j => j !== rowIndex);
-  basicInfoForm.value.primaryPhoneIndex = next !== undefined ? next : 0;
-}
 
 function addBasicInfoPhone() {
   basicInfoForm.value.phoneList.push("");
@@ -1855,9 +1740,9 @@ function removeBasicInfoPhone(index: number) {
   list.splice(index, 1);
   basicInfoForm.value.phoneRelationTags.splice(index, 1);
   basicInfoForm.value.phoneReadonly.splice(index, 1);
-  const primary = basicInfoForm.value.primaryPhoneIndex;
-  if (primary >= list.length) basicInfoForm.value.primaryPhoneIndex = Math.max(0, list.length - 1);
-  else if (primary > index) basicInfoForm.value.primaryPhoneIndex = primary - 1;
+  const preferred = basicInfoForm.value.preferredPhoneIndex;
+  if (preferred >= list.length) basicInfoForm.value.preferredPhoneIndex = Math.max(0, list.length - 1);
+  else if (preferred > index) basicInfoForm.value.preferredPhoneIndex = preferred - 1;
 }
 
 const exitBasicInfoEditMode = () => {
@@ -1872,52 +1757,16 @@ const exitBasicInfoEditMode = () => {
     phoneList: [],
     phoneRelationTags: [],
     phoneReadonly: [],
-    primaryPhoneIndex: 0,
+    preferredPhoneIndex: 0,
     lifecycleStatus: "active",
     originalLifecycleStatus: "active"
   };
 };
 
-// 公司信息编辑模式
-const enterCompanyEditMode = () => {
-  const company = props.profileData?.company;
-  if (!company) return;
+// 公司信息编辑模式：公司档案已下线，保留空实现以兼容调用
+const enterCompanyEditMode = () => {};
 
-  const phone =
-    typeof company.phone === "string"
-      ? company.phone
-      : Array.isArray(company.phone) && company.phone.length > 0
-        ? typeof company.phone[0] === "string"
-          ? (company.phone[0] as string)
-          : (company.phone[0] as { value?: string })?.value || ""
-        : "";
-
-  const lifecycle =
-    (company.lifecycleStatus as LifecycleStatus) || (props.profileData.customer.lifecycleStatus as LifecycleStatus) || "active";
-
-  companyForm.value = {
-    name: company.name || "",
-    address: company.address || "",
-    phone: phone || "",
-    contactPerson: company.contactPerson || "",
-    lifecycleStatus: lifecycle,
-    originalLifecycleStatus: lifecycle
-  };
-
-  isCompanyEditMode.value = true;
-};
-
-const exitCompanyEditMode = () => {
-  isCompanyEditMode.value = false;
-  companyForm.value = {
-    name: "",
-    address: "",
-    phone: "",
-    contactPerson: "",
-    lifecycleStatus: "active",
-    originalLifecycleStatus: "active"
-  };
-};
+const exitCompanyEditMode = () => {};
 
 // 提交基础信息修改（需要审核）
 const handleSubmitBasicInfo = async () => {
@@ -1945,7 +1794,7 @@ const handleSubmitBasicInfo = async () => {
       .map((value, i) => ({
         value,
         relationTagName: relationTagOptions.value.find(option => option.value === basicInfoForm.value.phoneRelationTags[i])?.label,
-        isPrimary: basicInfoForm.value.primaryPhoneIndex === i,
+        isPreferred: basicInfoForm.value.preferredPhoneIndex === i,
         readonly: basicInfoForm.value.phoneReadonly[i]
       }))
       .filter(p => p.value);
@@ -1956,7 +1805,7 @@ const handleSubmitBasicInfo = async () => {
       familyStatus: basicInfoForm.value.familyStatus,
       addresses: basicInfoForm.value.addresses,
       phoneList: phonePayload,
-      primaryPhoneIndex: basicInfoForm.value.primaryPhoneIndex,
+      preferredPhoneIndex: basicInfoForm.value.preferredPhoneIndex,
       lifecycleStatus: basicInfoForm.value.lifecycleStatus
     });
     exitBasicInfoEditMode();
@@ -2421,11 +2270,10 @@ const handleSaveTags = async () => {
             transform: scale(1.02);
           }
           &.tag-unselected {
-            color: var(--el-text-color-placeholder) !important;
-            background-color: var(--el-fill-color-lighter) !important;
-            filter: grayscale(0.8);
-            border-color: var(--el-border-color-lighter) !important;
-            opacity: 0.4;
+            color: #606266 !important;
+            background-color: #f5f7fa !important;
+            border-color: #dcdfe6 !important;
+            opacity: 0.85;
           }
 
           /* Muted, Low-Saturation Professional Palettes */
@@ -2700,6 +2548,10 @@ const handleSaveTags = async () => {
       flex-direction: column;
       gap: 4px;
     }
+
+.risk-status-tag {
+  border-radius: 8px;
+}
     .vehicle-info-row.detail-info {
       display: flex;
       align-items: center;
@@ -2948,12 +2800,9 @@ const handleSaveTags = async () => {
     .relation-tag {
       font-size: 12px;
       color: var(--el-text-color-secondary);
-      &.primary {
+      &.preferred {
         font-weight: 500;
         color: var(--el-color-primary);
-      }
-      &.secondary {
-        color: var(--el-text-color-secondary);
       }
       &.highlight {
         font-weight: 600;

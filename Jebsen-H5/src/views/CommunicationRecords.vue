@@ -1,21 +1,13 @@
 <template>
   <div class="communication-records-container">
-    <van-nav-bar
-      title="沟通记录"
-      left-arrow
-      fixed
-      placeholder
-      @click-left="$router.back()"
-    />
-
-    <!-- 数据同步提示 -->
+    <!-- 数据同步提示（内嵌在 Home Tab 中，上方不再预留导航栏高度） -->
     <van-notice-bar
       left-icon="info-o"
       text="数据由业务系统 T+1 同步，本平台仅供查看。"
       class="sync-notice-bar"
     />
 
-    <!-- 沟通记录列表（使用 van-list 实现滚动加载） -->
+      <!-- 沟通记录列表（使用 van-list 实现滚动加载） -->
     <van-list
       v-model:loading="loading"
       :finished="finished"
@@ -29,19 +21,14 @@
         class="communication-card"
       >
         <div class="card-header">
-          <div class="record-title">{{ record.channel }}</div>
-          <van-tag :type="getTypeTag(record.channel)" :size="'small' as any">
-            {{ record.channel }}
-          </van-tag>
+          <div class="record-title">
+            <span class="record-time">{{ record.time }}</span>
+          </div>
         </div>
         <div class="card-content">
           <div class="info-row">
             <span class="label">时间：</span>
             <span class="value">{{ record.time }}</span>
-          </div>
-          <div class="info-row">
-            <span class="label">渠道：</span>
-            <span class="value">{{ record.channel }}</span>
           </div>
           <div class="info-row">
             <span class="label">沟通内容：</span>
@@ -90,16 +77,6 @@ const communicationRecords = ref([
   },
 ])
 
-// 获取类型标签样式
-const getTypeTag = (type: string): any => {
-  const typeMap: Record<string, any> = {
-    电话: 'primary',
-    微信: 'success',
-    到店: 'warning',
-  }
-  return typeMap[type] || 'default'
-}
-
 // 滚动加载数据
 const onLoad = async () => {
   try {
@@ -133,8 +110,8 @@ onMounted(async () => {
 </script>
 
 <style scoped lang="scss">
-.communication-container {
-  min-height: 200px;
+.communication-records-container {
+  min-height: 160px;
   background: transparent;
   padding: 0;
   max-width: 100%;
@@ -170,13 +147,17 @@ onMounted(async () => {
     padding: 6px 10px;
     border-bottom: 1px solid #ebedf0;
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
 
     .record-title {
-      font-size: 12px;
-      font-weight: 600;
-      color: #323233;
+      display: flex;
+      align-items: center;
+
+      .record-time {
+        font-size: 12px;
+        color: #323233;
+      }
     }
   }
 
@@ -195,7 +176,7 @@ onMounted(async () => {
 
       .label {
         color: #969799;
-        min-width: 70px;
+        min-width: 60px;
         flex-shrink: 0;
       }
 

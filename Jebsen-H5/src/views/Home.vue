@@ -378,7 +378,7 @@
                 </span>
               </div>
               <div class="num-tags">
-                <span v-if="item.isPrimary" class="n-tag active">主号</span>
+                <span v-if="item.isPrimary" class="n-tag active">优选</span>
                 <!-- 仅显示关系标签（本人、配偶、公司电话），与公司类型保持一致的填充标签样式 -->
                 <span v-if="item.relationTagName && RELATION_TAGS_FOR_FIRST_SCREEN.includes(item.relationTagName)" class="n-tag is-relation">
                   {{ item.relationTagName }}
@@ -482,7 +482,7 @@
         </div>
       </div>
 
-      <!-- 画像标签 / 企业画像标签 -->
+      <!-- 画像标签 / 企业画像标签（首屏保持扁平展示，弹窗内做分层管理） -->
       <div class="container">
         <div class="block-h">
           <span class="title-text">{{ isCompany ? '企业画像标签' : '画像标签' }}</span>
@@ -507,7 +507,12 @@
               {{ tag }}
             </span>
           </span>
-          <span v-if="customerStore.profile.tags.length === 0" class="empty-tags-text">暂无标签</span>
+          <span
+            v-if="customerStore.profile.tags.length === 0"
+            class="empty-tags-text"
+          >
+            暂无标签
+          </span>
         </div>
       </div>
 
@@ -1183,17 +1188,34 @@
                       {{ getCategoryRuleText(category) }}
                     </span>
                   </div>
-                  <div class="tag-manager-chip-grid">
-                    <button
-                      v-for="tag in getCategoryTags(category)"
-                      :key="tag.id"
-                      type="button"
-                      class="tag-manager-chip"
-                      :class="{ selected: isTagSelectedInManager(tag.name) }"
-                      @click="toggleTag(tag.name)"
+                  <div class="tag-manager-category-block__subgroups">
+                    <div
+                      v-for="subgroup in category.subgroups"
+                      :key="subgroup.key"
+                      class="tag-manager-subgroup"
                     >
-                      <span class="tag-manager-chip__name">{{ tag.name }}</span>
-                    </button>
+                      <div
+                        v-if="category.subgroups.length > 1"
+                        class="tag-manager-subgroup__header"
+                      >
+                        <div class="tag-manager-subgroup__title">{{ subgroup.label }}</div>
+                        <div class="tag-manager-subgroup__count">
+                          {{ subgroup.selectedCount }}/{{ subgroup.totalCount }}
+                        </div>
+                      </div>
+                      <div class="tag-manager-chip-grid">
+                        <button
+                          v-for="tag in subgroup.tags"
+                          :key="tag.id"
+                          type="button"
+                          class="tag-manager-chip"
+                          :class="{ selected: isTagSelectedInManager(tag.name) }"
+                          @click="toggleTag(tag.name)"
+                        >
+                          <span class="tag-manager-chip__name">{{ tag.name }}</span>
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -4980,6 +5002,11 @@ onMounted(async () => {
   padding: 12px 14px 4px;
 }
 
+/* 首屏画像标签：紧凑展示，整体在一块区域内排布，但每个标签内展示层级路径 */
+.portrait-tag-inline {
+  align-items: flex-start;
+}
+
 .tag-item-custom {
   display: inline-flex;
   align-items: center;
@@ -6292,6 +6319,29 @@ onMounted(async () => {
     font-size: 10px;
     font-weight: 600;
     flex-shrink: 0;
+  }
+
+  .tag-manager-category-block__subgroups {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .tag-manager-subgroup__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+
+  .tag-manager-subgroup__title {
+    font-size: 12px;
+    color: var(--text-sub);
+  }
+
+  .tag-manager-subgroup__count {
+    font-size: 11px;
+    color: #9CA3AF;
   }
 
   .tag-manager-chip-grid {

@@ -15,9 +15,6 @@
       >
         <div class="card-header">
           <div class="campaign-title">{{ campaign.campaignCode }}</div>
-          <van-tag :type="getStatusType(campaign.status)" :size="'small' as any">
-            {{ campaign.status }}
-          </van-tag>
         </div>
         <div class="card-content">
           <div class="info-row">
@@ -53,15 +50,6 @@ const pageSize = ref(5) // 每页加载 5 条
 const marketingCampaigns = computed(() => {
   return customerStore.marketingCampaigns || []
 })
-
-// 获取状态类型
-const getStatusType = (status: string): any => {
-  const typeMap: Record<string, any> = {
-    '已参加': 'success',
-    '未参加': 'warning',
-  }
-  return typeMap[status] || 'warning'
-}
 
 // 滚动加载数据
 const onLoad = async () => {

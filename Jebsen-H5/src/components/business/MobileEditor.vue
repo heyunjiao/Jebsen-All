@@ -8,7 +8,7 @@
     @close="handleClose"
   >
     <div class="mobile-editor">
-      <!-- 从当前 tab 点编辑进入：只显示红框内容（号码+主副号+姓名+关系+取消保存） -->
+      <!-- 从当前 tab 点编辑进入：只显示红框内容（号码+姓名+关系+取消保存） -->
       <template v-if="showOnlyForm">
         <div class="popup-header">
           <h3>编辑号码</h3>
@@ -18,22 +18,16 @@
           <div class="mobile-item form-only-card">
             <div class="mobile-item-content">
               <div class="form-only-number-row">
-                <van-field
-                  v-model="editForm.mobile"
-                  placeholder="请输入手机号"
-                  :rules="mobileRules"
-                  clearable
-                  class="form-only-mobile-field"
-                  :border="false"
-                />
-                <div class="number-type-selector-compact">
-                  <van-radio-group v-model="editForm.isPrimary" direction="horizontal">
-                    <van-radio
-                      name="primary"
-                      :disabled="mobileItems.some(i => i.isPrimary && i.id !== editingItem?.id)"
-                    >主号</van-radio>
-                    <van-radio name="secondary">副号</van-radio>
-                  </van-radio-group>
+                <div class="edit-form-row">
+                  <span class="edit-form-label">手机号</span>
+                  <van-field
+                    v-model="editForm.mobile"
+                    placeholder="请输入手机号"
+                    :rules="mobileRules"
+                    clearable
+                    class="form-only-mobile-field"
+                    :border="false"
+                  />
                 </div>
               </div>
               <div class="contact-name-section">
@@ -131,37 +125,25 @@
                 >
                   <div class="mobile-item-header">
                     <div class="mobile-number">
-                      <!-- 编辑模式：显示输入框和类型选择 -->
-                      <div v-if="editingItemId === item.id" class="mobile-row-inline">
-                        <van-field
-                          v-model="editForm.mobile"
-                          placeholder="请输入手机号"
-                          :rules="mobileRules"
-                          clearable
-                          class="mobile-input-field"
-                          :border="false"
-                        />
-                        <div class="number-type-selector-compact">
-                          <van-radio-group v-model="editForm.isPrimary" direction="horizontal">
-                            <van-radio 
-                              name="primary" 
-                              :disabled="mobileItems.some(i => i.isPrimary && i.id !== item.id)"
-                            >主号</van-radio>
-                            <van-radio name="secondary">副号</van-radio>
-                          </van-radio-group>
-                        </div>
-                      </div>
-                      <!-- 非编辑模式：只显示号码和标签（姓名与关系已在分组头部展示） -->
+                      <!-- 编辑模式：头部只显示号码文案，具体编辑在下方表单 -->
+                      <template v-if="editingItemId === item.id">
+                        <span class="number number--editing">{{ editForm.mobile || '请输入手机号' }}</span>
+                      </template>
+                      <!-- 非编辑模式：号码 + 优选标签 + 来源标签 + 设为优选 -->
                       <template v-else>
                         <span class="number">{{ item.mobile }}</span>
-                        <van-tag v-if="item.isPrimary" type="primary" size="small" color="#94724A" plain>主号</van-tag>
+                        <span v-if="item.isPrimary" class="preferred-badge">优选</span>
                         <van-tag v-if="item.source" type="default" size="small" class="source-tag">{{ item.source }}</van-tag>
+                        <span
+                          v-if="!item.isPrimary && !item.readonly"
+                          class="set-preferred-link"
+                          @click.stop="setPreferred(item.id)"
+                        >设为优选</span>
                       </template>
                     </div>
                     <div v-if="editingItemId !== item.id && !item.readonly" class="mobile-actions">
-                      <!-- 非编辑模式：显示操作图标 -->
                       <van-icon
-                        v-if="!item.isPrimary && item.id"
+                        v-if="item.id && !item.isPrimary"
                         name="delete"
                         class="action-icon delete-icon"
                         @click="handleDelete(item.id)"
@@ -175,26 +157,19 @@
                   </div>
                   <div v-if="item.readonly" class="readonly-hint" style="font-size: 12px; color: #9ca3af; margin-top: 4px; padding-bottom: 2px;">该号码来自售后订单同步，仅支持查看</div>
                   
-                  <!-- 编辑模式：在当前号码下方展开表单 -->
+                  <!-- 编辑模式：在当前号码下方展开表单（仅手机号 + 按钮） -->
                   <div v-if="editingItemId === item.id" class="mobile-item-inline-form editing-mode">
-                    <div class="mobile-item-header">
-                      <div class="mobile-number">
-                        <div class="mobile-row-inline">
-                          <van-field
-                            v-model="editForm.mobile"
-                            placeholder="请输入手机号"
-                            :rules="mobileRules"
-                            clearable
-                            class="mobile-input-field"
-                            :border="false"
-                          />
-                          <div class="number-type-selector-compact">
-                            <van-radio-group v-model="editForm.isPrimary" direction="horizontal">
-                              <van-radio name="primary">主号</van-radio>
-                              <van-radio name="secondary">副号</van-radio>
-                            </van-radio-group>
-                          </div>
-                        </div>
+                    <div class="edit-form-fields">
+                      <div class="edit-form-row">
+                        <span class="edit-form-label">手机号</span>
+                        <van-field
+                          v-model="editForm.mobile"
+                          placeholder="请输入手机号"
+                          :rules="mobileRules"
+                          clearable
+                          class="mobile-input-field"
+                          :border="false"
+                        />
                       </div>
                     </div>
                     <div class="mobile-actions-bottom">
@@ -206,27 +181,17 @@
 
                 <!-- 在目标人卡片下方展开“新增号码”表单 -->
                 <div v-if="editingItemId === 'new' && editForm.contactName === group.contactName" class="mobile-item-inline-form">
-                  <div class="mobile-item-header">
-                    <div class="mobile-number">
-                      <div class="mobile-row-inline">
-                        <van-field
-                          v-model="editForm.mobile"
-                          placeholder="请输入手机号"
-                          :rules="mobileRules"
-                          clearable
-                          class="mobile-input-field"
-                          :border="false"
-                        />
-                        <div class="number-type-selector-compact">
-                          <van-radio-group v-model="editForm.isPrimary" direction="horizontal">
-                            <van-radio 
-                              name="primary" 
-                              :disabled="mobileItems.some(i => i.isPrimary)"
-                            >主号</van-radio>
-                            <van-radio name="secondary">副号</van-radio>
-                          </van-radio-group>
-                        </div>
-                      </div>
+                  <div class="edit-form-fields">
+                    <div class="edit-form-row">
+                      <span class="edit-form-label">手机号</span>
+                      <van-field
+                        v-model="editForm.mobile"
+                        placeholder="请输入手机号"
+                        :rules="mobileRules"
+                        clearable
+                        class="mobile-input-field"
+                        :border="false"
+                      />
                     </div>
                   </div>
                   <div class="mobile-actions-bottom">
@@ -236,44 +201,48 @@
                 </div>
               </div>
 
-              <!-- 全局新增购车人表单（不在现有分组内） -->
+              <!-- 全局新增联系人表单（仅新增与车主有关系的人，不在现有分组内） -->
               <div v-if="editingItemId === 'new' && !groupedIdentities.some(g => g.contactName === editForm.contactName)" class="mobile-person-group edit-form-new">
                 <div class="person-group-header">
-                  <span class="person-name">新增购车人</span>
+                  <span class="person-name">新增联系人</span>
                 </div>
-                <div class="mobile-item-header">
-                  <div class="mobile-number mobile-row-inline">
-                     <van-field
+                <div class="edit-form-fields">
+                  <div class="edit-form-row">
+                    <span class="edit-form-label">姓名</span>
+                    <van-field
                       v-model="editForm.contactName"
-                      placeholder="姓名"
+                      placeholder="请输入姓名"
                       class="contact-name-field-inline"
                       :border="false"
                     />
+                  </div>
+                  <div class="edit-form-row">
+                    <span class="edit-form-label">手机号</span>
                     <van-field
                       v-model="editForm.mobile"
-                      placeholder="手机号"
+                      placeholder="请输入手机号"
                       :rules="mobileRules"
                       clearable
                       class="mobile-input-field"
                       :border="false"
                     />
                   </div>
-                </div>
-                <div class="relation-tag-section" style="margin-top: 12px;">
-                  <div class="section-label">联系人标签：</div>
-                  <div class="tag-options">
-                    <van-tag
-                      v-for="tag in tagPool"
-                      :key="tag.id"
-                      :type="editForm.relationTagId === tag.id ? 'primary' : 'default'"
-                      size="small"
-                      plain
-                      class="tag-option"
-                      :class="{ 'tag-selected': editForm.relationTagId === tag.id }"
-                      @click="handleSelectRelationTag(tag.id)"
-                    >
-                      {{ tag.name }}
-                    </van-tag>
+                  <div class="relation-tag-section">
+                    <div class="section-label">与车主关系</div>
+                    <div class="tag-options">
+                      <van-tag
+                        v-for="tag in tagPool"
+                        :key="tag.id"
+                        :type="editForm.relationTagId === tag.id ? 'primary' : 'default'"
+                        size="small"
+                        plain
+                        class="tag-option"
+                        :class="{ 'tag-selected': editForm.relationTagId === tag.id }"
+                        @click="handleSelectRelationTag(tag.id)"
+                      >
+                        {{ tag.name }}
+                      </van-tag>
+                    </div>
                   </div>
                 </div>
                 <div class="mobile-actions-bottom">
@@ -293,7 +262,7 @@
                 @click="handleAdd()"
                 block
               >
-                新增购车人
+                新增联系人
               </van-button>
             </div>
           </div> <!-- End view-content -->
@@ -381,7 +350,7 @@ const show = computed({
   set: (val) => emit('update:modelValue', val),
 })
 
-/** 从当前 tab 点编辑进入时只显示红框表单（号码+主副号+姓名+关系+取消保存），不显示完整列表 */
+/** 从当前 tab 点编辑进入时只显示红框表单（号码+姓名+关系+取消保存），不显示完整列表 */
 const showOnlyForm = computed(
   () => !!show.value && !!props.initialEditItemId && editingItemId.value === props.initialEditItemId
 )
@@ -420,7 +389,6 @@ const editForm = ref({
   contactName: '',
   relationTagId: '' as string,
   businessTags: [] as string[],
-  isPrimary: 'secondary' as 'primary' | 'secondary',
 })
 
 // 手机号或座机：11位手机 / 带区号座机(0开头10-11位) / 7-8位本地
@@ -484,6 +452,50 @@ const handleSelectRelationTag = (tagId: string) => {
   editForm.value.relationTagId = editForm.value.relationTagId === tagId ? '' : tagId
 }
 
+// 设为优选号码（只能有一个）
+const setPreferred = async (id: string) => {
+  const item = mobileItems.value.find(i => i.id === id)
+  if (!item || item.readonly) return
+  const prevPrimary = mobileItems.value.find(i => i.isPrimary)
+  if (prevPrimary?.id === id) return
+  showLoadingToast({ message: '保存中...', forbidClick: true, duration: 0 })
+  try {
+    if (prevPrimary) {
+      await customerApi.updateMobileItem({
+        id: String(prevPrimary.id),
+        mobile: prevPrimary.mobile,
+        relationTagId: prevPrimary.relationTagId,
+        relationTagName: prevPrimary.relationTagName,
+        businessTags: prevPrimary.businessTags,
+        vehicleLabel: prevPrimary.vehicleLabel,
+        isPrimary: false,
+      })
+      const idx = mobileItems.value.findIndex(i => i.id === prevPrimary.id)
+      if (idx > -1) mobileItems.value[idx] = { ...mobileItems.value[idx], isPrimary: false }
+    }
+    const res = await customerApi.updateMobileItem({
+      id: String(item.id),
+      mobile: item.mobile,
+      contactName: item.contactName,
+      relationTagId: item.relationTagId,
+      relationTagName: item.relationTagName,
+      businessTags: item.businessTags,
+      vehicleLabel: item.vehicleLabel,
+      isPrimary: true,
+    })
+    if (res.code === 200) {
+      const idx = mobileItems.value.findIndex(i => i.id === id)
+      if (idx > -1) mobileItems.value[idx] = res.data
+      showToast('已设为优选号码')
+      emitUpdate()
+    }
+  } catch (e: any) {
+    showToast(e.message || '设置失败')
+  } finally {
+    closeToast()
+  }
+}
+
 // 监听 mobileData 变化，同步号码列表
 watch(
   () => props.mobileData,
@@ -523,13 +535,11 @@ const handleClose = () => {
 // 新增号码
 const handleAdd = (group?: any) => {
   editingItem.value = null
-  const hasPrimary = mobileItems.value.some(item => item.isPrimary)
   editForm.value = {
     mobile: '',
     contactName: group ? group.contactName : '',
     relationTagId: group ? group.items[0]?.relationTagId : '',
-    businessTags: group ? (group.items[0]?.businessTags || []) : ['购车人'],
-    isPrimary: hasPrimary ? 'secondary' : 'primary',
+    businessTags: group ? (group.items[0]?.businessTags || []) : [],
   }
   editingItemId.value = 'new'
 }
@@ -546,7 +556,6 @@ const handleEditItem = (item: MobileItem) => {
     contactName: item.contactName || '',
     relationTagId: item.relationTagId || '',
     businessTags: item.businessTags ? [...item.businessTags] : [],
-    isPrimary: item.isPrimary ? 'primary' : 'secondary',
   }
   editingItemId.value = item.id
 }
@@ -563,7 +572,6 @@ const handleCancelEdit = () => {
     contactName: '',
     relationTagId: '',
     businessTags: [],
-    isPrimary: 'secondary',
   }
 }
 
@@ -594,27 +602,8 @@ const handleSaveEdit = async () => {
 
   try {
     const selectedTag = tagPool.value.find(tag => tag.id === editForm.value.relationTagId)
-    const isPrimary = editForm.value.isPrimary === 'primary'
-    
-    // 如果设置为主号，需要先将原来的主号改为副号
-    if (isPrimary) {
-      const currentPrimary = mobileItems.value.find(item => item.isPrimary && item.id !== editingItem.value?.id)
-      if (currentPrimary) {
-        // 将原主号改为副号
-        await customerApi.updateMobileItem({
-          id: String(currentPrimary.id),
-          mobile: currentPrimary.mobile,
-          relationTagId: currentPrimary.relationTagId,
-          relationTagName: currentPrimary.relationTagName,
-          businessTags: currentPrimary.businessTags,
-          vehicleLabel: currentPrimary.vehicleLabel,
-          isPrimary: false,
-        })
-      }
-    }
-    
     if (editingItem.value) {
-      // 更新现有号码
+      // 更新现有号码（优选状态不变，需改优选请点「设为优选」）
       const res = await customerApi.updateMobileItem({
         id: String(editingItem.value.id),
         mobile: mobileToSave,
@@ -623,24 +612,11 @@ const handleSaveEdit = async () => {
         relationTagName: selectedTag?.name,
         businessTags: editingItem.value.businessTags,
         vehicleLabel: editingItem.value.vehicleLabel,
-        isPrimary,
+        isPrimary: editingItem.value.isPrimary,
       })
-      
       if (res.code === 200) {
         const index = mobileItems.value.findIndex((item) => item.id === editingItem.value!.id)
-        if (index > -1) {
-          mobileItems.value[index] = res.data
-        }
-        // 如果设置为主号，更新原主号状态
-        if (isPrimary) {
-          const currentPrimaryIndex = mobileItems.value.findIndex(item => item.isPrimary && item.id !== editingItem.value!.id)
-          if (currentPrimaryIndex > -1) {
-            mobileItems.value[currentPrimaryIndex] = {
-              ...mobileItems.value[currentPrimaryIndex],
-              isPrimary: false,
-            }
-          }
-        }
+        if (index > -1) mobileItems.value[index] = res.data
         showToast('更新成功')
         editingItemId.value = null
         editingItem.value = null
@@ -648,39 +624,21 @@ const handleSaveEdit = async () => {
         emitUpdate()
       }
     } else {
-      // 新增号码
+      // 新增号码（默认非优选，可在列表中设为优选）
       const res = await customerApi.addMobileItem({
         mobile: mobileToSave,
         contactName: contactNameToSave,
         relationTagId: editForm.value.relationTagId || undefined,
         relationTagName: selectedTag?.name,
-        // 如果是全局新增，或者该人在分组中标记过购车人，则确保带上标签
-        businessTags: editForm.value.businessTags.includes('购车人') ? editForm.value.businessTags : [...editForm.value.businessTags, '购车人'],
-        isPrimary,
+        businessTags: editForm.value.businessTags || [],
+        isPrimary: false,
       })
-      
       if (res.code === 200) {
         mobileItems.value.push(res.data)
-        // 如果设置为主号，更新原主号状态
-        if (isPrimary) {
-          const currentPrimaryIndex = mobileItems.value.findIndex(item => item.isPrimary && item.id !== res.data.id)
-          if (currentPrimaryIndex > -1) {
-            mobileItems.value[currentPrimaryIndex] = {
-              ...mobileItems.value[currentPrimaryIndex],
-              isPrimary: false,
-            }
-          }
-        }
         showToast('添加成功')
         editingItemId.value = null
         editingItem.value = null
-        editForm.value = {
-          mobile: '',
-          contactName: '',
-          relationTagId: '',
-          businessTags: [],
-          isPrimary: 'secondary',
-        }
+        editForm.value = { mobile: '', contactName: '', relationTagId: '', businessTags: [] }
         if (props.initialEditItemId) emit('update:modelValue', false)
         emitUpdate()
       }
@@ -712,7 +670,7 @@ const handleDelete = async (id: string) => {
   }
 
   if (item.isPrimary) {
-    showToast('不能删除主号码')
+    showToast('不能删除优选号码，请先将其他号码设为优选')
     return
   }
 
@@ -817,7 +775,7 @@ const emitUpdate = () => {
     overflow-y: auto;
   }
 
-  .mobile-list {
+    .mobile-list {
     flex: 1;
     margin-bottom: 12px;
 
@@ -904,6 +862,22 @@ const emitUpdate = () => {
               margin-right: 4px;
             }
             
+            .preferred-badge {
+              display: inline-block;
+              padding: 2px 6px;
+              font-size: 10px;
+              color: var(--accent-gold, #94724A);
+              background: rgba(148, 114, 74, 0.1);
+              border-radius: 4px;
+              margin-right: 4px;
+            }
+            .set-preferred-link {
+              font-size: 12px;
+              color: var(--accent-gold, #94724A);
+              margin-left: 6px;
+              cursor: pointer;
+              &:active { opacity: 0.8; }
+            }
             .source-tag {
               background: #f5f6f7;
               color: #9ca3af;
@@ -931,20 +905,6 @@ const emitUpdate = () => {
               flex-wrap: nowrap;
             }
             
-            .number-type-selector-compact {
-              flex-shrink: 0;
-              .van-radio-group {
-                display: flex;
-                gap: 12px;
-                .van-radio {
-                  :deep(.van-radio__label) {
-                    font-size: 13px;
-                    color: var(--text-main);
-                    margin-left: 4px;
-                  }
-                }
-              }
-            }
           }
 
           .mobile-actions {
@@ -1002,11 +962,30 @@ const emitUpdate = () => {
     border: 1px solid var(--accent-gold);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   }
+  .edit-form-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .edit-form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    .edit-form-label {
+      font-size: 12px;
+      color: #64748b;
+      font-weight: 500;
+    }
+    .van-field {
+      padding: 8px 10px;
+      background: #f8fafc;
+      border-radius: 6px;
+    }
+  }
   .form-only-number-row {
     display: flex;
-    align-items: center;
+    flex-direction: column;
     gap: 12px;
-    flex-wrap: wrap;
     margin-bottom: 14px;
   }
   .form-only-mobile-field {
@@ -1053,6 +1032,11 @@ const emitUpdate = () => {
         }
       }
     }
+  }
+
+  .number--editing {
+    color: #94a3b8;
+    font-weight: 500;
   }
 
   .mobile-actions-bottom {

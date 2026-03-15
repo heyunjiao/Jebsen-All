@@ -2,8 +2,8 @@
   <div class="platform-config-card">
     <div class="platform-header">
       <div class="platform-name">
+        <span class="platform-label">{{ platform }}</span>
         <span v-if="reportName" class="report-name-label">{{ reportName }}</span>
-        <span v-else class="report-name-label">{{ platform }}</span>
       </div>
     </div>
 
@@ -22,7 +22,7 @@
               allow-create
               :placeholder="$t('collection.config.platforms.stageNamePlaceholder')"
               class="stage-select"
-              @change="handleStageChange(index)"
+              @change="handleStageChange"
             >
               <el-option v-for="stage in defaultStages" :key="stage" :label="stage" :value="stage" />
             </el-select>
@@ -32,50 +32,21 @@
               value-format="HH:mm"
               :placeholder="$t('collection.config.platforms.selectTime')"
               class="time-picker"
-              @change="handleTimeChange(index)"
+              @change="handleTimeChange"
             />
           </div>
-          <span
-            v-if="index !== 3"
-            class="schedule-desc-compact"
-          >
+          <span v-if="index !== 3" class="schedule-desc-compact">
             {{ getStageDayDesc(index) }}{{ localConfig.schedules[index].time || getDefaultTime(index)
             }}{{ getStageDescSuffix(index) }}
           </span>
-          <span
-            v-else
-            class="schedule-desc-compact"
-          >
-            当天18:00前已成功上传文件清单，发送给操作人（唯一邮箱）
-          </span>
+          <span v-else class="schedule-desc-compact">当天18:00前已成功上传文件清单，发送给操作人（唯一邮箱）</span>
         </div>
         <el-form-item
           :label="$t('collection.config.recipients.scheduleConfig.recipientLabel')"
           class="schedule-recipients"
-          :required="index !== 2"
+          :required="true"
         >
           <el-select
-            v-if="index !== 2"
-            :model-value="localConfig.schedules[index].employeeIds[0]"
-            filterable
-            :placeholder="$t('collection.config.platforms.selectEmployee')"
-            class="employee-select"
-            @change="handleEmployeeChange(index, $event)"
-          >
-            <el-option
-              v-for="employee in availableEmployees"
-              :key="employee.id"
-              :label="`${employee.name} (${employee.email})`"
-              :value="employee.id"
-            >
-              <div class="employee-option">
-                <span class="employee-name">{{ employee.name }}</span>
-                <span class="employee-email">{{ employee.email }}</span>
-              </div>
-            </el-option>
-          </el-select>
-          <el-select
-            v-else
             v-model="localConfig.schedules[index].employeeIds"
             multiple
             filterable
@@ -95,7 +66,7 @@
               </div>
             </el-option>
           </el-select>
-          <div v-if="index === 2" class="form-tip">
+          <div class="form-tip">
             <el-icon><InfoFilled /></el-icon>
             <span>{{ $t("collection.config.platforms.multipleEmployeesTip") }}</span>
           </div>
@@ -129,12 +100,8 @@ const emit = defineEmits<{
 
 // 只保留 Christopher Xu 作为可选收件人；如果暂时找不到他，则回退到全部员工，避免下拉为空
 const normalizeName = (name: string) => name.replace(/\s+/g, " ").trim().toLowerCase();
-const chrisOnlyEmployees = computed(() =>
-  props.employees.filter(e => normalizeName(e.name) === normalizeName("Christopher Xu"))
-);
-const availableEmployees = computed(() =>
-  chrisOnlyEmployees.value.length > 0 ? chrisOnlyEmployees.value : props.employees
-);
+const chrisOnlyEmployees = computed(() => props.employees.filter(e => normalizeName(e.name) === normalizeName("Christopher Xu")));
+const availableEmployees = computed(() => (chrisOnlyEmployees.value.length > 0 ? chrisOnlyEmployees.value : props.employees));
 
 // 默认阶段选项（只保留 T+0, T+1, T+2, T+3 格式）
 const defaultStages = ["T+0", "T+1", "T+2", "T+3"];
@@ -229,24 +196,18 @@ const getDefaultTime = (index: number): string => {
 };
 
 // 处理阶段名称变化
-const handleStageChange = (index: number) => {
+const handleStageChange = () => {
   emit("update", { ...localConfig.value });
 };
 
 // 处理时间变化
-const handleTimeChange = (index: number) => {
+const handleTimeChange = () => {
   emit("update", { ...localConfig.value });
 };
 
-// 统一处理员工选择变化
+// 统一处理员工选择变化（所有阶段均支持多选）
 const handleEmployeeChange = (index: number, value: number | number[]) => {
-  if (index === 2) {
-    // T+2 是多选
-    localConfig.value.schedules[index].employeeIds = (value as number[]) || [];
-  } else {
-    // 其他阶段单选
-    localConfig.value.schedules[index].employeeIds = value ? [value as number] : [];
-  }
+  localConfig.value.schedules[index].employeeIds = (value as number[]) || [];
   emit("update", { ...localConfig.value });
 };
 </script>
@@ -265,12 +226,15 @@ const handleEmployeeChange = (index: number, value: number | number[]) => {
     border-bottom: 1px solid #ebeef5;
 
     .platform-name {
-      font-size: 15px;
-      font-weight: 600;
-      color: #303133;
       display: flex;
-      align-items: center;
-      gap: 12px;
+      align-items: baseline;
+      gap: 8px;
+
+      .platform-label {
+        font-size: 12px;
+        font-weight: 400;
+        color: #909399;
+      }
 
       :deep(.el-tag) {
         font-weight: 600;

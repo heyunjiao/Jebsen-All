@@ -61,9 +61,9 @@ export default {
         voucher: "会员优惠券"
       },
       manual: "手工表",
-      auto: "直连数据库",
+      auto: "自动",
       manualGroupTitle: "手工表",
-      autoGroupTitle: "直连数据库",
+      autoGroupTitle: "自动",
       upload: "上传",
       governance: {
         mergeConflict: "合并冲突: 客户 ID #88392",

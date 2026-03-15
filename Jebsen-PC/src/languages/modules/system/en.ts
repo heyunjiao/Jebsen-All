@@ -76,6 +76,7 @@ export default {
       // Functional Permissions
       functional: {
         menuTree: "Menu Tree",
+        menuSyncHint: "Synced with current system menus",
         pageAccess: "Page Access",
         operationButtons: "Operation Buttons/Functions",
         selectAll: "Select All",
@@ -102,10 +103,16 @@ export default {
         pushOpportunity: "Push Opportunity",
         download: "Download",
         assignPermission: "Assign Permission",
+        assignCustomer: "Assign Customer",
+        assignRole: "Assign Role",
+        filter: "Filter",
         approve: "Approve",
         reject: "Reject",
         batchIgnore: "Batch Ignore",
-        resetPassword: "Reset Password"
+        resetPassword: "Reset Password",
+        batchAdd: "Batch Add",
+        batchDelete: "Batch Delete",
+        status: "Status"
       },
       // Data Scope
       dataScope: {

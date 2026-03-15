@@ -19,11 +19,25 @@
                 <div class="dq-tab-label">
                   <div class="dq-tab-platform">{{ getPlatformLabel(report.source) }}</div>
                   <div class="dq-tab-name">{{ stripPlatformPrefix(report.name) }}</div>
+                  <span
+                    v-if="getReportUploadCycle(report.id)"
+                    class="dq-tab-upload-cycle"
+                    :class="{ 'dq-tab-upload-cycle-weak': getReportUploadCycle(report.id) === '按需' }"
+                  >
+                    {{ getReportUploadCycle(report.id) }}
+                  </span>
                 </div>
               </template>
 
               <!-- 当前报表的上传与预检区域 -->
               <div v-if="currentReport" class="upload-card dq-main-card">
+                <!-- 右侧最上方：任务清单标题 + 上传周期（与首页一致） -->
+                <div class="upload-card-top-bar">
+                  <span class="task-list-title">{{ $t("dataQualityWorkbench.upload.taskListTitle", { platform: currentReport.name }) }}</span>
+                  <span class="upload-cycle-wrap" v-if="getReportUploadCycle(currentReport.id)">
+                    {{ $t("dataQualityWorkbench.upload.uploadCycle") }}：{{ getReportUploadCycle(currentReport.id) }}
+                  </span>
+                </div>
                 <div class="upload-area">
                   <!-- 邮件通知规则 -->
                   <div class="notification-tip-info">
@@ -114,12 +128,6 @@
                         {{ $t("dataQualityWorkbench.upload.dragText") }}
                         <em>{{ $t("dataQualityWorkbench.upload.clickUpload") }}</em>
                       </div>
-                      <!-- 提示当前上传的是哪个报表 -->
-                      <template #tip>
-                        <div class="el-upload__tip">
-                          {{ $t("dataQualityWorkbench.upload.taskListTitle", { platform: currentReport.name }) }}
-                        </div>
-                      </template>
                     </el-upload>
                   </div>
                 </div>
@@ -373,7 +381,7 @@ import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 import { WarningFilled, CircleCheck, Download, UploadFilled, Loading, Check, Bell, InfoFilled } from "@element-plus/icons-vue";
 import { uploadAndValidateFile, downloadTemplate as downloadTemplateApi } from "@/api/modules/dataQualityWorkbench";
-import { PLATFORM_REPORTS, DATA_PLATFORM_LABELS, PLATFORM_METADATA } from "@/views/collection/constants";
+import { PLATFORM_REPORTS, DATA_PLATFORM_LABELS, PLATFORM_METADATA, REPORT_UPLOAD_CYCLE } from "@/views/collection/constants";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -443,6 +451,11 @@ const stripPlatformPrefix = (fullName: string): string => {
 // Tab 标签中展示的平台名称
 const getPlatformLabel = (source: string): string => {
   return DATA_PLATFORM_LABELS[source] || source.toUpperCase();
+};
+
+// 上传周期（与首页/collection 常量一致）
+const getReportUploadCycle = (reportId: string): string => {
+  return REPORT_UPLOAD_CYCLE[reportId] ?? "";
 };
 
 // Tab 当前索引（仅用于一些状态判断，如后续需要）
@@ -539,7 +552,7 @@ const triggerCurrentUploadPicker = async () => {
   }
 };
 
-// 监听整条 query，配合 pickerToken，保证每次从欢迎页点击都会触发一次上传选择框
+// 监听整条 query，配合 pickerToken，保证每次从源数据采集点击都会触发一次上传选择框
 watch(
   () => route.query,
   async query => {
@@ -1252,6 +1265,26 @@ const simulateErrorFile = () => {
       text-overflow: ellipsis;
       overflow: hidden;
     }
+
+    /* 与催收配置一致：上传周期 pill 样式 */
+    .dq-tab-upload-cycle {
+      display: inline-block;
+      margin-top: 6px;
+      font-size: 11px;
+      font-weight: 500;
+      line-height: 1.4;
+      color: var(--el-color-danger);
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    .dq-tab-upload-cycle-weak {
+      color: var(--el-text-color-secondary);
+      font-weight: 400;
+      font-size: 11px;
+      background: var(--el-fill-color-light);
+    }
   }
 
   /* 卡片感的左侧 tab 栏 */
@@ -1281,6 +1314,14 @@ const simulateErrorFile = () => {
     }
 
     .dq-tab-platform {
+      color: var(--el-color-primary);
+    }
+
+    .dq-tab-upload-cycle {
+      color: var(--el-color-danger);
+    }
+
+    .dq-tab-upload-cycle-weak {
       color: var(--el-color-primary);
     }
   }
@@ -1532,7 +1573,27 @@ const simulateErrorFile = () => {
     border-top: 1px solid var(--el-border-color-lighter, #dcdfe6); /* Ensure border matches */
     overflow: hidden;
 
-    /* Removed Header specific styles since header is gone */
+    .upload-card-top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 12px 16px;
+      margin-bottom: 12px;
+      background: var(--el-fill-color-light, #f5f7fa);
+      border-radius: 4px;
+      font-size: 14px;
+
+      .task-list-title {
+        font-weight: 500;
+        color: var(--el-text-color-primary, #303133);
+      }
+
+      .upload-cycle-wrap {
+        color: var(--el-text-color-regular, #606266);
+      }
+    }
 
     :deep(.el-card__body) {
       padding: 24px;

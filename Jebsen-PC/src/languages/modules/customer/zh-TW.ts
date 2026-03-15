@@ -49,7 +49,10 @@ export default {
     exportSuccess: "導出成功",
     addCustomer: "添加顧客",
     stats: {
-      total: "客戶檔案總數",
+      memberTierTitle: "會員分層",
+      total: "總數",
+      newThisMonth: "本月新增",
+      totalData: "客戶檔案總數",
       newToday: "今日新增",
       newMerged: "今日合併",
       newUpdated: "今日更新",
@@ -58,7 +61,12 @@ export default {
       growth: "較昨日",
       mergedCount: "已合併數",
       updatedCount: "已更新數",
-      incremental: "增量數據"
+      incremental: "增量數據",
+      salesDiamond: "銷售鑽石客戶",
+      aftersalesDiamond: "售後鑽石客戶",
+      activeAfterSales: "普通活躍售後客戶",
+      dormant: "休眠客戶",
+      lost: "流失客戶"
     },
     lifecycleStatusOptions: {
       active: "活躍",
@@ -71,6 +79,10 @@ export default {
       allStores: "全部門店",
       selectStore: "請選擇門店",
       currentStore: "當前門店"
+    },
+    vehicleView: {
+      buyerTags: "標籤（購車人）",
+      status: "車輛狀態"
     },
     placeholder: {
       userId: "請輸入用戶ID",
@@ -101,7 +113,26 @@ export default {
       segmentName: "請輸入分群名稱",
       customerType: "請選擇客戶類型",
       city: "請輸入城市",
-      primaryRelationTag: "主號關係標籤"
+      primaryRelationTag: "請選擇與車主關係",
+      identityType: "請選擇客戶身份",
+      companyName: "請輸入公司名稱",
+      residenceArea: "請輸入居住區域",
+      vehicleStatus: "請選擇車輛狀態",
+      tagChangeTime: "請選擇標籤變更時間",
+      segment: "請選擇分群"
+    },
+    tagChangeTime: "標籤變更時間",
+    tagChangeTimeOptions: {
+      oneMonthAdd: "一個月內新增",
+      oneMonthRemove: "一個月內減少",
+      threeMonthAdd: "三個月內新增",
+      threeMonthRemove: "三個月內減少"
+    },
+    segment: "分群",
+    identityType: {
+      prospective: "準車主",
+      owner: "車主",
+      formerOwner: "曾用車主"
     },
     relationTag: {
       self: "本人",
@@ -178,6 +209,8 @@ export default {
       operationNotice: "最新操作",
       moreRights: "查看更多",
       editTags: "編輯標籤",
+      tags: "標籤",
+      tagsPlaceholder: "請選擇或輸入標籤",
       projectPreference: "項目偏好",
       date: "日期",
       type: "類型",
@@ -235,6 +268,11 @@ export default {
       projectName: "項目名稱",
       orderNo: "訂單號",
       storeName: "保時捷中心",
+      viewAllPhones: "查看全部聯繫電話",
+      contactName: "聯繫人姓名",
+      doneEdit: "完成",
+      edit: "編輯",
+      addContact: "新增聯繫人",
       preferredNumber: "優選號碼",
       setAsPreferred: "設為優選號碼",
       copySuccess: "OneID已複製",
@@ -397,6 +435,27 @@ export default {
       multipleCustomers: "{names}等{count}人",
       rowSummary: "經辦人：{handlers} · 共{vehicleCount}輛車 · 點開360可查看不同角色使用不同車輛",
       rowSummaryEmpty: "暫無經辦人及車輛信息"
+    },
+    listFields: {
+      birthDate: "生日",
+      residenceArea: "居住區域",
+      identityType: "客戶身份關聯",
+      lastReturnStore: "最後一次返廠門店",
+      lastServiceDate: "上次服務日期",
+      firstMaintenanceDone: "是否完成首保",
+      firstReturnDone: "是否完成首次售後回廠",
+      firstOwnerNamePhone: "首任車主姓名、電話",
+      firstOwnerName: "首任車主姓名",
+      ownerPhone: "首任車主電話",
+      vehicleAge: "車齡",
+      vehicleAttribute: "車輛屬性",
+      topModelTag: "Top 車型標識",
+      deliveryDate: "交車日期",
+      predictedMileage: "預測當前里程",
+      optionInstallInfo: "選配加裝信息",
+      purchaseAttribute: "購車屬性",
+      hasStickyProduct: "是否購買粘性產品",
+      campaignParticipationCount: "活動 / Campaign 參與次數"
     },
     company: {
       title: "公司信息",

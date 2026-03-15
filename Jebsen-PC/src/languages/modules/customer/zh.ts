@@ -57,7 +57,9 @@ export default {
       buyerPhone: "购车人电话",
       insuranceStatus: "保险状态",
       insuranceEndDate: "保险到期日",
-      financeStatus: "金融状态"
+      financeStatus: "金融状态",
+      buyerTags: "标签（购车人）",
+      status: "车辆状态"
     },
     conflict: "数据冲突",
     view360: "360视图",
@@ -79,6 +81,9 @@ export default {
       mergedCount: "已合并数",
       updatedCount: "已更新数",
       incremental: "增量数据",
+      memberTierTitle: "会员分层",
+      total: "总数",
+      newThisMonth: "本月新增",
       salesDiamond: "销售钻石客户",
       aftersalesDiamond: "售后钻石客户",
       activeAfterSales: "普通活跃售后客户",
@@ -126,7 +131,26 @@ export default {
       segmentName: "请输入分群名称",
       customerType: "请选择客户类型",
       city: "请输入城市",
-      primaryRelationTag: "与车主关系标签"
+      primaryRelationTag: "请选择与车主关系",
+      identityType: "请选择客户身份",
+      companyName: "请输入公司名称",
+      residenceArea: "请输入居住区域",
+      vehicleStatus: "请选择车辆状态",
+      tagChangeTime: "请选择标签变更时间",
+      segment: "请选择分群"
+    },
+    tagChangeTime: "标签变更时间",
+    tagChangeTimeOptions: {
+      oneMonthAdd: "一个月内新增",
+      oneMonthRemove: "一个月内减少",
+      threeMonthAdd: "三个月内新增",
+      threeMonthRemove: "三个月内减少"
+    },
+    segment: "分群",
+    identityType: {
+      prospective: "准车主",
+      owner: "车主",
+      formerOwner: "曾用车主"
     },
     relationTag: {
       self: "本人",
@@ -203,6 +227,8 @@ export default {
       operationNotice: "最新操作",
       moreRights: "查看更多",
       editTags: "编辑标签",
+      tags: "标签",
+      tagsPlaceholder: "请选择或输入标签",
       projectPreference: "项目偏好",
       date: "日期",
       type: "类型",
@@ -276,6 +302,11 @@ export default {
       editBasicInfo: "编辑基本信息",
       tagsEdit: "编辑标签",
       addPhone: "添加手机号",
+      viewAllPhones: "查看全部联系电话",
+      contactName: "联系人姓名",
+      doneEdit: "完成",
+      edit: "编辑",
+      addContact: "新增联系人",
       // 新增：客户价值 / 行为 / 风控
       customerValue: "客户价值",
       compositeScore: "价值综合评分",
@@ -449,6 +480,27 @@ export default {
       multipleCustomers: "{names}等{count}人",
       rowSummary: "经办人：{handlers} · 共{vehicleCount}辆车 · 点开360可查看不同角色使用不同车辆",
       rowSummaryEmpty: "暂无经办人及车辆信息"
+    },
+    listFields: {
+      birthDate: "生日",
+      residenceArea: "居住区域",
+      identityType: "客户身份关联",
+      lastReturnStore: "最后一次返厂门店",
+      lastServiceDate: "上次服务日期",
+      firstMaintenanceDone: "是否完成首保",
+      firstReturnDone: "是否完成首次售后回厂",
+      firstOwnerNamePhone: "首任车主姓名、电话",
+      firstOwnerName: "首任车主姓名",
+      ownerPhone: "首任车主电话",
+      vehicleAge: "车龄",
+      vehicleAttribute: "车辆属性",
+      topModelTag: "Top 车型标识",
+      deliveryDate: "交车日期",
+      predictedMileage: "预测当前里程",
+      optionInstallInfo: "选配加装信息",
+      purchaseAttribute: "购车属性",
+      hasStickyProduct: "是否购买粘性产品",
+      campaignParticipationCount: "活动 / Campaign 参与次数"
     },
     company: {
       title: "公司信息",

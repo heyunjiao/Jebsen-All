@@ -28,6 +28,13 @@
               <div class="config-tab-name">
                 {{ item.reportName }}
               </div>
+              <span
+                v-if="item.uploadCycle"
+                class="config-tab-upload-cycle"
+                :class="{ 'config-tab-upload-cycle-weak': item.uploadCycle === '按需' }"
+              >
+                {{ item.uploadCycle }}
+              </span>
             </div>
           </template>
           <div class="tab-content">
@@ -111,7 +118,7 @@ import { Message, Check, Refresh, InfoFilled, Shop } from "@element-plus/icons-v
 import { useI18n } from "vue-i18n";
 import { getCollectionConfig, saveCollectionConfig, getEmployeeList } from "@/api/modules/collection";
 import type { CollectionConfig, PlatformConfig, DataPlatform, Employee } from "../interface";
-import { PLATFORM_REPORTS, DATA_PLATFORM_LABELS } from "../constants";
+import { PLATFORM_REPORTS, DATA_PLATFORM_LABELS, ORDERED_PLATFORM_KEYS, REPORT_UPLOAD_CYCLE } from "../constants";
 import PlatformConfigCard from "./components/PlatformConfigCard.vue";
 import { createDefaultGlobalRules } from "../globalRules";
 
@@ -123,12 +130,10 @@ const saving = ref(false);
 const employeeList = ref<Employee[]>([]);
 const loadingEmployees = ref(false);
 
-// 手动上传平台映射 (Key -> Label)
+// 手动上传平台映射 (Key -> Label)，key 顺序与 ORDERED_PLATFORM_KEYS 一致
 const manualPlatformsMap = computed(() => {
   const map: Record<string, string> = {};
-  // 只包含手动上传的平台 key
-  const keys = ["poas", "wws", "cap", "voucher", "manual"];
-  keys.forEach(key => {
+  ORDERED_PLATFORM_KEYS.forEach(key => {
     map[key] = DATA_PLATFORM_LABELS[key] || key.toUpperCase();
   });
   return map;
@@ -169,23 +174,34 @@ const getPlatformKeyByLabel = (label: string): string | undefined => {
   return entry ? entry[0] : undefined;
 };
 
-// 手动上传报表扁平列表（用于左侧一级 Tab）
+// 数据催收配置中不展示的 tab（仅本模块过滤，不影响 constants 及其他模块）
+const EXCLUDED_REPORT_IDS = [
+  "voucher_first_owner_info", // 首任车主信息
+  "manual_offline_marketing_segment", // 线下营销/社群活动分群
+  "manual_generic_opportunity" // 自定义通用商机
+];
+
+// 手动上传报表扁平列表（用于左侧一级 Tab），顺序与欢迎页今日数据采集状态一致
 const manualReports = computed(() => {
   const list: {
     platformKey: string;
     platformLabel: string;
     reportId: string;
     reportName: string;
+    uploadCycle: string;
   }[] = [];
 
-  Object.entries(manualPlatformsMap.value).forEach(([platformKey, platformLabel]) => {
+  ORDERED_PLATFORM_KEYS.forEach(platformKey => {
+    const platformLabel = manualPlatformsMap.value[platformKey];
     const reports = PLATFORM_REPORTS[platformKey] || [];
     reports.forEach(report => {
+      if (EXCLUDED_REPORT_IDS.includes(report.id)) return;
       list.push({
         platformKey,
         platformLabel,
         reportId: report.id,
-        reportName: report.name
+        reportName: report.name,
+        uploadCycle: REPORT_UPLOAD_CYCLE[report.id] || ""
       });
     });
   });
@@ -274,25 +290,15 @@ const loadConfig = async () => {
     const res = await getCollectionConfig();
     if (res.code === 200 && res.data) {
       if (res.data.platforms && res.data.platforms.length > 0) {
-        configForm.platforms = res.data.platforms;
-        // 如果前两个阶段没有员工，设置默认值
-        configForm.platforms.forEach(platform => {
-          const platformKey = getPlatformKeyByLabel(platform.platform);
-          const defaultEmployeeId = getDefaultEmployeeIdForReport(platformKey, platform.reportId, platform.reportName);
-
-          if (platform.schedules[0] && platform.schedules[0].employeeIds.length === 0 && defaultEmployeeId) {
-            platform.schedules[0].employeeIds = [defaultEmployeeId];
-          }
-          if (platform.schedules[1] && platform.schedules[1].employeeIds.length === 0 && defaultEmployeeId) {
-            platform.schedules[1].employeeIds = [defaultEmployeeId];
-          }
-        });
+        configForm.platforms = res.data.platforms.filter(
+          (p: { reportId?: string }) => !p.reportId || !EXCLUDED_REPORT_IDS.includes(p.reportId)
+        );
       } else {
         // 如果没有平台配置，初始化所有平台
         initDefaultPlatforms();
       }
-      // 兜底邮箱：如果后端没返回，就默认用 Christopher Xu 的邮箱
-      configForm.ccEmail = res.data.ccEmail || findEmployeeEmailByName("Christopher Xu") || "";
+      // 兜底邮箱：如果后端没返回，则保持为空
+      configForm.ccEmail = res.data.ccEmail || "";
       // 全局规则：如果后端没有返回，则使用默认配置
       if (res.data.globalRules && res.data.globalRules.length > 0) {
         configForm.globalRules = res.data.globalRules;
@@ -308,20 +314,7 @@ const loadConfig = async () => {
 
 // 将所有阶段的默认收件人统一设置为 Christopher Xu（如果存在）
 const applyDefaultRecipientToAllSchedules = () => {
-  const chrisId = findEmployeeIdByName("Christopher Xu");
-  if (!chrisId) return;
-
-  configForm.platforms.forEach(platform => {
-    platform.schedules.forEach(schedule => {
-      if (!schedule) return;
-      schedule.employeeIds = [chrisId];
-    });
-  });
-
-  // 如果兜底邮箱还没设置，也默认成 Christopher Xu 的邮箱
-  if (!configForm.ccEmail) {
-    configForm.ccEmail = findEmployeeEmailByName("Christopher Xu") || "";
-  }
+  // 已不再自动设置默认收件人，保留函数以兼容可能的后续调用
 };
 
 // 初始化默认平台配置
@@ -336,6 +329,7 @@ const initDefaultPlatforms = () => {
     const reports = PLATFORM_REPORTS[key] || [];
 
     reports.forEach(report => {
+      if (EXCLUDED_REPORT_IDS.includes(report.id)) return;
       const defaultEmployeeId = getDefaultEmployeeIdForReport(key, report.id, report.name);
       newPlatforms.push({
         platform: platformLabel,
@@ -346,13 +340,13 @@ const initDefaultPlatforms = () => {
           {
             stage: "T+0",
             time: "18:00",
-            employeeIds: defaultEmployeeId ? [defaultEmployeeId] : [],
+            employeeIds: [],
             description: t("collection.config.recipients.scheduleConfig.stageT0Desc")
           },
           {
             stage: "T+1",
             time: "9:00",
-            employeeIds: defaultEmployeeId ? [defaultEmployeeId] : [],
+            employeeIds: [],
             description: t("collection.config.recipients.scheduleConfig.stageT1Desc")
           },
           {
@@ -364,7 +358,7 @@ const initDefaultPlatforms = () => {
           {
             stage: "T+3",
             time: "18:00",
-            employeeIds: defaultEmployeeId ? [defaultEmployeeId] : [],
+            employeeIds: [],
             description: t("collection.config.recipients.scheduleConfig.stageT3DescPrefix") || ""
           }
         ]
@@ -434,9 +428,6 @@ onMounted(async () => {
   // 先加载员工列表，再加载配置，这样可以设置默认值
   await loadEmployees();
   await loadConfig();
-
-  // 将所有阶段的默认收件人统一设置为 Christopher Xu
-  applyDefaultRecipientToAllSchedules();
 
   // 默认选中第一个报表 Tab
   if (!activeTab.value && manualReports.value.length > 0) {
@@ -514,6 +505,30 @@ onMounted(async () => {
     text-overflow: ellipsis;
     overflow: hidden;
   }
+
+  /* 与首页今日数据采集状态一致：上传周期 pill 样式 */
+  .config-tab-upload-cycle {
+    display: inline-block;
+    margin-top: 6px;
+    // padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--el-color-danger);
+    // background: rgba(245, 108, 108, 0.08);
+    // border-radius: 999px;
+    // max-width: 200px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
+  .config-tab-upload-cycle-weak {
+    color: var(--el-text-color-secondary);
+    font-weight: 400;
+    font-size: 11px;
+    background: var(--el-fill-color-light);
+  }
 }
 
 :deep(.config-tabs .el-tabs__item) {
@@ -543,6 +558,16 @@ onMounted(async () => {
 
   .config-tab-platform {
     color: var(--el-color-primary);
+  }
+
+  .config-tab-upload-cycle {
+    color: var(--el-color-danger);
+    // background: rgba(245, 108, 108, 0.12);
+  }
+
+  .config-tab-upload-cycle-weak {
+    color: var(--el-color-primary);
+    // background: rgba(64, 158, 255, 0.08);
   }
 }
 

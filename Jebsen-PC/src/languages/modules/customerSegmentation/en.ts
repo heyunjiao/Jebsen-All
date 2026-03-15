@@ -7,12 +7,24 @@ export default {
     subtitle: "Customer Segmentation & Rule Builder",
 
     // Quick filters
+    filterSections: {
+      basic: "Basic Profile",
+      value: "Customer Value",
+      vehicle: "Vehicle Info",
+      sales: "Sales Behavior",
+      afterSales: "After-sales Behavior",
+      tags: "Tags"
+    },
     quickFilters: {
       title: "Quick Filters",
       keyword: "Keyword Search",
       keywordPlaceholder: "Enter name, phone, VIN...",
       tags: "Quick Tags",
-      tagsPlaceholder: "Select tags",
+      tagsPlaceholder: "Select or enter tags",
+      tagSection: "Tag Filter",
+      tagLabel: "Tags",
+      bdcComplaintTagsPlaceholder: "Select or enter complaint tags",
+      valueSection: "Customer Value",
       store: "Assigned Store",
       storePlaceholder: "Select store"
     },
@@ -106,6 +118,9 @@ export default {
       lastVisit: "Last Visit Time",
       visits90D: "Visits in 90 Days",
       annualSpend: "Annual Spend",
+      annualSpendRange: "Annual Spend Range",
+      spendingLevel: "Spending Level",
+      loyaltyLevel: "Loyalty Level",
       segment: "Existing Customer Segment",
       systemTag: "System Tag",
       oppLevel: "Opportunity Level",

@@ -185,7 +185,19 @@ import type { FilterFormType } from "./components/QuickFilters.vue";
 import type { CustomerSegmentation } from "@/api/modules/customerSegmentation";
 import { getFieldOptions, estimateCount } from "@/api/modules/customerSegmentation";
 import type { RuleNode } from "@/views/tagManage/components/RuleEditor.vue";
-import provinceCityDistrictData from "@/assets/json/provinceCityDistrict.json";
+import { getSegmentTagLabel, formatTagLabels } from "./constants/tagOptions";
+import {
+  formatValueLabels,
+  getSpendingLevelLabel,
+  getLoyaltyLevelLabel,
+  getCustomerValueTierLabel
+} from "./constants/valueOptions";
+import {
+  getVehicleAttributeLabel,
+  getPurchaseAttributeLabel
+} from "./constants/vehicleOptions";
+import { getLastServiceStoreLabel } from "./constants/afterSalesOptions";
+import { UNIQUE_FILTER_FIELD_KEYS } from "./constants/segmentFilterFields";
 
 const { t } = useI18n();
 
@@ -213,60 +225,43 @@ const exporting = ref(false);
 const isCalculationTimeout = ref(false);
 const ruleBuilderKey = ref(0); // 用于强制重新渲染 RuleBuilder 组件
 
-// 漏斗筛选表单初始值
+// 漏斗筛选表单初始值（与需求侧字段列表 + 标签管理默认标签对齐）
 const getInitialFilterForm = (): FilterFormType => ({
-  // 基础属性
   name: "",
   gender: "",
   ageGroup: [],
   familyStatus: [],
-  city: [],
+  residenceArea: "",
+  lifecycleStatus: "",
   contactValidity: "",
-  // 客户偏好
-  powerPreference: [],
-  spacePreference: [],
-  commutePreference: "",
-  familyLifestylePreference: "",
-  businessScenarioPreference: "",
-  performanceDrivingPreference: "",
-  promoSensitivity: "",
-  // 客户行为
   lastVisitTime: null,
   visits90d: { min: undefined, max: undefined },
   annualOrderFreq: { min: undefined, max: undefined },
   avgSpend: { min: undefined, max: undefined },
-  // 客户价值
   annualSpend: { min: undefined, max: undefined },
+  compositeScore: { min: undefined, max: undefined },
   spendingLevel: [],
   loyaltyLevel: [],
-  opportunityLevel: [],
-  // 车辆标签
   modelLine: "",
+  modelLines: [],
+  versionYear: "",
   carAge: { min: undefined, max: undefined },
-  usageIntensity: [],
-  accidentRiskLevel: [],
-  // 服务习惯
-  serviceHabit: "",
-  lastServiceAdvisor: "",
-  // 标签
+  vin: "",
+  licensePlate: "",
+  vehicleAttribute: "",
+  purchaseAttribute: [],
+  lastMaintenanceStore: "",
+  lastReturnStore: "",
   tags: [],
-  bdcComplaintTags: [],
-  // 车价相关
   totalCarPrice: { min: undefined, max: undefined },
   totalOptionPrice: { min: undefined, max: undefined },
   afterSalesSelfPayAmount: { min: undefined, max: undefined },
-  // 客户价值分层
   customerValueTier: [],
-  // 车型与订单
-  modelLines: [],
   completedOrderCount: { min: undefined, max: undefined },
-  // 两年内进场
   visitsIn2Years: { min: undefined, max: undefined },
   selfPayAmountIn2Years: { min: undefined, max: undefined },
   lastServiceOrderDate: null,
-  // 最后购车订单
   lastPurchaseDeliveryDate: null,
-  // 最近一年事故维修次数
   accidentRepairCountIn1Year: { min: undefined, max: undefined }
 });
 
@@ -321,50 +316,7 @@ const hasConflict = computed(() => conflictWarnings.value.length > 0);
 // 快捷筛选区域是否有冲突
 const hasQuickFilterConflict = computed(() => {
   if (!hasConflict.value) return false;
-  // 检查冲突字段是否涉及快捷筛选的字段
-  const quickFilterFields = [
-    "name",
-    "gender",
-    "ageGroup",
-    "familyStatus",
-    "city",
-    "contactValidity",
-    "powerPreference",
-    "spacePreference",
-    "commutePreference",
-    "familyLifestylePreference",
-    "businessScenarioPreference",
-    "performanceDrivingPreference",
-    "promoSensitivity",
-    "lastVisitTime",
-    "visits90d",
-    "annualOrderFreq",
-    "avgSpend",
-    "annualSpend",
-    "spendingLevel",
-    "loyaltyLevel",
-    "opportunityLevel",
-    "modelLine",
-    "carAge",
-    "usageIntensity",
-    "accidentRiskLevel",
-    "serviceHabit",
-    "tags",
-    "totalCarPrice",
-    "totalOptionPrice",
-    "afterSalesSelfPayAmount",
-    "customerValueTier",
-    "modelLines",
-    "completedOrderCount",
-    "visitsIn2Years",
-    "selfPayAmountIn2Years",
-    "lastServiceOrderDate",
-    "lastPurchaseDeliveryDate",
-    "accidentRepairCountIn1Year",
-    "lastServiceAdvisor",
-    "bdcComplaintTags"
-  ];
-  return conflictFields.value.some(field => quickFilterFields.includes(field));
+  return conflictFields.value.some(field => UNIQUE_FILTER_FIELD_KEYS.includes(field));
 });
 
 // 是否为零结果
@@ -376,14 +328,14 @@ const isZeroResult = computed(() => {
 const detectConflicts = () => {
   const warnings: ConflictWarning[] = [];
 
-  // 检测1: 标签与分群的逻辑互斥
+  // 检测1: 标签与分群的逻辑互斥（标签值已与 constants/tagCategory 叶子统一，如 会员分层-流失客户）
   const selectedTags = quickFilters.value.tags;
-  const selectedSegments: string[] = []; // 暂时为空，后续可以添加 existingSegment 字段
+  const selectedSegments: string[] = []; // 暂时为空，后续可接 existingSegment 字段
 
-  // Mock 冲突规则
+  // Mock 冲突规则：tag 需与 SEGMENT_TAG_OPTIONS 的 value 一致
   const conflictRules = [
-    { tag: "churn_risk", segment: "seg_002", message: "「即将流失」标签与「高净值客户群」分群存在逻辑矛盾" },
-    { tag: "new_customer", segment: "seg_003", message: "「新客户」标签与「年度保养提醒人群」分群存在矛盾（新客户无保养记录）" }
+    { tag: "会员分层-流失客户", segment: "seg_002", message: "「流失客户」标签与「高净值客户群」分群存在逻辑矛盾" },
+    { tag: "售后行为-12个月内完成首保", segment: "seg_003", message: "「12个月内完成首保」与「年度保养提醒人群」分群存在矛盾" }
   ];
 
   conflictRules.forEach(rule => {
@@ -543,7 +495,7 @@ const detectConflicts = () => {
     const rValStr = String(rValue);
 
     // 字符串/枚举类型冲突
-    if (["gender", "city", "serviceHabit", "modelLine", "contactValidity"].includes(field)) {
+    if (["gender", "residenceArea", "lifecycleStatus", "lastMaintenanceStore", "lastReturnStore", "modelLine", "contactValidity"].includes(field)) {
       if (typeof qValue === "string") {
         if (rOp === "equals" && qValue !== rValStr) return true;
         if (rOp === "notEquals" && qValue === rValStr) return true;
@@ -611,17 +563,9 @@ const quickFilterConditionsCount = computed(() => {
   if (qf.gender) count++;
   if (qf.ageGroup.length > 0) count++;
   if (qf.familyStatus.length > 0) count++;
-  if (Array.isArray(qf.city) && qf.city.length > 0) count++;
+  if (qf.residenceArea) count++;
+  if (qf.lifecycleStatus) count++;
   if (qf.contactValidity) count++;
-  // 客户偏好
-  if (qf.powerPreference.length > 0) count++;
-  if (qf.spacePreference.length > 0) count++;
-  if (qf.commutePreference) count++;
-  if (qf.familyLifestylePreference) count++;
-  if (qf.businessScenarioPreference) count++;
-  if (qf.performanceDrivingPreference) count++;
-  if (qf.promoSensitivity) count++;
-  // 客户行为
   if (qf.lastVisitTime) count++;
   if (qf.visits90d.min !== undefined || qf.visits90d.max !== undefined) count++;
   if (qf.annualOrderFreq.min !== undefined || qf.annualOrderFreq.max !== undefined) count++;
@@ -629,28 +573,26 @@ const quickFilterConditionsCount = computed(() => {
   if (qf.accidentRepairCountIn1Year.min !== undefined || qf.accidentRepairCountIn1Year.max !== undefined) count++;
   // 客户价值
   if (qf.annualSpend.min !== undefined || qf.annualSpend.max !== undefined) count++;
+  if (qf.compositeScore?.min !== undefined || qf.compositeScore?.max !== undefined) count++;
   if (qf.spendingLevel.length > 0) count++;
   if (qf.loyaltyLevel.length > 0) count++;
-  if (qf.opportunityLevel.length > 0) count++;
-  // 车辆标签
+  // 车辆关联
   if (qf.modelLine) count++;
+  if (qf.modelLines.length > 0) count++;
+  if (qf.versionYear) count++;
   if (qf.carAge.min !== undefined || qf.carAge.max !== undefined) count++;
-  if (qf.usageIntensity.length > 0) count++;
-  if (qf.accidentRiskLevel.length > 0) count++;
-  // 服务习惯
-  if (qf.serviceHabit) count++;
-  if (qf.lastServiceAdvisor) count++;
-  // 标签
+  if (qf.vin) count++;
+  if (qf.licensePlate) count++;
+  if (qf.vehicleAttribute) count++;
+  if (qf.purchaseAttribute.length > 0) count++;
+  if (qf.lastMaintenanceStore) count++;
+  if (qf.lastReturnStore) count++;
   if (qf.tags.length > 0) count++;
-  if (qf.bdcComplaintTags.length > 0) count++;
-  // 车价相关
   if (qf.totalCarPrice.min !== undefined || qf.totalCarPrice.max !== undefined) count++;
   if (qf.totalOptionPrice.min !== undefined || qf.totalOptionPrice.max !== undefined) count++;
   if (qf.afterSalesSelfPayAmount.min !== undefined || qf.afterSalesSelfPayAmount.max !== undefined) count++;
   // 客户价值分层
   if (qf.customerValueTier.length > 0) count++;
-  // 车型与订单
-  if (qf.modelLines.length > 0) count++;
   if (qf.completedOrderCount.min !== undefined || qf.completedOrderCount.max !== undefined) count++;
   // 两年内进场
   if (qf.visitsIn2Years.min !== undefined || qf.visitsIn2Years.max !== undefined) count++;
@@ -710,48 +652,18 @@ const quickFilterPreviewTags = computed(() => {
       conflict: conflictFieldSet.has("familyStatus"),
       field: "familyStatus"
     });
-  if (Array.isArray(qf.city) && qf.city.length > 0) {
-    // 从省市区级联数据中获取显示文本（支持单选和多选）
-    const getCityLabel = (codes: string[] | string[][]) => {
-      // 判断是多选（二维数组）还是单选（一维数组）
-      const isMultiSelect = Array.isArray(codes[0]) && Array.isArray(codes[0]);
-
-      if (isMultiSelect) {
-        // 多选：处理多个路径数组
-        const multiLabels = (codes as string[][]).map(path => {
-          let current: any = provinceCityDistrictData;
-          const labels: string[] = [];
-          path.forEach((code, index) => {
-            const item = current.find((item: any) => item.value === code);
-            if (item) {
-              labels.push(item.label);
-              if (item.children && index < path.length - 1) {
-                current = item.children;
-              }
-            }
-          });
-          return labels.join("/");
-        });
-        return multiLabels.join(", ");
-      } else {
-        // 单选：处理单个路径数组
-        const path = codes as string[];
-        let current: any = provinceCityDistrictData;
-        const labels: string[] = [];
-        path.forEach((code, index) => {
-          const item = current.find((item: any) => item.value === code);
-          if (item) {
-            labels.push(item.label);
-            if (item.children && index < path.length - 1) {
-              current = item.children;
-            }
-          }
-        });
-        return labels.join("/");
-      }
-    };
-    tags.push({ label: `地区: ${getCityLabel(qf.city)}`, conflict: conflictFieldSet.has("city"), field: "city" });
-  }
+  if (qf.residenceArea)
+    tags.push({
+      label: `${t("customer.listFields.residenceArea")}: ${qf.residenceArea}`,
+      conflict: conflictFieldSet.has("residenceArea"),
+      field: "residenceArea"
+    });
+  if (qf.lifecycleStatus)
+    tags.push({
+      label: `${t("customer.lifecycleStatus")}: ${t(`customer.lifecycleStatusOptions.${qf.lifecycleStatus}`)}`,
+      conflict: conflictFieldSet.has("lifecycleStatus"),
+      field: "lifecycleStatus"
+    });
   if (qf.contactValidity)
     tags.push({
       label: `联系方式: ${qf.contactValidity === "verified" ? "已验证" : "未验证"}`,
@@ -759,51 +671,6 @@ const quickFilterPreviewTags = computed(() => {
       field: "contactValidity"
     });
 
-  // 客户偏好
-  if (qf.powerPreference.length > 0)
-    tags.push({
-      label: `动力偏好: ${qf.powerPreference.length}项`,
-      conflict: conflictFieldSet.has("powerPreference"),
-      field: "powerPreference"
-    });
-  if (qf.spacePreference.length > 0)
-    tags.push({
-      label: `空间偏好: ${qf.spacePreference.length}项`,
-      conflict: conflictFieldSet.has("spacePreference"),
-      field: "spacePreference"
-    });
-  if (qf.commutePreference)
-    tags.push({
-      label: `通勤偏好: ${qf.commutePreference}`,
-      conflict: conflictFieldSet.has("commutePreference"),
-      field: "commutePreference"
-    });
-  if (qf.familyLifestylePreference)
-    tags.push({
-      label: `生活场景: ${qf.familyLifestylePreference}`,
-      conflict: conflictFieldSet.has("familyLifestylePreference"),
-      field: "familyLifestylePreference"
-    });
-  if (qf.businessScenarioPreference)
-    tags.push({
-      label: `商务场景: ${qf.businessScenarioPreference}`,
-      conflict: conflictFieldSet.has("businessScenarioPreference"),
-      field: "businessScenarioPreference"
-    });
-  if (qf.performanceDrivingPreference)
-    tags.push({
-      label: `驾驶偏好: ${qf.performanceDrivingPreference}`,
-      conflict: conflictFieldSet.has("performanceDrivingPreference"),
-      field: "performanceDrivingPreference"
-    });
-  if (qf.promoSensitivity)
-    tags.push({
-      label: `促销敏感: ${qf.promoSensitivity}`,
-      conflict: conflictFieldSet.has("promoSensitivity"),
-      field: "promoSensitivity"
-    });
-
-  // 客户行为
   if (qf.lastVisitTime)
     tags.push({ label: `到店时间已选`, conflict: conflictFieldSet.has("lastVisitTime"), field: "lastVisitTime" });
   if (qf.visits90d.min !== undefined || qf.visits90d.max !== undefined) {
@@ -838,33 +705,46 @@ const quickFilterPreviewTags = computed(() => {
   // 客户价值
   if (qf.annualSpend.min !== undefined || qf.annualSpend.max !== undefined) {
     tags.push({
-      label: `年度消费: ${qf.annualSpend.min ?? 0}-${qf.annualSpend.max ?? "∞"}元`,
+      label: `${t("customerSegmentation.fields.annualSpend")}: ${qf.annualSpend.min ?? 0}-${qf.annualSpend.max ?? "∞"}元`,
       conflict: conflictFieldSet.has("annualSpend"),
       field: "annualSpend"
     });
   }
-  if (qf.spendingLevel.length > 0)
+  if (qf.compositeScore?.min !== undefined || qf.compositeScore?.max !== undefined) {
     tags.push({
-      label: `消费等级: ${qf.spendingLevel.length}项`,
+      label: `${t("customer.profile360.compositeScore")}: ${qf.compositeScore?.min ?? 0}-${qf.compositeScore?.max ?? "∞"}`,
+      conflict: conflictFieldSet.has("compositeScore"),
+      field: "compositeScore"
+    });
+  }
+  if (qf.spendingLevel.length > 0) {
+    const text = formatValueLabels(qf.spendingLevel, getSpendingLevelLabel) || `${qf.spendingLevel.length}项`;
+    tags.push({
+      label: `${t("customerSegmentation.fields.spendingLevel")}: ${text}`,
       conflict: conflictFieldSet.has("spendingLevel"),
       field: "spendingLevel"
     });
-  if (qf.loyaltyLevel.length > 0)
+  }
+  if (qf.loyaltyLevel.length > 0) {
+    const text = formatValueLabels(qf.loyaltyLevel, getLoyaltyLevelLabel) || `${qf.loyaltyLevel.length}项`;
     tags.push({
-      label: `忠诚度: ${qf.loyaltyLevel.length}项`,
+      label: `${t("customerSegmentation.fields.loyaltyLevel")}: ${text}`,
       conflict: conflictFieldSet.has("loyaltyLevel"),
       field: "loyaltyLevel"
     });
-  if (qf.opportunityLevel.length > 0)
-    tags.push({
-      label: `商机等级: ${qf.opportunityLevel.length}项`,
-      conflict: conflictFieldSet.has("opportunityLevel"),
-      field: "opportunityLevel"
-    });
-
-  // 车辆标签
+  }
+  // 车辆关联信息：车系、车型、版本/年款
   if (qf.modelLine)
-    tags.push({ label: `车型: ${qf.modelLine}`, conflict: conflictFieldSet.has("modelLine"), field: "modelLine" });
+    tags.push({ label: `车系: ${qf.modelLine}`, conflict: conflictFieldSet.has("modelLine"), field: "modelLine" });
+  if (qf.modelLines.length > 0) {
+    tags.push({
+      label: `车型: ${qf.modelLines.length}项`,
+      conflict: conflictFieldSet.has("modelLines"),
+      field: "modelLines"
+    });
+  }
+  if (qf.versionYear)
+    tags.push({ label: `版本/年款: ${qf.versionYear}`, conflict: conflictFieldSet.has("versionYear"), field: "versionYear" });
   if (qf.carAge.min !== undefined || qf.carAge.max !== undefined) {
     tags.push({
       label: `车龄: ${qf.carAge.min ?? 0}-${qf.carAge.max ?? "∞"}年`,
@@ -872,41 +752,48 @@ const quickFilterPreviewTags = computed(() => {
       field: "carAge"
     });
   }
-  if (qf.usageIntensity.length > 0)
+  if (qf.vin)
+    tags.push({ label: `车架号: ${qf.vin}`, conflict: conflictFieldSet.has("vin"), field: "vin" });
+  if (qf.licensePlate)
+    tags.push({ label: `车牌号: ${qf.licensePlate}`, conflict: conflictFieldSet.has("licensePlate"), field: "licensePlate" });
+  if (qf.vehicleAttribute)
     tags.push({
-      label: `使用强度: ${qf.usageIntensity.length}项`,
-      conflict: conflictFieldSet.has("usageIntensity"),
-      field: "usageIntensity"
+      label: `车辆属性: ${getVehicleAttributeLabel(qf.vehicleAttribute)}`,
+      conflict: conflictFieldSet.has("vehicleAttribute"),
+      field: "vehicleAttribute"
     });
-  if (qf.accidentRiskLevel.length > 0)
+  if (qf.purchaseAttribute.length > 0) {
+    const text = qf.purchaseAttribute.map(getPurchaseAttributeLabel).join("、");
     tags.push({
-      label: `事故风险: ${qf.accidentRiskLevel.length}项`,
-      conflict: conflictFieldSet.has("accidentRiskLevel"),
-      field: "accidentRiskLevel"
+      label: `购车属性: ${text}`,
+      conflict: conflictFieldSet.has("purchaseAttribute"),
+      field: "purchaseAttribute"
     });
-
-  // 服务习惯
-  if (qf.serviceHabit)
-    tags.push({ label: `服务习惯: ${qf.serviceHabit}`, conflict: conflictFieldSet.has("serviceHabit"), field: "serviceHabit" });
-  if (qf.lastServiceAdvisor) {
+  }
+  if (qf.lastMaintenanceStore) {
     tags.push({
-      label: `最后接待顾问: ${qf.lastServiceAdvisor}`,
-      conflict: conflictFieldSet.has("lastServiceAdvisor"),
-      field: "lastServiceAdvisor"
+      label: `${t("customer.profile360.lastMaintenanceStore")}: ${getLastServiceStoreLabel(qf.lastMaintenanceStore)}`,
+      conflict: conflictFieldSet.has("lastMaintenanceStore"),
+      field: "lastMaintenanceStore"
+    });
+  }
+  if (qf.lastReturnStore) {
+    tags.push({
+      label: `${t("customer.listFields.lastReturnStore")}: ${getLastServiceStoreLabel(qf.lastReturnStore)}`,
+      conflict: conflictFieldSet.has("lastReturnStore"),
+      field: "lastReturnStore"
     });
   }
 
-  // 标签
-  if (qf.tags.length > 0)
-    tags.push({ label: `标签: ${qf.tags.length}个`, conflict: conflictFieldSet.has("tags"), field: "tags" });
-  if (qf.bdcComplaintTags.length > 0) {
+  // 标签（展示已选标签名称，与 QuickFilters 选项统一）
+  if (qf.tags.length > 0) {
+    const tagText = formatTagLabels(qf.tags, getSegmentTagLabel) || `${qf.tags.length}项`;
     tags.push({
-      label: `BDC投诉标签: ${qf.bdcComplaintTags.length}个`,
-      conflict: conflictFieldSet.has("bdcComplaintTags"),
-      field: "bdcComplaintTags"
+      label: `${t("customerSegmentation.quickFilters.tagLabel")}: ${tagText}`,
+      conflict: conflictFieldSet.has("tags"),
+      field: "tags"
     });
   }
-
   // 车价相关
   if (qf.totalCarPrice.min !== undefined || qf.totalCarPrice.max !== undefined) {
     tags.push({
@@ -932,28 +819,14 @@ const quickFilterPreviewTags = computed(() => {
 
   // 客户价值分层
   if (qf.customerValueTier.length > 0) {
-    const tierLabels: Record<string, string> = {
-      diamond: "钻石",
-      platinum: "白金",
-      gold: "黄金",
-      silver: "白银"
-    };
-    const tierText = qf.customerValueTier.map(t => tierLabels[t] || t).join("、");
+    const tierText = formatValueLabels(qf.customerValueTier, getCustomerValueTierLabel) || `${qf.customerValueTier.length}项`;
     tags.push({
-      label: `价值分层: ${tierText}`,
+      label: `${t("customerSegmentation.fields.customerValueTier")}: ${tierText}`,
       conflict: conflictFieldSet.has("customerValueTier"),
       field: "customerValueTier"
     });
   }
 
-  // 车型与订单
-  if (qf.modelLines.length > 0) {
-    tags.push({
-      label: `车型: ${qf.modelLines.length}项`,
-      conflict: conflictFieldSet.has("modelLines"),
-      field: "modelLines"
-    });
-  }
   if (qf.completedOrderCount.min !== undefined || qf.completedOrderCount.max !== undefined) {
     tags.push({
       label: `已成交订单: ${qf.completedOrderCount.min ?? 0}-${qf.completedOrderCount.max ?? "∞"}单`,
@@ -1229,7 +1102,9 @@ const loadFieldOptions = async () => {
           { label: "女", value: "female" }
         ]
       },
-      { field: "city", label: "所在城市", operators: ["equals", "belongsTo", "notBelongsTo"], inputType: "select" },
+      { field: "residenceArea", label: "居住区域", operators: ["equals"], inputType: "select" },
+      { field: "lifecycleStatus", label: "OneID状态", operators: ["equals"], inputType: "select" },
+      { field: "compositeScore", label: "价值综合评分", operators: ["between", "greaterThan", "lessThan"], inputType: "numberrange" },
       { field: "carAge", label: "车龄", operators: ["equals", "greaterThan", "lessThan", "between"], inputType: "numberrange" },
       { field: "annualSpend", label: "年均消费", operators: ["greaterThan", "lessThan", "between"], inputType: "numberrange" },
       { field: "lastVisit", label: "最近到店时间", operators: ["before", "after", "between"], inputType: "daterange" },
@@ -1264,17 +1139,16 @@ const loadFieldOptions = async () => {
         unit: "次"
       },
       {
-        field: "lastServiceAdvisor",
-        label: "最后一次接待顾问",
-        operators: ["equals", "contains", "notContains"],
-        inputType: "select",
-        asyncSearch: true
+        field: "lastMaintenanceStore",
+        label: "最近一次保养门店",
+        operators: ["equals"],
+        inputType: "select"
       },
       {
-        field: "bdcComplaintTags",
-        label: "来自BDC的投诉标签",
-        operators: ["contains", "notContains", "allMatch"],
-        inputType: "tagselect"
+        field: "lastReturnStore",
+        label: "最后一次返厂门店",
+        operators: ["equals"],
+        inputType: "select"
       },
       {
         field: "customerValueTier",

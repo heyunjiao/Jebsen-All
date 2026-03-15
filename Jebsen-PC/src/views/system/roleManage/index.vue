@@ -5,22 +5,12 @@
       <template #tableHeader>
         <el-button type="primary" :icon="Plus" @click="handleAdd">{{ $t("system.add") }}</el-button>
       </template>
-      <!-- 表格操作 -->
+      <!-- 表格操作：直接显示 修改、分配客户 -->
       <template #operation="scope">
         <template v-if="scope.row.roleId !== 1">
           <div class="operation-center">
             <el-button type="primary" link :icon="Edit" @click="handleUpdate(scope.row)">{{ $t("system.modify") }}</el-button>
-            <el-dropdown @command="command => handleCommand(command, scope.row)">
-              <el-button type="primary" link :icon="More">更多</el-button>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item command="handleConfigPermission" :icon="Setting">
-                    {{ $t("system.roleManagement.functionalPermission") }}
-                  </el-dropdown-item>
-                  <el-dropdown-item command="handleAuthUser" :icon="User">{{ $t("system.assignUser") }}</el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
+            <el-button type="primary" link :icon="User" @click="handleAuthUser(scope.row)">分配客户</el-button>
           </div>
         </template>
       </template>
@@ -30,7 +20,7 @@
     <el-dialog :title="title" v-model="open" width="1200px" append-to-body top="3vh" class="role-config-dialog">
       <el-tabs v-model="activeTab" class="role-tabs">
         <!-- Tab 1: 基础信息 -->
-        <el-tab-pane :label="$t('system.roleManagement.basicInfo')">
+        <el-tab-pane name="basic" :label="$t('system.roleManagement.basicInfo')">
           <BasicInfo
             ref="basicInfoRef"
             :form="form"
@@ -41,7 +31,7 @@
         </el-tab-pane>
 
         <!-- Tab 2: 功能权限 -->
-        <el-tab-pane :label="$t('system.roleManagement.functionalPermission')">
+        <el-tab-pane name="permission" :label="$t('system.roleManagement.functionalPermission')">
           <FunctionalPermission
             ref="functionalPermissionRef"
             :menu-options="menuOptions"
@@ -54,7 +44,7 @@
         </el-tab-pane>
 
         <!-- Tab 3: 字段脱敏 -->
-        <el-tab-pane :label="$t('system.roleManagement.fieldMaskingTab')">
+        <el-tab-pane name="masking" :label="$t('system.roleManagement.fieldMaskingTab')">
           <FieldMasking
             ref="fieldMaskingRef"
             :business-objects="businessObjects"
@@ -87,19 +77,20 @@
 </template>
 
 <script setup lang="tsx">
-import { ref, reactive, onMounted, nextTick } from "vue";
+import { ref, reactive, onMounted, nextTick, watch } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { Plus, Edit, Delete, More, Setting, User } from "@element-plus/icons-vue";
+import { Plus, Edit, Delete, User } from "@element-plus/icons-vue";
 import { useI18n } from "vue-i18n";
 import ProTable from "@/components/ProTable/index.vue";
 import { ProTableInstance, ColumnProps } from "@/components/ProTable/interface";
+import { useAuthStore } from "@/stores/modules/auth";
 import roleManagementMockData from "@/assets/json/roleManagementMockData.json";
-import authMenuList from "@/assets/json/authMenuList.json";
 import BasicInfo from "./components/BasicInfo.vue";
 import FunctionalPermission from "./components/FunctionalPermission.vue";
 import FieldMasking from "./components/FieldMasking.vue";
 
 const { t } = useI18n();
+const authStore = useAuthStore();
 
 // Mock数据
 const mockRoleList = roleManagementMockData.roleList.data.list;
@@ -113,17 +104,19 @@ const roleLevelOptions = {
   dataSpecialist: "dataSpecialist"
 };
 
-// 转换菜单数据为树结构
+// 转换菜单数据为树结构（只保留会显示的菜单，过滤掉 meta.isHide === true 的项）
 let globalMenuId = 1;
-const transformMenuToTree = (list: any[], parentId = 0): any[] => {
-  return list.map(item => {
+const transformMenuToTree = (list: any[]): any[] => {
+  const visibleList = (list || []).filter((item: any) => item.meta?.isHide !== true);
+  return visibleList.map((item: any) => {
     const currentId = globalMenuId++;
+    const visibleChildren = (item.children || []).filter((c: any) => c.meta?.isHide !== true);
     return {
       id: currentId,
       label: item.meta?.title || item.name,
       path: item.path,
       name: item.name,
-      children: item.children && item.children.length > 0 ? transformMenuToTree(item.children, currentId) : []
+      children: visibleChildren.length > 0 ? transformMenuToTree(visibleChildren) : []
     };
   });
 };
@@ -301,33 +294,38 @@ const columns = reactive<ColumnProps[]>([
   { prop: "operation", label: t("common.operation"), fixed: "right", minWidth: 200, sortable: false }
 ]);
 
-// 查询菜单树结构（从真实菜单数据加载）
+// 查询菜单树结构（以当前侧栏显示的菜单为准：使用 authStore.authMenuListGet，与左侧菜单一致）
 const getMenuTreeselect = async () => {
-  return new Promise(resolve => {
-    setTimeout(() => {
-      globalMenuId = 1;
-      const menuTree = transformMenuToTree(JSON.parse(JSON.stringify(authMenuList.data)));
-      menuOptions.value = menuTree;
-      resolve(menuTree);
-    }, 50);
-  });
+  if (!authStore.authMenuListGet?.length) {
+    await authStore.getAuthMenuList();
+  }
+  const list = authStore.authMenuListGet || [];
+  globalMenuId = 1;
+  const menuTree = transformMenuToTree(JSON.parse(JSON.stringify(list)));
+  menuOptions.value = menuTree;
+  return menuTree;
 };
 
-// 根据角色ID查询菜单下拉树结构
+// 切换到功能权限 Tab 时，用当前系统菜单同步一次树并恢复勾选
+watch(activeTab, async newTab => {
+  if (newTab === "permission") {
+    await getMenuTreeselect();
+    nextTick(() => {
+      const keys = form.menuIds?.length ? form.menuIds : form.functionalPermissions?.menuIds || [];
+      if (functionalPermissionRef.value && keys.length) {
+        functionalPermissionRef.value.setCheckedKeys(keys);
+      }
+    });
+  }
+});
+
+// 根据角色ID查询菜单下拉树结构（从 mock 角色数据中取该角色的 menuIds）
 const getRoleMenuTreeselect = async (roleId: number) => {
-  // 模拟根据角色ID获取权限
   return new Promise(resolve => {
     setTimeout(() => {
-      // 模拟部分选中
-      let checkedKeys: number[] = [];
-      if (roleId === 1) {
-        // 管理员全选
-        checkedKeys = [11, 12, 13, 14, 21, 22, 23, 24, 31, 32];
-      } else {
-        // 其他角色选一部分
-        checkedKeys = [11, 12, 21];
-      }
-      resolve({ checkedKeys, menus: mockMenuTree });
+      const role = mockRoleList.find((item: any) => item.roleId === roleId);
+      const checkedKeys: number[] = role?.menuIds ?? [];
+      resolve({ checkedKeys, menus: menuOptions.value });
     }, 50);
   });
 };
@@ -402,20 +400,6 @@ const reset = () => {
   });
 };
 
-// 更多操作触发
-const handleCommand = (command, row) => {
-  switch (command) {
-    case "handleConfigPermission":
-      handleUpdate(row);
-      break;
-    case "handleAuthUser":
-      handleAuthUser(row);
-      break;
-    default:
-      break;
-  }
-};
-
 // 新增按钮操作
 const handleAdd = async () => {
   reset();
@@ -448,17 +432,18 @@ const handleUpdate = async (row?: any) => {
     });
   }
 
-  open.value = true;
   title.value = t("system.modifyRole");
 
-  // 并行获取树数据和角色权限
+  // 先加载当前系统菜单与角色权限，再打开对话框，保证功能权限 Tab 展示的菜单与系统一致
   await getMenuTreeselect();
-  const roleMenu = await getRoleMenuTreeselect(roleId);
+  const roleMenu = (await getRoleMenuTreeselect(roleId)) as { checkedKeys: number[] };
+
+  open.value = true;
 
   // 设置已选中的菜单和部门
   nextTick(() => {
     if (functionalPermissionRef.value) {
-      functionalPermissionRef.value.setCheckedKeys(roleMenu.checkedKeys || []);
+      functionalPermissionRef.value.setCheckedKeys(roleMenu?.checkedKeys || []);
     }
     // 初始化字段脱敏配置
     if (fieldMaskingRef.value && (!form.fieldMasking || Object.keys(form.fieldMasking).length === 0)) {

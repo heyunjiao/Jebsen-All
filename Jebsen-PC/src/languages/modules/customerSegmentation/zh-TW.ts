@@ -2,6 +2,22 @@ export default {
   customerSegmentation: {
     title: "智能分群構建器",
     subtitle: "Customer Segmentation & Rule Builder",
+    filterSections: {
+      basic: "基礎檔案信息",
+      value: "客戶價值",
+      vehicle: "車輛關聯信息",
+      sales: "銷售行為",
+      afterSales: "售後行為",
+      tags: "標籤"
+    },
+    quickFilters: {
+      title: "快捷篩選",
+      tagsPlaceholder: "選擇或輸入標籤",
+      tagSection: "標籤篩選",
+      tagLabel: "標籤",
+      bdcComplaintTagsPlaceholder: "選擇或輸入投訴標籤",
+      valueSection: "客戶價值"
+    },
     ruleBuilder: {
       title: "可視化規則引擎",
       rootOperator: "滿足以下條件",
@@ -51,6 +67,9 @@ export default {
       lastVisit: "最近到店時間",
       visits90D: "90天進店頻次",
       annualSpend: "年均消費",
+      annualSpendRange: "年度消費金額",
+      spendingLevel: "消費等級",
+      loyaltyLevel: "忠誠度等級",
       segment: "現有客戶分群",
       systemTag: "系統標籤",
       oppLevel: "商機等級",

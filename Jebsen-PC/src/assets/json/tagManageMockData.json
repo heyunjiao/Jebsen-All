@@ -5,980 +5,543 @@
     "data": {
       "list": [
         {
-          "tagId": "TAG-001",
-          "tagName": "意向级别-热",
-          "category": "业务 / 意向级别",
-          "tagType": "manual",
-          "status": "active",
-          "coverageCount": 15230,
-          "coverageRate": "15.2%",
-          "creator": "业务专员",
-          "createTime": "2024-01-05 08:00:00",
-          "updateTime": "2024-01-20 14:20:00",
-          "publishTime": "2024-01-05 14:00:00",
-          "version": "v1.0",
-          "description": "意向级别为热的客户",
-          "ruleConfig": null
-        },
-        {
-          "tagId": "TAG-002",
-          "tagName": "意向级别-暖",
-          "category": "业务 / 意向级别",
-          "tagType": "manual",
-          "status": "active",
-          "coverageCount": 28450,
-          "coverageRate": "28.4%",
-          "creator": "业务专员",
-          "createTime": "2024-01-05 08:00:00",
-          "updateTime": "2024-01-20 14:20:00",
-          "publishTime": "2024-01-05 14:00:00",
-          "version": "v1.0",
-          "description": "意向级别为暖的客户",
-          "ruleConfig": null
-        },
-        {
-          "tagId": "TAG-003",
-          "tagName": "意向级别-冷",
-          "category": "业务 / 意向级别",
-          "tagType": "manual",
-          "status": "active",
-          "coverageCount": 45600,
-          "coverageRate": "45.6%",
-          "creator": "业务专员",
-          "createTime": "2024-01-05 08:00:00",
-          "updateTime": "2024-01-20 14:20:00",
-          "publishTime": "2024-01-05 14:00:00",
-          "version": "v1.0",
-          "description": "意向级别为冷的客户",
-          "ruleConfig": null
-        },
-        {
-          "tagId": "TAG-004",
-          "tagName": "私牌",
-          "category": "车 / 车牌类型",
+          "tagId": "TAG-049",
+          "tagName": "销售钻石客户",
+          "category": "业务 / 会员分层",
           "tagType": "auto",
           "status": "active",
-          "coverageCount": 78900,
-          "coverageRate": "78.9%",
-          "creator": "系统管理员",
-          "createTime": "2024-01-06 09:00:00",
-          "updateTime": "2024-01-06 09:00:00",
-          "publishTime": "2024-01-06 14:00:00",
+          "coverageCount": 3200,
+          "coverageRate": "3.2%",
+          "creator": "系统初始化",
+          "createTime": "2024-01-01 00:00:00",
+          "updateTime": "2024-01-01 00:00:00",
+          "publishTime": "2024-01-01 00:00:00",
           "version": "v1.0",
-          "description": "车牌类型为私牌的客户",
+          "description": "会员分层-销售钻石客户（系统默认标签）",
           "ruleConfig": {
-            "logic": "AND",
-            "conditions": [
-              {
-                "field": "licensePlateType",
-                "operator": "=",
-                "value": "私牌"
-              }
-            ]
+            "root": {
+              "id": "root",
+              "type": "group",
+              "operator": "AND",
+              "children": [
+                {
+                  "id": "cond-default-1",
+                  "type": "predicate",
+                  "field": "tag_会员分层-销售钻石客户",
+                  "operatorType": "eq",
+                  "value": "是"
+                }
+              ]
+            }
           }
         },
         {
-          "tagId": "TAG-005",
-          "tagName": "公牌",
-          "category": "车 / 车牌类型",
+          "tagId": "TAG-050",
+          "tagName": "售后钻石客户",
+          "category": "业务 / 会员分层",
           "tagType": "auto",
           "status": "active",
-          "coverageCount": 12300,
-          "coverageRate": "12.3%",
-          "creator": "系统管理员",
-          "createTime": "2024-01-06 09:00:00",
-          "updateTime": "2024-01-06 09:00:00",
-          "publishTime": "2024-01-06 14:00:00",
+          "coverageCount": 4100,
+          "coverageRate": "4.1%",
+          "creator": "系统初始化",
+          "createTime": "2024-01-01 00:00:00",
+          "updateTime": "2024-01-01 00:00:00",
+          "publishTime": "2024-01-01 00:00:00",
           "version": "v1.0",
-          "description": "车牌类型为公牌的客户",
+          "description": "会员分层-售后钻石客户（系统默认标签）",
           "ruleConfig": {
-            "logic": "AND",
-            "conditions": [
-              {
-                "field": "licensePlateType",
-                "operator": "=",
-                "value": "公牌"
-              }
-            ]
+            "root": {
+              "id": "root",
+              "type": "group",
+              "operator": "AND",
+              "children": [
+                {
+                  "id": "cond-default-1",
+                  "type": "predicate",
+                  "field": "tag_会员分层-售后钻石客户",
+                  "operatorType": "eq",
+                  "value": "是"
+                }
+              ]
+            }
           }
         },
         {
-          "tagId": "TAG-006",
-          "tagName": "本市",
-          "category": "车 / 所在城市",
+          "tagId": "TAG-051",
+          "tagName": "普通活跃售后客户",
+          "category": "业务 / 会员分层",
           "tagType": "auto",
           "status": "active",
-          "coverageCount": 67800,
-          "coverageRate": "67.8%",
-          "creator": "系统管理员",
-          "createTime": "2024-01-06 10:00:00",
-          "updateTime": "2024-01-06 10:00:00",
-          "publishTime": "2024-01-06 15:00:00",
+          "coverageCount": 25600,
+          "coverageRate": "25.6%",
+          "creator": "系统初始化",
+          "createTime": "2024-01-01 00:00:00",
+          "updateTime": "2024-01-01 00:00:00",
+          "publishTime": "2024-01-01 00:00:00",
           "version": "v1.0",
-          "description": "所在城市为本市的客户",
+          "description": "会员分层-普通活跃售后客户（系统默认标签）",
           "ruleConfig": {
-            "logic": "AND",
-            "conditions": [
-              {
-                "field": "city",
-                "operator": "=",
-                "value": "本市"
-              }
-            ]
+            "root": {
+              "id": "root",
+              "type": "group",
+              "operator": "AND",
+              "children": [
+                {
+                  "id": "cond-default-1",
+                  "type": "predicate",
+                  "field": "tag_会员分层-普通活跃售后客户",
+                  "operatorType": "eq",
+                  "value": "是"
+                }
+              ]
+            }
           }
         },
         {
-          "tagId": "TAG-007",
-          "tagName": "省内外市",
-          "category": "车 / 所在城市",
-          "tagType": "auto",
-          "status": "active",
-          "coverageCount": 23400,
-          "coverageRate": "23.4%",
-          "creator": "系统管理员",
-          "createTime": "2024-01-06 10:00:00",
-          "updateTime": "2024-01-06 10:00:00",
-          "publishTime": "2024-01-06 15:00:00",
-          "version": "v1.0",
-          "description": "所在城市为省内外市的客户",
-          "ruleConfig": {
-            "logic": "AND",
-            "conditions": [
-              {
-                "field": "city",
-                "operator": "=",
-                "value": "省内外市"
-              }
-            ]
-          }
-        },
-        {
-          "tagId": "TAG-008",
-          "tagName": "免打扰车主",
-          "category": "业务 / 特殊标识",
-          "tagType": "manual",
-          "status": "active",
-          "coverageCount": 890,
-          "coverageRate": "0.9%",
-          "creator": "客服专员",
-          "createTime": "2024-01-07 09:00:00",
-          "updateTime": "2024-01-07 09:00:00",
-          "publishTime": "2024-01-07 14:00:00",
-          "version": "v1.0",
-          "description": "标记为免打扰的车主",
-          "ruleConfig": null
-        },
-        {
-          "tagId": "TAG-009",
-          "tagName": "爱好-亲子",
-          "category": "人 / 爱好",
-          "tagType": "manual",
-          "status": "active",
-          "coverageCount": 15600,
-          "coverageRate": "15.6%",
-          "creator": "业务专员",
-          "createTime": "2024-01-08 09:00:00",
-          "updateTime": "2024-01-08 09:00:00",
-          "publishTime": "2024-01-08 14:00:00",
-          "version": "v1.0",
-          "description": "爱好包含亲子的客户",
-          "ruleConfig": null
-        },
-        {
-          "tagId": "TAG-010",
-          "tagName": "爱好-品酒",
-          "category": "人 / 爱好",
-          "tagType": "manual",
-          "status": "active",
-          "coverageCount": 8900,
-          "coverageRate": "8.9%",
-          "creator": "业务专员",
-          "createTime": "2024-01-08 09:00:00",
-          "updateTime": "2024-01-08 09:00:00",
-          "publishTime": "2024-01-08 14:00:00",
-          "version": "v1.0",
-          "description": "爱好包含品酒的客户",
-          "ruleConfig": null
-        },
-        {
-          "tagId": "TAG-011",
-          "tagName": "爱好-宠物",
-          "category": "人 / 爱好",
-          "tagType": "manual",
-          "status": "active",
-          "coverageCount": 12300,
-          "coverageRate": "12.3%",
-          "creator": "业务专员",
-          "createTime": "2024-01-08 09:00:00",
-          "updateTime": "2024-01-08 09:00:00",
-          "publishTime": "2024-01-08 14:00:00",
-          "version": "v1.0",
-          "description": "爱好包含宠物的客户",
-          "ruleConfig": null
-        },
-        {
-          "tagId": "TAG-012",
-          "tagName": "爱好-自驾游",
-          "category": "人 / 爱好",
-          "tagType": "manual",
-          "status": "active",
-          "coverageCount": 22300,
-          "coverageRate": "22.3%",
-          "creator": "业务专员",
-          "createTime": "2024-01-08 09:00:00",
-          "updateTime": "2024-01-08 09:00:00",
-          "publishTime": "2024-01-08 14:00:00",
-          "version": "v1.0",
-          "description": "爱好包含自驾游的客户",
-          "ruleConfig": null
-        },
-        {
-          "tagId": "TAG-013",
-          "tagName": "爱好-艺术文化",
-          "category": "人 / 爱好",
-          "tagType": "manual",
-          "status": "active",
-          "coverageCount": 11200,
-          "coverageRate": "11.2%",
-          "creator": "业务专员",
-          "createTime": "2024-01-08 09:00:00",
-          "updateTime": "2024-01-08 09:00:00",
-          "publishTime": "2024-01-08 14:00:00",
-          "version": "v1.0",
-          "description": "爱好包含艺术文化的客户",
-          "ruleConfig": null
-        },
-        {
-          "tagId": "TAG-014",
-          "tagName": "爱好-赛车",
-          "category": "人 / 爱好",
-          "tagType": "manual",
-          "status": "active",
-          "coverageCount": 3450,
-          "coverageRate": "3.4%",
-          "creator": "业务专员",
-          "createTime": "2024-01-08 09:00:00",
-          "updateTime": "2024-01-08 09:00:00",
-          "publishTime": "2024-01-08 14:00:00",
-          "version": "v1.0",
-          "description": "爱好包含赛车的客户",
-          "ruleConfig": null
-        },
-        {
-          "tagId": "TAG-015",
-          "tagName": "爱好-运动",
-          "category": "人 / 爱好",
-          "tagType": "manual",
-          "status": "active",
-          "coverageCount": 28900,
-          "coverageRate": "28.9%",
-          "creator": "业务专员",
-          "createTime": "2024-01-08 09:00:00",
-          "updateTime": "2024-01-08 09:00:00",
-          "publishTime": "2024-01-08 14:00:00",
-          "version": "v1.0",
-          "description": "爱好包含运动的客户",
-          "ruleConfig": null
-        },
-        {
-          "tagId": "TAG-016",
-          "tagName": "爱好-高尔夫",
-          "category": "人 / 爱好",
-          "tagType": "manual",
-          "status": "active",
-          "coverageCount": 6780,
-          "coverageRate": "6.8%",
-          "creator": "业务专员",
-          "createTime": "2024-01-08 09:00:00",
-          "updateTime": "2024-01-08 09:00:00",
-          "publishTime": "2024-01-08 14:00:00",
-          "version": "v1.0",
-          "description": "爱好包含高尔夫的客户",
-          "ruleConfig": null
-        },
-        {
-          "tagId": "TAG-017",
-          "tagName": "SC-PMP邀约",
-          "category": "业务 / SC",
-          "tagType": "manual",
-          "status": "active",
-          "coverageCount": 12580,
-          "coverageRate": "12.5%",
-          "creator": "销售顾问",
-          "createTime": "2024-01-09 09:00:00",
-          "updateTime": "2024-01-09 09:00:00",
-          "publishTime": "2024-01-09 14:00:00",
-          "version": "v1.0",
-          "description": "通过PMP邀约的客户",
-          "ruleConfig": null
-        },
-        {
-          "tagId": "TAG-018",
-          "tagName": "SC-全款",
-          "category": "业务 / SC",
-          "tagType": "auto",
-          "status": "active",
-          "coverageCount": 45600,
-          "coverageRate": "45.6%",
-          "creator": "系统管理员",
-          "createTime": "2024-01-09 09:00:00",
-          "updateTime": "2024-01-09 09:00:00",
-          "publishTime": "2024-01-09 14:00:00",
-          "version": "v1.0",
-          "description": "支付方式为全款的客户",
-          "ruleConfig": {
-            "logic": "AND",
-            "conditions": [
-              {
-                "field": "paymentMethod",
-                "operator": "=",
-                "value": "全款"
-              }
-            ]
-          }
-        },
-        {
-          "tagId": "TAG-019",
-          "tagName": "SC-贷款",
-          "category": "业务 / SC",
-          "tagType": "auto",
-          "status": "active",
-          "coverageCount": 34500,
-          "coverageRate": "34.5%",
-          "creator": "系统管理员",
-          "createTime": "2024-01-09 09:00:00",
-          "updateTime": "2024-01-09 09:00:00",
-          "publishTime": "2024-01-09 14:00:00",
-          "version": "v1.0",
-          "description": "支付方式为贷款的客户",
-          "ruleConfig": {
-            "logic": "AND",
-            "conditions": [
-              {
-                "field": "paymentMethod",
-                "operator": "=",
-                "value": "贷款"
-              }
-            ]
-          }
-        },
-        {
-          "tagId": "TAG-020",
-          "tagName": "SC-员工介绍",
-          "category": "业务 / SC",
-          "tagType": "manual",
-          "status": "active",
-          "coverageCount": 8900,
-          "coverageRate": "8.9%",
-          "creator": "销售顾问",
-          "createTime": "2024-01-09 10:00:00",
-          "updateTime": "2024-01-09 10:00:00",
-          "publishTime": "2024-01-09 15:00:00",
-          "version": "v1.0",
-          "description": "通过员工介绍获得的客户",
-          "ruleConfig": null
-        },
-        {
-          "tagId": "TAG-021",
-          "tagName": "SC-市场活动",
-          "category": "业务 / SC",
-          "tagType": "manual",
-          "status": "active",
-          "coverageCount": 15600,
-          "coverageRate": "15.6%",
-          "creator": "市场专员",
-          "createTime": "2024-01-09 10:00:00",
-          "updateTime": "2024-01-09 10:00:00",
-          "publishTime": "2024-01-09 15:00:00",
-          "version": "v1.0",
-          "description": "通过市场活动获得的客户",
-          "ruleConfig": null
-        },
-        {
-          "tagId": "TAG-022",
-          "tagName": "SC-新车",
-          "category": "业务 / SC",
-          "tagType": "auto",
-          "status": "active",
-          "coverageCount": 78900,
-          "coverageRate": "78.9%",
-          "creator": "系统管理员",
-          "createTime": "2024-01-09 11:00:00",
-          "updateTime": "2024-01-09 11:00:00",
-          "publishTime": "2024-01-09 16:00:00",
-          "version": "v1.0",
-          "description": "购买新车的客户",
-          "ruleConfig": {
-            "logic": "AND",
-            "conditions": [
-              {
-                "field": "vehicleSource",
-                "operator": "=",
-                "value": "新车"
-              }
-            ]
-          }
-        },
-        {
-          "tagId": "TAG-023",
-          "tagName": "SC-易手车",
-          "category": "业务 / SC",
-          "tagType": "auto",
-          "status": "active",
-          "coverageCount": 12300,
-          "coverageRate": "12.3%",
-          "creator": "系统管理员",
-          "createTime": "2024-01-09 11:00:00",
-          "updateTime": "2024-01-09 11:00:00",
-          "publishTime": "2024-01-09 16:00:00",
-          "version": "v1.0",
-          "description": "购买易手车的客户",
-          "ruleConfig": {
-            "logic": "AND",
-            "conditions": [
-              {
-                "field": "vehicleSource",
-                "operator": "=",
-                "value": "易手车"
-              }
-            ]
-          }
-        },
-        {
-          "tagId": "TAG-024",
-          "tagName": "SC-老客介绍",
-          "category": "业务 / SC",
-          "tagType": "manual",
-          "status": "active",
-          "coverageCount": 22300,
-          "coverageRate": "22.3%",
-          "creator": "销售顾问",
-          "createTime": "2024-01-09 11:00:00",
-          "updateTime": "2024-01-09 11:00:00",
-          "publishTime": "2024-01-09 16:00:00",
-          "version": "v1.0",
-          "description": "通过老客户介绍获得的客户",
-          "ruleConfig": null
-        },
-        {
-          "tagId": "TAG-025",
-          "tagName": "SC-老客重购",
-          "category": "业务 / SC",
-          "tagType": "auto",
-          "status": "active",
-          "coverageCount": 11200,
-          "coverageRate": "11.2%",
-          "creator": "系统管理员",
-          "createTime": "2024-01-09 11:00:00",
-          "updateTime": "2024-01-09 11:00:00",
-          "publishTime": "2024-01-09 16:00:00",
-          "version": "v1.0",
-          "description": "老客户重新购买的客户",
-          "ruleConfig": {
-            "logic": "AND",
-            "conditions": [
-              {
-                "field": "isRepeatPurchase",
-                "operator": "=",
-                "value": true
-              }
-            ]
-          }
-        },
-        {
-          "tagId": "TAG-026",
-          "tagName": "SC-自然客流",
-          "category": "业务 / SC",
-          "tagType": "manual",
-          "status": "active",
-          "coverageCount": 34500,
-          "coverageRate": "34.5%",
-          "creator": "销售顾问",
-          "createTime": "2024-01-09 12:00:00",
-          "updateTime": "2024-01-09 12:00:00",
-          "publishTime": "2024-01-09 17:00:00",
-          "version": "v1.0",
-          "description": "自然到店的客户",
-          "ruleConfig": null
-        },
-        {
-          "tagId": "TAG-027",
-          "tagName": "SC-销售邀约",
-          "category": "业务 / SC",
-          "tagType": "manual",
-          "status": "active",
-          "coverageCount": 18900,
-          "coverageRate": "18.9%",
-          "creator": "销售顾问",
-          "createTime": "2024-01-09 12:00:00",
-          "updateTime": "2024-01-09 12:00:00",
-          "publishTime": "2024-01-09 17:00:00",
-          "version": "v1.0",
-          "description": "通过销售邀约的客户",
-          "ruleConfig": null
-        },
-        {
-          "tagId": "TAG-028",
-          "tagName": "续保-人保",
-          "category": "业务 / 续保",
-          "tagType": "manual",
-          "status": "active",
-          "coverageCount": 23400,
-          "coverageRate": "23.4%",
-          "creator": "续保专员",
-          "createTime": "2024-01-10 09:00:00",
-          "updateTime": "2024-01-10 09:00:00",
-          "publishTime": "2024-01-10 14:00:00",
-          "version": "v1.0",
-          "description": "保险公司为人保的客户",
-          "ruleConfig": null
-        },
-        {
-          "tagId": "TAG-029",
-          "tagName": "续保-平安",
-          "category": "业务 / 续保",
-          "tagType": "manual",
-          "status": "active",
-          "coverageCount": 28900,
-          "coverageRate": "28.9%",
-          "creator": "续保专员",
-          "createTime": "2024-01-10 09:00:00",
-          "updateTime": "2024-01-10 09:00:00",
-          "publishTime": "2024-01-10 14:00:00",
-          "version": "v1.0",
-          "description": "保险公司为平安的客户",
-          "ruleConfig": null
-        },
-        {
-          "tagId": "TAG-030",
-          "tagName": "续保-太保",
-          "category": "业务 / 续保",
-          "tagType": "manual",
-          "status": "active",
-          "coverageCount": 15600,
-          "coverageRate": "15.6%",
-          "creator": "续保专员",
-          "createTime": "2024-01-10 09:00:00",
-          "updateTime": "2024-01-10 09:00:00",
-          "publishTime": "2024-01-10 14:00:00",
-          "version": "v1.0",
-          "description": "保险公司为太保的客户",
-          "ruleConfig": null
-        },
-        {
-          "tagId": "TAG-031",
-          "tagName": "续保-新保",
-          "category": "业务 / 续保",
-          "tagType": "auto",
-          "status": "active",
-          "coverageCount": 12300,
-          "coverageRate": "12.3%",
-          "creator": "系统管理员",
-          "createTime": "2024-01-10 10:00:00",
-          "updateTime": "2024-01-10 10:00:00",
-          "publishTime": "2024-01-10 15:00:00",
-          "version": "v1.0",
-          "description": "新购买保险的客户",
-          "ruleConfig": {
-            "logic": "AND",
-            "conditions": [
-              {
-                "field": "insuranceType",
-                "operator": "=",
-                "value": "新保"
-              }
-            ]
-          }
-        },
-        {
-          "tagId": "TAG-032",
-          "tagName": "续保-续保",
-          "category": "业务 / 续保",
-          "tagType": "auto",
-          "status": "active",
-          "coverageCount": 67800,
-          "coverageRate": "67.8%",
-          "creator": "系统管理员",
-          "createTime": "2024-01-10 10:00:00",
-          "updateTime": "2024-01-10 10:00:00",
-          "publishTime": "2024-01-10 15:00:00",
-          "version": "v1.0",
-          "description": "续保的客户",
-          "ruleConfig": {
-            "logic": "AND",
-            "conditions": [
-              {
-                "field": "insuranceType",
-                "operator": "=",
-                "value": "续保"
-              }
-            ]
-          }
-        },
-        {
-          "tagId": "TAG-033",
-          "tagName": "续保-在修不在保",
-          "category": "业务 / 续保",
-          "tagType": "manual",
-          "status": "active",
-          "coverageCount": 3450,
-          "coverageRate": "3.4%",
-          "creator": "续保专员",
-          "createTime": "2024-01-10 10:00:00",
-          "updateTime": "2024-01-10 10:00:00",
-          "publishTime": "2024-01-10 15:00:00",
-          "version": "v1.0",
-          "description": "在修但不在保的客户",
-          "ruleConfig": null
-        },
-        {
-          "tagId": "TAG-034",
-          "tagName": "保险到期月份-1月",
-          "category": "业务 / 保险到期月份",
-          "tagType": "auto",
-          "status": "active",
-          "coverageCount": 8900,
-          "coverageRate": "8.9%",
-          "creator": "系统管理员",
-          "createTime": "2024-01-10 11:00:00",
-          "updateTime": "2024-01-10 11:00:00",
-          "publishTime": "2024-01-10 16:00:00",
-          "version": "v1.0",
-          "description": "保险到期月份为1月的客户",
-          "ruleConfig": {
-            "logic": "AND",
-            "conditions": [
-              {
-                "field": "insuranceExpiryMonth",
-                "operator": "=",
-                "value": 1
-              }
-            ]
-          }
-        },
-        {
-          "tagId": "TAG-035",
-          "tagName": "保险到期月份-2月",
-          "category": "业务 / 保险到期月份",
-          "tagType": "auto",
-          "status": "active",
-          "coverageCount": 7800,
-          "coverageRate": "7.8%",
-          "creator": "系统管理员",
-          "createTime": "2024-01-10 11:00:00",
-          "updateTime": "2024-01-10 11:00:00",
-          "publishTime": "2024-01-10 16:00:00",
-          "version": "v1.0",
-          "description": "保险到期月份为2月的客户",
-          "ruleConfig": {
-            "logic": "AND",
-            "conditions": [
-              {
-                "field": "insuranceExpiryMonth",
-                "operator": "=",
-                "value": 2
-              }
-            ]
-          }
-        },
-        {
-          "tagId": "TAG-036",
-          "tagName": "保险到期月份-3月",
-          "category": "业务 / 保险到期月份",
-          "tagType": "auto",
-          "status": "active",
-          "coverageCount": 8900,
-          "coverageRate": "8.9%",
-          "creator": "系统管理员",
-          "createTime": "2024-01-10 11:00:00",
-          "updateTime": "2024-01-10 11:00:00",
-          "publishTime": "2024-01-10 16:00:00",
-          "version": "v1.0",
-          "description": "保险到期月份为3月的客户",
-          "ruleConfig": {
-            "logic": "AND",
-            "conditions": [
-              {
-                "field": "insuranceExpiryMonth",
-                "operator": "=",
-                "value": 3
-              }
-            ]
-          }
-        },
-        {
-          "tagId": "TAG-037",
-          "tagName": "POC-精确报价",
-          "category": "业务 / POC",
-          "tagType": "manual",
-          "status": "active",
-          "coverageCount": 45600,
-          "coverageRate": "45.6%",
-          "creator": "评估专员",
-          "createTime": "2024-01-11 09:00:00",
-          "updateTime": "2024-01-11 09:00:00",
-          "publishTime": "2024-01-11 14:00:00",
-          "version": "v1.0",
-          "description": "已进行精确报价的客户",
-          "ruleConfig": null
-        },
-        {
-          "tagId": "TAG-038",
-          "tagName": "POC-区间报价",
-          "category": "业务 / POC",
-          "tagType": "manual",
-          "status": "active",
-          "coverageCount": 23400,
-          "coverageRate": "23.4%",
-          "creator": "评估专员",
-          "createTime": "2024-01-11 09:00:00",
-          "updateTime": "2024-01-11 09:00:00",
-          "publishTime": "2024-01-11 14:00:00",
-          "version": "v1.0",
-          "description": "已进行区间报价的客户",
-          "ruleConfig": null
-        },
-        {
-          "tagId": "TAG-039",
-          "tagName": "POC-销售评估",
-          "category": "业务 / POC",
-          "tagType": "manual",
-          "status": "active",
-          "coverageCount": 34500,
-          "coverageRate": "34.5%",
-          "creator": "销售顾问",
-          "createTime": "2024-01-11 10:00:00",
-          "updateTime": "2024-01-11 10:00:00",
-          "publishTime": "2024-01-11 15:00:00",
-          "version": "v1.0",
-          "description": "已进行销售评估的客户",
-          "ruleConfig": null
-        },
-        {
-          "tagId": "TAG-040",
-          "tagName": "POC-售后评估",
-          "category": "业务 / POC",
-          "tagType": "manual",
-          "status": "active",
-          "coverageCount": 28900,
-          "coverageRate": "28.9%",
-          "creator": "售后专员",
-          "createTime": "2024-01-11 10:00:00",
-          "updateTime": "2024-01-11 10:00:00",
-          "publishTime": "2024-01-11 15:00:00",
-          "version": "v1.0",
-          "description": "已进行售后评估的客户",
-          "ruleConfig": null
-        },
-        {
-          "tagId": "TAG-041",
-          "tagName": "线上活动-8月再购活动抽奖",
-          "category": "业务 / 线上活动",
-          "tagType": "manual",
-          "status": "active",
-          "coverageCount": 1230,
-          "coverageRate": "1.2%",
-          "creator": "市场专员",
-          "createTime": "2024-01-12 09:00:00",
-          "updateTime": "2024-01-12 09:00:00",
-          "publishTime": "2024-01-12 14:00:00",
-          "version": "v1.0",
-          "description": "参与8月再购活动抽奖的客户",
-          "ruleConfig": null
-        },
-        {
-          "tagId": "TAG-042",
-          "tagName": "保时捷911",
-          "category": "车 / 保时捷",
-          "tagType": "auto",
-          "status": "active",
-          "coverageCount": 15230,
-          "coverageRate": "15.2%",
-          "creator": "系统管理员",
-          "createTime": "2024-01-13 09:00:00",
-          "updateTime": "2024-01-13 09:00:00",
-          "publishTime": "2024-01-13 14:00:00",
-          "version": "v1.0",
-          "description": "车型为保时捷911的客户",
-          "ruleConfig": {
-            "logic": "AND",
-            "conditions": [
-              {
-                "field": "carSeriesModel",
-                "operator": "contains",
-                "value": "911"
-              }
-            ]
-          }
-        },
-        {
-          "tagId": "TAG-043",
-          "tagName": "保时捷Cayenne",
-          "category": "车 / 保时捷",
-          "tagType": "auto",
-          "status": "active",
-          "coverageCount": 28900,
-          "coverageRate": "28.9%",
-          "creator": "系统管理员",
-          "createTime": "2024-01-13 09:00:00",
-          "updateTime": "2024-01-13 09:00:00",
-          "publishTime": "2024-01-13 14:00:00",
-          "version": "v1.0",
-          "description": "车型为保时捷Cayenne的客户",
-          "ruleConfig": {
-            "logic": "AND",
-            "conditions": [
-              {
-                "field": "carSeriesModel",
-                "operator": "contains",
-                "value": "Cayenne"
-              }
-            ]
-          }
-        },
-        {
-          "tagId": "TAG-044",
-          "tagName": "保时捷Macan",
-          "category": "车 / 保时捷",
-          "tagType": "auto",
-          "status": "active",
-          "coverageCount": 22300,
-          "coverageRate": "22.3%",
-          "creator": "系统管理员",
-          "createTime": "2024-01-13 10:00:00",
-          "updateTime": "2024-01-13 10:00:00",
-          "publishTime": "2024-01-13 15:00:00",
-          "version": "v1.0",
-          "description": "车型为保时捷Macan的客户",
-          "ruleConfig": {
-            "logic": "AND",
-            "conditions": [
-              {
-                "field": "carSeriesModel",
-                "operator": "contains",
-                "value": "Macan"
-              }
-            ]
-          }
-        },
-        {
-          "tagId": "TAG-045",
-          "tagName": "保时捷Panamera",
-          "category": "车 / 保时捷",
-          "tagType": "auto",
-          "status": "active",
-          "coverageCount": 15600,
-          "coverageRate": "15.6%",
-          "creator": "系统管理员",
-          "createTime": "2024-01-13 10:00:00",
-          "updateTime": "2024-01-13 10:00:00",
-          "publishTime": "2024-01-13 15:00:00",
-          "version": "v1.0",
-          "description": "车型为保时捷Panamera的客户",
-          "ruleConfig": {
-            "logic": "AND",
-            "conditions": [
-              {
-                "field": "carSeriesModel",
-                "operator": "contains",
-                "value": "Panamera"
-              }
-            ]
-          }
-        },
-        {
-          "tagId": "TAG-046",
-          "tagName": "保时捷Taycan",
-          "category": "车 / 保时捷",
-          "tagType": "auto",
-          "status": "active",
-          "coverageCount": 11200,
-          "coverageRate": "11.2%",
-          "creator": "系统管理员",
-          "createTime": "2024-01-13 11:00:00",
-          "updateTime": "2024-01-13 11:00:00",
-          "publishTime": "2024-01-13 16:00:00",
-          "version": "v1.0",
-          "description": "车型为保时捷Taycan的客户",
-          "ruleConfig": {
-            "logic": "AND",
-            "conditions": [
-              {
-                "field": "carSeriesModel",
-                "operator": "contains",
-                "value": "Taycan"
-              }
-            ]
-          }
-        },
-        {
-          "tagId": "TAG-047",
-          "tagName": "新能源车型",
-          "category": "车 / 新能源",
+          "tagId": "TAG-052",
+          "tagName": "休眠客户",
+          "category": "业务 / 会员分层",
           "tagType": "auto",
           "status": "active",
           "coverageCount": 18900,
           "coverageRate": "18.9%",
-          "creator": "系统管理员",
-          "createTime": "2024-01-13 11:00:00",
-          "updateTime": "2024-01-13 11:00:00",
-          "publishTime": "2024-01-13 16:00:00",
+          "creator": "系统初始化",
+          "createTime": "2024-01-01 00:00:00",
+          "updateTime": "2024-01-01 00:00:00",
+          "publishTime": "2024-01-01 00:00:00",
           "version": "v1.0",
-          "description": "新能源车型的客户",
+          "description": "会员分层-休眠客户（系统默认标签）",
           "ruleConfig": {
-            "logic": "AND",
-            "conditions": [
-              {
-                "field": "vehicleType",
-                "operator": "=",
-                "value": "新能源"
-              }
-            ]
+            "root": {
+              "id": "root",
+              "type": "group",
+              "operator": "AND",
+              "children": [
+                {
+                  "id": "cond-default-1",
+                  "type": "predicate",
+                  "field": "tag_会员分层-休眠客户",
+                  "operatorType": "eq",
+                  "value": "是"
+                }
+              ]
+            }
           }
         },
         {
-          "tagId": "TAG-048",
-          "tagName": "70周年屏蔽",
-          "category": "特殊标识",
-          "tagType": "manual",
+          "tagId": "TAG-053",
+          "tagName": "流失客户",
+          "category": "业务 / 会员分层",
+          "tagType": "auto",
           "status": "active",
-          "coverageCount": 450,
-          "coverageRate": "0.4%",
-          "creator": "系统管理员",
-          "createTime": "2024-01-14 09:00:00",
-          "updateTime": "2024-01-14 09:00:00",
-          "publishTime": "2024-01-14 14:00:00",
+          "coverageCount": 12300,
+          "coverageRate": "12.3%",
+          "creator": "系统初始化",
+          "createTime": "2024-01-01 00:00:00",
+          "updateTime": "2024-01-01 00:00:00",
+          "publishTime": "2024-01-01 00:00:00",
           "version": "v1.0",
-          "description": "70周年活动屏蔽的客户",
-          "ruleConfig": null
+          "description": "会员分层-流失客户（系统默认标签）",
+          "ruleConfig": {
+            "root": {
+              "id": "root",
+              "type": "group",
+              "operator": "AND",
+              "children": [
+                {
+                  "id": "cond-default-1",
+                  "type": "predicate",
+                  "field": "tag_会员分层-流失客户",
+                  "operatorType": "eq",
+                  "value": "是"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "tagId": "TAG-054",
+          "tagName": "12个月内完成首保",
+          "category": "业务 / 售后行为",
+          "tagType": "auto",
+          "status": "active",
+          "coverageCount": 34500,
+          "coverageRate": "34.5%",
+          "creator": "系统初始化",
+          "createTime": "2024-01-01 00:00:00",
+          "updateTime": "2024-01-01 00:00:00",
+          "publishTime": "2024-01-01 00:00:00",
+          "version": "v1.0",
+          "description": "售后行为-12个月内完成首保（系统默认标签）",
+          "ruleConfig": {
+            "root": {
+              "id": "root",
+              "type": "group",
+              "operator": "AND",
+              "children": [
+                {
+                  "id": "cond-default-1",
+                  "type": "predicate",
+                  "field": "tag_售后行为-12个月内完成首保",
+                  "operatorType": "eq",
+                  "value": "是"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "tagId": "TAG-055",
+          "tagName": "12个月内完成首次回厂",
+          "category": "业务 / 售后行为",
+          "tagType": "auto",
+          "status": "active",
+          "coverageCount": 28900,
+          "coverageRate": "28.9%",
+          "creator": "系统初始化",
+          "createTime": "2024-01-01 00:00:00",
+          "updateTime": "2024-01-01 00:00:00",
+          "publishTime": "2024-01-01 00:00:00",
+          "version": "v1.0",
+          "description": "售后行为-12个月内完成首次回厂（系统默认标签）",
+          "ruleConfig": {
+            "root": {
+              "id": "root",
+              "type": "group",
+              "operator": "AND",
+              "children": [
+                {
+                  "id": "cond-default-1",
+                  "type": "predicate",
+                  "field": "tag_售后行为-12个月内完成首次回厂",
+                  "operatorType": "eq",
+                  "value": "是"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "tagId": "TAG-056",
+          "tagName": "12个月内回厂",
+          "category": "业务 / 售后行为",
+          "tagType": "auto",
+          "status": "active",
+          "coverageCount": 45600,
+          "coverageRate": "45.6%",
+          "creator": "系统初始化",
+          "createTime": "2024-01-01 00:00:00",
+          "updateTime": "2024-01-01 00:00:00",
+          "publishTime": "2024-01-01 00:00:00",
+          "version": "v1.0",
+          "description": "售后行为-12个月内回厂（系统默认标签）",
+          "ruleConfig": {
+            "root": {
+              "id": "root",
+              "type": "group",
+              "operator": "AND",
+              "children": [
+                {
+                  "id": "cond-default-1",
+                  "type": "predicate",
+                  "field": "tag_售后行为-12个月内回厂",
+                  "operatorType": "eq",
+                  "value": "是"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "tagId": "TAG-057",
+          "tagName": "13-24个月回厂",
+          "category": "业务 / 售后行为",
+          "tagType": "auto",
+          "status": "active",
+          "coverageCount": 22300,
+          "coverageRate": "22.3%",
+          "creator": "系统初始化",
+          "createTime": "2024-01-01 00:00:00",
+          "updateTime": "2024-01-01 00:00:00",
+          "publishTime": "2024-01-01 00:00:00",
+          "version": "v1.0",
+          "description": "售后行为-13-24个月回厂（系统默认标签）",
+          "ruleConfig": {
+            "root": {
+              "id": "root",
+              "type": "group",
+              "operator": "AND",
+              "children": [
+                {
+                  "id": "cond-default-1",
+                  "type": "predicate",
+                  "field": "tag_售后行为-13-24个月回厂",
+                  "operatorType": "eq",
+                  "value": "是"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "tagId": "TAG-058",
+          "tagName": "购买附加产品",
+          "category": "业务 / 活跃度相关",
+          "tagType": "auto",
+          "status": "active",
+          "coverageCount": 27800,
+          "coverageRate": "27.8%",
+          "creator": "系统初始化",
+          "createTime": "2024-01-01 00:00:00",
+          "updateTime": "2024-01-01 00:00:00",
+          "publishTime": "2024-01-01 00:00:00",
+          "version": "v1.0",
+          "description": "活跃度相关-购买附加产品（系统默认标签）",
+          "ruleConfig": {
+            "root": {
+              "id": "root",
+              "type": "group",
+              "operator": "AND",
+              "children": [
+                {
+                  "id": "cond-default-1",
+                  "type": "predicate",
+                  "field": "tag_活跃度-购买附加产品",
+                  "operatorType": "eq",
+                  "value": "是"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "tagId": "TAG-059",
+          "tagName": "推荐其他客户",
+          "category": "业务 / 活跃度相关",
+          "tagType": "auto",
+          "status": "active",
+          "coverageCount": 11200,
+          "coverageRate": "11.2%",
+          "creator": "系统初始化",
+          "createTime": "2024-01-01 00:00:00",
+          "updateTime": "2024-01-01 00:00:00",
+          "publishTime": "2024-01-01 00:00:00",
+          "version": "v1.0",
+          "description": "活跃度相关-推荐其他客户（系统默认标签）",
+          "ruleConfig": {
+            "root": {
+              "id": "root",
+              "type": "group",
+              "operator": "AND",
+              "children": [
+                {
+                  "id": "cond-default-1",
+                  "type": "predicate",
+                  "field": "tag_活跃度-推荐其他客户",
+                  "operatorType": "eq",
+                  "value": "是"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "tagId": "TAG-060",
+          "tagName": "有增购/换购",
+          "category": "业务 / 活跃度相关",
+          "tagType": "auto",
+          "status": "active",
+          "coverageCount": 8900,
+          "coverageRate": "8.9%",
+          "creator": "系统初始化",
+          "createTime": "2024-01-01 00:00:00",
+          "updateTime": "2024-01-01 00:00:00",
+          "publishTime": "2024-01-01 00:00:00",
+          "version": "v1.0",
+          "description": "活跃度相关-有增购/换购（系统默认标签）",
+          "ruleConfig": {
+            "root": {
+              "id": "root",
+              "type": "group",
+              "operator": "AND",
+              "children": [
+                {
+                  "id": "cond-default-1",
+                  "type": "predicate",
+                  "field": "tag_活跃度-有增购换购",
+                  "operatorType": "eq",
+                  "value": "是"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "tagId": "TAG-061",
+          "tagName": "参加社群/市场活动",
+          "category": "业务 / 活跃度相关",
+          "tagType": "auto",
+          "status": "active",
+          "coverageCount": 15600,
+          "coverageRate": "15.6%",
+          "creator": "系统初始化",
+          "createTime": "2024-01-01 00:00:00",
+          "updateTime": "2024-01-01 00:00:00",
+          "publishTime": "2024-01-01 00:00:00",
+          "version": "v1.0",
+          "description": "活跃度相关-参加社群/市场活动（系统默认标签）",
+          "ruleConfig": {
+            "root": {
+              "id": "root",
+              "type": "group",
+              "operator": "AND",
+              "children": [
+                {
+                  "id": "cond-default-1",
+                  "type": "predicate",
+                  "field": "tag_活跃度-参加社群市场活动",
+                  "operatorType": "eq",
+                  "value": "是"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "tagId": "TAG-062",
+          "tagName": "粘性产品",
+          "category": "业务 / 粘性产品",
+          "tagType": "auto",
+          "status": "active",
+          "coverageCount": 18900,
+          "coverageRate": "18.9%",
+          "creator": "系统初始化",
+          "createTime": "2024-01-01 00:00:00",
+          "updateTime": "2024-01-01 00:00:00",
+          "publishTime": "2024-01-01 00:00:00",
+          "version": "v1.0",
+          "description": "粘性产品（系统默认标签）",
+          "ruleConfig": {
+            "root": {
+              "id": "root",
+              "type": "group",
+              "operator": "AND",
+              "children": [
+                {
+                  "id": "cond-default-1",
+                  "type": "predicate",
+                  "field": "tag_粘性产品-粘性产品",
+                  "operatorType": "eq",
+                  "value": "是"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "tagId": "TAG-063",
+          "tagName": "6个月内有投诉",
+          "category": "业务 / 投诉相关",
+          "tagType": "auto",
+          "status": "active",
+          "coverageCount": 3450,
+          "coverageRate": "3.4%",
+          "creator": "系统初始化",
+          "createTime": "2024-01-01 00:00:00",
+          "updateTime": "2024-01-01 00:00:00",
+          "publishTime": "2024-01-01 00:00:00",
+          "version": "v1.0",
+          "description": "6个月内有投诉（系统默认标签）",
+          "ruleConfig": {
+            "root": {
+              "id": "root",
+              "type": "group",
+              "operator": "AND",
+              "children": [
+                {
+                  "id": "cond-default-1",
+                  "type": "predicate",
+                  "field": "tag_投诉相关-6个月内有投诉",
+                  "operatorType": "eq",
+                  "value": "是"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "tagId": "TAG-064",
+          "tagName": "达标定保",
+          "category": "业务 / 定保相关",
+          "tagType": "auto",
+          "status": "active",
+          "coverageCount": 28900,
+          "coverageRate": "28.9%",
+          "creator": "系统初始化",
+          "createTime": "2024-01-01 00:00:00",
+          "updateTime": "2024-01-01 00:00:00",
+          "publishTime": "2024-01-01 00:00:00",
+          "version": "v1.0",
+          "description": "达标定保（系统默认标签，是/否）",
+          "ruleConfig": {
+            "root": {
+              "id": "root",
+              "type": "group",
+              "operator": "AND",
+              "children": [
+                {
+                  "id": "cond-default-1",
+                  "type": "predicate",
+                  "field": "tag_定保相关-达标定保",
+                  "operatorType": "eq",
+                  "value": "是"
+                }
+              ]
+            }
+          }
         }
       ],
-      "total": 48
+      "total": 16
     }
   },
   "detail": {
     "code": 200,
     "msg": "操作成功",
     "data": {
-      "tagId": "TAG-001",
-      "tagName": "意向级别-热",
-      "category": "业务 / 意向级别",
-      "tagType": "manual",
+      "tagId": "TAG-049",
+      "tagName": "销售钻石客户",
+      "category": "业务 / 会员分层",
+      "tagType": "auto",
       "status": "active",
-      "coverageCount": 15230,
-      "coverageRate": "15.2%",
-      "creator": "业务专员",
-      "createTime": "2024-01-05 08:00:00",
-      "updateTime": "2024-01-20 14:20:00",
-      "publishTime": "2024-01-05 14:00:00",
+      "coverageCount": 3200,
+      "coverageRate": "3.2%",
+      "creator": "系统初始化",
+      "createTime": "2024-01-01 00:00:00",
+      "updateTime": "2024-01-01 00:00:00",
+      "publishTime": "2024-01-01 00:00:00",
       "version": "v1.0",
-      "description": "意向级别为热的客户",
-      "ruleConfig": null,
+      "description": "会员分层-销售钻石客户（系统默认标签）",
+      "ruleConfig": {
+        "root": {
+          "id": "root",
+          "type": "group",
+          "operator": "AND",
+          "children": [
+            {
+              "id": "cond-default-1",
+              "type": "predicate",
+              "field": "tag_会员分层-销售钻石客户",
+              "operatorType": "eq",
+              "value": "是"
+            }
+          ]
+        }
+      },
       "versionHistory": [
         {
           "version": "v1.0",
-          "updateTime": "2024-01-05 08:00:00",
-          "operator": "业务专员",
+          "updateTime": "2024-01-01 00:00:00",
+          "operator": "系统初始化",
           "changeLog": "初始版本"
         }
       ]

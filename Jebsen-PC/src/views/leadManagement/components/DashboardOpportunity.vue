@@ -15,6 +15,7 @@
         >
           <LifecycleCard
             :title="item.title"
+            :subtitle="item.subtitle"
             :icon="item.icon"
             :icon-color="item.iconColor"
             :total-count="item.totalCount"
@@ -104,7 +105,7 @@ import {
 } from "@element-plus/icons-vue";
 import { getDashboardStats } from "@/api/modules/lead";
 import type { Lead } from "@/api/modules/lead";
-import { mergeLeadTypeMetrics } from "@/constants/leadTypes";
+import { getLeadTypeSourceI18nKey, mergeLeadTypeMetrics } from "@/constants/leadTypes";
 import { STANDARD_18_LEAD_TYPES, GENERAL_LEAD_TYPES, C360_LEAD_TYPES } from "../interface";
 import LifecycleCard from "./LifecycleCard.vue";
 import RuleFormDialog from "./RuleFormDialog.vue";
@@ -249,7 +250,13 @@ function buildCardData(
   });
 }
 
-const standard18Data = computed(() => buildCardData(STANDARD_18_LEAD_TYPES));
+const standard18Data = computed(() => {
+  const data = buildCardData(STANDARD_18_LEAD_TYPES);
+  return data.map(d => {
+    const key = getLeadTypeSourceI18nKey(d.category);
+    return { ...d, subtitle: key ? t(key) : "" };
+  });
+});
 
 // 通用商机：一个豆腐块，汇总该组下所有类型的统计
 const generalAggregate = computed(() => {

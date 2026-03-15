@@ -11,6 +11,7 @@
             :node="ruleTree"
             :level="0"
             :available-tags="availableTags"
+            :disabled="disabled"
             @update:node="handleNodeUpdate"
             @add-condition="handleAddCondition"
             @add-group="handleAddGroup"
@@ -59,12 +60,18 @@ export interface RuleNode {
   // 标签节点专用
   tagIds?: string[]; // 选中的标签ID列表
   tagNames?: string[]; // 标签名称（用于显示）
+  /** 是/否：是=拥有该标签，否=不拥有该标签 */
+  tagMatch?: "yes" | "no";
 }
 
-const props = defineProps<{
-  modelValue: RuleNode;
-  availableTags?: Array<{ tagId: string; tagName: string; category: string }>;
-}>();
+const props = withDefaults(
+  defineProps<{
+    modelValue: RuleNode;
+    availableTags?: Array<{ tagId: string; tagName: string; category: string }>;
+    disabled?: boolean;
+  }>(),
+  { disabled: false }
+);
 
 const emit = defineEmits<{
   "update:modelValue": [value: RuleNode];
@@ -216,7 +223,8 @@ const handleAddTag = (parentId: string) => {
         id: generateId(),
         type: "tag",
         tagIds: [],
-        tagNames: []
+        tagNames: [],
+        tagMatch: "yes"
       });
       return true;
     }

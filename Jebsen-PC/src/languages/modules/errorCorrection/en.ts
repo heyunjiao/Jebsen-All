@@ -81,6 +81,8 @@ export default {
       viewTitle: "Exception Processing Details",
       alertTitle: "Format Validation Failed",
       alertDesc: "Field [{field}] does not meet the specification. Please correct and resubmit.",
+      alertDescNoField:
+        'This record contains "validity / completeness" issues. Please fix it in the source system and resubmit, or record the handling notes here.',
       originalData: "Original Data",
       errorFields: "Error Fields",
       correction: "Correction",

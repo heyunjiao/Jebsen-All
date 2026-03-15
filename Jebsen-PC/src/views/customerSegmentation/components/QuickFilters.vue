@@ -18,12 +18,12 @@
 
     <el-form :model="filterForm" label-width="120px" label-position="top" class="filter-form">
       <el-collapse v-model="activeSections">
-        <!-- 1. 基础属性 -->
+        <!-- 1. 基础档案信息 -->
         <el-collapse-item name="basic">
           <template #title>
             <div class="section-title">
               <el-icon><User /></el-icon>
-              <span>基础属性</span>
+              <span>{{ $t("customerSegmentation.filterSections.basic") }}</span>
               <el-tag v-if="getSectionCount('basic') > 0" size="small" type="success">{{ getSectionCount("basic") }}</el-tag>
             </div>
           </template>
@@ -63,35 +63,43 @@
                 </el-checkbox-group>
               </el-form-item>
             </el-col>
-            <el-col :xs="24" :sm="12" :md="12" :lg="12">
-              <el-form-item label="所在省/市/区">
-                <el-cascader
-                  v-if="provinceCityDistrictOptions.length > 0"
-                  v-model="filterForm.city"
-                  :options="provinceCityDistrictOptions"
-                  :props="{ ...cascaderProps, multiple: true }"
-                  placeholder="请选择省/市/区"
-                  multiple
-                  clearable
+            <el-col :xs="24" :sm="12" :md="8" :lg="6">
+              <el-form-item :label="$t('customer.listFields.residenceArea')">
+                <el-select
+                  v-model="filterForm.residenceArea"
                   filterable
-                  collapse-tags
-                  :max-collapse-tags="3"
-                  collapse-tags-tooltip
+                  allow-create
+                  default-first-option
+                  :placeholder="$t('customer.placeholder.residenceArea')"
+                  clearable
                   style="width: 100%"
-                  class="city-cascader"
                   @change="handleFilterChange"
-                />
-                <el-input
-                  v-else
-                  :model-value="
-                    Array.isArray(filterForm.city) && filterForm.city.length > 0
-                      ? filterForm.city.map(c => (Array.isArray(c) ? c.join('/') : c)).join(', ')
-                      : ''
-                  "
-                  placeholder="加载中..."
-                  disabled
+                >
+                  <el-option
+                    v-for="city in RESIDENCE_CITY_OPTIONS"
+                    :key="city"
+                    :label="city"
+                    :value="city"
+                  />
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="12" :md="8" :lg="6">
+              <el-form-item :label="$t('customer.lifecycleStatus')">
+                <el-select
+                  v-model="filterForm.lifecycleStatus"
+                  :placeholder="$t('customer.placeholder.lifecycleStatus')"
+                  clearable
                   style="width: 100%"
-                />
+                  @change="handleFilterChange"
+                >
+                  <el-option
+                    v-for="opt in LIFECYCLE_STATUS_OPTIONS"
+                    :key="opt.value"
+                    :label="$t(opt.labelKey)"
+                    :value="opt.value"
+                  />
+                </el-select>
               </el-form-item>
             </el-col>
             <el-col :xs="24" :sm="12" :md="8" :lg="6">
@@ -106,90 +114,12 @@
           </el-row>
         </el-collapse-item>
 
-        <!-- 2. 客户偏好 -->
-        <el-collapse-item name="preference">
-          <template #title>
-            <div class="section-title">
-              <el-icon><Star /></el-icon>
-              <span>客户偏好</span>
-              <el-tag v-if="getSectionCount('preference') > 0" size="small" type="success">{{
-                getSectionCount("preference")
-              }}</el-tag>
-            </div>
-          </template>
-          <el-row :gutter="24">
-            <el-col :xs="24" :sm="12" :md="8" :lg="6">
-              <el-form-item label="动力偏好">
-                <el-checkbox-group v-model="filterForm.powerPreference" @change="handleFilterChange">
-                  <el-checkbox value="fuel">燃油</el-checkbox>
-                  <el-checkbox value="hybrid">混动</el-checkbox>
-                  <el-checkbox value="electric">纯电</el-checkbox>
-                </el-checkbox-group>
-              </el-form-item>
-            </el-col>
-            <el-col :xs="24" :sm="12" :md="8" :lg="6">
-              <el-form-item label="空间偏好">
-                <el-checkbox-group v-model="filterForm.spacePreference" @change="handleFilterChange">
-                  <el-checkbox value="small">小型</el-checkbox>
-                  <el-checkbox value="medium">中型</el-checkbox>
-                  <el-checkbox value="suv">SUV</el-checkbox>
-                </el-checkbox-group>
-              </el-form-item>
-            </el-col>
-            <el-col :xs="24" :sm="12" :md="8" :lg="6">
-              <el-form-item label="通勤偏好">
-                <el-input
-                  v-model="filterForm.commutePreference"
-                  placeholder="输入通勤偏好"
-                  clearable
-                  @input="handleFilterChange"
-                />
-              </el-form-item>
-            </el-col>
-            <el-col :xs="24" :sm="12" :md="8" :lg="6">
-              <el-form-item label="家庭/生活场景偏好">
-                <el-input
-                  v-model="filterForm.familyLifestylePreference"
-                  placeholder="输入偏好"
-                  clearable
-                  @input="handleFilterChange"
-                />
-              </el-form-item>
-            </el-col>
-            <el-col :xs="24" :sm="12" :md="8" :lg="6">
-              <el-form-item label="商务场景偏好">
-                <el-input
-                  v-model="filterForm.businessScenarioPreference"
-                  placeholder="输入偏好"
-                  clearable
-                  @input="handleFilterChange"
-                />
-              </el-form-item>
-            </el-col>
-            <el-col :xs="24" :sm="12" :md="8" :lg="6">
-              <el-form-item label="性能驾驶偏好">
-                <el-input
-                  v-model="filterForm.performanceDrivingPreference"
-                  placeholder="输入偏好"
-                  clearable
-                  @input="handleFilterChange"
-                />
-              </el-form-item>
-            </el-col>
-            <el-col :xs="24" :sm="12" :md="8" :lg="6">
-              <el-form-item label="促销敏感度">
-                <el-input v-model="filterForm.promoSensitivity" placeholder="输入敏感度" clearable @input="handleFilterChange" />
-              </el-form-item>
-            </el-col>
-          </el-row>
-        </el-collapse-item>
-
-        <!-- 3. 客户行为 -->
+        <!-- 2. 售后行为（需求侧-售后行为） -->
         <el-collapse-item name="behavior">
           <template #title>
             <div class="section-title">
               <el-icon><DataLine /></el-icon>
-              <span>客户行为</span>
+              <span>{{ $t("customerSegmentation.filterSections.afterSales") }}</span>
               <el-tag v-if="getSectionCount('behavior') > 0" size="small" type="success">{{
                 getSectionCount("behavior")
               }}</el-tag>
@@ -360,21 +290,59 @@
                 </div>
               </el-form-item>
             </el-col>
+            <el-col :xs="24" :sm="12" :md="8" :lg="6">
+              <el-form-item :label="$t('customer.profile360.lastMaintenanceStore')">
+                <el-select
+                  v-model="filterForm.lastMaintenanceStore"
+                  placeholder="请选择门店"
+                  clearable
+                  filterable
+                  style="width: 100%"
+                  @change="handleFilterChange"
+                >
+                  <el-option
+                    v-for="opt in LAST_SERVICE_STORE_OPTIONS"
+                    :key="opt.value"
+                    :label="opt.label"
+                    :value="opt.value"
+                  />
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="12" :md="8" :lg="6">
+              <el-form-item :label="$t('customer.listFields.lastReturnStore')">
+                <el-select
+                  v-model="filterForm.lastReturnStore"
+                  placeholder="请选择门店"
+                  clearable
+                  filterable
+                  style="width: 100%"
+                  @change="handleFilterChange"
+                >
+                  <el-option
+                    v-for="opt in LAST_SERVICE_STORE_OPTIONS"
+                    :key="opt.value"
+                    :label="opt.label"
+                    :value="opt.value"
+                  />
+                </el-select>
+              </el-form-item>
+            </el-col>
           </el-row>
         </el-collapse-item>
 
-        <!-- 4. 客户价值 -->
+        <!-- 3. 客户价值（需求侧-客户价值） -->
         <el-collapse-item name="value">
           <template #title>
             <div class="section-title">
               <el-icon><TrendCharts /></el-icon>
-              <span>客户价值</span>
+              <span>{{ $t("customerSegmentation.filterSections.value") }}</span>
               <el-tag v-if="getSectionCount('value') > 0" size="small" type="success">{{ getSectionCount("value") }}</el-tag>
             </div>
           </template>
           <el-row :gutter="24">
             <el-col :xs="24" :sm="12" :md="12" :lg="8">
-              <el-form-item label="年度消费金额">
+              <el-form-item :label="$t('customerSegmentation.fields.annualSpendRange')">
                 <div class="range-input-row">
                   <el-input
                     v-model.number="filterForm.annualSpend.min"
@@ -396,57 +364,80 @@
               </el-form-item>
             </el-col>
             <el-col :xs="24" :sm="12" :md="8" :lg="6">
-              <el-form-item label="消费等级">
+              <el-form-item :label="$t('customer.profile360.compositeScore')">
+                <div class="range-input-row">
+                  <el-input
+                    v-model.number="filterForm.compositeScore.min"
+                    type="number"
+                    placeholder="最低"
+                    class="range-number-input"
+                    @input="handleFilterChange"
+                  />
+                  <span class="range-sep">-</span>
+                  <el-input
+                    v-model.number="filterForm.compositeScore.max"
+                    type="number"
+                    placeholder="最高"
+                    class="range-number-input"
+                    @input="handleFilterChange"
+                  />
+                </div>
+              </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="12" :md="8" :lg="6">
+              <el-form-item :label="$t('customerSegmentation.fields.spendingLevel')">
                 <el-checkbox-group v-model="filterForm.spendingLevel" @change="handleFilterChange">
-                  <el-checkbox value="high">高</el-checkbox>
-                  <el-checkbox value="medium">中</el-checkbox>
-                  <el-checkbox value="low">低</el-checkbox>
+                  <el-checkbox
+                    v-for="opt in SPENDING_LEVEL_OPTIONS"
+                    :key="opt.value"
+                    :value="opt.value"
+                  >
+                    {{ opt.label }}
+                  </el-checkbox>
                 </el-checkbox-group>
               </el-form-item>
             </el-col>
             <el-col :xs="24" :sm="12" :md="8" :lg="6">
-              <el-form-item label="忠诚度等级">
+              <el-form-item :label="$t('customerSegmentation.fields.loyaltyLevel')">
                 <el-checkbox-group v-model="filterForm.loyaltyLevel" @change="handleFilterChange">
-                  <el-checkbox value="dormant">沉睡</el-checkbox>
-                  <el-checkbox value="churn">流失</el-checkbox>
-                  <el-checkbox value="active">活跃</el-checkbox>
+                  <el-checkbox
+                    v-for="opt in LOYALTY_LEVEL_OPTIONS"
+                    :key="opt.value"
+                    :value="opt.value"
+                  >
+                    {{ opt.label }}
+                  </el-checkbox>
                 </el-checkbox-group>
               </el-form-item>
             </el-col>
             <el-col :xs="24" :sm="12" :md="8" :lg="6">
-              <el-form-item label="商机等级">
-                <el-checkbox-group v-model="filterForm.opportunityLevel" @change="handleFilterChange">
-                  <el-checkbox value="diamond">钻石</el-checkbox>
-                  <el-checkbox value="gold">黄金</el-checkbox>
-                  <el-checkbox value="silver">白银</el-checkbox>
-                </el-checkbox-group>
-              </el-form-item>
-            </el-col>
-            <el-col :xs="24" :sm="12" :md="8" :lg="6">
-              <el-form-item label="客户价值分层">
+              <el-form-item :label="$t('customerSegmentation.fields.customerValueTier')">
                 <el-checkbox-group v-model="filterForm.customerValueTier" @change="handleFilterChange">
-                  <el-checkbox value="diamond">钻石</el-checkbox>
-                  <el-checkbox value="platinum">白金</el-checkbox>
-                  <el-checkbox value="gold">黄金</el-checkbox>
-                  <el-checkbox value="silver">白银</el-checkbox>
+                  <el-checkbox
+                    v-for="opt in CUSTOMER_VALUE_TIER_OPTIONS"
+                    :key="opt.value"
+                    :value="opt.value"
+                  >
+                    {{ opt.label }}
+                  </el-checkbox>
                 </el-checkbox-group>
               </el-form-item>
             </el-col>
           </el-row>
         </el-collapse-item>
 
-        <!-- 5. 车辆标签 -->
+        <!-- 4. 车辆关联信息（需求侧-车辆关联信息） -->
         <el-collapse-item name="vehicle">
           <template #title>
             <div class="section-title">
               <el-icon><Van /></el-icon>
-              <span>车辆标签</span>
+              <span>{{ $t("customerSegmentation.filterSections.vehicle") }}</span>
               <el-tag v-if="getSectionCount('vehicle') > 0" size="small" type="success">{{ getSectionCount("vehicle") }}</el-tag>
             </div>
           </template>
           <el-row :gutter="24">
             <el-col :xs="24" :sm="12" :md="8" :lg="6">
-              <el-form-item label="车系+车型">
+              <el-form-item label="车系">
                 <el-autocomplete
                   v-model="filterForm.modelLine"
                   :fetch-suggestions="queryModelLine"
@@ -459,7 +450,7 @@
               </el-form-item>
             </el-col>
             <el-col :xs="24" :sm="12" :md="12" :lg="8">
-              <el-form-item label="车型（多选）">
+              <el-form-item label="车型">
                 <el-select
                   v-model="filterForm.modelLines"
                   multiple
@@ -472,6 +463,17 @@
                 >
                   <el-option v-for="model in modelLineOptions" :key="model" :label="model" :value="model" />
                 </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="12" :md="8" :lg="6">
+              <el-form-item label="版本/年款">
+                <el-input
+                  v-model="filterForm.versionYear"
+                  placeholder="输入版本或年款"
+                  clearable
+                  style="width: 100%"
+                  @input="handleFilterChange"
+                />
               </el-form-item>
             </el-col>
             <el-col :xs="24" :sm="12" :md="12" :lg="8">
@@ -497,110 +499,110 @@
               </el-form-item>
             </el-col>
             <el-col :xs="24" :sm="12" :md="8" :lg="6">
-              <el-form-item label="使用强度">
-                <el-checkbox-group v-model="filterForm.usageIntensity" @change="handleFilterChange">
-                  <el-checkbox value="high">高</el-checkbox>
-                  <el-checkbox value="medium">中</el-checkbox>
-                  <el-checkbox value="low">低</el-checkbox>
-                </el-checkbox-group>
+              <el-form-item label="车架号（VIN）">
+                <el-input
+                  v-model="filterForm.vin"
+                  placeholder="输入车架号"
+                  clearable
+                  style="width: 100%"
+                  @input="handleFilterChange"
+                />
               </el-form-item>
             </el-col>
             <el-col :xs="24" :sm="12" :md="8" :lg="6">
-              <el-form-item label="事故风险等级">
-                <el-checkbox-group v-model="filterForm.accidentRiskLevel" @change="handleFilterChange">
-                  <el-checkbox value="high">高</el-checkbox>
-                  <el-checkbox value="medium">中</el-checkbox>
-                  <el-checkbox value="low">低</el-checkbox>
+              <el-form-item label="车牌号">
+                <el-input
+                  v-model="filterForm.licensePlate"
+                  placeholder="输入车牌号"
+                  clearable
+                  style="width: 100%"
+                  @input="handleFilterChange"
+                />
+              </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="12" :md="8" :lg="6">
+              <el-form-item label="车辆属性">
+                <el-select
+                  v-model="filterForm.vehicleAttribute"
+                  placeholder="新车/二手车"
+                  clearable
+                  style="width: 100%"
+                  @change="handleFilterChange"
+                >
+                  <el-option
+                    v-for="opt in VEHICLE_ATTRIBUTE_OPTIONS"
+                    :key="opt.value"
+                    :label="opt.label"
+                    :value="opt.value"
+                  />
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="12" :md="8" :lg="6">
+              <el-form-item label="购车属性">
+                <el-checkbox-group v-model="filterForm.purchaseAttribute" @change="handleFilterChange">
+                  <el-checkbox
+                    v-for="opt in PURCHASE_ATTRIBUTE_OPTIONS"
+                    :key="opt.value"
+                    :value="opt.value"
+                  >
+                    {{ opt.label }}
+                  </el-checkbox>
                 </el-checkbox-group>
               </el-form-item>
             </el-col>
           </el-row>
         </el-collapse-item>
 
-        <!-- 6. 服务与使用习惯 -->
-        <el-collapse-item name="service">
-          <template #title>
-            <div class="section-title">
-              <el-icon><Service /></el-icon>
-              <span>服务与使用习惯</span>
-              <el-tag v-if="getSectionCount('service') > 0" size="small" type="success">{{ getSectionCount("service") }}</el-tag>
-            </div>
-          </template>
-          <el-row :gutter="24">
-            <el-col :xs="24" :sm="12" :md="8" :lg="6">
-              <el-form-item label="服务习惯">
-                <el-input
-                  v-model="filterForm.serviceHabit"
-                  placeholder="输入年度节点偏好"
-                  clearable
-                  @input="handleFilterChange"
-                />
-              </el-form-item>
-            </el-col>
-            <el-col :xs="24" :sm="12" :md="8" :lg="6">
-              <el-form-item label="最后接待顾问">
-                <el-input
-                  v-model="filterForm.lastServiceAdvisor"
-                  placeholder="输入顾问姓名，支持模糊匹配"
-                  clearable
-                  @input="handleFilterChange"
-                />
-              </el-form-item>
-            </el-col>
-          </el-row>
-        </el-collapse-item>
-
-        <!-- 7. 标签筛选 -->
+        <!-- 6. 标签（按分类展开，直接勾选） -->
         <el-collapse-item name="tags">
           <template #title>
             <div class="section-title">
               <el-icon><PriceTag /></el-icon>
-              <span>标签筛选</span>
+              <span>{{ $t("customerSegmentation.filterSections.tags") }}</span>
               <el-tag v-if="getSectionCount('tags') > 0" size="small" type="success">{{ getSectionCount("tags") }}</el-tag>
             </div>
           </template>
-          <el-row :gutter="24">
-            <el-col :xs="24" :sm="16" :md="12" :lg="8">
-              <el-form-item label="标签">
-                <el-select
-                  v-model="filterForm.tags"
-                  multiple
-                  filterable
-                  allow-create
-                  default-first-option
-                  placeholder="选择或输入标签"
-                  style="width: 100%"
-                  @change="handleFilterChange"
+          <el-form-item :label="$t('customerSegmentation.quickFilters.tagLabel')">
+            <div class="tag-by-category">
+              <el-collapse v-model="tagCategoryActiveNames" class="tag-category-collapse">
+                <el-collapse-item
+                  v-for="category in tagCategories"
+                  :key="category.value"
+                  :name="category.value"
                 >
-                  <el-option v-for="tag in tagOptions" :key="tag.value" :label="tag.label" :value="tag.value" />
-                </el-select>
-              </el-form-item>
-            </el-col>
-            <el-col :xs="24" :sm="16" :md="12" :lg="8">
-              <el-form-item label="来自BDC的投诉标签">
-                <el-select
-                  v-model="filterForm.bdcComplaintTags"
-                  multiple
-                  filterable
-                  allow-create
-                  default-first-option
-                  placeholder="选择或输入投诉标签"
-                  style="width: 100%"
-                  @change="handleFilterChange"
-                >
-                  <el-option v-for="tag in bdcComplaintTagOptions" :key="tag.value" :label="tag.label" :value="tag.value" />
-                </el-select>
-              </el-form-item>
-            </el-col>
-          </el-row>
+                  <template #title>
+                    <span class="tag-category-name">{{ category.label }}</span>
+                    <el-tag v-if="getCategoryTagCount(category) > 0" size="small" type="info" class="tag-category-count">
+                      {{ getCategoryTagCount(category) }}
+                    </el-tag>
+                  </template>
+                  <el-checkbox-group
+                    v-model="filterForm.tags"
+                    class="tag-checkbox-group"
+                    @change="handleFilterChange"
+                  >
+                    <el-checkbox
+                      v-for="tag in (category.children || [])"
+                      :key="tag.value"
+                      :value="tag.value"
+                      class="tag-checkbox"
+                    >
+                      {{ tag.label }}
+                    </el-checkbox>
+                  </el-checkbox-group>
+                </el-collapse-item>
+              </el-collapse>
+            </div>
+          </el-form-item>
         </el-collapse-item>
 
-        <!-- 8. 购车信息 -->
+        <!-- 5. 销售行为（需求侧-销售行为） -->
         <el-collapse-item name="purchase">
           <template #title>
             <div class="section-title">
               <el-icon><ShoppingBag /></el-icon>
-              <span>购车信息</span>
+              <span>{{ $t("customerSegmentation.filterSections.sales") }}</span>
               <el-tag v-if="getSectionCount('purchase') > 0" size="small" type="success">{{
                 getSectionCount("purchase")
               }}</el-tag>
@@ -608,69 +610,57 @@
           </template>
           <el-row :gutter="24">
             <el-col :xs="24" :sm="12" :md="12" :lg="8">
-              <el-form-item label="总车价">
-                <div class="range-input-row">
-                  <el-input
-                    v-model.number="filterForm.totalCarPrice.min"
-                    type="number"
-                    placeholder="最少"
-                    class="range-number-input"
-                    @input="handleFilterChange"
+              <el-form-item label="购车金额">
+                <el-select
+                  :model-value="totalCarPriceRangeValue"
+                  placeholder="请选择金额区间"
+                  clearable
+                  style="width: 100%"
+                  @change="onAmountRangeChange('totalCarPrice', $event, PURCHASE_AMOUNT_RANGES)"
+                >
+                  <el-option
+                    v-for="opt in PURCHASE_AMOUNT_RANGES"
+                    :key="opt.value || 'empty'"
+                    :label="opt.label"
+                    :value="opt.value"
                   />
-                  <span class="range-sep">-</span>
-                  <el-input
-                    v-model.number="filterForm.totalCarPrice.max"
-                    type="number"
-                    placeholder="最多"
-                    class="range-number-input"
-                    @input="handleFilterChange"
-                  />
-                  <span class="range-unit">万元</span>
-                </div>
+                </el-select>
               </el-form-item>
             </el-col>
             <el-col :xs="24" :sm="12" :md="12" :lg="8">
-              <el-form-item label="选配总价">
-                <div class="range-input-row">
-                  <el-input
-                    v-model.number="filterForm.totalOptionPrice.min"
-                    type="number"
-                    placeholder="最少"
-                    class="range-number-input"
-                    @input="handleFilterChange"
+              <el-form-item label="选配金额">
+                <el-select
+                  :model-value="totalOptionPriceRangeValue"
+                  placeholder="请选择金额区间"
+                  clearable
+                  style="width: 100%"
+                  @change="onAmountRangeChange('totalOptionPrice', $event, OPTION_AMOUNT_RANGES)"
+                >
+                  <el-option
+                    v-for="opt in OPTION_AMOUNT_RANGES"
+                    :key="opt.value || 'empty'"
+                    :label="opt.label"
+                    :value="opt.value"
                   />
-                  <span class="range-sep">-</span>
-                  <el-input
-                    v-model.number="filterForm.totalOptionPrice.max"
-                    type="number"
-                    placeholder="最多"
-                    class="range-number-input"
-                    @input="handleFilterChange"
-                  />
-                  <span class="range-unit">万元</span>
-                </div>
+                </el-select>
               </el-form-item>
             </el-col>
             <el-col :xs="24" :sm="12" :md="12" :lg="8">
               <el-form-item label="售后自费金额">
-                <div class="range-input-row">
-                  <el-input
-                    v-model.number="filterForm.afterSalesSelfPayAmount.min"
-                    type="number"
-                    placeholder="最少"
-                    class="range-number-input"
-                    @input="handleFilterChange"
+                <el-select
+                  :model-value="afterSalesSelfPayRangeValue"
+                  placeholder="请选择金额区间"
+                  clearable
+                  style="width: 100%"
+                  @change="onAmountRangeChange('afterSalesSelfPayAmount', $event, AFTER_SALES_SELF_PAY_RANGES)"
+                >
+                  <el-option
+                    v-for="opt in AFTER_SALES_SELF_PAY_RANGES"
+                    :key="opt.value || 'empty'"
+                    :label="opt.label"
+                    :value="opt.value"
                   />
-                  <span class="range-sep">-</span>
-                  <el-input
-                    v-model.number="filterForm.afterSalesSelfPayAmount.max"
-                    type="number"
-                    placeholder="最多"
-                    class="range-number-input"
-                    @input="handleFilterChange"
-                  />
-                  <span class="range-unit">元</span>
-                </div>
+                </el-select>
               </el-form-item>
             </el-col>
             <el-col :xs="24" :sm="12" :md="12" :lg="8">
@@ -724,7 +714,6 @@ import {
   Filter,
   RefreshLeft,
   User,
-  Star,
   DataLine,
   TrendCharts,
   Van,
@@ -733,25 +722,39 @@ import {
   ShoppingBag
 } from "@element-plus/icons-vue";
 import provinceCityDistrictData from "@/assets/json/provinceCityDistrict.json";
+import {
+  PURCHASE_AMOUNT_RANGES,
+  OPTION_AMOUNT_RANGES,
+  AFTER_SALES_SELF_PAY_RANGES,
+  matchPurchaseAmountRange,
+  matchOptionAmountRange,
+  matchAfterSalesSelfPayRange
+} from "@/constants/amountRangeOptions";
+import { SEGMENT_TAG_OPTIONS } from "../constants/tagOptions";
+import { TAG_CATEGORY_OPTIONS } from "@/constants/tagCategory";
+import {
+  SPENDING_LEVEL_OPTIONS,
+  LOYALTY_LEVEL_OPTIONS,
+  CUSTOMER_VALUE_TIER_OPTIONS
+} from "../constants/valueOptions";
+import {
+  VEHICLE_ATTRIBUTE_OPTIONS,
+  PURCHASE_ATTRIBUTE_OPTIONS
+} from "../constants/vehicleOptions";
+import { LAST_SERVICE_STORE_OPTIONS } from "../constants/afterSalesOptions";
+import { LIFECYCLE_STATUS_OPTIONS, RESIDENCE_CITY_OPTIONS } from "../constants/basicOptions";
 
 // 表单数据类型
 export interface FilterFormType {
-  // 基础属性
+  // 基础档案（与客户列表筛选对齐）
   name: string;
   gender: string;
   ageGroup: string[];
   familyStatus: string[];
-  city: string[] | string[][]; // 支持级联选择 [省, 市, 区] 或多选 [[省, 市, 区], ...]
+  residenceArea: string;   // 居住区域，支持搜索城市
+  lifecycleStatus: string; // OneID/生命周期状态
   contactValidity: string;
-  // 客户偏好
-  powerPreference: string[];
-  spacePreference: string[];
-  commutePreference: string;
-  familyLifestylePreference: string;
-  businessScenarioPreference: string;
-  performanceDrivingPreference: string;
-  promoSensitivity: string;
-  // 客户行为
+  // 售后行为
   lastVisitTime: [string, string] | null;
   visits90d: { min: number | undefined; max: number | undefined };
   annualOrderFreq: { min: number | undefined; max: number | undefined };
@@ -759,28 +762,28 @@ export interface FilterFormType {
   accidentRepairCountIn1Year: { min: number | undefined; max: number | undefined };
   // 客户价值
   annualSpend: { min: number | undefined; max: number | undefined };
+  compositeScore: { min: number | undefined; max: number | undefined }; // 价值综合评分
   spendingLevel: string[];
   loyaltyLevel: string[];
-  opportunityLevel: string[];
-  // 车辆标签
+  // 车辆关联信息（需求侧表格拆解）
   modelLine: string;
+  modelLines: string[];
+  versionYear: string;
   carAge: { min: number | undefined; max: number | undefined };
-  usageIntensity: string[];
-  accidentRiskLevel: string[];
-  // 服务习惯
-  serviceHabit: string;
-  lastServiceAdvisor: string;
-  // 标签
+  vin: string;              // 车架号
+  licensePlate: string;     // 车牌号
+  vehicleAttribute: string; // 车辆属性：新车/二手车
+  purchaseAttribute: string[]; // 购车属性：首次购车/增购/换购
+  lastMaintenanceStore: string;  // 最近一次保养门店
+  lastReturnStore: string;       // 最后一次返厂门店
+  // 标签（默认标签 tagCategory）
   tags: string[];
-  bdcComplaintTags: string[];
   // 车价相关
   totalCarPrice: { min: number | undefined; max: number | undefined }; // 总车价起止范围（万元）
   totalOptionPrice: { min: number | undefined; max: number | undefined }; // 选配总价范围起止（万元）
   afterSalesSelfPayAmount: { min: number | undefined; max: number | undefined }; // 售后自费金额起止金额
   // 客户价值分层
   customerValueTier: string[]; // 客户价值分层类型（钻石客户等）
-  // 车型与订单
-  modelLines: string[]; // 车型多选
   completedOrderCount: { min: number | undefined; max: number | undefined }; // 已成交订单数范围（购车数）
   // 两年内进场
   visitsIn2Years: { min: number | undefined; max: number | undefined }; // 两年内进场多少次
@@ -800,15 +803,15 @@ const emit = defineEmits<{
   change: [value: FilterFormType];
 }>();
 
-// 折叠面板状态 - 默认全部展开
-const activeSections = ref<string[]>(["basic", "preference", "behavior", "value", "vehicle", "service", "tags", "purchase"]);
-const allExpanded = computed(() => activeSections.value.length === 8);
+// 折叠面板状态 - 默认全部展开（需求侧维度：基础档案、售后行为、客户价值、车辆关联、标签、销售行为）
+const activeSections = ref<string[]>(["basic", "behavior", "value", "vehicle", "tags", "purchase"]);
+const allExpanded = computed(() => activeSections.value.length === 6);
 
 const toggleAllSections = () => {
   if (allExpanded.value) {
     activeSections.value = [];
   } else {
-    activeSections.value = ["basic", "preference", "behavior", "value", "vehicle", "service", "tags", "purchase"];
+    activeSections.value = ["basic", "behavior", "value", "vehicle", "tags", "purchase"];
   }
 };
 
@@ -845,39 +848,33 @@ const getInitialForm = (): FilterFormType => ({
   gender: "",
   ageGroup: [],
   familyStatus: [],
-  city: [], // 改为空数组
+  residenceArea: "",
+  lifecycleStatus: "",
   contactValidity: "",
-  // 客户偏好
-  powerPreference: [],
-  spacePreference: [],
-  commutePreference: "",
-  familyLifestylePreference: "",
-  businessScenarioPreference: "",
-  performanceDrivingPreference: "",
-  promoSensitivity: "",
-  // 客户行为
+  // 售后行为
   lastVisitTime: null,
   visits90d: { min: undefined, max: undefined },
   annualOrderFreq: { min: undefined, max: undefined },
   avgSpend: { min: undefined, max: undefined },
   // 客户价值
   annualSpend: { min: undefined, max: undefined },
+  compositeScore: { min: undefined, max: undefined },
   spendingLevel: [],
   loyaltyLevel: [],
-  opportunityLevel: [],
-  // 车辆标签
+  // 车辆关联
   modelLine: "",
+  modelLines: [],
+  versionYear: "",
   carAge: { min: undefined, max: undefined },
-  usageIntensity: [],
-  accidentRiskLevel: [],
-  // 客户行为补充
+  vin: "",
+  licensePlate: "",
+  vehicleAttribute: "",
+  purchaseAttribute: [],
   accidentRepairCountIn1Year: { min: undefined, max: undefined },
-  // 服务习惯
-  serviceHabit: "",
-  lastServiceAdvisor: "",
+  lastMaintenanceStore: "",
+  lastReturnStore: "",
   // 标签
   tags: [],
-  bdcComplaintTags: [],
   // 车价相关
   totalCarPrice: { min: undefined, max: undefined },
   totalOptionPrice: { min: undefined, max: undefined },
@@ -896,6 +893,32 @@ const getInitialForm = (): FilterFormType => ({
 });
 
 const filterForm = reactive<FilterFormType>(getInitialForm());
+
+// 购车/选配/售后自费金额区间选择回显
+const totalCarPriceRangeValue = computed(() =>
+  matchPurchaseAmountRange(filterForm.totalCarPrice.min, filterForm.totalCarPrice.max)
+);
+const totalOptionPriceRangeValue = computed(() =>
+  matchOptionAmountRange(filterForm.totalOptionPrice.min, filterForm.totalOptionPrice.max)
+);
+const afterSalesSelfPayRangeValue = computed(() =>
+  matchAfterSalesSelfPayRange(filterForm.afterSalesSelfPayAmount.min, filterForm.afterSalesSelfPayAmount.max)
+);
+
+// 金额区间选择变更（预设区间，客户直接选择）
+function onAmountRangeChange(
+  field: "totalCarPrice" | "totalOptionPrice" | "afterSalesSelfPayAmount",
+  value: string,
+  options: typeof PURCHASE_AMOUNT_RANGES
+) {
+  const opt = options.find(r => r.value === value);
+  if (opt) {
+    (filterForm[field] as { min?: number; max?: number }) = { min: opt.min, max: opt.max };
+  } else {
+    (filterForm[field] as { min?: number; max?: number }) = { min: undefined, max: undefined };
+  }
+  handleFilterChange();
+}
 
 // 日期快捷选项
 const dateShortcuts = [
@@ -937,27 +960,25 @@ const dateShortcuts = [
   }
 ];
 
-// 标签选项 (实际项目中从标签管理模块获取)
-const tagOptions = ref([
-  { label: "高价值", value: "high_value" },
-  { label: "即将流失", value: "churn_risk" },
-  { label: "活跃客户", value: "active" },
-  { label: "沉睡客户", value: "dormant" },
-  { label: "新客户", value: "new_customer" },
-  { label: "VIP", value: "vip" },
-  { label: "保养到期", value: "maintenance_due" },
-  { label: "质保即将到期", value: "warranty_expiring" }
-]);
+// 标签选项：与标签管理 tagCategory 统一，与 index 预览共用
+const segmentTagOptions = SEGMENT_TAG_OPTIONS;
 
-// BDC 投诉标签选项
-const bdcComplaintTagOptions = ref([
-  { label: "服务态度投诉", value: "bdc_service_attitude" },
-  { label: "维修质量投诉", value: "bdc_repair_quality" },
-  { label: "价格/费用争议", value: "bdc_price_dispute" },
-  { label: "预约/等待体验差", value: "bdc_waiting_experience" },
-  { label: "配件供应问题", value: "bdc_parts_supply" },
-  { label: "其他投诉", value: "bdc_other_complaint" }
-]);
+// 按分类展示的标签（来自 tagCategory 第二级：会员分层、售后行为等）
+const tagCategories = computed(() => {
+  const root = TAG_CATEGORY_OPTIONS[0];
+  return root?.children ?? [];
+});
+
+// 标签分类折叠：默认全部展开
+const tagCategoryActiveNames = ref<string[]>(
+  (TAG_CATEGORY_OPTIONS[0]?.children ?? []).map((c: { value: string }) => c.value)
+);
+
+// 某分类下已选标签数量
+const getCategoryTagCount = (category: { value: string; label: string; children?: { value: string; label: string }[] }) => {
+  const values = (category.children ?? []).map(c => c.value);
+  return filterForm.tags.filter(v => values.includes(v)).length;
+};
 
 // 车型自动补全
 const modelLineOptions = [
@@ -998,19 +1019,10 @@ const getSectionCount = (section: string): number => {
       if (hasValue(f.gender)) basicCount++;
       if (hasValue(f.ageGroup)) basicCount++;
       if (hasValue(f.familyStatus)) basicCount++;
-      if (hasValue(f.city) && Array.isArray(f.city) && f.city.length > 0) basicCount++;
+      if (hasValue(f.residenceArea)) basicCount++;
+      if (hasValue(f.lifecycleStatus)) basicCount++;
       if (hasValue(f.contactValidity)) basicCount++;
       return basicCount;
-    case "preference":
-      let prefCount = 0;
-      if (hasValue(f.powerPreference)) prefCount++;
-      if (hasValue(f.spacePreference)) prefCount++;
-      if (hasValue(f.commutePreference)) prefCount++;
-      if (hasValue(f.familyLifestylePreference)) prefCount++;
-      if (hasValue(f.businessScenarioPreference)) prefCount++;
-      if (hasValue(f.performanceDrivingPreference)) prefCount++;
-      if (hasValue(f.promoSensitivity)) prefCount++;
-      return prefCount;
     case "behavior":
       let behaviorCount = 0;
       if (hasValue(f.lastVisitTime)) behaviorCount++;
@@ -1021,33 +1033,30 @@ const getSectionCount = (section: string): number => {
       if (hasValue(f.selfPayAmountIn2Years.min) || hasValue(f.selfPayAmountIn2Years.max)) behaviorCount++;
       if (hasValue(f.lastServiceOrderDate)) behaviorCount++;
       if (hasValue(f.accidentRepairCountIn1Year.min) || hasValue(f.accidentRepairCountIn1Year.max)) behaviorCount++;
+      if (hasValue(f.lastMaintenanceStore)) behaviorCount++;
+      if (hasValue(f.lastReturnStore)) behaviorCount++;
       return behaviorCount;
     case "value":
       let valueCount = 0;
       if (hasValue(f.annualSpend.min) || hasValue(f.annualSpend.max)) valueCount++;
+      if (hasValue(f.compositeScore?.min) || hasValue(f.compositeScore?.max)) valueCount++;
       if (hasValue(f.spendingLevel)) valueCount++;
       if (hasValue(f.loyaltyLevel)) valueCount++;
-      if (hasValue(f.opportunityLevel)) valueCount++;
       if (hasValue(f.customerValueTier)) valueCount++;
       return valueCount;
     case "vehicle":
       let vehicleCount = 0;
       if (hasValue(f.modelLine)) vehicleCount++;
       if (hasValue(f.modelLines)) vehicleCount++;
+      if (hasValue(f.versionYear)) vehicleCount++;
       if (hasValue(f.carAge.min) || hasValue(f.carAge.max)) vehicleCount++;
-      if (hasValue(f.usageIntensity)) vehicleCount++;
-      if (hasValue(f.accidentRiskLevel)) vehicleCount++;
+      if (hasValue(f.vin)) vehicleCount++;
+      if (hasValue(f.licensePlate)) vehicleCount++;
+      if (hasValue(f.vehicleAttribute)) vehicleCount++;
+      if (hasValue(f.purchaseAttribute)) vehicleCount++;
       return vehicleCount;
-    case "service":
-      let serviceCount = 0;
-      if (hasValue(f.serviceHabit)) serviceCount++;
-      if (hasValue(f.lastServiceAdvisor)) serviceCount++;
-      return serviceCount;
     case "tags":
-      let tagCount = 0;
-      if (hasValue(f.tags)) tagCount++;
-      if (hasValue(f.bdcComplaintTags)) tagCount++;
-      return tagCount;
+      return hasValue(f.tags) ? 1 : 0;
     case "purchase":
       let purchaseCount = 0;
       if (hasValue(f.totalCarPrice.min) || hasValue(f.totalCarPrice.max)) purchaseCount++;
@@ -1065,11 +1074,9 @@ const getSectionCount = (section: string): number => {
 const activeFiltersCount = computed(() => {
   return (
     getSectionCount("basic") +
-    getSectionCount("preference") +
     getSectionCount("behavior") +
     getSectionCount("value") +
     getSectionCount("vehicle") +
-    getSectionCount("service") +
     getSectionCount("tags") +
     getSectionCount("purchase")
   );
@@ -1085,6 +1092,7 @@ const handleFilterChange = () => {
     "annualOrderFreq",
     "avgSpend",
     "annualSpend",
+    "compositeScore",
     "carAge",
     "totalCarPrice",
     "totalOptionPrice",
@@ -1294,6 +1302,40 @@ onMounted(async () => {
           overflow-y: auto;
         }
       }
+    }
+
+    // 标签按分类展开
+    .tag-by-category {
+      width: 100%;
+    }
+    .tag-category-collapse {
+      border: none;
+      --el-collapse-header-height: 40px;
+      :deep(.el-collapse-item__header) {
+        border-bottom: 1px solid var(--el-border-color-lighter);
+        padding-left: 12px;
+        font-weight: 500;
+      }
+      :deep(.el-collapse-item__wrap) {
+        border-bottom: none;
+      }
+      :deep(.el-collapse-item__content) {
+        padding: 12px 12px 16px 24px;
+      }
+    }
+    .tag-category-name {
+      margin-right: 8px;
+    }
+    .tag-category-count {
+      vertical-align: middle;
+    }
+    .tag-checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 24px;
+    }
+    .tag-checkbox {
+      margin-right: 0;
     }
 
     // 响应式优化

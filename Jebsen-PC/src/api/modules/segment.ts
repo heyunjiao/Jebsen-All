@@ -8,10 +8,14 @@ export namespace Segment {
   // 分群分类（根据分群名称前缀动态生成）
   export type SegmentCategory = string;
 
+  /** 可见范围：公开 = 团队可见，private = 仅我可见 */
+  export type SegmentVisibility = "public" | "private";
+
   export interface SegmentInfo {
     id: string;
     name: string;
     category?: SegmentCategory;
+    visibility?: SegmentVisibility;
     status: SegmentStatus;
     memberCount: number;
     snapshotCount: number;
@@ -36,6 +40,7 @@ export namespace Segment {
     id?: string;
     name: string;
     category?: SegmentCategory;
+    visibility?: SegmentVisibility;
     status?: SegmentStatus;
     description?: string;
     ruleConfig: TagManage.RuleConfig | null;

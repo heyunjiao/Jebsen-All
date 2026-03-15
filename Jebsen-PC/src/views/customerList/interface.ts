@@ -140,6 +140,30 @@ export interface CustomerBehaviorInfo {
   hasComplaintWithin6Months?: boolean;
   /** 12 个月内是否回厂 */
   hasReturnWithin12Months?: boolean;
+  /** 最后一次返厂门店 */
+  lastReturnStore?: string;
+  /** 上次服务日期（客户最后一次进厂服务日期） */
+  lastServiceDate?: string;
+  /** 是否完成首保 */
+  firstMaintenanceDone?: boolean;
+  /** 是否在保修期内 */
+  inWarrantyPeriod?: boolean;
+  /** 12 个月内完成首保 */
+  firstMaintenanceWithin12Months?: boolean;
+  /** 12 个月内完成首次回厂 */
+  firstReturnWithin12Months?: boolean;
+  /** 13-24 个月回厂 */
+  returnWithin13To24Months?: boolean;
+  /** 新车销售时购买新保 */
+  newInsuranceAtSale?: boolean;
+  /** 到期客户中成功续保 */
+  renewedAfterExpiry?: boolean;
+  /** 在店维修不在店投保成功续保数 */
+  renewCountInStoreRepairOutStoreInsurance?: number;
+  /** 是否购买粘性产品 */
+  hasStickyProduct?: boolean;
+  /** 活动 / Campaign 参与次数 */
+  campaignParticipationCount?: number;
 }
 
 // 风控状态信息
@@ -220,6 +244,10 @@ export interface Customer {
   primaryRelationTag?: string; // 主号关系标签（本人、配偶、公司电话等）
   handlers?: HandlerInfo[]; // 经办人列表（仅公司客户）
   selectedHandlerId?: string; // 当前选中经办人ID（仅公司客户）
+  /** 客户价值（列表展示用，与 360 视图一致） */
+  valueInfo?: CustomerValueInfo;
+  /** 销售/售后行为（列表展示用，与 360 视图一致） */
+  behaviorInfo?: CustomerBehaviorInfo;
 }
 
 // 公司信息

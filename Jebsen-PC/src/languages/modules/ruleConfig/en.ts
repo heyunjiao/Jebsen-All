@@ -57,15 +57,15 @@ export default {
         aftersales_cs: "After-sales Satisfaction Follow-up",
         newcar_cs: "New Car Satisfaction Follow-up",
         bdc_campaign: "BDC Campaign",
-        cm_custom: "CM Custom",
-        pcn_aftersales_campaign: "PCN After-sales Campaign",
+        cm_custom: "General Opportunity",
+        pcn_aftersales_campaign: "PCN Recall Campaign",
         ttr_survey: "TTR Research",
         new_to_renew: "New to Renew",
         renew_to_renew: "Renew to Renew",
         in_repair_no_insurance: "In Repair No Insurance",
         psp_expiry: "PSP Expiry",
         maintenance_churn: "Maintenance Churn Risk",
-        no_visit_365d: "No Visit for 365 Days",
+        no_visit_365d: "Vehicle not visited for 365 days",
         regular_maintenance_365d: "Regular Maintenance Customer No Service for 365 Days",
         periodic_maintenance: "Periodic Maintenance",
         first_insurance_2y: "First Insurance 2Y",
@@ -83,7 +83,8 @@ export default {
       pushRole: {
         SA: "SA",
         SC: "SC",
-        other: "Other"
+        other: "Other",
+        renewal: "Renewal"
       },
       status: {
         enable: "Enabled",

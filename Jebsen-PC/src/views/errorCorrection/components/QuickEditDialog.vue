@@ -1,7 +1,11 @@
 <template>
   <el-dialog
     :model-value="visible"
-    :title="isAssociationException ? '关联性异常详情' : t('errorCorrection.common.correctionTitle')"
+    :title="
+      isAssociationException
+        ? t('errorCorrection.taxonomy.consistency.name')
+        : t('errorCorrection.common.correctionTitle')
+    "
     width="700px"
     :close-on-click-modal="false"
     append-to-body
@@ -9,6 +13,7 @@
     @update:model-value="handleClose"
   >
     <!-- 只读模式：显示处理结果 -->
+    <!-- 只读模式：查看处理结果（用于已处理任务 & 关联性异常） -->
     <template v-if="task?.readonly">
       <el-alert :title="getStatusLabel()" :type="getStatusType()" show-icon :closable="false" class="mb-16">
         <template #default>
@@ -70,13 +75,54 @@
       </div>
     </template>
 
-    <!-- 编辑模式：原有表单（仅提示，不再展示报错字段列表或按字段录入） -->
+    <!-- 编辑模式：有效性 / 完整性异常，提供修正表单 -->
     <template v-else>
       <el-alert :title="t('errorCorrection.quickEdit.alertTitle')" type="warning" show-icon :closable="false" class="mb-16">
         <template #default>
           {{ t("errorCorrection.quickEdit.alertDescNoField") }}
         </template>
       </el-alert>
+
+      <!-- 原始数据预览 -->
+      <div class="section" v-if="originalFields.length">
+        <div class="section-title">
+          <el-icon><Document /></el-icon>
+          {{ t("errorCorrection.quickEdit.originalData") }}
+        </div>
+        <el-descriptions :column="2" border class="mb-16">
+          <el-descriptions-item v-for="field in originalFields" :key="field" :label="field">
+            <span>{{ task?.originalData[field] ?? "-" }}</span>
+          </el-descriptions-item>
+        </el-descriptions>
+      </div>
+
+      <!-- 修正表单：按字段提供输入，留空则表示不修改 -->
+      <div class="section">
+        <div class="section-title">
+          <el-icon><Edit /></el-icon>
+          {{ t("errorCorrection.quickEdit.correction") }}
+        </div>
+        <el-form label-width="120px">
+          <el-form-item
+            v-for="field in originalFields"
+            :key="field"
+            :label="field"
+          >
+            <el-input
+              v-model="form.corrections[field]"
+              :placeholder="String(task?.originalData[field] ?? t('errorCorrection.quickEdit.currentValue'))"
+              clearable
+            />
+          </el-form-item>
+        </el-form>
+        <div class="field-hint">
+          <el-icon><InfoFilled /></el-icon>
+          <span>
+            {{ t("errorCorrection.quickEdit.enterCorrectValue") }}，
+            {{ t("errorCorrection.quickEdit.pleaseEnterCorrection") }}
+          </span>
+        </div>
+      </div>
     </template>
 
     <template #footer>
@@ -141,6 +187,15 @@ const ignoring = ref(false);
 const form = reactive({
   // 已不再按字段维度收集修正，仅保留结构以便后续根据新需求扩展
   corrections: {} as Record<string, string>
+});
+
+// 是否为“关联性异常”（只读查看模式标题需要区分）
+const isAssociationException = computed(() => props.task?.errorType === "consistency");
+
+// 原始数据字段列表（用于生成表单）
+const originalFields = computed(() => {
+  if (!props.task || !props.task.originalData) return [] as string[];
+  return Object.keys(props.task.originalData);
 });
 
 // 获取状态标签

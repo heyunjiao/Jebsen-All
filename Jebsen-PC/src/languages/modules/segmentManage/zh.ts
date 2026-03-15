@@ -52,11 +52,18 @@ export default {
     statusOptions: {
       draft: "草稿",
       running: "计算中",
-      active: "已启用",
+      active: "已完成",
       failed: "失败",
       inactive: "已停用",
       disabled: "已停用"
     },
+    completed: "已完成",
+    permission: "可见范围",
+    permissionPlaceholder: "选择谁可以查看和使用该分群",
+    permissionPublic: "公开",
+    permissionPublicTip: "团队内成员均可查看与使用",
+    permissionPrivate: "仅我可见",
+    permissionPrivateTip: "仅创建者本人可查看与使用",
     categoryOptions: {
       demography: "人口学",
       value: "价值",
@@ -82,8 +89,8 @@ export default {
     stats: {
       segmentTotal: "分群总数",
       totalMembers: "总成员数",
-      activeSegments: "已启用分群",
-      draftSegments: "草稿分群"
+      calculatingCount: "计算中",
+      completedCount: "已完成"
     }
   }
 };

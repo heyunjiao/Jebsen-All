@@ -362,9 +362,7 @@
           "operator": "zhang.san@jebsen.com",
           "validationResult": "passed",
           "uploadStatus": "success",
-          "totalRows": 156,
-          "successRows": 156,
-          "errorRows": 0
+          "errorType": ""
         },
         {
           "uploadTime": "2024-01-20 10:18:42",
@@ -373,9 +371,7 @@
           "operator": "li.si@jebsen.com",
           "validationResult": "failed",
           "uploadStatus": "failed",
-          "totalRows": 120,
-          "successRows": 80,
-          "errorRows": 40
+          "errorType": "文件类型错误"
         },
         {
           "uploadTime": "2024-01-20 08:45:23",
@@ -384,9 +380,7 @@
           "operator": "chen.wei@jebsen.com",
           "validationResult": "passed",
           "uploadStatus": "success",
-          "totalRows": 98,
-          "successRows": 98,
-          "errorRows": 0
+          "errorType": ""
         },
         {
           "uploadTime": "2024-01-19 16:45:28",
@@ -395,9 +389,7 @@
           "operator": "wang.wu@jebsen.com",
           "validationResult": "passed",
           "uploadStatus": "success",
-          "totalRows": 234,
-          "successRows": 234,
-          "errorRows": 0
+          "errorType": ""
         },
         {
           "uploadTime": "2024-01-19 14:20:11",
@@ -406,9 +398,7 @@
           "operator": "liu.ming@jebsen.com",
           "validationResult": "failed",
           "uploadStatus": "failed",
-          "totalRows": 167,
-          "successRows": 0,
-          "errorRows": 167
+          "errorType": "文件级别的错误识别"
         },
         {
           "uploadTime": "2024-01-19 09:23:56",
@@ -417,9 +407,7 @@
           "operator": "zhao.liu@jebsen.com",
           "validationResult": "passed",
           "uploadStatus": "success",
-          "totalRows": 67,
-          "successRows": 67,
-          "errorRows": 0
+          "errorType": ""
         },
         {
           "uploadTime": "2024-01-19 08:15:30",
@@ -428,9 +416,7 @@
           "operator": "sun.qi@jebsen.com",
           "validationResult": "passed",
           "uploadStatus": "success",
-          "totalRows": 142,
-          "successRows": 142,
-          "errorRows": 0
+          "errorType": ""
         },
         {
           "uploadTime": "2024-01-18 17:30:45",
@@ -439,9 +425,7 @@
           "operator": "zhou.jie@jebsen.com",
           "validationResult": "passed",
           "uploadStatus": "success",
-          "totalRows": 189,
-          "successRows": 189,
-          "errorRows": 0
+          "errorType": ""
         },
         {
           "uploadTime": "2024-01-18 15:12:33",
@@ -450,9 +434,7 @@
           "operator": "wu.gang@jebsen.com",
           "validationResult": "failed",
           "uploadStatus": "failed",
-          "totalRows": 203,
-          "successRows": 120,
-          "errorRows": 83
+          "errorType": "表头不匹配"
         },
         {
           "uploadTime": "2024-01-18 11:25:18",
@@ -461,9 +443,7 @@
           "operator": "zheng.shuang@jebsen.com",
           "validationResult": "passed",
           "uploadStatus": "success",
-          "totalRows": 124,
-          "successRows": 124,
-          "errorRows": 0
+          "errorType": ""
         },
         {
           "uploadTime": "2024-01-18 09:40:52",
@@ -472,9 +452,7 @@
           "operator": "he.jiong@jebsen.com",
           "validationResult": "passed",
           "uploadStatus": "success",
-          "totalRows": 89,
-          "successRows": 89,
-          "errorRows": 0
+          "errorType": ""
         },
         {
           "uploadTime": "2024-01-17 16:55:27",
@@ -483,9 +461,7 @@
           "operator": "xie.na@jebsen.com",
           "validationResult": "passed",
           "uploadStatus": "success",
-          "totalRows": 156,
-          "successRows": 156,
-          "errorRows": 0
+          "errorType": ""
         }
       ],
       "total": 12

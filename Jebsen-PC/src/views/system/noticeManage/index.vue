@@ -27,6 +27,15 @@
       </template>
       <!-- 表格操作 -->
       <template #operation="scope">
+        <el-button
+          v-if="scope.row.status === '1'"
+          type="primary"
+          link
+          :icon="Promotion"
+          @click="handlePublish(scope.row)"
+        >
+          发布
+        </el-button>
         <el-button type="primary" link :icon="Edit" @click="handleUpdate(scope.row)">修改</el-button>
         <el-button type="primary" link :icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
       </template>
@@ -77,7 +86,7 @@
 <script setup lang="tsx">
 import { ref, reactive, onMounted } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { Plus, Edit, Delete } from "@element-plus/icons-vue";
+import { Plus, Edit, Delete, Promotion } from "@element-plus/icons-vue";
 import ProTable from "@/components/ProTable/index.vue";
 import { ProTableInstance, ColumnProps } from "@/components/ProTable/interface";
 import WangEditor from "@/components/WangEditor/index.vue";
@@ -160,7 +169,7 @@ const columns = reactive<ColumnProps[]>([
     width: 180,
     align: "center"
   },
-  { prop: "operation", label: "操作", fixed: "right", minWidth: 150 }
+  { prop: "operation", label: "操作", fixed: "right", minWidth: 200 }
 ]);
 
 // dataCallback 是对于返回的表格数据做处理
@@ -261,6 +270,36 @@ const submitForm = () => {
       }
     });
   }
+};
+
+// 发布按钮操作（仅对状态为「关闭」的公告显示，发布后变为「正常」）
+const handlePublish = (row: any) => {
+  if (!row?.noticeId) {
+    ElMessage.warning("未找到要发布的公告");
+    return;
+  }
+  if (row.status === "0") {
+    ElMessage.info("该公告已处于发布状态");
+    return;
+  }
+  ElMessageBox.confirm(`是否确认发布公告「${row.noticeTitle || row.noticeId}」？`, "发布确认", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "info"
+  })
+    .then(async () => {
+      try {
+        await updateNotice({
+          ...row,
+          status: "0"
+        });
+        ElMessage.success("发布成功");
+        proTable.value?.getTableList();
+      } catch (error) {
+        console.error("发布失败:", error);
+      }
+    })
+    .catch(() => {});
 };
 
 // 删除按钮操作（按行删除）

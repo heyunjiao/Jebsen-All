@@ -120,22 +120,9 @@ const columns = computed<ColumnProps[]>(() => [
     }
   },
   {
-    prop: "totalRows",
-    label: t("dataQualityWorkbench.auditLog.totalRows"),
-    width: 100,
-    align: "right"
-  },
-  {
-    prop: "successRows",
-    label: t("dataQualityWorkbench.auditLog.successRows"),
-    width: 100,
-    align: "right"
-  },
-  {
-    prop: "errorRows",
-    label: t("dataQualityWorkbench.auditLog.errorRows"),
-    width: 100,
-    align: "right"
+    prop: "errorType",
+    label: "错误类型",
+    minWidth: 150
   }
 ]);
 

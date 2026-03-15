@@ -46,7 +46,10 @@ export default {
     serviceHabit: "Service Habit",
     addCustomer: "Add Customer",
     stats: {
-      total: "Total Data",
+      memberTierTitle: "Member Tier",
+      total: "Total",
+      newThisMonth: "New This Month",
+      totalData: "Total Data",
       newToday: "New Today",
       newMerged: "Merged Today",
       newUpdated: "Updated Today",
@@ -55,13 +58,22 @@ export default {
       growth: "vs Yesterday",
       mergedCount: "Merged Count",
       updatedCount: "Updated Count",
-      incremental: "Incremental Data"
+      incremental: "Incremental Data",
+      salesDiamond: "Sales Diamond",
+      aftersalesDiamond: "After-sales Diamond",
+      activeAfterSales: "Active After-sales",
+      dormant: "Dormant",
+      lost: "Churned"
     },
     store: {
       label: "Store",
       allStores: "All Stores",
       selectStore: "Select store",
       currentStore: "Current store"
+    },
+    vehicleView: {
+      buyerTags: "Tags (Buyer)",
+      status: "Vehicle Status"
     },
     placeholder: {
       userId: "Please enter User ID",
@@ -91,7 +103,26 @@ export default {
       segmentName: "Please enter segment name",
       customerType: "Please select customer type",
       city: "Please enter city",
-      primaryRelationTag: "Primary relation tag"
+      primaryRelationTag: "Please select relation tag",
+      identityType: "Please select identity type",
+      companyName: "Please enter company name",
+      residenceArea: "Please enter residence area",
+      vehicleStatus: "Please select vehicle status",
+      tagChangeTime: "Select tag change time",
+      segment: "Select segment"
+    },
+    tagChangeTime: "Tag change time",
+    tagChangeTimeOptions: {
+      oneMonthAdd: "Added within 1 month",
+      oneMonthRemove: "Removed within 1 month",
+      threeMonthAdd: "Added within 3 months",
+      threeMonthRemove: "Removed within 3 months"
+    },
+    segment: "Segment",
+    identityType: {
+      prospective: "Prospective Owner",
+      owner: "Owner",
+      formerOwner: "Former Owner"
     },
     relationTag: {
       self: "Self",
@@ -139,8 +170,15 @@ export default {
       saveConfirm: "Confirm save changes?",
       editBasicInfo: "Edit Basic Info",
       editTags: "Edit Tags",
+      tags: "Tags",
+      tagsPlaceholder: "Select or enter tag",
       tagsEdit: "Edit Tags",
       addPhone: "Add Phone",
+      viewAllPhones: "View all contact numbers",
+      contactName: "Contact name",
+      doneEdit: "Done",
+      edit: "Edit",
+      addContact: "Add contact",
       preferredNumber: "Preferred",
       setAsPreferred: "Set as preferred",
       offlineActivities: "Offline Activities",
@@ -268,6 +306,27 @@ export default {
       rowSummary:
         "Handlers: {handlers} · {vehicleCount} vehicles in total · Open 360 to see different roles using different vehicles",
       rowSummaryEmpty: "No handler or vehicle information"
+    },
+    listFields: {
+      birthDate: "Birthday",
+      residenceArea: "Residence Area",
+      identityType: "Identity Type",
+      lastReturnStore: "Last Return Store",
+      lastServiceDate: "Last Service Date",
+      firstMaintenanceDone: "First Maintenance Done",
+      firstReturnDone: "First Return Done",
+      firstOwnerNamePhone: "First Owner Name & Phone",
+      firstOwnerName: "First Owner Name",
+      ownerPhone: "First Owner Phone",
+      vehicleAge: "Vehicle Age",
+      vehicleAttribute: "Vehicle Attribute",
+      topModelTag: "Top Model Tag",
+      deliveryDate: "Delivery Date",
+      predictedMileage: "Predicted Mileage",
+      optionInstallInfo: "Option & Install Info",
+      purchaseAttribute: "Purchase Attribute",
+      hasStickyProduct: "Has Sticky Product",
+      campaignParticipationCount: "Campaign Participation Count"
     },
     company: {
       title: "Company Information",

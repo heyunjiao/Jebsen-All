@@ -503,7 +503,7 @@ function getTagManageMockData(url: string, method: string, params: any) {
     return listData;
   }
 
-  // 标签详情接口
+  // 标签详情接口：根据 tagId 从列表中取对应标签（含 ruleConfig），默认标签点进去即带一条规则
   if (
     url.includes("/tag/") &&
     method === "get" &&
@@ -514,10 +514,20 @@ function getTagManageMockData(url: string, method: string, params: any) {
     !url.includes("/disable") &&
     !url.includes("/abandon")
   ) {
-    const tagId = url.split("/tag/")[1];
+    const rawTagId = url.split("/tag/")[1];
+    const tagId = rawTagId?.split("?")[0]?.trim() || "TAG-049";
+    const listData = JSON.parse(JSON.stringify(tagManageMockData.list));
+    const found = listData.data.list.find((t: any) => t.tagId === tagId);
     const detailData = JSON.parse(JSON.stringify(tagManageMockData.detail));
-    if (detailData.data) {
-      detailData.data.tagId = tagId || "TAG-001";
+    if (found) {
+      detailData.data = {
+        ...found,
+        versionHistory: detailData.data?.versionHistory || [
+          { version: "v1.0", updateTime: found.updateTime, operator: found.creator || "系统初始化", changeLog: "初始版本" }
+        ]
+      };
+    } else if (detailData.data) {
+      detailData.data.tagId = tagId;
     }
     return detailData;
   }

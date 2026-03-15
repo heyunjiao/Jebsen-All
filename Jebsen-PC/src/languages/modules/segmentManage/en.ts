@@ -51,17 +51,23 @@ export default {
     statusOptions: {
       draft: "Draft",
       running: "Calculating",
-      active: "Active",
+      active: "Completed",
       failed: "Failed",
       inactive: "Inactive",
       disabled: "Disabled"
     },
+    completed: "Completed",
+    permission: "Visibility",
+    permissionPlaceholder: "Who can view and use this segment",
+    permissionPublic: "Public",
+    permissionPublicTip: "Visible and usable by all team members",
+    permissionPrivate: "Only me",
+    permissionPrivateTip: "Visible and usable only by the creator",
     stats: {
       segmentTotal: "Segment Total",
       totalMembers: "Total Members",
-      activeSegments: "Active Segments",
-      draftSegments: "Draft Segments",
-      pushedToOpportunity: "Pushed to Opportunity"
+      calculatingCount: "Calculating",
+      completedCount: "Completed"
     }
   }
 };

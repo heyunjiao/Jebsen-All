@@ -33,51 +33,79 @@
       </div>
     </el-card>
 
-    <!-- 统计面板：客户分层维度 -->
-    <div class="stats-panel">
-      <div class="stats-card primary-card">
-        <div class="stats-icon-wrapper">
-          <el-icon><Medal /></el-icon>
+    <!-- 统计面板：会员分层（总数 + 本月新增数，不随筛选变更） -->
+    <div v-if="activeListMode === 'person'" class="stats-panel">
+      <div class="stats-panel-title">{{ t("customer.stats.memberTierTitle") }}</div>
+      <div class="stats-cards-row">
+        <div class="stats-card primary-card">
+          <div class="stats-icon-wrapper">
+            <el-icon><Medal /></el-icon>
+          </div>
+          <div class="stats-content">
+            <div class="stats-label">{{ t("customer.stats.salesDiamond") }}</div>
+            <div class="stats-row">
+              <span class="stats-number">{{ formatNumber(customerStats.salesDiamond) }}</span>
+              <span class="stats-new">
+              {{ t("customer.stats.newThisMonth") }} {{ formatNumber(customerStats.salesDiamondNew) }}
+            </span>
+            </div>
+          </div>
         </div>
-        <div class="stats-content">
-          <div class="stats-number">{{ formatNumber(customerStats.salesDiamond) }}</div>
-          <div class="stats-label">{{ t("customer.stats.salesDiamond") }}</div>
+        <div class="stats-card success-card">
+          <div class="stats-icon-wrapper">
+            <el-icon><Top /></el-icon>
+          </div>
+          <div class="stats-content">
+            <div class="stats-label">{{ t("customer.stats.aftersalesDiamond") }}</div>
+            <div class="stats-row">
+              <span class="stats-number">{{ formatNumber(customerStats.aftersalesDiamond) }}</span>
+              <span class="stats-new">
+              {{ t("customer.stats.newThisMonth") }} {{ formatNumber(customerStats.aftersalesDiamondNew) }}
+            </span>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="stats-card success-card">
-        <div class="stats-icon-wrapper">
-          <el-icon><Top /></el-icon>
+        <div class="stats-card info-card">
+          <div class="stats-icon-wrapper">
+            <el-icon><Connection /></el-icon>
+          </div>
+          <div class="stats-content">
+            <div class="stats-label">{{ t("customer.stats.activeAfterSales") }}</div>
+            <div class="stats-row">
+              <span class="stats-number">{{ formatNumber(customerStats.activeAfterSales) }}</span>
+              <span class="stats-new">
+              {{ t("customer.stats.newThisMonth") }} {{ formatNumber(customerStats.activeAfterSalesNew) }}
+            </span>
+            </div>
+          </div>
         </div>
-        <div class="stats-content">
-          <div class="stats-number">{{ formatNumber(customerStats.aftersalesDiamond) }}</div>
-          <div class="stats-label">{{ t("customer.stats.aftersalesDiamond") }}</div>
+        <div class="stats-card warning-card">
+          <div class="stats-icon-wrapper">
+            <el-icon><Select /></el-icon>
+          </div>
+          <div class="stats-content">
+            <div class="stats-label">{{ t("customer.stats.dormant") }}</div>
+            <div class="stats-row">
+              <span class="stats-number">{{ formatNumber(customerStats.dormant) }}</span>
+              <span class="stats-new">
+              {{ t("customer.stats.newThisMonth") }} {{ formatNumber(customerStats.dormantNew) }}
+            </span>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="stats-card info-card">
-        <div class="stats-icon-wrapper">
-          <el-icon><Connection /></el-icon>
-        </div>
-        <div class="stats-content">
-          <div class="stats-number">{{ formatNumber(customerStats.activeAfterSales) }}</div>
-          <div class="stats-label">{{ t("customer.stats.activeAfterSales") }}</div>
-        </div>
-      </div>
-      <div class="stats-card warning-card">
-        <div class="stats-icon-wrapper">
-          <el-icon><Select /></el-icon>
-        </div>
-        <div class="stats-content">
-          <div class="stats-number">{{ formatNumber(customerStats.dormant) }}</div>
-          <div class="stats-label">{{ t("customer.stats.dormant") }}</div>
-        </div>
-      </div>
-      <div class="stats-card info-card">
-        <div class="stats-icon-wrapper">
-          <el-icon><Refresh /></el-icon>
-        </div>
-        <div class="stats-content">
-          <div class="stats-number">{{ formatNumber(customerStats.lost) }}</div>
-          <div class="stats-label">{{ t("customer.stats.lost") }}</div>
+        <div class="stats-card info-card">
+          <div class="stats-icon-wrapper">
+            <el-icon><Refresh /></el-icon>
+          </div>
+          <div class="stats-content">
+            <div class="stats-label">{{ t("customer.stats.lost") }}</div>
+            <div class="stats-row">
+              <span class="stats-number">{{ formatNumber(customerStats.lost) }}</span>
+              <span class="stats-new">
+              {{ t("customer.stats.newThisMonth") }} {{ formatNumber(customerStats.lostNew) }}
+            </span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -132,6 +160,16 @@
         </el-tag>
       </template>
 
+      <!-- 标签列：与标签管理统一，使用 tagCategory 叶子编码展示 -->
+      <template #tags="scope">
+        <div v-if="scope.row.tags && scope.row.tags.length" class="person-tags-cell">
+          <el-tag v-for="tag in scope.row.tags" :key="tag" size="small" :type="getTagType(tag)" class="person-tag">
+            {{ getCategoryFullPath(TAG_CATEGORY_OPTIONS, tag) || tag }}
+          </el-tag>
+        </div>
+        <span v-else class="table-cell-empty">{{ TABLE_EMPTY_PLACEHOLDER }}</span>
+      </template>
+
       <!-- 操作列 -->
       <template #operation="scope">
         <el-button link type="primary" @click="viewProfile360(scope.row)">
@@ -162,6 +200,22 @@
         </el-button>
       </template>
 
+      <!-- 标签（购车人）列：与按人标签列 UI 一致 -->
+      <template #buyerTags="scope">
+        <div v-if="scope.row.buyerTags && scope.row.buyerTags.length" class="person-tags-cell">
+          <el-tag
+            v-for="tag in scope.row.buyerTags"
+            :key="tag"
+            size="small"
+            :type="getTagType(tag)"
+            class="person-tag"
+          >
+            {{ getCategoryFullPath(TAG_CATEGORY_OPTIONS, tag) || tag }}
+          </el-tag>
+        </div>
+        <span v-else class="table-cell-empty">{{ TABLE_EMPTY_PLACEHOLDER }}</span>
+      </template>
+
       <template #status="scope">
         <el-tag :type="getVehicleStatusType(scope.row.status)" size="small">
           {{ scope.row.status || TABLE_EMPTY_PLACEHOLDER }}
@@ -186,15 +240,19 @@
 <script setup lang="ts">
 import { ref, reactive, h, onMounted, watch, computed } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
+import { ElSelect, ElOption } from "element-plus";
 import { Download, View, Warning, User, Top, Select, Medal, Connection, Refresh } from "@element-plus/icons-vue";
 import { useUserStore } from "@/stores/modules/user";
 import ProTable from "@/components/ProTable/index.vue";
 import { ColumnProps } from "@/components/ProTable/interface";
 import { TABLE_EMPTY_PLACEHOLDER } from "@/utils";
+import { getCategoryFullPath, getCategoryType, TAG_CATEGORY_META, TAG_CATEGORY_OPTIONS } from "@/constants/tagCategory";
 import { Customer, Customer360View, FeedbackForm, LifecycleStatus, CompanyInfo } from "./interface";
 import MultiValueField from "./components/MultiValueField.vue";
 import Profile360View from "./components/Profile360View.vue";
 import FeedbackDialog from "./components/FeedbackDialog.vue";
+import { getSegmentList } from "@/api/modules/segment";
+import type { Segment } from "@/api/modules/segment";
 
 // 国际化多语言处理
 import { useI18n } from "vue-i18n";
@@ -210,11 +268,23 @@ interface VehicleListRow {
   hasConflict: boolean;
   primaryStoreName?: string;
   customerType: Customer["customerType"];
+  name?: string;
+  companyName?: string;
+  buyerPhone: string;
+  /** 首任车主姓名 */
+  firstOwnerName?: string;
+  /** 车主电话（首任车主电话） */
+  ownerPhone?: string;
   vehicleModel: string;
   licensePlate: string;
   vin: string;
+  vehicleAge?: string;
+  vehicleAttribute?: string;
+  topModelTag?: string;
   purchaseDate: string;
   currentMileage: number;
+  optionInstallInfo?: string;
+  purchaseAttribute?: string;
   insuranceCompany: string;
   insuranceType: string;
   insuranceStatus: string;
@@ -236,8 +306,9 @@ interface VehicleListRow {
   lastVisitTime: string;
   visitCount90Days: number;
   annualOrderFrequency: number;
-  buyerPhone: string;
   status: string;
+  /** 通过购车人关联的标签，多个关联人时取最新关联人的标签 */
+  buyerTags?: string[];
 }
 
 // 模拟门店列表（与 Mock 数据一致，保证搜索选项与列表数据可关联、门店筛选生效）
@@ -255,13 +326,18 @@ const storeSearchOptions = computed(() => [
   ...MOCK_STORE_LIST.map(s => ({ label: s.storeName, value: s.storeId }))
 ]);
 
-// 客户库统计数据（根据当前筛选/Tab 的结果动态计算）- 客户分层维度
+// 会员分层统计（不随筛选变更：总数为全量，本月新增数为当月进入该分层的人数）
 const customerStats = reactive({
-  salesDiamond: 0, // 销售钻石客户
-  aftersalesDiamond: 0, // 售后钻石客户
-  activeAfterSales: 0, // 普通活跃售后客户
-  dormant: 0, // 休眠客户
-  lost: 0 // 流失客户
+  salesDiamond: 0,
+  salesDiamondNew: 0,
+  aftersalesDiamond: 0,
+  aftersalesDiamondNew: 0,
+  activeAfterSales: 0,
+  activeAfterSalesNew: 0,
+  dormant: 0,
+  dormantNew: 0,
+  lost: 0,
+  lostNew: 0
 });
 
 // 格式化数字
@@ -303,8 +379,38 @@ const onTopStoreChange = () => {
 // 工具栏按钮配置
 const toolButton: ("refresh" | "setting" | "search")[] = ["refresh", "setting", "search"];
 
-// 基础表格列配置（个人 / 公司共用）
-const baseColumns: ColumnProps<Customer>[] = [
+// 标签筛选下拉选项（仅叶子节点，与标签管理一致）
+const tagSearchOptions = computed(() =>
+  TAG_CATEGORY_META.filter(m => m.isLeaf).map(m => ({
+    value: m.value,
+    label: getCategoryFullPath(TAG_CATEGORY_OPTIONS, m.value) || m.label
+  }))
+);
+
+// 标签变更时间筛选项（仅单选标签时可用）
+const TAG_CHANGE_TIME_OPTIONS = [
+  { value: "one_month_add", labelKey: "customer.tagChangeTimeOptions.oneMonthAdd" },
+  { value: "one_month_remove", labelKey: "customer.tagChangeTimeOptions.oneMonthRemove" },
+  { value: "three_month_add", labelKey: "customer.tagChangeTimeOptions.threeMonthAdd" },
+  { value: "three_month_remove", labelKey: "customer.tagChangeTimeOptions.threeMonthRemove" }
+];
+
+// 分群下拉选项（接口拉取）
+const segmentOptions = ref<{ value: string; label: string }[]>([]);
+const loadSegmentOptions = async () => {
+  try {
+    const res = await getSegmentList({ pageNum: 1, pageSize: 500, status: "active" as Segment.SegmentStatus });
+    const data = res?.data as { list?: Segment.SegmentInfo[] } | undefined;
+    const list = data?.list ?? [];
+    segmentOptions.value = list.map(s => ({ value: s.id, label: s.name }));
+  } catch {
+    segmentOptions.value = [];
+  }
+};
+onMounted(() => loadSegmentOptions());
+
+// 人视角列：按需求侧字段列表-人视角（D=Y）顺序
+const personColumns = computed<ColumnProps<Customer>[]>(() => [
   {
     prop: "oneId",
     label: t("customer.oneId"),
@@ -313,430 +419,336 @@ const baseColumns: ColumnProps<Customer>[] = [
     search: {
       el: "input",
       label: t("customer.oneId"),
+      order: 2,
       props: { placeholder: t("customer.placeholder.oneId") }
-    }
-  },
-  {
-    prop: "storeId",
-    label: t("customer.store.label"),
-    minWidth: 160,
-    enum: storeSearchOptions,
-    // 门店筛已移至页面顶部，此处仅作列展示，不再在搜索区重复
-    render: scope => {
-      // 列表只保留一个门店信息列：展示主服务门店名称，保证当前有数据
-      const name = scope.row.primaryStoreName;
-      const display = name || TABLE_EMPTY_PLACEHOLDER;
-      return display === TABLE_EMPTY_PLACEHOLDER ? h("span", { class: "table-cell-empty" }, display) : display;
-    }
-  },
-  {
-    prop: "lifecycleStatus",
-    label: t("customer.lifecycleStatus"),
-    minWidth: 120,
-    search: {
-      el: "select",
-      label: t("customer.lifecycleStatus"),
-      props: {
-        placeholder: t("customer.placeholder.lifecycleStatus"),
-        options: [
-          { label: t("customer.lifecycleStatusOptions.active"), value: "active" },
-          { label: t("customer.lifecycleStatusOptions.inactive"), value: "inactive" },
-          { label: t("customer.lifecycleStatusOptions.pending"), value: "pending" },
-          { label: t("customer.lifecycleStatusOptions.conflict"), value: "conflict" }
-        ]
-      }
-    }
-  },
-  {
-    prop: "userId",
-    label: t("customer.userId"),
-    minWidth: 120,
-    sortable: true,
-    search: {
-      el: "input",
-      label: t("customer.userId"),
-      props: { placeholder: t("customer.placeholder.userId") }
-    }
-  },
-  {
-    prop: "name",
-    label: t("customer.name"),
-    minWidth: 120,
-    search: {
-      el: "input",
-      label: t("customer.name"),
-      props: { placeholder: t("customer.placeholder.name") }
-    }
-  },
-  {
-    prop: "companyName",
-    label: t("customer.company.name"),
-    minWidth: 140,
-    render: scope => {
-      const row = scope.row as Customer;
-      const display = row.companyName || TABLE_EMPTY_PLACEHOLDER;
-      return display === TABLE_EMPTY_PLACEHOLDER ? h("span", { class: "table-cell-empty" }, display) : display;
-    }
-  },
-  {
-    prop: "city",
-    label: t("customer.city"),
-    minWidth: 120,
-    search: {
-      el: "input",
-      label: t("customer.city"),
-      props: { placeholder: t("customer.placeholder.city") }
     }
   },
   {
     prop: "customerType",
     label: t("customer.customerType.label"),
-    minWidth: 120,
+    minWidth: 100,
+    enum: [
+      { label: t("customer.customerType.individual"), value: "individual" },
+      { label: t("customer.customerType.company"), value: "company" }
+    ],
     search: {
       el: "select",
       label: t("customer.customerType.label"),
-      props: {
-        placeholder: t("customer.placeholder.customerType"),
-        options: [
-          { label: t("customer.customerType.individual"), value: "individual" },
-          { label: t("customer.customerType.company"), value: "company" }
-        ]
-      }
-    },
-    render: scope => {
-      const type = scope.row.customerType;
-      const label = type === "company" ? t("customer.customerType.company") : t("customer.customerType.individual");
-      return h(
-        "span",
-        {
-          class: "customer-type-cell"
-        },
-        label
-      );
-    }
-  },
-  {
-    prop: "gender",
-    label: t("customer.gender.label"),
-    minWidth: 100,
-    search: {
-      el: "select",
-      label: t("customer.gender.label"),
-      props: {
-        placeholder: t("customer.placeholder.gender"),
-        options: [
-          { label: t("customer.gender.male"), value: "male" },
-          { label: t("customer.gender.female"), value: "female" },
-          { label: t("customer.gender.other"), value: "other" }
-        ]
-      }
+      props: { placeholder: t("customer.placeholder.customerType") }
     },
     render: scope =>
-      scope.row.customerType === "company"
-        ? "—"
-        : scope.row.gender
-          ? t(`customer.gender.${scope.row.gender}`)
-          : TABLE_EMPTY_PLACEHOLDER
+      scope.row.customerType === "company" ? t("customer.customerType.company") : t("customer.customerType.individual")
+  },
+  {
+    prop: "companyName",
+    label: t("customer.company.name"),
+    minWidth: 140,
+    search: {
+      el: "input",
+      label: t("customer.company.name"),
+      props: { placeholder: t("customer.placeholder.companyName") }
+    },
+    render: scope => scope.row.companyName || TABLE_EMPTY_PLACEHOLDER
+  },
+  {
+    prop: "name",
+    label: t("customer.name"),
+    minWidth: 120,
+    search: { el: "input", label: t("customer.name"), props: { placeholder: t("customer.placeholder.name") } }
+  },
+  {
+    prop: "phone",
+    label: t("customer.phone"),
+    minWidth: 140,
+    search: { el: "input", label: t("customer.phone"), props: { placeholder: t("customer.placeholder.phone") } }
+  },
+  {
+    prop: "birthDate",
+    label: t("customer.listFields.birthDate"),
+    minWidth: 120,
+    render: scope => scope.row.birthDate || TABLE_EMPTY_PLACEHOLDER
+  },
+  {
+    prop: "residenceArea",
+    label: t("customer.listFields.residenceArea"),
+    minWidth: 140,
+    search: {
+      el: "input",
+      label: t("customer.listFields.residenceArea"),
+      props: { placeholder: t("customer.placeholder.residenceArea") }
+    },
+    render: scope => scope.row.residenceArea || scope.row.city || TABLE_EMPTY_PLACEHOLDER
   },
   {
     prop: "ageGroup",
     label: t("customer.ageGroup"),
-    minWidth: 120,
+    minWidth: 100,
+    enum: [
+      { label: "18-25", value: "18-25" },
+      { label: "26-35", value: "26-35" },
+      { label: "36-45", value: "36-45" },
+      { label: "46-55", value: "46-55" },
+      { label: "56-65", value: "56-65" }
+    ],
     search: {
-      el: "input",
+      el: "select",
       label: t("customer.ageGroup"),
       props: { placeholder: t("customer.placeholder.ageGroup") }
     },
     render: scope => (scope.row.customerType === "company" ? "—" : scope.row.ageGroup || TABLE_EMPTY_PLACEHOLDER)
   },
   {
-    prop: "familyStatus",
-    label: t("customer.familyStatus"),
-    minWidth: 120,
-    search: {
-      el: "input",
-      label: t("customer.familyStatus"),
-      props: { placeholder: t("customer.placeholder.familyStatus") }
-    },
-    render: scope => (scope.row.customerType === "company" ? "—" : scope.row.familyStatus || TABLE_EMPTY_PLACEHOLDER)
-  },
-  {
-    prop: "address",
-    label: t("customer.address"),
-    minWidth: 180,
-    search: {
-      el: "input",
-      label: t("customer.address"),
-      props: { placeholder: t("customer.placeholder.address") }
-    },
-    render: scope => {
-      const fieldValue = scope.row.address;
-      if (Array.isArray(fieldValue) && fieldValue.length > 1) {
-        return h(MultiValueField, {
-          fieldKey: "address",
-          fieldLabel: t("customer.address"),
-          fieldValue: fieldValue,
-          oneId: scope.row.oneId
-        });
-      }
-      const val = typeof fieldValue === "string" ? fieldValue : (fieldValue?.[0]?.value ?? "");
-      const display = val || TABLE_EMPTY_PLACEHOLDER;
-      return display === TABLE_EMPTY_PLACEHOLDER ? h("span", { class: "table-cell-empty" }, display) : display;
-    }
-  },
-  {
-    prop: "phone",
-    label: t("customer.phone"),
-    minWidth: 140,
-    search: {
-      el: "input",
-      label: t("customer.phone"),
-      props: { placeholder: t("customer.placeholder.phone") }
-    }
-  },
-  {
     prop: "primaryRelationTag",
     label: t("customer.primaryRelationTag"),
     minWidth: 110,
-    render: scope => {
-      const row = scope.row as Customer;
-      // 业务规则：主号关系仅对个人客户有意义；公司在列表中不展示
-      if (row.customerType === "company") return TABLE_EMPTY_PLACEHOLDER;
-      const display = row.primaryRelationTag || TABLE_EMPTY_PLACEHOLDER;
-      return display === TABLE_EMPTY_PLACEHOLDER ? h("span", { class: "table-cell-empty" }, display) : display;
-    }
-  },
-  {
-    prop: "handler",
-    label: t("customer.handler"),
-    minWidth: 100,
-    render: scope => {
-      const row = scope.row;
-      if (row.customerType !== "company" || !row.handlers?.length) return "—";
-      const selected = row.handlers.find((h: { id: string }) => h.id === row.selectedHandlerId) || row.handlers[0];
-      if (!selected?.name) return "—";
-      const role = (selected as { role?: string }).role;
-      return role ? `${selected.name}（${role}）` : selected.name;
-    }
-  },
-  {
-    prop: "segmentName",
-    label: t("customer.segmentName"),
-    minWidth: 120,
-    search: {
-      el: "input",
-      label: t("customer.segmentName"),
-      props: { placeholder: t("customer.placeholder.segmentName") }
-    }
-  },
-  {
-    prop: "contactPreference",
-    label: t("customer.contactPreference"),
-    minWidth: 160,
-    search: {
-      el: "input",
-      label: t("customer.contactPreference"),
-      props: { placeholder: t("customer.placeholder.contactPreference") }
-    }
-  },
-  {
-    prop: "lastVisitTime",
-    label: t("customer.lastVisitTime"),
-    minWidth: 160,
-    search: {
-      el: "date-picker",
-      label: t("customer.lastVisitTime"),
-      props: {
-        type: "daterange",
-        rangeSeparator: "-",
-        startPlaceholder: t("customer.placeholder.lastVisitTimeStart"),
-        endPlaceholder: t("customer.placeholder.lastVisitTimeEnd")
-      }
-    }
-  },
-  {
-    prop: "visitCount90Days",
-    label: t("customer.visitCount90Days"),
-    minWidth: 160,
-    sortable: true,
-    search: {
-      el: "input-number",
-      label: t("customer.visitCount90Days"),
-      props: {
-        placeholder: t("customer.placeholder.visitCount90Days"),
-        min: 0
-      }
-    }
-  },
-  {
-    prop: "annualOrderFrequency",
-    label: t("customer.annualOrderFrequency"),
-    minWidth: 180,
-    search: {
-      el: "input",
-      label: t("customer.annualOrderFrequency"),
-      props: { placeholder: t("customer.placeholder.annualOrderFrequency") }
-    }
-  },
-  {
-    prop: "avgConsumption",
-    label: t("customer.avgConsumption"),
-    minWidth: 150,
-    sortable: true,
-    search: {
-      el: "input-number",
-      label: t("customer.avgConsumption"),
-      props: {
-        placeholder: t("customer.placeholder.avgConsumption"),
-        min: 0,
-        precision: 2
-      }
-    }
-  },
-  {
-    prop: "projectPreference",
-    label: t("customer.projectPreference"),
-    minWidth: 150,
-    search: {
-      el: "input",
-      label: t("customer.projectPreference"),
-      props: { placeholder: t("customer.placeholder.projectPreference") }
-    }
-  },
-  {
-    prop: "hasComplaintLastYear",
-    label: t("customer.hasComplaintLastYear"),
-    minWidth: 180,
+    enum: [
+      { label: t("customer.relationTag.self"), value: "本人" },
+      { label: t("customer.relationTag.spouse"), value: "配偶" },
+      { label: t("customer.relationTag.companyPhone"), value: "公司电话" }
+    ],
     search: {
       el: "select",
-      label: t("customer.hasComplaintLastYear"),
-      props: {
-        placeholder: t("customer.placeholder.hasComplaintLastYear"),
-        options: [
-          { label: t("common.yes"), value: true },
-          { label: t("common.no"), value: false }
-        ]
-      }
+      label: t("customer.primaryRelationTag"),
+      props: { placeholder: t("customer.placeholder.primaryRelationTag") }
     },
-    render: scope => (scope.row.hasComplaintLastYear ? t("common.yes") : t("common.no"))
+    render: scope => scope.row.primaryRelationTag || TABLE_EMPTY_PLACEHOLDER
   },
   {
-    prop: "annualConsumption",
-    label: t("customer.annualConsumption"),
-    minWidth: 160,
-    sortable: true,
+    prop: "identityType",
+    label: t("customer.listFields.identityType"),
+    minWidth: 120,
+    enum: [
+      { label: t("customer.identityType.prospective"), value: "准车主" },
+      { label: t("customer.identityType.owner"), value: "车主" },
+      { label: t("customer.identityType.formerOwner"), value: "曾用车主" }
+    ],
     search: {
-      el: "input-number",
-      label: t("customer.annualConsumption"),
-      props: {
-        placeholder: t("customer.placeholder.annualConsumption"),
-        min: 0,
-        precision: 2
+      el: "select",
+      label: t("customer.listFields.identityType"),
+      props: { placeholder: t("customer.placeholder.identityType") }
+    },
+    render: scope => scope.row.identityType || TABLE_EMPTY_PLACEHOLDER
+  },
+  {
+    prop: "lifecycleStatus",
+    label: t("customer.lifecycleStatus"),
+    minWidth: 100,
+    enum: [
+      { label: t("customer.lifecycleStatusOptions.active"), value: "active" },
+      { label: t("customer.lifecycleStatusOptions.inactive"), value: "inactive" },
+      { label: t("customer.lifecycleStatusOptions.pending"), value: "pending" },
+      { label: t("customer.lifecycleStatusOptions.conflict"), value: "conflict" }
+    ],
+    search: {
+      el: "select",
+      label: t("customer.lifecycleStatus"),
+      props: { placeholder: t("customer.placeholder.lifecycleStatus") }
+    }
+  },
+  {
+    prop: "tags",
+    label: t("customer.profile360.tags"),
+    minWidth: 200,
+    slot: "tags",
+    enum: tagSearchOptions.value,
+    search: {
+      el: "select",
+      label: t("customer.profile360.tags"),
+      order: 1,
+      defaultValue: [],
+      props: { multiple: true, placeholder: t("customer.profile360.tagsPlaceholder") }
+    }
+  },
+  {
+    prop: "tagChangeTime",
+    isShow: false,
+    search: {
+      label: t("customer.tagChangeTime"),
+      order: 0,
+      key: "tagChangeTime",
+      render: (scope: any) => {
+        const tags = scope.searchParam?.tags;
+        const isSingleTag = Array.isArray(tags) && tags.length === 1;
+        return h(
+          ElSelect,
+          {
+            modelValue: scope.searchParam?.tagChangeTime,
+            "onUpdate:modelValue": (v: string) => {
+              if (scope.searchParam) scope.searchParam.tagChangeTime = v;
+            },
+            disabled: !isSingleTag,
+            placeholder: t("customer.placeholder.tagChangeTime"),
+            clearable: true,
+            style: { width: "100%" }
+          },
+          {
+            default: () =>
+              TAG_CHANGE_TIME_OPTIONS.map(opt => h(ElOption, { key: opt.value, label: t(opt.labelKey), value: opt.value }))
+          }
+        );
       }
     }
   },
   {
-    prop: "loyaltyLevel",
-    label: t("customer.loyaltyLevel"),
-    minWidth: 140,
+    prop: "segmentId",
+    label: t("customer.segment"),
+    minWidth: 120,
+    isShow: false,
     search: {
-      el: "input",
-      label: t("customer.loyaltyLevel"),
-      props: { placeholder: t("customer.placeholder.loyaltyLevel") }
+      el: "select",
+      label: t("customer.segment"),
+      order: 3,
+      key: "segmentId",
+      props: { placeholder: t("customer.placeholder.segment") },
+      enum: computed(() => segmentOptions.value)
     }
   },
   {
-    prop: "opportunityLevel",
-    label: t("customer.opportunityLevel"),
+    prop: "valueInfo.compositeScore",
+    label: t("customer.profile360.compositeScore"),
+    minWidth: 120,
+    render: scope => (scope.row.valueInfo?.compositeScore != null ? scope.row.valueInfo.compositeScore : TABLE_EMPTY_PLACEHOLDER)
+  },
+  {
+    prop: "valueInfo.postSalesSelfPaidAmount",
+    label: t("customer.profile360.postSalesSelfPaidAmount"),
     minWidth: 140,
-    search: {
-      el: "input",
-      label: t("customer.opportunityLevel"),
-      props: { placeholder: t("customer.placeholder.opportunityLevel") }
-    }
+    render: scope =>
+      scope.row.valueInfo?.postSalesSelfPaidAmount != null
+        ? `¥${formatNumber(Math.round(scope.row.valueInfo.postSalesSelfPaidAmount))}`
+        : TABLE_EMPTY_PLACEHOLDER
+  },
+  {
+    prop: "valueInfo.addonPurchaseAmount",
+    label: t("customer.profile360.addonPurchaseAmount"),
+    minWidth: 140,
+    render: scope =>
+      scope.row.valueInfo?.addonPurchaseAmount != null
+        ? `¥${formatNumber(Math.round(scope.row.valueInfo.addonPurchaseAmount))}`
+        : TABLE_EMPTY_PLACEHOLDER
   },
   {
     prop: "vinInfo",
     label: t("customer.vinInfo"),
-    minWidth: 180,
-    search: {
-      el: "input",
-      label: t("customer.vinInfo"),
-      props: { placeholder: t("customer.placeholder.vinInfo") }
-    },
-    render: scope => {
-      const fieldValue = scope.row.vinInfo;
-      if (Array.isArray(fieldValue) && fieldValue.length > 1) {
-        return h(MultiValueField, {
-          fieldKey: "vin",
-          fieldLabel: t("customer.vinInfo"),
-          fieldValue: fieldValue,
-          oneId: scope.row.oneId
-        });
-      }
-      const val = typeof fieldValue === "string" ? fieldValue : (fieldValue?.[0]?.value ?? "");
-      const display = val || TABLE_EMPTY_PLACEHOLDER;
-      return display === TABLE_EMPTY_PLACEHOLDER ? h("span", { class: "table-cell-empty" }, display) : display;
-    }
-  },
-  {
-    prop: "licensePlate",
-    label: t("customer.licensePlate"),
-    minWidth: 140,
-    search: {
-      el: "input",
-      label: t("customer.licensePlate"),
-      props: { placeholder: t("customer.placeholder.licensePlate") }
-    },
-    render: scope => {
-      const fieldValue = scope.row.licensePlate;
-      if (Array.isArray(fieldValue) && fieldValue.length > 1) {
-        return h(MultiValueField, {
-          fieldKey: "plate",
-          fieldLabel: t("customer.licensePlate"),
-          fieldValue: fieldValue,
-          oneId: scope.row.oneId
-        });
-      }
-      const val = typeof fieldValue === "string" ? fieldValue : (fieldValue?.[0]?.value ?? "");
-      const display = val || TABLE_EMPTY_PLACEHOLDER;
-      return display === TABLE_EMPTY_PLACEHOLDER ? h("span", { class: "table-cell-empty" }, display) : display;
-    }
-  },
-  {
-    prop: "carSeriesModel",
-    label: t("customer.carSeriesModel"),
     minWidth: 160,
-    search: {
-      el: "input",
-      label: t("customer.carSeriesModel"),
-      props: { placeholder: t("customer.placeholder.carSeriesModel") }
-    }
-  },
-  {
-    prop: "currentMileage",
-    label: t("customer.currentMileage"),
-    minWidth: 150,
-    sortable: true,
-    search: {
-      el: "input-number",
-      label: t("customer.currentMileage"),
-      props: {
-        placeholder: t("customer.placeholder.currentMileage"),
-        min: 0,
-        precision: 2
+    search: { el: "input", label: t("customer.vinInfo"), props: { placeholder: t("customer.placeholder.vinInfo") } },
+    render: scope => {
+      const v = scope.row.vinInfo;
+      if (Array.isArray(v) && v.length > 1) {
+        return h(MultiValueField, { fieldKey: "vin", fieldLabel: t("customer.vinInfo"), fieldValue: v, oneId: scope.row.oneId });
       }
+      const val = typeof v === "string" ? v : (v?.[0]?.value ?? "");
+      return val || TABLE_EMPTY_PLACEHOLDER;
     }
   },
   {
-    prop: "serviceHabit",
-    label: t("customer.serviceHabit"),
-    minWidth: 150,
-    search: {
-      el: "input",
-      label: t("customer.serviceHabit"),
-      props: { placeholder: t("customer.placeholder.serviceHabit") }
-    }
+    prop: "behaviorInfo.purchaseAmount",
+    label: t("customer.profile360.purchaseAmount"),
+    minWidth: 120,
+    render: scope =>
+      scope.row.behaviorInfo?.purchaseAmount != null
+        ? `¥${formatNumber(Math.round(scope.row.behaviorInfo.purchaseAmount))}`
+        : TABLE_EMPTY_PLACEHOLDER
+  },
+  {
+    prop: "behaviorInfo.optionAmount",
+    label: t("customer.profile360.optionAmount"),
+    minWidth: 120,
+    render: scope =>
+      scope.row.behaviorInfo?.optionAmount != null
+        ? `¥${formatNumber(Math.round(scope.row.behaviorInfo.optionAmount))}`
+        : TABLE_EMPTY_PLACEHOLDER
+  },
+  {
+    prop: "behaviorInfo.addonProductAmount",
+    label: t("customer.profile360.addonProductAmount"),
+    minWidth: 140,
+    render: scope =>
+      scope.row.behaviorInfo?.addonProductAmount != null
+        ? `¥${formatNumber(Math.round(scope.row.behaviorInfo.addonProductAmount))}`
+        : TABLE_EMPTY_PLACEHOLDER
+  },
+  {
+    prop: "behaviorInfo.serviceFrequencyLastYear",
+    label: t("customer.profile360.serviceFrequencyLastYear"),
+    minWidth: 140,
+    render: scope => scope.row.behaviorInfo?.serviceFrequencyLastYear ?? TABLE_EMPTY_PLACEHOLDER
+  },
+  {
+    prop: "behaviorInfo.lastMaintenanceStore",
+    label: t("customer.profile360.lastMaintenanceStore"),
+    minWidth: 160,
+    render: scope => scope.row.behaviorInfo?.lastMaintenanceStore || TABLE_EMPTY_PLACEHOLDER
+  },
+  {
+    prop: "behaviorInfo.lastReturnStore",
+    label: t("customer.listFields.lastReturnStore"),
+    minWidth: 160,
+    render: scope => scope.row.behaviorInfo?.lastReturnStore || TABLE_EMPTY_PLACEHOLDER
+  },
+  {
+    prop: "behaviorInfo.repairAmountLastYear",
+    label: t("customer.profile360.repairAmountLastYear"),
+    minWidth: 160,
+    render: scope =>
+      scope.row.behaviorInfo?.repairAmountLastYear != null
+        ? `¥${formatNumber(Math.round(scope.row.behaviorInfo.repairAmountLastYear))}`
+        : TABLE_EMPTY_PLACEHOLDER
+  },
+  {
+    prop: "behaviorInfo.accidentRepairCountLastYear",
+    label: t("customer.profile360.accidentRepairCountLastYear"),
+    minWidth: 160,
+    render: scope => scope.row.behaviorInfo?.accidentRepairCountLastYear ?? TABLE_EMPTY_PLACEHOLDER
+  },
+  {
+    prop: "behaviorInfo.lastServiceDate",
+    label: t("customer.listFields.lastServiceDate"),
+    minWidth: 120,
+    render: scope =>
+      scope.row.behaviorInfo?.lastServiceDate || scope.row.behaviorInfo?.lastMaintenanceDate || TABLE_EMPTY_PLACEHOLDER
+  },
+  {
+    prop: "behaviorInfo.firstMaintenanceDone",
+    label: t("customer.listFields.firstMaintenanceDone"),
+    minWidth: 140,
+    render: scope => (scope.row.behaviorInfo?.firstMaintenanceDone ? t("common.yes") : t("common.no"))
+  },
+  {
+    prop: "behaviorInfo.inWarrantyPeriod",
+    label: "是否在保修期内",
+    minWidth: 130,
+    render: scope => (scope.row.behaviorInfo?.inWarrantyPeriod ? t("common.yes") : t("common.no"))
+  },
+  {
+    prop: "behaviorInfo.newInsuranceAtSale",
+    label: "新车销售时购买新保",
+    minWidth: 160,
+    render: scope => (scope.row.behaviorInfo?.newInsuranceAtSale ? t("common.yes") : t("common.no"))
+  },
+  {
+    prop: "behaviorInfo.renewedAfterExpiry",
+    label: "到期客户中成功续保",
+    minWidth: 160,
+    render: scope => (scope.row.behaviorInfo?.renewedAfterExpiry ? t("common.yes") : t("common.no"))
+  },
+  {
+    prop: "behaviorInfo.renewCountInStoreRepairOutStoreInsurance",
+    label: "在店维修不在店投保成功续保数",
+    minWidth: 220,
+    render: scope =>
+      scope.row.behaviorInfo?.renewCountInStoreRepairOutStoreInsurance != null
+        ? String(scope.row.behaviorInfo.renewCountInStoreRepairOutStoreInsurance)
+        : TABLE_EMPTY_PLACEHOLDER
+  },
+  {
+    prop: "behaviorInfo.campaignParticipationCount",
+    label: t("customer.listFields.campaignParticipationCount"),
+    minWidth: 180,
+    render: scope =>
+      scope.row.behaviorInfo?.campaignParticipationCount != null
+        ? String(scope.row.behaviorInfo.campaignParticipationCount)
+        : TABLE_EMPTY_PLACEHOLDER
   },
   {
     prop: "operation",
@@ -744,15 +756,68 @@ const baseColumns: ColumnProps<Customer>[] = [
     fixed: "right",
     width: 150
   }
-];
+]);
 
-const personColumns = computed<ColumnProps<Customer>[]>(() => baseColumns.filter(col => col.prop !== "handler"));
-
+// 车视角列：按需求侧字段列表-车视角（E=Y）顺序
 const vehicleColumns = computed<ColumnProps<VehicleListRow>[]>(() => [
   {
-    prop: "primaryStoreName",
-    label: t("customer.store.label"),
-    minWidth: 180
+    prop: "oneId",
+    label: t("customer.oneId"),
+    minWidth: 150,
+    search: { el: "input", label: t("customer.oneId"), props: { placeholder: t("customer.placeholder.oneId") } }
+  },
+  {
+    prop: "companyName",
+    label: t("customer.company.name"),
+    minWidth: 140,
+    search: {
+      el: "input",
+      label: t("customer.company.name"),
+      props: { placeholder: t("customer.placeholder.companyName") }
+    },
+    render: scope => scope.row.companyName || TABLE_EMPTY_PLACEHOLDER
+  },
+  {
+    prop: "name",
+    label: t("customer.name"),
+    minWidth: 120,
+    search: { el: "input", label: t("customer.name"), props: { placeholder: t("customer.placeholder.name") } },
+    render: scope => scope.row.name || TABLE_EMPTY_PLACEHOLDER
+  },
+  {
+    prop: "buyerPhone",
+    label: t("customer.phone"),
+    minWidth: 130,
+    search: {
+      el: "input",
+      label: t("customer.phone"),
+      props: { placeholder: t("customer.placeholder.phone") }
+    },
+    render: scope => scope.row.buyerPhone || TABLE_EMPTY_PLACEHOLDER
+  },
+  {
+    prop: "firstOwnerName",
+    label: t("customer.listFields.firstOwnerName"),
+    minWidth: 120,
+    render: scope => scope.row.firstOwnerName || TABLE_EMPTY_PLACEHOLDER
+  },
+  {
+    prop: "ownerPhone",
+    label: t("customer.listFields.ownerPhone"),
+    minWidth: 130,
+    render: scope => scope.row.ownerPhone || TABLE_EMPTY_PLACEHOLDER
+  },
+  {
+    prop: "vin",
+    label: t("customer.vinInfo"),
+    minWidth: 160,
+    search: { el: "input", label: t("customer.vinInfo"), props: { placeholder: t("customer.placeholder.vinInfo") } }
+  },
+  {
+    prop: "licensePlate",
+    label: t("customer.licensePlate"),
+    minWidth: 120,
+    search: { el: "input", label: t("customer.licensePlate"), props: { placeholder: t("customer.placeholder.licensePlate") } }
   },
   {
     prop: "vehicleModel",
@@ -765,178 +830,69 @@ const vehicleColumns = computed<ColumnProps<VehicleListRow>[]>(() => [
     }
   },
   {
-    prop: "licensePlate",
-    label: t("customer.licensePlate"),
-    minWidth: 130,
-    search: {
-      el: "input",
-      label: t("customer.licensePlate"),
-      props: { placeholder: t("customer.placeholder.licensePlate") }
-    }
+    prop: "vehicleAge",
+    label: t("customer.listFields.vehicleAge"),
+    minWidth: 100,
+    render: scope => scope.row.vehicleAge || TABLE_EMPTY_PLACEHOLDER
   },
   {
-    prop: "vin",
-    label: t("customer.profile360.vin"),
-    minWidth: 160,
-    search: {
-      el: "input",
-      label: t("customer.profile360.vin"),
-      props: { placeholder: t("customer.placeholder.vinInfo") }
-    }
+    prop: "vehicleAttribute",
+    label: t("customer.listFields.vehicleAttribute"),
+    minWidth: 110,
+    render: scope => scope.row.vehicleAttribute || TABLE_EMPTY_PLACEHOLDER
+  },
+  {
+    prop: "topModelTag",
+    label: t("customer.listFields.topModelTag"),
+    minWidth: 120,
+    render: scope => scope.row.topModelTag || TABLE_EMPTY_PLACEHOLDER
   },
   {
     prop: "purchaseDate",
-    label: t("customer.profile360.purchaseDate"),
-    minWidth: 120
+    label: t("customer.listFields.deliveryDate"),
+    minWidth: 120,
+    render: scope => scope.row.purchaseDate || TABLE_EMPTY_PLACEHOLDER
+  },
+  {
+    prop: "currentMileage",
+    label: t("customer.listFields.predictedMileage"),
+    minWidth: 130,
+    render: scope =>
+      scope.row.currentMileage != null ? `${formatNumber(Math.round(scope.row.currentMileage))} km` : TABLE_EMPTY_PLACEHOLDER
+  },
+  {
+    prop: "optionInstallInfo",
+    label: t("customer.listFields.optionInstallInfo"),
+    minWidth: 160,
+    render: scope => scope.row.optionInstallInfo || TABLE_EMPTY_PLACEHOLDER
+  },
+  {
+    prop: "purchaseAttribute",
+    label: t("customer.listFields.purchaseAttribute"),
+    minWidth: 120,
+    render: scope => scope.row.purchaseAttribute || TABLE_EMPTY_PLACEHOLDER
+  },
+  {
+    prop: "buyerTags",
+    label: t("customer.vehicleView.buyerTags"),
+    minWidth: 200,
+    slot: "buyerTags"
   },
   {
     prop: "status",
     label: t("customer.profile360.status"),
-    minWidth: 110
-  },
-  {
-    prop: "submitDate",
-    label: t("customer.profile360.submitDate"),
-    minWidth: 130
-  },
-  {
-    prop: "signStatus",
-    label: t("customer.profile360.signStatus"),
-    minWidth: 120
-  },
-  {
-    prop: "signDate",
-    label: t("customer.profile360.signDate"),
-    minWidth: 130
-  },
-  {
-    prop: "issueCenter",
-    // 发放中心跟随订单，不直接等于上方门店列
-    label: t("customer.profile360.issueCenter"),
-    minWidth: 160
-  },
-  {
-    label: t("customer.profile360.transactions"),
-    _children: [
-      {
-        prop: "lastVisitTime",
-        label: t("customer.lastVisitTime"),
-        minWidth: 170
-      },
-      {
-        prop: "visitCount90Days",
-        label: t("customer.visitCount90Days"),
-        minWidth: 140
-      },
-      {
-        prop: "annualOrderFrequency",
-        label: t("customer.annualOrderFrequency"),
-        minWidth: 140
-      },
-      {
-        prop: "currentMileage",
-        label: t("customer.currentMileage"),
-        minWidth: 130,
-        render: scope => `${formatNumber(Math.round(scope.row.currentMileage || 0))} km`
-      }
-    ]
-  },
-  {
-    label: t("customer.profile360.insurance"),
-    _children: [
-      {
-        prop: "insuranceCompany",
-        label: t("customer.profile360.insuranceCompany"),
-        minWidth: 150,
-        search: {
-          el: "input",
-          label: t("customer.profile360.insuranceCompany"),
-          props: { placeholder: t("customer.profile360.insuranceCompany") }
-        }
-      },
-      {
-        prop: "insuranceType",
-        label: t("customer.profile360.insuranceType"),
-        minWidth: 120
-      },
-      {
-        prop: "insuranceStatus",
-        label: t("customer.vehicleView.insuranceStatus"),
-        minWidth: 120
-      },
-      {
-        prop: "insuranceEndDate",
-        label: t("customer.vehicleView.insuranceEndDate"),
-        minWidth: 130
-      }
-    ]
-  },
-  {
-    label: t("customer.profile360.financialLoans"),
-    _children: [
-      {
-        prop: "financeInstitution",
-        label: t("customer.profile360.financeInstitution"),
-        minWidth: 150,
-        search: {
-          el: "input",
-          label: t("customer.profile360.financeInstitution"),
-          props: { placeholder: t("customer.profile360.financeInstitution") }
-        }
-      },
-      {
-        prop: "loanStatus",
-        label: t("customer.vehicleView.financeStatus"),
-        minWidth: 120
-      },
-      {
-        prop: "customerRate",
-        label: t("customer.profile360.customerRate"),
-        minWidth: 130,
-        render: scope => `${scope.row.customerRate?.toFixed(1) ?? 0}%`
-      },
-      {
-        prop: "loanAmount",
-        label: t("customer.profile360.loanAmount"),
-        minWidth: 140,
-        render: scope => `¥${formatNumber(Math.round(scope.row.loanAmount || 0))}`
-      },
-      {
-        prop: "loanTerm",
-        label: t("customer.profile360.loanTerm"),
-        minWidth: 120
-      },
-      {
-        prop: "bankRebate",
-        label: t("customer.profile360.bankRebate"),
-        minWidth: 130,
-        render: scope => `¥${formatNumber(Math.round(scope.row.bankRebate || 0))}`
-      },
-      {
-        prop: "loanServiceFee",
-        label: t("customer.profile360.loanServiceFee"),
-        minWidth: 140,
-        render: scope => `¥${formatNumber(Math.round(scope.row.loanServiceFee || 0))}`
-      },
-      {
-        prop: "vehicleRegistrationFee",
-        label: t("customer.profile360.vehicleRegistrationFee"),
-        minWidth: 150,
-        render: scope => `¥${formatNumber(Math.round(scope.row.vehicleRegistrationFee || 0))}`
-      },
-      {
-        prop: "vehicleRegistrationCitySubsidy",
-        label: t("customer.profile360.vehicleRegistrationCitySubsidy"),
-        minWidth: 180,
-        render: scope => `¥${formatNumber(Math.round(scope.row.vehicleRegistrationCitySubsidy || 0))}`
-      },
-      {
-        prop: "discountRate",
-        label: t("customer.profile360.discountRate"),
-        minWidth: 130,
-        render: scope => `${scope.row.discountRate?.toFixed(1) ?? 0}%`
-      }
-    ]
+    minWidth: 110,
+    enum: [
+      { label: t("customer.profile360.vehicleStatusSelfUse"), value: "自用" },
+      { label: t("customer.profile360.vehicleStatusRepairing"), value: "维修中" },
+      { label: t("customer.profile360.vehicleStatusSold"), value: "已售" },
+      { label: t("customer.profile360.vehicleStatusOrderInTransit"), value: "订车中-在途" }
+    ],
+    search: {
+      el: "select",
+      label: t("customer.vehicleView.status"),
+      props: { placeholder: t("customer.placeholder.vehicleStatus") }
+    }
   }
 ]);
 
@@ -1000,7 +956,7 @@ const generateMockData = (pageNum: number, pageSize: number, filters: any = {}) 
     const lifecycleStatus = lifecycleStatuses[i % lifecycleStatuses.length];
     const store = MOCK_STORE_LIST[i % storeCount];
 
-    allData.push({
+    const item: Customer = {
       id: i + 1,
       oneId: oneId,
       userId: `C${String(i + 1).padStart(3, "0")}`,
@@ -1142,7 +1098,6 @@ const generateMockData = (pageNum: number, pageSize: number, filters: any = {}) 
           }
         ]
       },
-      tags: i % 5 === 0 ? ["高价值客户", "VIP"] : i % 3 === 0 ? ["活跃客户"] : [],
       segmentName: segments[i % segments.length],
       city: cities[i % cities.length],
       // 主号关系标签：个人客户为“本人/配偶”，公司客户固定“公司电话”
@@ -1150,7 +1105,16 @@ const generateMockData = (pageNum: number, pageSize: number, filters: any = {}) 
         customerType === "company" ? companyRelationTag : individualRelationTags[i % individualRelationTags.length],
       primaryStoreId: store.storeId,
       primaryStoreName: store.storeName,
-      createdAt: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString(),
+      birthDate:
+        customerType === "individual"
+          ? `19${80 + (i % 20)}-${String((i % 12) + 1).padStart(2, "0")}-${String((i % 28) + 1).padStart(2, "0")}`
+          : undefined,
+      residenceArea: `${cities[i % cities.length]}市`,
+      identityType: ["准车主", "车主", "曾用车主"][i % 3],
+      createdAt:
+        i < 10
+          ? new Date(new Date().getFullYear(), new Date().getMonth(), (i % 28) + 1).toISOString()
+          : new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString(),
       updatedAt: new Date().toISOString(),
       ...(customerType === "company"
         ? {
@@ -1160,12 +1124,137 @@ const generateMockData = (pageNum: number, pageSize: number, filters: any = {}) 
             ],
             selectedHandlerId: `H${i}-1`
           }
-        : {})
-    });
+        : {}),
+      valueInfo: (() => {
+        const v90 = Math.floor(Math.random() * 20);
+        const ann = Math.floor(Math.random() * 50);
+        const loyalty = loyaltyLevels[i % loyaltyLevels.length];
+        const isHigh = loyalty === "金卡" || loyalty === "VIP";
+        const hasValueTag = i % 5 === 0 || i % 3 === 0;
+        const daysSince = 30 + (i % 400);
+        const isLost = daysSince > 365;
+        const isDormant = !isLost && daysSince > 180;
+        const isSalesDiamond = !isLost && !isDormant && isHigh && ann >= 5;
+        const isAftersalesDiamond = !isLost && !isDormant && !isSalesDiamond && v90 > 0 && (isHigh || hasValueTag);
+        const isActiveAfterSales = !isLost && !isDormant && !isSalesDiamond && !isAftersalesDiamond && v90 > 0;
+        return {
+          compositeScore: 60 + (i % 40),
+          postSalesSelfPaidAmount: Math.round(parseFloat((Math.random() * 50000).toFixed(2)) * 0.6),
+          addonPurchaseAmount: Math.round(parseFloat((Math.random() * 50000).toFixed(2)) * 0.2),
+          isSalesDiamond,
+          isAftersalesDiamond,
+          isActiveAfterSales,
+          isDormant,
+          isLost
+        };
+      })(),
+      behaviorInfo: (() => {
+        const lastVisit = `2023-${String(Math.floor(Math.random() * 12) + 1).padStart(2, "0")}-${String(Math.floor(Math.random() * 28) + 1).padStart(2, "0")}`;
+        return {
+          hasUpgradeOrReplace: i % 4 === 0,
+          hasReferralBehavior: i % 5 === 0,
+          purchaseAmount: Math.round(120000 + Math.random() * 800000),
+          optionAmount: Math.round(10000 + Math.random() * 50000),
+          addonProductAmount: Math.round(5000 + Math.random() * 20000),
+          serviceFrequencyLastYear: Math.floor(Math.random() * 12),
+          lastMaintenanceStore: store.storeName,
+          lastMaintenanceDate: lastVisit,
+          lastReturnStore: store.storeName,
+          repairAmountLastYear: Math.round(3000 + Math.random() * 15000),
+          accidentRepairCountLastYear: Math.floor(Math.random() * 3),
+          lastServiceDate: lastVisit,
+          isStandardMaintenance: i % 3 !== 0,
+          hasComplaintWithin6Months: i % 7 === 0,
+          hasReturnWithin12Months: i % 2 === 0,
+          firstMaintenanceDone: i % 5 !== 0,
+          inWarrantyPeriod: i % 4 !== 0,
+          firstMaintenanceWithin12Months: i % 6 !== 0,
+          firstReturnWithin12Months: i % 3 !== 0,
+          returnWithin13To24Months: i % 4 === 0,
+          newInsuranceAtSale: i % 2 === 0,
+          renewedAfterExpiry: i % 3 === 0,
+          renewCountInStoreRepairOutStoreInsurance: i % 5,
+          hasStickyProduct: i % 4 === 0,
+          campaignParticipationCount: i % 8
+        };
+      })()
+    };
+    // 与标签管理统一：根据 valueInfo/behaviorInfo 推导 tags（使用 tagCategory 叶子编码）
+    const valueInfo = item.valueInfo!;
+    const behaviorInfo = item.behaviorInfo!;
+    const derivedTags: string[] = [];
+    if (valueInfo.isSalesDiamond) derivedTags.push("会员分层-销售钻石客户");
+    if (valueInfo.isAftersalesDiamond) derivedTags.push("会员分层-售后钻石客户");
+    if (valueInfo.isActiveAfterSales) derivedTags.push("会员分层-普通活跃售后客户");
+    if (valueInfo.isDormant) derivedTags.push("会员分层-休眠客户");
+    if (valueInfo.isLost) derivedTags.push("会员分层-流失客户");
+    if (behaviorInfo.hasUpgradeOrReplace) derivedTags.push("活跃度-有增购换购");
+    if (behaviorInfo.hasReferralBehavior) derivedTags.push("活跃度-推荐其他客户");
+    if (behaviorInfo.isStandardMaintenance) derivedTags.push("定保相关-达标定保");
+    if (behaviorInfo.hasComplaintWithin6Months) derivedTags.push("投诉相关-6个月内有投诉");
+    if (behaviorInfo.firstMaintenanceWithin12Months) derivedTags.push("售后行为-12个月内完成首保");
+    if (behaviorInfo.firstReturnWithin12Months) derivedTags.push("售后行为-12个月内完成首次回厂");
+    if (behaviorInfo.hasReturnWithin12Months) derivedTags.push("售后行为-12个月内回厂");
+    if (behaviorInfo.returnWithin13To24Months) derivedTags.push("售后行为-13-24个月回厂");
+    if (behaviorInfo.hasStickyProduct) derivedTags.push("粘性产品-粘性产品");
+    item.tags = derivedTags;
+    allData.push(item);
   }
 
+  // 会员分层全局统计（不随筛选变更）：基于全量 allData 计算总数与本月新增数
+  const nowDate = new Date();
+  const thisYear = nowDate.getFullYear();
+  const thisMonth = nowDate.getMonth();
+  const isCurrentMonth = (isoDate: string | undefined) => {
+    if (!isoDate) return false;
+    const d = new Date(isoDate);
+    return d.getFullYear() === thisYear && d.getMonth() === thisMonth;
+  };
+  const countTiers = (list: typeof allData) => {
+    let sd = 0;
+    let ad = 0;
+    let aas = 0;
+    let dor = 0;
+    let los = 0;
+    list.forEach(item => {
+      const vi = item.valueInfo;
+      if (vi?.isLost) {
+        los += 1;
+        return;
+      }
+      if (vi?.isDormant) {
+        dor += 1;
+        return;
+      }
+      if (vi?.isSalesDiamond) {
+        sd += 1;
+        return;
+      }
+      if (vi?.isAftersalesDiamond) {
+        ad += 1;
+        return;
+      }
+      if (vi?.isActiveAfterSales) aas += 1;
+    });
+    return { salesDiamond: sd, aftersalesDiamond: ad, activeAfterSales: aas, dormant: dor, lost: los };
+  };
+  const globalTierStats = {
+    totals: countTiers(allData),
+    newThisMonth: countTiers(allData.filter(item => isCurrentMonth(item.createdAt)))
+  };
+
   // 拆分筛选条件：排除分页与表格内部参数，只保留业务筛选字段
-  const { customerType, lifecycleStatus, storeId, pageNum: _pn, pageSize: _ps, ...restFilters } = filters || {};
+  const {
+    customerType,
+    lifecycleStatus,
+    storeId,
+    tags: filterTags,
+    tagChangeTime: filterTagChangeTime,
+    segmentId: filterSegmentId,
+    pageNum: _pn,
+    pageSize: _ps,
+    ...restFilters
+  } = filters || {};
 
   // 计算 Tab 统计用的基础集合（不区分 customerType）
   let baseFiltered = allData;
@@ -1177,18 +1266,71 @@ const generateMockData = (pageNum: number, pageSize: number, filters: any = {}) 
     baseFiltered = baseFiltered.filter(item => item.lifecycleStatus === lifecycleStatus);
   }
 
+  // 标签筛选：支持多选，多选时为 AND（同时包含所选标签）
+  const tagList = Array.isArray(filterTags) ? filterTags : filterTags != null && filterTags !== "" ? [filterTags] : [];
+  if (tagList.length) {
+    baseFiltered = baseFiltered.filter((item: any) => {
+      const itemTags = (item.tags || []) as string[];
+      return tagList.every((t: string) => itemTags.includes(t));
+    });
+  }
+
+  // 标签变更时间（仅单选标签时生效）：一个月/三个月内新增或减少，用 updatedAt 模拟
+  const singleTag = tagList.length === 1 ? tagList[0] : null;
+  if (singleTag && filterTagChangeTime) {
+    const now = Date.now();
+    const oneMonth = 30 * 24 * 60 * 60 * 1000;
+    const threeMonth = 90 * 24 * 60 * 60 * 1000;
+    const inOneMonth = (iso: string | undefined) => iso && now - new Date(iso).getTime() <= oneMonth;
+    const inThreeMonth = (iso: string | undefined) => iso && now - new Date(iso).getTime() <= threeMonth;
+    baseFiltered = baseFiltered.filter((item: any) => {
+      const itemTags = (item.tags || []) as string[];
+      const hasTag = itemTags.includes(singleTag);
+      const updatedAt = item.updatedAt;
+      switch (filterTagChangeTime) {
+        case "one_month_add":
+          return hasTag && inOneMonth(updatedAt);
+        case "one_month_remove":
+          return !hasTag && inOneMonth(updatedAt);
+        case "three_month_add":
+          return hasTag && inThreeMonth(updatedAt);
+        case "three_month_remove":
+          return !hasTag && inThreeMonth(updatedAt);
+        default:
+          return true;
+      }
+    });
+  }
+
+  // 分群筛选：按分群 ID 对应名称匹配 mock 中的 segmentName
+  if (filterSegmentId) {
+    const segmentName = segmentOptions.value.find(s => s.value === filterSegmentId)?.label;
+    if (segmentName) {
+      baseFiltered = baseFiltered.filter((item: any) => item.segmentName === segmentName);
+    }
+  }
+
   // 通用筛选（支持公司/个人的多条件搜索）：
   // 对于字符串字段，使用包含（contains）；布尔/枚举字段使用全等
   Object.entries(restFilters || {}).forEach(([key, value]) => {
     if (value === undefined || value === null || value === "") return;
+    if (["tags", "tagChangeTime", "segmentId"].includes(key)) return;
     baseFiltered = baseFiltered.filter((item: any) => {
+      const strValue = typeof value === "string" ? value : String(value);
+      if (key === "residenceArea") {
+        const field = item.residenceArea || item.city || "";
+        return String(field).includes(strValue);
+      }
       const field = item[key];
       if (field === undefined || field === null) return false;
       if (typeof value === "string") {
-        return String(field).includes(value);
+        return String(field).includes(strValue);
       }
       if (typeof value === "boolean" || typeof value === "number") {
         return field === value;
+      }
+      if (Array.isArray(value) && value.length) {
+        return value.every((v: any) => String(field).includes(String(v)));
       }
       return true;
     });
@@ -1218,47 +1360,27 @@ const generateMockData = (pageNum: number, pageSize: number, filters: any = {}) 
 
   const now = Date.now();
 
+  // 统计面板：优先用 valueInfo（与列表 tags 同源），无则用 tags 叶子编码
   filteredData.forEach(item => {
-    const visitCount90Days = Number(item.visitCount90Days || 0);
-    const annualOrderFrequency = Number(item.annualOrderFrequency || 0);
-    const loyaltyLevel = item.loyaltyLevel as string | undefined;
-    const tags = (item.tags || []) as string[];
-
-    let daysSinceLastVisit = 9999;
-    if (item.lastVisitTime) {
-      const time = new Date(item.lastVisitTime).getTime();
-      if (!Number.isNaN(time)) {
-        daysSinceLastVisit = Math.floor((now - time) / (1000 * 60 * 60 * 24));
-      }
-    }
-
-    // 流失：很久未到店（> 365 天）
-    if (daysSinceLastVisit > 365) {
+    const vi = item.valueInfo;
+    if (vi?.isLost) {
       lost += 1;
       return;
     }
-
-    // 休眠：较长时间未到店（180–365 天）
-    if (daysSinceLastVisit > 180) {
+    if (vi?.isDormant) {
       dormant += 1;
       return;
     }
-
-    // 普通活跃售后客户：近 90 天有到店记录
-    if (visitCount90Days > 0) {
-      activeAfterSales += 1;
-    }
-
-    // 售后钻石客户：活跃 + 标签/忠诚度较高
-    const isHighLoyalty = loyaltyLevel === "金卡" || loyaltyLevel === "VIP";
-    const hasValueTag = tags.includes("高价值客户") || tags.includes("VIP客户") || tags.includes("活跃客户");
-    if (visitCount90Days > 0 && (isHighLoyalty || hasValueTag)) {
-      aftersalesDiamond += 1;
-    }
-
-    // 销售钻石客户：忠诚度高 + 年度订单频次较高
-    if (isHighLoyalty && annualOrderFrequency >= 5) {
+    if (vi?.isSalesDiamond) {
       salesDiamond += 1;
+      return;
+    }
+    if (vi?.isAftersalesDiamond) {
+      aftersalesDiamond += 1;
+      return;
+    }
+    if (vi?.isActiveAfterSales) {
+      activeAfterSales += 1;
     }
   });
 
@@ -1273,7 +1395,8 @@ const generateMockData = (pageNum: number, pageSize: number, filters: any = {}) 
   return {
     data: pageData,
     total: filteredTotal,
-    stats
+    stats,
+    globalTierStats
   };
 };
 
@@ -1313,6 +1436,15 @@ const buildVehicleRows = (customers: Customer[]): VehicleListRow[] =>
     const vehicleRegistrationCitySubsidy = 1500 + (customer.id % 3) * 250;
     const discountRate = 1 + (customer.id % 3); // 1% - 3%
 
+    const statusList = ["自用", "维修中", "已售", "订车中-在途"];
+    const status = statusList[customer.id % 4];
+    const firstOwnerName = customer.name || "—";
+    const firstOwnerPhone =
+      customer.customerType === "company"
+        ? buyerPhone
+        : typeof customer.phone === "string"
+          ? customer.phone
+          : customer.phone?.[0]?.value || "";
     return {
       id: `vehicle-${customer.id}-${index + 1}`,
       oneId: customer.oneId,
@@ -1321,11 +1453,21 @@ const buildVehicleRows = (customers: Customer[]): VehicleListRow[] =>
       hasConflict: customer.hasConflict,
       primaryStoreName: customer.primaryStoreName,
       customerType: customer.customerType,
+      name: customer.name,
+      companyName: customer.companyName,
+      buyerPhone,
+      firstOwnerName: firstOwnerName === "—" ? undefined : firstOwnerName,
+      ownerPhone: firstOwnerPhone || undefined,
       vehicleModel: customer.carSeriesModel,
       licensePlate: getDisplayValue(customer.licensePlate),
       vin: getDisplayValue(customer.vinInfo),
+      vehicleAge: `${(customer.id % 8) + 1}年`,
+      vehicleAttribute: customer.id % 5 === 0 ? "二手车" : "新车",
+      topModelTag: customer.carSeriesModel?.includes("Turbo") || customer.carSeriesModel?.includes("GT") ? "是" : "—",
       purchaseDate: customer.createdAt?.slice(0, 10) || "2024-01-01",
       currentMileage: Number(customer.currentMileage || 0),
+      optionInstallInfo: `选装包${(customer.id % 3) + 1} ¥${formatNumber(10000 + customer.id * 2000)}`,
+      purchaseAttribute: ["首次购车", "增购", "换购"][customer.id % 3],
       insuranceCompany: insuranceCompanies[insuranceIndex],
       insuranceType: insuranceTypes[insuranceIndex],
       insuranceStatus: insuranceStatuses[insuranceIndex],
@@ -1337,7 +1479,6 @@ const buildVehicleRows = (customers: Customer[]): VehicleListRow[] =>
       submitDate: `2024-${submitMonth}-${submitDay}`,
       signStatus: customer.id % 3 === 0 ? t("customer.profile360.signStatus") : t("customer.profile360.loanStatusNormal"),
       signDate: `2024-${submitMonth}-${String(Number(submitMonth) + 1).padStart(2, "0")}-${submitDay}`,
-      // 发放中心随订单走，这里仅做示例模拟
       issueCenter: issueCenters[financeIndex],
       customerRate,
       bankRebate,
@@ -1348,8 +1489,14 @@ const buildVehicleRows = (customers: Customer[]): VehicleListRow[] =>
       lastVisitTime: customer.lastVisitTime,
       visitCount90Days: Number(customer.visitCount90Days || 0),
       annualOrderFrequency: Number(customer.annualOrderFrequency || 0),
-      buyerPhone,
-      status: ["自用", "维修中", "已售", "订车中-在途"][customer.id % 4]
+      status,
+      // 通过购车人关联的标签，多关联人时取最新一人；mock：当前行对应一个 customer 即购车人，用其 tags，并 mock 部分行多些标签
+      buyerTags: (() => {
+        const baseTags = (customer.tags || []) as string[];
+        const extraPool = ["保时捷会员", "首保完成", "续保意向", "高潜换购", "推荐人"];
+        const extra = index % 4 === 0 ? [extraPool[customer.id % extraPool.length]] : [];
+        return [...baseTags, ...extra].filter(Boolean).length ? [...baseTags, ...extra] : undefined;
+      })()
     };
   });
 
@@ -1384,12 +1531,18 @@ const loadPersonData = async (params: any) => {
 
   console.log(`生成了 ${result.data.length} 条数据，总共 ${result.total} 条`);
 
-  // 同步更新统计面板数据（客户分层维度）
-  customerStats.salesDiamond = result.stats.salesDiamond;
-  customerStats.aftersalesDiamond = result.stats.aftersalesDiamond;
-  customerStats.activeAfterSales = result.stats.activeAfterSales;
-  customerStats.dormant = result.stats.dormant;
-  customerStats.lost = result.stats.lost;
+  // 会员分层面板：使用全局统计（不随筛选变更）
+  const g = result.globalTierStats || { totals: result.stats, newThisMonth: result.stats };
+  customerStats.salesDiamond = g.totals.salesDiamond;
+  customerStats.salesDiamondNew = g.newThisMonth.salesDiamond;
+  customerStats.aftersalesDiamond = g.totals.aftersalesDiamond;
+  customerStats.aftersalesDiamondNew = g.newThisMonth.aftersalesDiamond;
+  customerStats.activeAfterSales = g.totals.activeAfterSales;
+  customerStats.activeAfterSalesNew = g.newThisMonth.activeAfterSales;
+  customerStats.dormant = g.totals.dormant;
+  customerStats.dormantNew = g.newThisMonth.dormant;
+  customerStats.lost = g.totals.lost;
+  customerStats.lostNew = g.newThisMonth.lost;
 
   // 模拟网络延迟
   await new Promise(resolve => setTimeout(resolve, 300));
@@ -1424,12 +1577,18 @@ const loadVehicleData = async (params: any) => {
   listModeStats.person = personResult.total;
   listModeStats.vehicle = vehicleRows.length;
 
-  // 使用按人维度的统计结果，保持客户分层口径一致
-  customerStats.salesDiamond = personResult.stats.salesDiamond;
-  customerStats.aftersalesDiamond = personResult.stats.aftersalesDiamond;
-  customerStats.activeAfterSales = personResult.stats.activeAfterSales;
-  customerStats.dormant = personResult.stats.dormant;
-  customerStats.lost = personResult.stats.lost;
+  // 会员分层面板：使用全局统计（不随筛选变更）
+  const g = personResult.globalTierStats || { totals: personResult.stats, newThisMonth: personResult.stats };
+  customerStats.salesDiamond = g.totals.salesDiamond;
+  customerStats.salesDiamondNew = g.newThisMonth.salesDiamond;
+  customerStats.aftersalesDiamond = g.totals.aftersalesDiamond;
+  customerStats.aftersalesDiamondNew = g.newThisMonth.aftersalesDiamond;
+  customerStats.activeAfterSales = g.totals.activeAfterSales;
+  customerStats.activeAfterSalesNew = g.newThisMonth.activeAfterSales;
+  customerStats.dormant = g.totals.dormant;
+  customerStats.dormantNew = g.newThisMonth.dormant;
+  customerStats.lost = g.totals.lost;
+  customerStats.lostNew = g.newThisMonth.lost;
 
   const start = (pageNum - 1) * pageSize;
   const end = start + pageSize;
@@ -1459,6 +1618,13 @@ const getStatusType = (status: LifecycleStatus): "success" | "info" | "warning" 
     conflict: "danger"
   };
   return map[status] || "info";
+};
+
+/** 根据标签叶子编码得到 el-tag 的 type，与 tagCategory 分类颜色一致 */
+const getTagType = (tagValue: string): string => {
+  const prefix = tagValue.includes("-") ? tagValue.split("-")[0] : tagValue;
+  const category = prefix === "活跃度" ? "活跃度相关" : prefix;
+  return getCategoryType(category);
 };
 
 // 获取状态标签（避免 status 为空时出现 i18n undefined 警告）
@@ -2040,19 +2206,19 @@ const viewProfile360 = async (sourceRow: Customer | VehicleListRow) => {
       avgVisitInterval: 45,
       projectPreferenceRank
     },
-    // 客户价值（示例 Mock，可按真实口径覆盖）
-    valueInfo: {
+    // 客户价值（与列表一致：五类互斥；优先使用列表行已有的 valueInfo）
+    valueInfo: row.valueInfo ?? {
       compositeScore: 85,
       postSalesSelfPaidAmount: Number((row.annualConsumption * 0.6).toFixed(0)),
       addonPurchaseAmount: Number((row.annualConsumption * 0.2).toFixed(0)),
-      isSalesDiamond: true,
-      isAftersalesDiamond: true,
+      isSalesDiamond: false,
+      isAftersalesDiamond: false,
       isActiveAfterSales: row.visitCount90Days > 0,
       isDormant: false,
       isLost: false
     },
-    // 销售 / 售后行为（示例 Mock）
-    behaviorInfo: {
+    // 销售 / 售后行为（优先使用列表行已有的 behaviorInfo）
+    behaviorInfo: row.behaviorInfo ?? {
       hasUpgradeOrReplace: false,
       hasReferralBehavior: false,
       purchaseAmount: Number((row.annualConsumption * 3).toFixed(0)),
@@ -2156,7 +2322,7 @@ const viewProfile360 = async (sourceRow: Customer | VehicleListRow) => {
       operationType: "人工更新",
       operationTime: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
     },
-    // 数据状态监控：与欢迎页保持一致，只展示大节点，时间固定为昨日本批
+    // 数据状态监控：与源数据采集保持一致，只展示大节点，时间固定为昨日本批
     platformSyncStatus: [
       { name: "POAS", status: "success" as const },
       { name: "WWS", status: "success" as const },
@@ -2255,6 +2421,18 @@ onMounted(() => {
 .customer-list-container .el-button {
   margin-right: 8px;
 }
+.person-tags-cell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.person-tags-cell .person-tag {
+  margin-right: 4px;
+  margin-bottom: 2px;
+}
+.table-cell-empty {
+  color: var(--el-text-color-placeholder);
+}
 </style>
 
 <style scoped lang="scss">
@@ -2340,10 +2518,63 @@ onMounted(() => {
   border-radius: 10px;
 }
 .stats-panel {
+  margin-bottom: 20px;
+}
+.stats-panel-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #303133;
+  margin-bottom: 12px;
+  padding-left: 2px;
+}
+.stats-cards-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(5, 1fr);
   gap: 16px;
-  margin-bottom: 16px;
+}
+@media (max-width: 1200px) {
+  .stats-cards-row {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (max-width: 768px) {
+  .stats-cards-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 480px) {
+  .stats-cards-row {
+    grid-template-columns: 1fr;
+  }
+}
+.stats-panel .stats-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.stats-panel .stats-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #606266;
+  line-height: 1.4;
+}
+.stats-panel .stats-row {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.stats-panel .stats-number {
+  font-size: 26px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+.stats-panel .stats-new {
+  font-size: 12px;
+  color: #909399;
+  font-weight: 400;
 }
 .customer-type-tabs-card {
   margin-bottom: 16px;
@@ -2401,38 +2632,38 @@ onMounted(() => {
 .stats-card {
   position: relative;
   display: flex;
-  gap: 16px;
-  align-items: center;
-  padding: 16px 20px;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 18px 20px;
   background: #ffffff;
   border: 1px solid #e4e7ed;
-  border-radius: 8px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 10px;
+  transition: all 0.25s ease;
   &:hover {
     border-color: transparent;
-    box-shadow: 0 4px 12px rgb(0 0 0 / 8%);
-    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgb(0 0 0 / 6%);
+    transform: translateY(-1px);
   }
   .stats-icon-wrapper {
     display: flex;
     flex-shrink: 0;
     align-items: center;
     justify-content: center;
-    width: 48px;
-    height: 48px;
-    font-size: 24px;
-    border-radius: 8px;
-    transition: all 0.3s ease;
+    width: 44px;
+    height: 44px;
+    font-size: 22px;
+    border-radius: 10px;
+    transition: all 0.25s ease;
   }
   .stats-content {
     display: flex;
     flex: 1;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
     min-width: 0;
   }
   .stats-number {
-    font-size: 28px;
+    font-size: 26px;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     line-height: 1.2;
@@ -2445,9 +2676,9 @@ onMounted(() => {
     }
   }
   .stats-label {
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 1.5;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.4;
     color: #606266;
     word-break: break-word;
   }

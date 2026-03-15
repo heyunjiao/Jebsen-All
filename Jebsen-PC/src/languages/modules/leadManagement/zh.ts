@@ -91,15 +91,15 @@ export default {
         aftersales_cs: "售后满意度回访",
         newcar_cs: "新车满意度回访",
         bdc_campaign: "BDC Campaign",
-        cm_custom: "CM 自定义",
-        pcn_aftersales_campaign: "PCN售后 Campaign",
+        cm_custom: "通用商机",
+        pcn_aftersales_campaign: "PCN召回Campaign",
         ttr_survey: "TTR调研",
         new_to_renew: "新转续",
         renew_to_renew: "续转续",
         in_repair_no_insurance: "在修不在保",
         psp_expiry: "PSP到期",
         maintenance_churn: "保养潜在流失",
-        no_visit_365d: "365天未进店",
+        no_visit_365d: "车辆365天未进店",
         regular_maintenance_365d: "定保客户365天未保养",
         periodic_maintenance: "定期保养",
         first_insurance_2y: "首保2年",
@@ -110,10 +110,14 @@ export default {
         newcar_delivery_90d_revisit: "新车交付90天回访"
       }
     },
+    leadTypeSource: {
+      templateUpload: "使用模版上传",
+      c360Auto: "通过C360自动生成"
+    },
     tracking: {
       totalGenerated: "生成商机总数",
       totalPushed: "已推送的商机",
-      convertedCount: "成交数量",
+      convertedCount: "成交人数",
       orderCount: "订单数量",
       totalOrderAmount: "订单总金额",
       conversionRate: "成交率",

@@ -32,137 +32,57 @@ export interface CategoryExplorerRoot {
   branches: CategoryExplorerBranch[];
 }
 
-/** 多级分类树（与标签管理、分群管理等保持一致） */
+/** 多级分类树（仅保留系统默认标签分类：会员分层、售后行为、活跃度相关、粘性产品、投诉相关） */
 export const TAG_CATEGORY_OPTIONS: CategoryOption[] = [
-  {
-    value: "人",
-    label: "人",
-    children: [
-      {
-        value: "人口学",
-        label: "人口学",
-        children: [
-          { value: "性别", label: "性别" },
-          { value: "年龄段", label: "年龄段" }
-        ]
-      },
-      {
-        value: "爱好",
-        label: "爱好",
-        children: [
-          {
-            value: "运动",
-            label: "运动",
-            children: [
-              { value: "运动-球类-足球", label: "球类 / 足球" },
-              { value: "运动-球类-篮球", label: "球类 / 篮球" },
-              { value: "运动-户外-越野跑", label: "户外 / 越野跑" }
-            ]
-          },
-          {
-            value: "旅游",
-            label: "旅游",
-            children: [
-              { value: "旅游-国内-海岛", label: "国内 / 海岛游" },
-              { value: "旅游-国外-欧洲", label: "出境 / 欧洲" }
-            ]
-          }
-        ]
-      }
-    ]
-  },
-  {
-    value: "车",
-    label: "车",
-    children: [
-      {
-        value: "车牌类型",
-        label: "车牌类型",
-        children: [
-          { value: "车牌-新能源-绿牌", label: "新能源 / 绿牌" },
-          { value: "车牌-普通-蓝牌", label: "普通 / 蓝牌" }
-        ]
-      },
-      {
-        value: "所在城市",
-        label: "所在城市",
-        children: [
-          { value: "城市-一线-上海", label: "一线 / 上海" },
-          { value: "城市-一线-北京", label: "一线 / 北京" }
-        ]
-      },
-      {
-        value: "保时捷",
-        label: "保时捷",
-        children: [
-          { value: "保时捷-跑车-911", label: "跑车 / 911" },
-          { value: "保时捷-SUV-卡宴", label: "SUV / 卡宴" }
-        ]
-      },
-      { value: "新能源", label: "新能源" }
-    ]
-  },
   {
     value: "业务",
     label: "业务",
     children: [
       {
-        value: "意向级别",
-        label: "意向级别",
+        value: "会员分层",
+        label: "会员分层",
         children: [
-          { value: "意向-高", label: "高意向" },
-          { value: "意向-中", label: "中意向" },
-          { value: "意向-低", label: "低意向" }
+          { value: "会员分层-销售钻石客户", label: "销售钻石客户" },
+          { value: "会员分层-售后钻石客户", label: "售后钻石客户" },
+          { value: "会员分层-普通活跃售后客户", label: "普通活跃售后客户" },
+          { value: "会员分层-休眠客户", label: "休眠客户" },
+          { value: "会员分层-流失客户", label: "流失客户" }
         ]
       },
       {
-        value: "特殊标识",
-        label: "特殊标识",
+        value: "售后行为",
+        label: "售后行为",
         children: [
-          { value: "特殊-限时优惠", label: "限时优惠" },
-          { value: "特殊-VIP", label: "VIP 身份" }
+          { value: "售后行为-12个月内完成首保", label: "12个月内完成首保" },
+          { value: "售后行为-12个月内完成首次回厂", label: "12个月内完成首次回厂" },
+          { value: "售后行为-12个月内回厂", label: "12个月内回厂" },
+          { value: "售后行为-13-24个月回厂", label: "13-24个月回厂" }
         ]
       },
       {
-        value: "续保",
-        label: "续保",
+        value: "活跃度相关",
+        label: "活跃度相关",
         children: [
-          { value: "续保-到期-3个月内", label: "到期前 3 个月内" },
-          { value: "续保-到期-已过期", label: "续保已过期" }
+          { value: "活跃度-购买附加产品", label: "购买附加产品" },
+          { value: "活跃度-推荐其他客户", label: "推荐其他客户" },
+          { value: "活跃度-有增购换购", label: "有增购/换购" },
+          { value: "活跃度-参加社群市场活动", label: "参加社群/市场活动" }
         ]
       },
       {
-        value: "保险到期月份",
-        label: "保险到期月份",
-        children: [
-          { value: "保险到期-本月", label: "本月到期" },
-          { value: "保险到期-本季度", label: "本季度到期" }
-        ]
+        value: "粘性产品",
+        label: "粘性产品",
+        children: [{ value: "粘性产品-粘性产品", label: "粘性产品" }]
       },
       {
-        value: "POC",
-        label: "POC",
-        children: [
-          { value: "POC-高", label: "高价值 POC" },
-          { value: "POC-中", label: "中价值 POC" }
-        ]
+        value: "投诉相关",
+        label: "投诉相关",
+        children: [{ value: "投诉相关-6个月内有投诉", label: "6个月内有投诉" }]
       },
       {
-        value: "线上活动",
-        label: "线上活动",
-        children: [
-          { value: "线上-试驾活动", label: "线上试驾活动" },
-          { value: "线上-金融活动", label: "线上金融活动" }
-        ]
-      },
-      {
-        value: "SC",
-        label: "SC",
-        children: [
-          { value: "SC-高", label: "高 SC 等级" },
-          { value: "SC-中", label: "中 SC 等级" },
-          { value: "SC-低", label: "低 SC 等级" }
-        ]
+        value: "定保相关",
+        label: "定保相关",
+        children: [{ value: "定保相关-达标定保", label: "达标定保" }]
       }
     ]
   }
@@ -193,6 +113,11 @@ function flattenCategoryNodes(
 }
 
 const FLATTENED_CATEGORY_META = flattenCategoryNodes(TAG_CATEGORY_OPTIONS);
+
+/** 规则配置中「条件」可选的默认标签字段（下拉选中后操作符固定为「等于」，值为「是/否」） */
+export const DEFAULT_TAG_FIELDS: { value: string; label: string }[] = FLATTENED_CATEGORY_META.filter(
+  m => m.isLeaf
+).map(m => ({ value: `tag_${m.value}`, label: m.label }));
 
 export function getCategoryMeta(
   options: CategoryOption[],
@@ -259,25 +184,14 @@ export function getCategoryFullPath(
   return value;
 }
 
-/** 分类对应 el-tag 的 type（取最后一级匹配） */
+/** 分类对应 el-tag 的 type（取最后一级匹配，仅默认标签分类） */
 const CATEGORY_TYPE_MAP: Record<string, string> = {
-  意向级别: "primary",
-  车牌类型: "success",
-  所在城市: "warning",
-  特殊标识: "danger",
-  爱好: "info",
-  SC: "success",
-  续保: "warning",
-  保险到期月份: "info",
-  POC: "primary",
-  线上活动: "success",
-  保时捷: "warning",
-  新能源: "success",
-  性别: "primary",
-  年龄段: "info",
-  人口学: "info",
-  运动: "success",
-  旅游: "warning"
+  会员分层: "primary",
+  售后行为: "success",
+  活跃度相关: "warning",
+  粘性产品: "success",
+  投诉相关: "danger",
+  定保相关: "warning"
 };
 
 /**

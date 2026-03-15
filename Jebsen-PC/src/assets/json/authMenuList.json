@@ -16,20 +16,6 @@
       }
     },
     {
-      "path": "/dashboard/dataMonitor",
-      "name": "dataMonitor",
-      "component": "/dashboard/dataMonitor/index",
-      "meta": {
-        "icon": "Monitor",
-        "title": "源数据采集看板",
-        "isLink": "",
-        "isHide": true,
-        "isFull": false,
-        "isAffix": false,
-        "isKeepAlive": true
-      }
-    },
-    {
       "path": "/dataProcess",
       "name": "dataProcess",
       "redirect": "/dataProcess/errorCorrection",
@@ -295,36 +281,6 @@
           "meta": {
             "icon": "Grid",
             "title": "菜单管理",
-            "isLink": "",
-            "isHide": true,
-            "isFull": false,
-            "isAffix": false,
-            "isKeepAlive": true
-          }
-        }
-      ]
-    },
-    {
-      "path": "/operation",
-      "name": "operation",
-      "redirect": "/operation/storeAnalysis",
-      "meta": {
-        "icon": "DataAnalysis",
-        "title": "运营分析",
-        "isLink": "",
-        "isHide": true,
-        "isFull": false,
-        "isAffix": false,
-        "isKeepAlive": true
-      },
-      "children": [
-        {
-          "path": "/operation/storeAnalysis",
-          "name": "storeAnalysis",
-          "component": "/operation/storeAnalysis/index",
-          "meta": {
-            "icon": "TrendCharts",
-            "title": "门店经营分析",
             "isLink": "",
             "isHide": true,
             "isFull": false,

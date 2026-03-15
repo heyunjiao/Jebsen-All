@@ -158,9 +158,36 @@
           "status": "0",
           "createBy": "admin",
           "createTime": "2023-01-27 11:00:00"
+        },
+        {
+          "noticeId": 6,
+          "noticeTitle": "2024年度客户满意度调研预告",
+          "noticeType": "2",
+          "noticeContent": "<p>各位客户：</p><p>2024年度客户满意度调研将于3月下旬启动，届时将通过邮件和站内信发送问卷链接，敬请留意并参与。</p><p>您的反馈对我们持续改进服务至关重要。</p>",
+          "status": "1",
+          "createBy": "admin",
+          "createTime": "2024-03-10 09:00:00"
+        },
+        {
+          "noticeId": 7,
+          "noticeTitle": "新版本功能预告：智能报表即将上线",
+          "noticeType": "1",
+          "noticeContent": "<p>各位客户：</p><p>智能报表模块正在内测中，预计下月正式上线。新功能包括：自定义报表模板、定时推送、多维度分析等。</p><p>敬请期待。</p>",
+          "status": "1",
+          "createBy": "admin",
+          "createTime": "2024-03-12 14:30:00"
+        },
+        {
+          "noticeId": 8,
+          "noticeTitle": "清明节假期业务安排说明",
+          "noticeType": "2",
+          "noticeContent": "<p>各位客户：</p><p>清明节假期期间（4月4日-4月6日）客服值班时间调整为 9:00-18:00，紧急问题可发送邮件至 support@example.com。</p><p>祝大家假期愉快。</p>",
+          "status": "1",
+          "createBy": "admin",
+          "createTime": "2024-03-14 10:00:00"
         }
       ],
-      "total": 5
+      "total": 8
     },
     "detail": {
       "code": 200,

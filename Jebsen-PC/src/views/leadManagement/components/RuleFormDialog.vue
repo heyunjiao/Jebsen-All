@@ -85,6 +85,7 @@
           <el-option :label="t('ruleConfig.enums.pushRole.SA')" value="SA" />
           <el-option :label="t('ruleConfig.enums.pushRole.SC')" value="SC" />
           <el-option :label="t('ruleConfig.enums.pushRole.other')" value="other" />
+          <el-option :label="t('ruleConfig.enums.pushRole.renewal')" value="renewal" />
         </el-select>
       </el-form-item>
     </el-form>

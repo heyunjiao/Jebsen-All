@@ -118,13 +118,23 @@
                     </div>
                     <div class="sys-info">
                       <div class="sys-main-line">
-                        <span class="sys-name">{{ sys.name }}</span>
+                        <span class="sys-name">{{ sys.desc }}</span>
+
                         <span class="sys-sep">/</span>
-                        <span class="sys-desc">{{ sys.desc }}</span>
+                        <span class="sys-desc">{{ sys.name }}</span>
+
                       </div>
                       <div class="sys-status-row">
                         <span class="sys-status">{{ sys.statusText }}</span>
                         <span class="sys-time" v-if="sys.uploadTime">{{ sys.uploadTime }}</span>
+                        <span
+                          v-if="sys.uploadCycle"
+                          class="sys-upload-cycle"
+                          :class="{ 'sys-upload-cycle-weak': sys.uploadCycleWeak }"
+                          :title="sys.uploadCycleWeak ? sys.uploadCycle : undefined"
+                        >
+                          {{ sys.uploadCycleWeak ? "按需" : sys.uploadCycle }}
+                        </span>
                         <span class="sys-type-tag">{{ $t("welcome.data.manual") }}</span>
                         <el-button
                           v-if="sys.status === 'gray'"
@@ -160,12 +170,20 @@
                     <div class="sys-info">
                       <div class="sys-main-line">
                         <span class="sys-name">{{ sys.name }}</span>
-                        <span class="sys-sep">/</span>
-                        <span class="sys-desc">{{ sys.desc }}</span>
+                        <!-- <span class="sys-sep">/</span> -->
+                        <!-- <span class="sys-desc">{{ sys.desc }}</span> -->
                       </div>
                       <div class="sys-status-row">
                         <span class="sys-status">{{ sys.statusText }}</span>
                         <span class="sys-time" v-if="sys.uploadTime">{{ sys.uploadTime }}</span>
+                        <span
+                          v-if="sys.uploadCycle"
+                          class="sys-upload-cycle"
+                          :class="{ 'sys-upload-cycle-weak': sys.uploadCycleWeak }"
+                          :title="sys.uploadCycleWeak ? sys.uploadCycle : undefined"
+                        >
+                          {{ sys.uploadCycleWeak ? "按需" : sys.uploadCycle }}
+                        </span>
                         <span class="sys-type-tag sys-type-tag-auto">{{ $t("welcome.data.auto") }}</span>
                       </div>
                     </div>
@@ -224,32 +242,13 @@
         </section>
       </template>
 
-      <section class="page-section" v-if="quickNavItems.length > 0">
-        <div class="section-heading">
-          <h2 class="section-title">{{ $t("welcome.quickNavigation") }}</h2>
-        </div>
-
-        <div class="quick-nav-panel">
-          <div class="quick-nav-grid">
-            <div v-for="item in quickNavItems" :key="item.path" class="nav-item" @click="handleNavClick(item)">
-              <div class="nav-icon" :class="item.iconClass">
-                <el-icon :size="22"><component :is="item.icon" /></el-icon>
-              </div>
-              <div class="nav-content">
-                <div class="nav-title">{{ item.title }}</div>
-              </div>
-              <div class="nav-item-arrow">
-                <el-icon><ArrowRight /></el-icon>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+     
 
       <section class="page-section" v-if="isAdmin">
         <div class="section-heading">
-          <div>
+          <div class="section-title-row">
             <h2 class="section-title">{{ $t("dashboard.dataMonitor.qualityTitle") }}</h2>
+            <span class="section-desc-inline">统计范围为过去 7 天，按日汇总展示</span>
           </div>
         </div>
 
@@ -350,22 +349,29 @@ const welcomeMessage = computed(() => {
 
 const isAdmin = computed(() => getRoleFromStorage() === "admin");
 
-// 当日数据采集来源（按你的图：系统名称 + 表名）
+// 上传频率排序权重：数字越小越靠前（频率越高越靠前）
+const UPLOAD_CYCLE_ORDER: Record<string, number> = {
+  每天: 1,
+  每周五: 2,
+  每周五上传: 2,
+  "每周五上传": 2,
+  每月第二个周五: 3,
+  "T+1 同步": 4,
+  按需: 5
+};
+
+const getUploadCycleSortKey = (sys: { uploadCycle?: string; uploadCycleWeak?: boolean }) => {
+  if (sys.uploadCycleWeak) return UPLOAD_CYCLE_ORDER["按需"] ?? 99;
+  const key = sys.uploadCycle?.trim() || "";
+  if (key.includes("按需")) return UPLOAD_CYCLE_ORDER["按需"] ?? 99;
+  return UPLOAD_CYCLE_ORDER[key] ?? 99;
+};
+
+// 当日数据采集来源（按上传频率排序：每天 → 每周五 → 每月第二个周五 → 按需）
 // - type = "manual" 表示当日手工上传，点击需要跳转到数据质量工作台并自动弹出对应报表的上传框
 // - type = "auto" 表示 T+1 / 实时系统同步结果，只查看同步状态
 const sourceSystems = computed(() => [
-  // 手工表（Manual）
-  {
-    name: "POAS",
-    type: "manual",
-    reportSource: "poas",
-    reportId: "poas_opp",
-    status: "success",
-    statusText: t("welcome.data.status.uploaded"),
-    desc: "商机表",
-    uploadTime: "昨日 18:00",
-    icon: Tickets
-  },
+  // 手工表（Manual）- 按上传频率从高到低排列
   {
     name: "WWS",
     type: "manual",
@@ -375,28 +381,19 @@ const sourceSystems = computed(() => [
     statusText: t("welcome.data.status.uploaded"),
     desc: "活动列表",
     uploadTime: "昨日 18:00",
+    uploadCycle: "每天",
     icon: Monitor
-  },
-  {
-    name: "C@P系统",
-    type: "manual",
-    reportSource: "cap",
-    reportId: "cap_vehicle",
-    status: "success",
-    statusText: t("welcome.data.status.uploaded"),
-    desc: "车辆报告",
-    uploadTime: "昨日 18:00",
-    icon: Upload
   },
   {
     name: "Voucher",
     type: "manual",
     reportSource: "voucher",
-    reportId: "voucher_member_addon_sales",
+    reportId: "voucher_member_benefit_stats",
     status: "success",
     statusText: t("welcome.data.status.uploaded"),
-    desc: "会员附加销售报表",
+    desc: "会员优惠信息统计表",
     uploadTime: "昨日 18:00",
+    uploadCycle: "每月第二个周五",
     icon: Ticket
   },
   {
@@ -408,18 +405,44 @@ const sourceSystems = computed(() => [
     statusText: t("welcome.data.status.uploaded"),
     desc: "优惠券余额报表明细",
     uploadTime: "昨日 18:00",
+    uploadCycle: "每月第二个周五",
     icon: Ticket
   },
   {
     name: "Voucher",
     type: "manual",
     reportSource: "voucher",
-    reportId: "voucher_first_owner_info",
+    reportId: "voucher_member_addon_sales",
     status: "success",
     statusText: t("welcome.data.status.uploaded"),
-    desc: "首任车主信息",
+    desc: "会员附加销售报表",
     uploadTime: "昨日 18:00",
+    uploadCycle: "每月第二个周五",
     icon: Ticket
+  },
+  {
+    name: "POAS",
+    type: "manual",
+    reportSource: "poas",
+    reportId: "poas_opp",
+    status: "success",
+    statusText: t("welcome.data.status.uploaded"),
+    desc: "商机表",
+    uploadTime: "昨日 18:00",
+    uploadCycle: "每周五",
+    icon: Tickets
+  },
+  {
+    name: "C@P系统",
+    type: "manual",
+    reportSource: "cap",
+    reportId: "cap_vehicle",
+    status: "success",
+    statusText: t("welcome.data.status.uploaded"),
+    desc: "车辆报告",
+    uploadTime: "昨日 18:00",
+    uploadCycle: "每周五",
+    icon: Upload
   },
   {
     name: "Manual Files",
@@ -430,6 +453,7 @@ const sourceSystems = computed(() => [
     statusText: t("welcome.data.status.uploaded"),
     desc: "续保销售记录",
     uploadTime: "昨日 18:00",
+    uploadCycle: "每月第二个周五",
     icon: Document
   },
   {
@@ -441,6 +465,7 @@ const sourceSystems = computed(() => [
     statusText: t("welcome.data.status.uploaded"),
     desc: "新保销售记录",
     uploadTime: "昨日 18:00",
+    uploadCycle: "每月第二个周五",
     icon: Document
   },
   {
@@ -452,6 +477,7 @@ const sourceSystems = computed(() => [
     statusText: t("welcome.data.status.uploaded"),
     desc: "客户基盘表",
     uploadTime: "昨日 18:00",
+    uploadCycle: "每月第二个周五",
     icon: Document
   },
   {
@@ -463,6 +489,7 @@ const sourceSystems = computed(() => [
     statusText: t("welcome.data.status.uploaded"),
     desc: "推荐置换再购审批记录",
     uploadTime: "昨日 18:00",
+    uploadCycle: "每月第二个周五",
     icon: Document
   },
   {
@@ -474,6 +501,8 @@ const sourceSystems = computed(() => [
     statusText: t("welcome.data.status.uploaded"),
     desc: "线下营销/社群活动分群",
     uploadTime: "昨日 18:00",
+    uploadCycle: "按需上传,上传后T+1生效",
+    uploadCycleWeak: true,
     icon: Document
   },
   {
@@ -484,6 +513,20 @@ const sourceSystems = computed(() => [
     status: "gray",
     statusText: t("welcome.data.status.pendingUpload"),
     desc: "自定义通用商机",
+    uploadCycle: "按需上传,上传后T+1生效",
+    uploadCycleWeak: true,
+    icon: Upload
+  },
+  {
+    name: "Manual Files",
+    type: "manual",
+    reportSource: "manual",
+    reportId: "manual_ttr",
+    status: "gray",
+    statusText: t("welcome.data.status.pendingUpload"),
+    desc: "TTR",
+    uploadCycle: "按需上传,上传后T+1生效",
+    uploadCycleWeak: true,
     icon: Upload
   },
 
@@ -493,8 +536,9 @@ const sourceSystems = computed(() => [
     type: "auto",
     status: "success",
     statusText: t("welcome.data.status.synced"),
-    desc: "BDC 外呼系统数据（昨日本批）",
+    desc: "BDC 外呼系统数据",
     uploadTime: "T+1 09:00",
+    uploadCycle: "T+1 同步",
     icon: Service
   },
   {
@@ -502,8 +546,9 @@ const sourceSystems = computed(() => [
     type: "auto",
     status: "success",
     statusText: t("welcome.data.status.synced"),
-    desc: "DMS 主数据（昨日本批）",
+    desc: "DMS 主数据",
     uploadTime: "T+1 09:00",
+    uploadCycle: "T+1 同步",
     icon: Monitor
   },
   {
@@ -511,13 +556,28 @@ const sourceSystems = computed(() => [
     type: "auto",
     status: "success",
     statusText: t("welcome.data.status.synced"),
-    desc: "企业微信互动数据（昨日本批）",
+    desc: "企业微信互动数据",
     uploadTime: "T+1 09:00",
+    uploadCycle: "T+1 同步",
     icon: Connection
+  },
+  {
+    name: "Voucher",
+    type: "auto",
+    status: "success",
+    statusText: t("welcome.data.status.synced"),
+    desc: "Voucher 数据",
+    uploadTime: "T+1 09:00",
+    uploadCycle: "T+1 同步",
+    icon: Ticket
   }
 ]);
 
-const manualSystems = computed(() => sourceSystems.value.filter(s => s.type === "manual"));
+const manualSystems = computed(() =>
+  sourceSystems.value
+    .filter((s): s is (typeof sourceSystems.value)[0] & { type: "manual" } => s.type === "manual")
+    .sort((a, b) => getUploadCycleSortKey(a) - getUploadCycleSortKey(b))
+);
 const autoSystems = computed(() => sourceSystems.value.filter(s => s.type === "auto"));
 const manualUploadedCount = computed(() => manualSystems.value.filter(s => s.status === "success").length);
 const autoSyncedCount = computed(() => autoSystems.value.filter(s => s.status === "success").length);
@@ -721,16 +781,27 @@ const heroStatus = computed<{ text: string; type: StatusTagType }>(() => {
   };
 });
 
-// 数据接入与质量 - 仅数据量柱状图（静态假数据）
-const dataVolumeSourceData = [1200, 932, 2013, 934, 1290, 430, 220];
-const dataVolumeSystemNames = ["DMS", "BDC", "WeCom", "App", "MiniP", "Evt", "3rd"];
+// 数据接入与质量 - 过去一周按日期的每日总量柱状图（静态假数据）
+const getPastSevenDays = () => {
+  const days: { label: string; date: string }[] = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const m = d.getMonth() + 1;
+    const day = d.getDate();
+    days.push({
+      label: `${m}/${day}`,
+      date: `${d.getFullYear()}-${String(m).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+    });
+  }
+  return days;
+};
+const dataVolumeDateLabels = getPastSevenDays();
+// 过去七天每天的总量（示例数据，可按接口替换）
+const dataVolumeDailyTotals = [1200, 932, 2013, 934, 1290, 1430, 1220];
 const dataVolumeChartOption = computed<ECOption>(() => {
-  const chartData = dataVolumeSourceData;
-  const total = chartData.reduce((sum: number, val: number) => sum + val, 0);
-  const xAxisData = chartData.map((val: number) => {
-    const percentage = total > 0 ? ((val / total) * 100).toFixed(1) : "0.0";
-    return `${percentage}%`;
-  });
+  const chartData = dataVolumeDailyTotals;
+  const xAxisData = dataVolumeDateLabels.map(d => d.label);
   return {
     grid: { top: 40, right: 24, bottom: 32, left: 56, containLabel: false },
     tooltip: {
@@ -739,8 +810,8 @@ const dataVolumeChartOption = computed<ECOption>(() => {
         if (Array.isArray(params) && params[0]) {
           const dataIndex = params[0].dataIndex;
           const value = params[0].value;
-          const name = dataVolumeSystemNames[dataIndex] || "";
-          return `${name}<br/>${t("dashboard.dataMonitor.dataVolume")}: ${formatNumber(value)}`;
+          const dateFull = dataVolumeDateLabels[dataIndex]?.date ?? "";
+          return `${dateFull}<br/>${t("dashboard.dataMonitor.dataVolume")}: ${formatNumber(value)}`;
         }
         return "";
       }
@@ -1103,12 +1174,24 @@ onMounted(() => {
   margin-bottom: 12px;
 }
 
+.section-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
 .section-title {
   margin: 0;
   color: var(--el-text-color-primary);
   font-size: 20px;
   font-weight: 700;
   line-height: 1.2;
+}
+
+.section-desc-inline {
+  color: var(--el-text-color-secondary);
+  font-size: 13px;
+  font-weight: 400;
 }
 
 .section-desc {
@@ -1420,6 +1503,18 @@ onMounted(() => {
   color: var(--el-color-success);
   font-size: 12px;
   font-weight: 700;
+}
+
+.sys-upload-cycle {
+  color: var(--el-color-danger);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.sys-upload-cycle-weak {
+  color: var(--el-text-color-secondary);
+  font-size: 11px;
+  font-weight: 400;
 }
 
 .sys-type-tag {

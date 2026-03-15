@@ -4,7 +4,8 @@ import {
   C360_LEAD_TYPE_VALUES,
   GENERAL_LEAD_TYPE_VALUES,
   getLeadTypeLabel,
-  normalizeLeadType
+  normalizeLeadType,
+  STANDARD_18_LEAD_TYPE_OPTIONS
 } from "@/constants/leadTypes";
 
 // 重新导出 API 类型，方便页面使用
@@ -32,10 +33,8 @@ export const LEAD_STATUS_DISPLAY_MAP: Record<string, string> = {
 // 商机类型选项
 export const LEAD_TYPE_OPTIONS = BOARD_LEAD_TYPE_OPTIONS;
 
-/** 标准18个商机：17个标准商机 + 1个TTR商机（标准20个中的一栏） */
-export const STANDARD_18_LEAD_TYPES = LEAD_TYPE_OPTIONS.filter(
-  option => !GENERAL_LEAD_TYPE_VALUES.includes(option.value as (typeof GENERAL_LEAD_TYPE_VALUES)[number])
-);
+/** 标准 18 个商机（按产品要求顺序） */
+export const STANDARD_18_LEAD_TYPES = STANDARD_18_LEAD_TYPE_OPTIONS;
 
 /** 通用商机：没有逻辑，使用商机通用模板上传 */
 export const GENERAL_LEAD_TYPES = LEAD_TYPE_OPTIONS.filter(option =>

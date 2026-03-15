@@ -7,7 +7,10 @@
           <el-icon :size="20" :color="iconColor">
             <component :is="icon" />
           </el-icon>
-          <span class="card-title">{{ title }}</span>
+          <div class="title-wrap">
+            <span class="card-title">{{ title }}</span>
+            <span v-if="subtitle" class="card-subtitle">{{ subtitle }}</span>
+          </div>
         </div>
       </div>
     </template>
@@ -41,6 +44,7 @@ import { computed } from "vue";
 
 interface Props {
   title: string;
+  subtitle?: string;
   icon: any;
   iconColor: string;
   totalCount: number;
@@ -53,6 +57,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  subtitle: "",
   isActive: false
 });
 
@@ -96,10 +101,23 @@ const handleViewDetail = (e?: Event) => {
         font-size: 18px;
       }
 
+      .title-wrap {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
       .card-title {
         font-size: 14px;
         font-weight: 600;
         color: var(--el-text-color-primary);
+      }
+
+      .card-subtitle {
+        font-size: 11px;
+        color: var(--el-text-color-secondary);
+        font-weight: normal;
+        opacity: 0.85;
       }
     }
 

@@ -20,22 +20,22 @@
           <div class="stats-label">{{ t("segmentManage.stats.totalMembers") }}</div>
         </div>
       </div>
+      <div class="stats-card warning-card">
+        <div class="stats-icon-wrapper">
+          <el-icon><Refresh /></el-icon>
+        </div>
+        <div class="stats-content">
+          <div class="stats-number">{{ formatNumber(segmentStats.calculatingCount) }}</div>
+          <div class="stats-label">{{ t("segmentManage.stats.calculatingCount") }}</div>
+        </div>
+      </div>
       <div class="stats-card success-card">
         <div class="stats-icon-wrapper">
           <el-icon><Check /></el-icon>
         </div>
         <div class="stats-content">
-          <div class="stats-number">{{ formatNumber(segmentStats.activeSegments) }}</div>
-          <div class="stats-label">{{ t("segmentManage.stats.activeSegments") }}</div>
-        </div>
-      </div>
-      <div class="stats-card warning-card">
-        <div class="stats-icon-wrapper">
-          <el-icon><Edit /></el-icon>
-        </div>
-        <div class="stats-content">
-          <div class="stats-number">{{ formatNumber(segmentStats.draftSegments) }}</div>
-          <div class="stats-label">{{ t("segmentManage.stats.draftSegments") }}</div>
+          <div class="stats-number">{{ formatNumber(segmentStats.completedCount) }}</div>
+          <div class="stats-label">{{ t("segmentManage.stats.completedCount") }}</div>
         </div>
       </div>
     </div>
@@ -51,14 +51,6 @@
       <!-- 表格 header 按钮（新建分群不设权限，始终显示） -->
       <template #tableHeader>
         <el-button type="primary" :icon="Plus" @click="handleAdd">{{ t("segmentManage.createSegment") }}</el-button>
-      </template>
-
-      <!-- 分类列（多级别展示完整路径） -->
-      <template #category="scope">
-        <el-tag v-if="scope.row.category" :type="getCategoryType(scope.row.category) as any" size="small">
-          {{ getCategoryFullPath(TAG_CATEGORY_OPTIONS, scope.row.category) || scope.row.category }}
-        </el-tag>
-        <span v-else class="text-gray-500">-</span>
       </template>
 
       <!-- 状态列 -->
@@ -77,27 +69,32 @@
 
       <template #operation="scope">
         <el-button type="primary" link :icon="Edit" @click="handleEdit(scope.row)">{{ t("segmentManage.edit") }}</el-button>
-        <el-button type="info" link :icon="View" @click="handleView(scope.row)">{{ t("segmentManage.preview") }}</el-button>
-        <el-button v-if="scope.row.status === 'active'" type="warning" link :icon="Close" @click="handleDisable(scope.row)">
-          {{ t("segmentManage.disable") }}
-        </el-button>
         <el-button type="warning" link :icon="Download" @click="handleExport(scope.row)">{{
           t("segmentManage.export")
         }}</el-button>
       </template>
     </ProTable>
 
-    <!-- 新建 / 编辑分群 -->
-    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="1400px" append-to-body :close-on-click-modal="false">
+    <!-- 新建 / 编辑分群（编辑时仅可改分群名称与可见范围） -->
+    <el-dialog
+      v-model="dialogVisible"
+      :title="dialogTitle"
+      width="1400px"
+      append-to-body
+      :close-on-click-modal="false"
+      class="segment-manage-dialog"
+    >
       <el-form ref="formRef" :model="form" :rules="rules" label-width="120px">
         <el-form-item :label="t('segmentManage.segmentName')" prop="name" required>
-          <el-input
-            v-model="form.name"
-            maxlength="50"
-            show-word-limit
-            :placeholder="t('segmentManage.enterSegmentName')"
-            :disabled="!!form.id"
-          />
+          <el-input v-model="form.name" maxlength="50" show-word-limit :placeholder="t('segmentManage.enterSegmentName')" />
+        </el-form-item>
+        <el-form-item :label="t('segmentManage.permission')" prop="visibility" class="permission-form-item">
+          <el-radio-group v-model="form.visibility" class="permission-radio-group">
+            <el-radio v-for="opt in permissionOptions" :key="opt.value" :value="opt.value" border>
+              <span class="permission-label">{{ t(opt.labelKey) }}</span>
+              <span class="permission-tip">{{ t(opt.tipKey) }}</span>
+            </el-radio>
+          </el-radio-group>
         </el-form-item>
         <el-form-item :label="t('segmentManage.category')" prop="category">
           <el-cascader
@@ -119,6 +116,7 @@
             maxlength="200"
             show-word-limit
             :placeholder="t('segmentManage.enterDescription')"
+            :disabled="!!form.id"
           />
         </el-form-item>
         <el-form-item :label="t('segmentManage.status')" prop="status" required>
@@ -128,16 +126,17 @@
             inactive-value="inactive"
             :active-text="t('segmentManage.statusOptions.active')"
             :inactive-text="t('segmentManage.statusOptions.disabled')"
+            :disabled="!!form.id"
           />
         </el-form-item>
         <el-form-item :label="t('segmentManage.ruleConfig')" prop="ruleConfig" class="rule-config-form-item">
-          <RuleEditor v-model="ruleTree" :available-tags="availableTags" />
+          <RuleEditor v-model="ruleTree" :available-tags="availableTags" :disabled="!!form.id" />
         </el-form-item>
       </el-form>
       <template #footer>
         <div class="dialog-footer">
           <div class="footer-left">
-            <div v-if="estimateResult" class="estimate-result">
+            <div v-if="!form.id && estimateResult" class="estimate-result">
               <span class="estimate-item">
                 {{ t("segmentManage.estimatedCount") }}：<strong>{{ estimateResult.estimatedCount.toLocaleString() }}</strong>
               </span>
@@ -147,61 +146,31 @@
             </div>
           </div>
           <div class="footer-right">
-            <el-button type="success" :icon="View" @click="handleEstimate">{{ t("segmentManage.coverageEstimate") }}</el-button>
+            <el-button v-if="!form.id" type="success" :icon="View" @click="handleEstimate">
+              {{ t("segmentManage.coverageEstimate") }}
+            </el-button>
             <el-button @click="dialogVisible = false">{{ t("segmentManage.cancel") }}</el-button>
             <el-button type="primary" :loading="submitting" @click="submitForm">{{ t("segmentManage.save") }}</el-button>
           </div>
         </div>
       </template>
     </el-dialog>
-
-    <!-- 分群预览 -->
-    <el-drawer v-model="previewVisible" :title="t('segmentManage.segmentPreview')" size="60%" :with-header="true">
-      <div class="preview-header">
-        <div>{{ t("segmentManage.segmentName") }}：{{ currentSegment?.name }}</div>
-        <div>{{ t("segmentManage.memberCount") }}：{{ currentSegment?.memberCount?.toLocaleString?.() || "-" }}</div>
-      </div>
-      <ProTable
-        v-if="previewVisible"
-        :columns="previewColumns"
-        :request-api="mockPreview"
-        row-key="oneId"
-        :pagination="true"
-        :tool-button="[]"
-      />
-      <div class="drawer-footer">
-        <el-button type="warning" :icon="Download" @click="handleExport(currentSegment)">{{
-          t("segmentManage.export")
-        }}</el-button>
-      </div>
-    </el-drawer>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, watch } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { Plus, Edit, View, Check, Download, UserFilled, User, Close } from "@element-plus/icons-vue";
+import { Plus, Edit, View, Check, Download, UserFilled, User, Refresh } from "@element-plus/icons-vue";
 import { useI18n } from "vue-i18n";
 import ProTable from "@/components/ProTable/index.vue";
 import { ProTableInstance, ColumnProps } from "@/components/ProTable/interface";
 import RuleEditor, { type RuleNode } from "../tagManage/components/RuleEditor.vue";
 import type { Segment } from "@/api/modules/segment";
-import {
-  getSegmentList,
-  getSegmentDetail,
-  saveSegment,
-  estimateSegment,
-  exportSegment,
-  disableSegment
-} from "@/api/modules/segment";
+import { getSegmentList, getSegmentDetail, saveSegment, estimateSegment, exportSegment } from "@/api/modules/segment";
 import { getTagList } from "@/api/modules/tagManage";
 import type { TagManage } from "@/api/modules/tagManage";
-import {
-  TAG_CATEGORY_OPTIONS,
-  getCategoryFullPath,
-  getCategoryType as getCategoryTypeFromConst
-} from "@/constants/tagCategory";
+import { TAG_CATEGORY_OPTIONS } from "@/constants/tagCategory";
 import { onMounted } from "vue";
 
 const { t } = useI18n();
@@ -209,10 +178,8 @@ const { t } = useI18n();
 const proTable = ref<ProTableInstance>();
 const dialogVisible = ref(false);
 const dialogTitle = ref("");
-const previewVisible = ref(false);
 const submitting = ref(false);
 const formRef = ref();
-const currentSegment = ref<Segment.SegmentInfo | null>(null);
 const estimateResult = ref<{ estimatedCount: number; estimatedRate: string } | null>(null);
 const availableTags = ref<Array<{ tagId: string; tagName: string; category: string }>>([]);
 
@@ -220,8 +187,8 @@ const availableTags = ref<Array<{ tagId: string; tagName: string; category: stri
 const segmentStats = reactive({
   segmentTotal: 0,
   totalMembers: 0,
-  activeSegments: 0,
-  draftSegments: 0
+  calculatingCount: 0,
+  completedCount: 0
 });
 
 // 格式化数字
@@ -233,10 +200,16 @@ const form = reactive<Segment.ReqSegmentForm>({
   id: undefined,
   name: "",
   category: "",
+  visibility: "public",
   description: "",
   status: "draft",
   ruleConfig: null
 });
+
+const permissionOptions = [
+  { value: "public", labelKey: "segmentManage.permissionPublic", tipKey: "segmentManage.permissionPublicTip" },
+  { value: "private", labelKey: "segmentManage.permissionPrivate", tipKey: "segmentManage.permissionPrivateTip" }
+] as const;
 
 const ruleTree = ref<RuleNode>({
   id: "root",
@@ -253,27 +226,13 @@ const rules = {
 };
 
 const statusType = (s: Segment.SegmentStatus) => {
-  return {
-    draft: "info",
-    running: "warning",
-    active: "success",
-    failed: "danger",
-    inactive: "warning"
-  }[s];
+  return s === "running" ? "warning" : "success";
 };
 const statusLabel = (s: Segment.SegmentStatus) => {
-  return {
-    draft: t("segmentManage.draft"),
-    running: t("segmentManage.calculating"),
-    active: t("segmentManage.active"),
-    failed: t("segmentManage.failed"),
-    inactive: t("segmentManage.inactive")
-  }[s];
+  return s === "running" ? t("segmentManage.calculating") : t("segmentManage.completed");
 };
 
-// 多级分类（与标签管理统一）
 const categoryOptions = TAG_CATEGORY_OPTIONS;
-const getCategoryType = (category?: Segment.SegmentCategory) => getCategoryTypeFromConst(category);
 
 const columns = reactive<ColumnProps<Segment.SegmentInfo>[]>([
   {
@@ -281,23 +240,6 @@ const columns = reactive<ColumnProps<Segment.SegmentInfo>[]>([
     label: t("segmentManage.segmentName"),
     minWidth: 180,
     search: { el: "input", props: { placeholder: t("segmentManage.enterSegmentName") } }
-  },
-  {
-    prop: "category",
-    label: t("segmentManage.category"),
-    minWidth: 100,
-    enum: categoryOptions,
-    search: {
-      el: "cascader",
-      props: {
-        options: categoryOptions,
-        checkStrictly: true,
-        emitPath: false,
-        placeholder: t("segmentManage.selectCategory"),
-        filterable: true,
-        clearable: true
-      }
-    }
   },
   {
     prop: "status",
@@ -308,17 +250,13 @@ const columns = reactive<ColumnProps<Segment.SegmentInfo>[]>([
       props: {
         placeholder: t("segmentManage.selectStatus"),
         options: [
-          { label: t("segmentManage.draft"), value: "draft" },
           { label: t("segmentManage.calculating"), value: "running" },
-          { label: t("segmentManage.active"), value: "active" },
-          { label: t("segmentManage.failed"), value: "failed" },
-          { label: t("segmentManage.inactive"), value: "inactive" }
+          { label: t("segmentManage.completed"), value: "active" }
         ]
       }
     }
   },
   { prop: "memberCount", label: "成员数", minWidth: 120 },
-
   { prop: "lastExportAt", label: "最近导出时间", minWidth: 180 },
   { prop: "creator", label: "创建人", minWidth: 120 },
   { prop: "createdAt", label: "创建时间", minWidth: 180 },
@@ -327,15 +265,8 @@ const columns = reactive<ColumnProps<Segment.SegmentInfo>[]>([
     prop: "operation",
     label: "操作",
     fixed: "right",
-    width: 260
+    width: 160
   }
-]);
-
-const previewColumns = reactive<ColumnProps[]>([
-  { prop: "oneId", label: "OneID", minWidth: 140 },
-  { prop: "name", label: "姓名", minWidth: 120 },
-  { prop: "gender", label: "性别", minWidth: 80 },
-  { prop: "tagSummary", label: "标签", minWidth: 200 }
 ]);
 
 const dataCallback = (data: any) => {
@@ -355,8 +286,8 @@ const dataCallback = (data: any) => {
 const updateStats = (list: Segment.SegmentInfo[]) => {
   segmentStats.segmentTotal = list.length;
   segmentStats.totalMembers = list.reduce((sum, item) => sum + (item.memberCount || 0), 0);
-  segmentStats.activeSegments = list.filter(item => item.status === "active").length;
-  segmentStats.draftSegments = list.filter(item => item.status === "draft").length;
+  segmentStats.calculatingCount = list.filter(item => item.status === "running").length;
+  segmentStats.completedCount = list.filter(item => item.status === "active").length;
 };
 
 const getTableList = (params: any) => getSegmentList(params);
@@ -386,8 +317,8 @@ const handleEdit = (row: Segment.SegmentInfo) => {
     form.id = data.id;
     form.name = data.name;
     form.category = data.category || "";
+    form.visibility = data.visibility ?? "public";
     form.description = data.description;
-    // 如果状态不是 active 或 inactive，则根据状态设置：draft/running/failed 都设为 inactive
     form.status = data.status === "active" ? "active" : "inactive";
     ruleTree.value = data.ruleConfig?.root || {
       id: "root",
@@ -398,16 +329,10 @@ const handleEdit = (row: Segment.SegmentInfo) => {
     dialogTitle.value = t("segmentManage.editSegment");
     dialogVisible.value = true;
     estimateResult.value = null;
-    // 确保标签列表已加载
     if (availableTags.value.length === 0) {
       loadTags();
     }
   });
-};
-
-const handleView = (row: Segment.SegmentInfo) => {
-  currentSegment.value = row;
-  previewVisible.value = true;
 };
 
 const handleEstimate = async () => {
@@ -421,24 +346,39 @@ const handleEstimate = async () => {
 };
 
 const submitForm = () => {
-  formRef.value?.validate((valid: boolean) => {
-    if (!valid) return;
+  const doSubmit = () => {
     submitting.value = true;
-    saveSegment({
-      ...form,
-      ruleConfig: { root: ruleTree.value }
-    })
+    const payload = form.id
+      ? {
+          ...form,
+          id: form.id,
+          name: form.name,
+          visibility: form.visibility,
+          ruleConfig: form.ruleConfig ?? { root: ruleTree.value }
+        }
+      : { ...form, ruleConfig: { root: ruleTree.value } };
+    saveSegment(payload as Segment.ReqSegmentForm)
       .then(() => {
         ElMessage.success(t("segmentManage.saveSuccess"));
         dialogVisible.value = false;
         proTable.value?.getTableList();
       })
       .finally(() => (submitting.value = false));
-  });
+  };
+  if (form.id) {
+    formRef.value?.validateField("name", (valid: boolean) => {
+      if (valid) doSubmit();
+    });
+  } else {
+    formRef.value?.validate((valid: boolean) => {
+      if (!valid) return;
+      doSubmit();
+    });
+  }
 };
 
-const handleExport = (row?: Segment.SegmentInfo | null) => {
-  const target = row || currentSegment.value;
+const handleExport = (row: Segment.SegmentInfo) => {
+  const target = row;
   if (!target) {
     ElMessage.warning(t("segmentManage.selectSegmentFirst"));
     return;
@@ -454,37 +394,11 @@ const handleExport = (row?: Segment.SegmentInfo | null) => {
   });
 };
 
-// 停用分群
-const handleDisable = (row: Segment.SegmentInfo) => {
-  ElMessageBox.confirm(t("segmentManage.messages.disableConfirm", { name: row.name }), t("common.confirm"), {
-    confirmButtonText: t("common.confirm"),
-    cancelButtonText: t("common.cancel"),
-    type: "warning"
-  }).then(() => {
-    disableSegment({ id: row.id }).then(() => {
-      ElMessage.success(t("segmentManage.messages.disableSuccess"));
-      proTable.value?.getTableList();
-    });
-  });
-};
-
-const mockPreview = async () => {
-  // 简单预览占位
-  return {
-    data: {
-      list: [
-        { oneId: "ONEID0001", name: "陈建华", gender: "女", tagSummary: "高价值客户, 活跃" },
-        { oneId: "ONEID0002", name: "王芳", gender: "男", tagSummary: "新能源, 高潜" }
-      ],
-      total: 2
-    }
-  };
-};
-
 const resetForm = () => {
   form.id = undefined;
   form.name = "";
   form.category = "";
+  form.visibility = "public";
   form.description = "";
   form.status = "active";
   form.ruleConfig = null;
@@ -525,6 +439,39 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
+/* 弹窗使用 append-to-body 时内容在 body 下，需单独命中 */
+:deep(.segment-manage-dialog) {
+  .permission-form-item .el-form-item__content {
+    display: block;
+  }
+  .permission-radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    .el-radio {
+      margin-right: 0;
+      align-items: flex-start;
+      .el-radio__label {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        line-height: 1.5;
+      }
+    }
+  }
+  .permission-label {
+    font-weight: 500;
+    color: var(--el-text-color-primary);
+  }
+  .permission-tip {
+    display: block;
+    font-size: 12px;
+    color: var(--el-text-color-secondary);
+    margin-top: 4px;
+    font-weight: normal;
+  }
+}
+
 .segment-manage {
   .strong {
     font-weight: 600;
@@ -544,6 +491,38 @@ onMounted(() => {
     :deep(.el-form-item__content) {
       width: 100%;
     }
+  }
+
+  .permission-form-item {
+    :deep(.el-form-item__content) {
+      display: block;
+    }
+  }
+  .permission-radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    :deep(.el-radio) {
+      margin-right: 0;
+      align-items: flex-start;
+      .el-radio__label {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        line-height: 1.5;
+      }
+    }
+  }
+  .permission-label {
+    font-weight: 500;
+    color: var(--el-text-color-primary);
+  }
+  .permission-tip {
+    display: block;
+    font-size: 12px;
+    color: var(--el-text-color-secondary);
+    margin-top: 4px;
+    font-weight: normal;
   }
 
   .dialog-footer {

@@ -63,6 +63,7 @@ export default {
       completedFileName: "File Name",
       reupload: "Re-upload",
       taskListTitle: "{platform} Platform Task List",
+      uploadCycle: "Upload Cycle",
       reportName: "Report Name",
       status: "Status",
       lastUploadTime: "Last Upload Time"
@@ -76,6 +77,9 @@ export default {
       voucher_sales: "Additional Sales Report",
       voucher_benefits: "Member Benefits Statistics",
       voucher_balance: "Coupon Balance Report (Details)",
+      voucher_member_benefit_stats: "Member Benefits Statistics",
+      voucher_member_addon_sales: "Member Additional Sales Report",
+      voucher_balance_detail: "Coupon Balance Report (Details)",
       manual_pc_marketing: "PC Active Marketing Follow-up Update",
       manual_client_base: "Client Base",
       manual_loss_15m: "First Service 15-Month Loss Determination",

@@ -51,17 +51,23 @@ export default {
     statusOptions: {
       draft: "草稿",
       running: "計算中",
-      active: "已啟用",
+      active: "已完成",
       failed: "失敗",
       inactive: "已停用",
       disabled: "已停用"
     },
+    completed: "已完成",
+    permission: "可見範圍",
+    permissionPlaceholder: "選擇誰可以查看和使用該分群",
+    permissionPublic: "公開",
+    permissionPublicTip: "團隊內成員均可查看與使用",
+    permissionPrivate: "僅我可見",
+    permissionPrivateTip: "僅創建者本人可查看與使用",
     stats: {
       segmentTotal: "分群總數",
       totalMembers: "總成員數",
-      activeSegments: "生效分群",
-      draftSegments: "草稿分群",
-      pushedToOpportunity: "已推送商機"
+      calculatingCount: "計算中",
+      completedCount: "已完成"
     }
   }
 };

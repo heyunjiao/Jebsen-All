@@ -63,6 +63,7 @@ export default {
       completedFileName: "文件名",
       reupload: "重新上传",
       taskListTitle: "{platform} 平台任务清单",
+      uploadCycle: "上传周期",
       reportName: "报表名称",
       status: "状态",
       lastUploadTime: "最后上传时间"
@@ -71,6 +72,7 @@ export default {
       poas_opp: "商机表",
       wws_activity: "活动列表",
       cap_vehicle: "车辆报告",
+      voucher_member_benefit_stats: "会员优惠信息统计表",
       voucher_member_addon_sales: "会员附加销售报表",
       voucher_balance_detail: "优惠券余额报表明细",
       voucher_first_owner_info: "首任车主信息",

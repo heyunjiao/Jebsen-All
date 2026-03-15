@@ -94,6 +94,8 @@ export default {
       viewTitle: "数据修正",
       alertTitle: "格式校验失败",
       alertDesc: "字段 【{field}】 不符合规范，请修正后重新提交。",
+      alertDescNoField:
+        "该条记录存在“有效性 / 完整性”异常。请在源系统中修正后重新发起同步，或在此记录处理情况。",
       originalData: "原始数据",
       errorFields: "报错字段",
       correction: "修正信息",

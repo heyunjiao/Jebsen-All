@@ -10,24 +10,39 @@
         </div>
       </div>
 
-      <!-- 标签节点 -->
+      <!-- 标签节点（是/否） -->
       <div v-else-if="node.type === 'tag'" class="tag-node">
-        <span class="tag-label">标签：</span>
+        <span class="tag-label">标签（{{ node.tagMatch === "no" ? "否" : "是" }}）：</span>
         <el-tag
           v-for="(tagName, index) in node.tagNames || node.tagIds || []"
           :key="index"
           size="small"
+          :type="node.tagMatch === 'no' ? 'info' : undefined"
           style="margin-right: 4px"
         >
           {{ tagName }}
         </el-tag>
       </div>
 
-      <!-- 条件节点 -->
+      <!-- 条件节点（含默认标签、金额档位、分析场景） -->
       <div v-else class="predicate-node">
         <span class="field-label">{{ getFieldLabel(node.field || "") }}</span>
-        <span class="operator-label">{{ getOperatorLabel(node.operatorType || "") }}</span>
-        <span class="value-label">{{ node.value }}</span>
+        <span class="operator-label">{{
+          (node.field && String(node.field).startsWith("tag_"))
+            ? "等于"
+            : ["totalCarPrice", "totalOptionPrice", "afterSalesSelfPayAmount"].includes(String(node.field))
+              ? "属于"
+              : ["activityCountInPeriod", "bdcReachInPeriod", "wecomReachInPeriod", "couponExpiry", "visitCountInPeriod"].includes(String(node.field))
+                ? "等于"
+                : getOperatorLabel(node.operatorType || "")
+        }}</span>
+        <span class="value-label">{{
+          ["totalCarPrice", "totalOptionPrice", "afterSalesSelfPayAmount"].includes(String(node.field))
+            ? getAmountRangeValueLabel(String(node.field), node.value)
+            : ["activityCountInPeriod", "bdcReachInPeriod", "wecomReachInPeriod", "couponExpiry", "visitCountInPeriod"].includes(String(node.field))
+              ? formatScenarioValue(String(node.field), node.value)
+              : node.value
+        }}</span>
       </div>
     </div>
   </div>
@@ -35,6 +50,13 @@
 
 <script setup lang="ts">
 import type { RuleNode } from "./RuleEditor.vue";
+import { DEFAULT_TAG_FIELDS } from "@/constants/tagCategory";
+import {
+  PURCHASE_AMOUNT_RANGES,
+  OPTION_AMOUNT_RANGES,
+  AFTER_SALES_SELF_PAY_RANGES
+} from "@/constants/amountRangeOptions";
+import { getScenarioFieldLabel, formatScenarioValue } from "@/constants/analysisScenarioOptions";
 
 const props = defineProps<{
   node: RuleNode;
@@ -44,6 +66,10 @@ const props = defineProps<{
 const level = props.level || 0;
 
 const getFieldLabel = (field: string) => {
+  if (field && field.startsWith("tag_")) {
+    const found = DEFAULT_TAG_FIELDS.find(f => f.value === field);
+    return found ? found.label : field;
+  }
   const fieldMap: Record<string, string> = {
     age: "年龄",
     annualConsumption: "年消费金额",
@@ -51,9 +77,31 @@ const getFieldLabel = (field: string) => {
     visitCount90Days: "90天到店次数",
     vehicleType: "车辆类型",
     lastVisitDays: "最后到店天数",
-    totalConsumption: "累计消费"
+    totalConsumption: "累计消费",
+    totalCarPrice: "购车金额",
+    totalOptionPrice: "选配金额",
+    afterSalesSelfPayAmount: "售后自费金额",
+    ...Object.fromEntries(
+      ["activityCountInPeriod", "bdcReachInPeriod", "wecomReachInPeriod", "couponExpiry", "visitCountInPeriod"].map(
+        f => [f, getScenarioFieldLabel(f)]
+      )
+    )
   };
   return fieldMap[field] || field;
+};
+
+const getAmountRangeValueLabel = (field: string, value: string) => {
+  if (!value) return value;
+  const list =
+    field === "totalCarPrice"
+      ? PURCHASE_AMOUNT_RANGES
+      : field === "totalOptionPrice"
+        ? OPTION_AMOUNT_RANGES
+        : field === "afterSalesSelfPayAmount"
+          ? AFTER_SALES_SELF_PAY_RANGES
+          : [];
+  const opt = list.find((r: any) => r.value === value);
+  return opt ? opt.label : value;
 };
 
 const getOperatorLabel = (operator: string) => {

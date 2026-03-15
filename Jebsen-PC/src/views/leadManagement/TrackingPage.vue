@@ -17,7 +17,13 @@
         <el-tab-pane v-for="tab in typeTabOptions" :key="tab.value" :name="tab.value">
           <template #label>
             <span class="tab-label">
-              {{ tab.group ? tab.label : getLeadTypeLabel(tab.value) }}
+              <span class="tab-label-inner">
+                <span class="tab-label-main">{{ tab.group ? tab.label : getLeadTypeLabel(tab.value) }}</span>
+                <span
+                  v-if="!tab.group && getLeadTypeSourceI18nKey(tab.value)"
+                  class="tab-label-sub"
+                >{{ $t(getLeadTypeSourceI18nKey(tab.value)) }}</span>
+              </span>
               <el-badge
                 v-if="getTypeStats(tab.value).pushed > 0"
                 :value="getTypeStats(tab.value).pushed"
@@ -30,17 +36,8 @@
       </el-tabs>
     </el-card>
 
-    <!-- 统计面板 -->
+    <!-- 统计面板（已删除：生成商机总数、成交数量、成交率） -->
     <div class="stats-panel">
-      <div class="stats-card primary-card">
-        <div class="stats-icon-wrapper">
-          <el-icon><Document /></el-icon>
-        </div>
-        <div class="stats-content">
-          <div class="stats-number">{{ formatNumber(stats.totalGenerated) }}</div>
-          <div class="stats-label">{{ $t("leadManagement.tracking.totalGenerated") }}</div>
-        </div>
-      </div>
       <div class="stats-card primary-card">
         <div class="stats-icon-wrapper">
           <el-icon><Upload /></el-icon>
@@ -50,40 +47,22 @@
           <div class="stats-label">{{ $t("leadManagement.tracking.totalPushed") }}</div>
         </div>
       </div>
-      <div class="stats-card success-card">
-        <div class="stats-icon-wrapper">
-          <el-icon><CircleCheck /></el-icon>
-        </div>
-        <div class="stats-content">
-          <div class="stats-number">{{ formatNumber(stats.convertedCount) }}</div>
-          <div class="stats-label">{{ $t("leadManagement.tracking.convertedCount") }}</div>
-        </div>
-      </div>
-      <div class="stats-card warning-card">
+      <div class="stats-card primary-card">
         <div class="stats-icon-wrapper">
           <el-icon><ShoppingCart /></el-icon>
         </div>
         <div class="stats-content">
-          <div class="stats-number">{{ formatNumber(stats.orderCount) }}</div>
+          <div class="stats-number">{{ formatNumber(stats.convertedCount) }}</div>
           <div class="stats-label">{{ $t("leadManagement.tracking.orderCount") }}</div>
         </div>
       </div>
-      <div class="stats-card info-card">
+      <div class="stats-card primary-card">
         <div class="stats-icon-wrapper">
           <el-icon><Money /></el-icon>
         </div>
         <div class="stats-content">
           <div class="stats-number">{{ formatCurrency(stats.totalOrderAmount) }}</div>
           <div class="stats-label">{{ $t("leadManagement.tracking.totalOrderAmount") }}</div>
-        </div>
-      </div>
-      <div class="stats-card primary-card">
-        <div class="stats-icon-wrapper">
-          <el-icon><TrendCharts /></el-icon>
-        </div>
-        <div class="stats-content">
-          <div class="stats-number">{{ (stats.conversionRate * 100).toFixed(2) }}%</div>
-          <div class="stats-label">{{ $t("leadManagement.tracking.conversionRate") }}</div>
         </div>
       </div>
     </div>
@@ -136,16 +115,6 @@
             @change="handleDateRangeChange"
           />
           <el-select
-            v-model="initParam.pushTarget"
-            :placeholder="$t('leadManagement.tracking.filterByTarget')"
-            clearable
-            style="width: 150px; margin-right: 12px"
-            @change="handleFilterChange"
-          >
-            <el-option :label="$t('leadManagement.tracking.all')" value="" />
-            <el-option v-for="target in pushTargetOptions" :key="target.value" :label="target.label" :value="target.value" />
-          </el-select>
-          <el-select
             v-model="initParam.converted"
             :placeholder="$t('leadManagement.tracking.filterByConverted')"
             clearable
@@ -163,20 +132,6 @@
         <template #leadType="scope">
           <el-tag :type="getTypeTagType(scope.row.leadType) as any" size="small">
             {{ getLeadTypeLabel(scope.row.leadType) }}
-          </el-tag>
-        </template>
-
-        <!-- 推送目标列 -->
-        <template #pushTarget="scope">
-          <el-tag type="info" size="small">
-            {{ getPushTargetLabel(scope.row.pushTarget) }}
-          </el-tag>
-        </template>
-
-        <!-- 推送角色列 -->
-        <template #pushRole="scope">
-          <el-tag type="info" size="small">
-            {{ getPushRoleLabel(scope.row.pushRole) }}
           </el-tag>
         </template>
 
@@ -277,6 +232,7 @@ import {
 } from "./interface";
 import {
   getLeadTypeLabel,
+  getLeadTypeSourceI18nKey,
   getLeadTypeTagType,
   mergeLeadTypeMetrics,
   normalizeLeadTypeList
@@ -305,12 +261,11 @@ const stats = reactive<Lead.LeadTrackingStats>({
   byDate: []
 });
 
-// 初始化参数
+// 初始化参数（已移除按推送目标筛选）
 const initParam = reactive<Lead.ReqLeadTrackingParams>({
   pageNum: 1,
   pageSize: 10,
   leadType: "",
-  pushTarget: "" as any,
   converted: undefined,
   startDate: "",
   endDate: ""
@@ -355,7 +310,7 @@ const getActiveLeadTypes = (): string[] | null => {
   return [activeTypeTab.value];
 };
 
-// 表格列配置
+// 表格列配置（已删除：手机号、推送目标、推送角色、顾问）
 const columns: ColumnProps[] = [
   {
     prop: "oneId",
@@ -365,21 +320,6 @@ const columns: ColumnProps[] = [
   {
     prop: "leadType",
     label: t("leadManagement.columns.leadType"),
-    minWidth: 120
-  },
-  {
-    prop: "phone",
-    label: t("customer.phone"),
-    minWidth: 120
-  },
-  {
-    prop: "pushTarget",
-    label: t("leadManagement.columns.pushTarget"),
-    minWidth: 120
-  },
-  {
-    prop: "pushRole",
-    label: t("leadManagement.columns.pushRole"),
     minWidth: 120
   },
   {
@@ -395,11 +335,6 @@ const columns: ColumnProps[] = [
     minWidth: 150,
     align: "right",
     sortable: true
-  },
-  {
-    prop: "advisorName",
-    label: t("leadManagement.tracking.advisorName"),
-    minWidth: 120
   },
   {
     prop: "storeName",
@@ -440,11 +375,8 @@ const loadData = async (params: any) => {
     // 应用筛选条件
     if (Array.isArray(queryParams.leadTypes) && queryParams.leadTypes.length > 0) {
       mockList = mockList.filter(item => queryParams.leadTypes.includes(item.leadType));
-    } else if (queryParams.leadType) {
+    } else     if (queryParams.leadType) {
       mockList = mockList.filter(item => item.leadType === queryParams.leadType);
-    }
-    if (queryParams.pushTarget) {
-      mockList = mockList.filter(item => item.pushTarget === queryParams.pushTarget);
     }
     if (queryParams.converted !== undefined) {
       mockList = mockList.filter(item => item.converted === queryParams.converted);
@@ -722,7 +654,8 @@ const getPushRoleLabel = (role?: string | null) => {
     SC: "SC",
     OTHER: "其他",
     Other: "其他",
-    other: "其他"
+    other: "其他",
+    renewal: "续保"
   };
   return map[role] || role;
 };
@@ -1224,6 +1157,24 @@ onMounted(() => {
       display: inline-flex;
       align-items: center;
       gap: 8px;
+    }
+
+    .tab-label-inner {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1px;
+    }
+
+    .tab-label-main {
+      line-height: 1.3;
+    }
+
+    .tab-label-sub {
+      font-size: 11px;
+      color: var(--el-text-color-secondary);
+      opacity: 0.85;
+      line-height: 1.2;
     }
 
     .tab-badge {

@@ -116,48 +116,77 @@
                 </span>
               </div>
             </template>
-            <div v-else class="phone-list-edit">
-              <div v-for="(phone, index) in basicInfoForm.phoneList" :key="index" class="phone-item-edit">
-                <el-input
-                  v-model="basicInfoForm.phoneList[index]"
-                  :placeholder="$t('customer.placeholder.phone')"
-                  size="small"
-                  clearable
-                  class="phone-input"
-                  :disabled="basicInfoForm.phoneReadonly[index]"
-                />
-                <el-select
-                  v-model="basicInfoForm.phoneRelationTags[index]"
-                  :placeholder="$t('customer.relationTag.label')"
-                  size="small"
-                  clearable
-                  class="relation-tag-select"
-                  :disabled="basicInfoForm.phoneReadonly[index]"
-                >
-                  <el-option v-for="opt in relationTagOptions" :key="opt.value" :label="opt.label" :value="opt.value" />
-                </el-select>
-                <el-radio-group
-                  v-model="basicInfoForm.preferredPhoneIndex"
-                  size="small"
-                  :disabled="basicInfoForm.phoneReadonly[index]"
-                  class="preferred-radio-group"
-                >
-                  <el-radio :value="index" :label="index">
-                    {{ $t("customer.profile360.setAsPreferred") }}
-                  </el-radio>
-                </el-radio-group>
-                <el-button
-                  type="danger"
-                  link
-                  size="small"
-                  :icon="Delete"
-                  :disabled="basicInfoForm.phoneList.length <= 1 || basicInfoForm.phoneReadonly[index]"
-                  @click="removeBasicInfoPhone(index)"
-                />
-                <div v-if="basicInfoForm.phoneReadonly[index]" class="readonly-tip">该号码来自售后订单同步，仅支持查看</div>
+            <div v-else class="phone-list-edit h5-style-contact">
+              <div class="phone-edit-section-title">{{ $t("customer.profile360.viewAllPhones") || "查看全部联系电话" }}</div>
+              <div v-for="group in groupedPhoneItems" :key="group.key" class="phone-group">
+                <div class="phone-group-header">
+                  <span class="group-contact-name">{{ group.contactName }}</span>
+                  <el-tag v-if="group.relationTagLabel" type="info" size="small" plain class="group-relation-tag">
+                    {{ group.relationTagLabel }}
+                  </el-tag>
+                  <el-button type="primary" link size="small" :icon="Plus" class="add-number-btn" @click="addNumberInGroup(group)">
+                    {{ $t("customer.profile360.addPhone") }}
+                  </el-button>
+                </div>
+                <div v-for="item in group.items" :key="item.index" class="phone-row" :class="{ 'is-preferred': basicInfoForm.preferredPhoneIndex === item.index }">
+                  <template v-if="editingPhoneIndex === item.index">
+                    <div class="phone-row-edit">
+                      <el-input
+                        v-model="basicInfoForm.phoneItems[item.index].value"
+                        :placeholder="$t('customer.placeholder.phone')"
+                        size="small"
+                        clearable
+                        class="phone-input"
+                        :disabled="item.readonly"
+                      />
+                      <el-input
+                        v-model="basicInfoForm.phoneItems[item.index].contactName"
+                        :placeholder="$t('customer.profile360.contactName') || '联系人姓名'"
+                        size="small"
+                        clearable
+                        class="contact-name-input"
+                        :disabled="item.readonly"
+                      />
+                      <el-select
+                        v-model="basicInfoForm.phoneItems[item.index].relationTagKey"
+                        :placeholder="$t('customer.relationTag.label')"
+                        size="small"
+                        clearable
+                        class="relation-tag-select"
+                        :disabled="item.readonly"
+                      >
+                        <el-option v-for="opt in relationTagOptions" :key="opt.value" :label="opt.label" :value="opt.value" />
+                      </el-select>
+                      <el-button type="primary" link size="small" @click="editingPhoneIndex = null">{{ $t("customer.profile360.doneEdit") || "完成" }}</el-button>
+                    </div>
+                  </template>
+                  <template v-else>
+                    <div class="phone-row-display">
+                      <span class="phone-number">{{ item.value || ($t('customer.placeholder.phone') || '请输入手机号') }}</span>
+                      <span v-if="basicInfoForm.preferredPhoneIndex === item.index" class="preferred-badge">{{ $t("customer.profile360.preferredNumber") }}</span>
+                      <span
+                        v-if="basicInfoForm.preferredPhoneIndex !== item.index && !item.readonly"
+                        class="set-preferred-link"
+                        @click="setPreferredPhoneIndex(item.index)"
+                      >{{ $t("customer.profile360.setAsPreferred") }}</span>
+                      <template v-if="!item.readonly">
+                        <el-button type="primary" link size="small" @click="editingPhoneIndex = item.index">{{ $t("customer.profile360.edit") || "编辑" }}</el-button>
+                        <el-button
+                          type="danger"
+                          link
+                          size="small"
+                          :icon="Delete"
+                          :disabled="basicInfoForm.phoneItems.length <= 1"
+                          @click="removeBasicInfoPhone(item.index)"
+                        />
+                      </template>
+                      <div v-if="item.readonly" class="readonly-tip">该号码来自售后订单同步，仅支持查看</div>
+                    </div>
+                  </template>
+                </div>
               </div>
-              <el-button type="primary" link size="small" :icon="Plus" @click="addBasicInfoPhone">
-                {{ $t("customer.profile360.addPhone") }}
+              <el-button type="primary" link size="small" :icon="Plus" class="add-contact-btn" @click="addNewContact">
+                {{ $t("customer.profile360.addContact") || "新增联系人" }}
               </el-button>
             </div>
           </el-descriptions-item>
@@ -913,7 +942,7 @@
         </el-tab-pane>
       </el-tabs>
 
-      <!-- 消费统计 -->
+      <!-- 消费统计（UI 参照「客户价值」，使用表格型展示） -->
       <el-card shadow="never" class="reference-card">
         <template #header>
           <div class="card-header">
@@ -923,38 +952,23 @@
             </div>
           </div>
         </template>
-        <el-row :gutter="16">
-          <el-col :span="12">
-            <div class="stat-item">
-              <div class="stat-label">{{ $t("errorCorrection.customerReference.totalSpend") }}</div>
-              <div class="stat-value money-font">¥{{ formatMoney(consumptionStats.totalSpend) }}</div>
-            </div>
-          </el-col>
-          <el-col :span="12">
-            <div class="stat-item">
-              <div class="stat-label">{{ $t("errorCorrection.customerReference.avgSpend") }}</div>
-              <div class="stat-value money-font">¥{{ formatMoney(consumptionStats.avgSpend) }}</div>
-            </div>
-          </el-col>
-          <el-col :span="12">
-            <div class="stat-item">
-              <div class="stat-label">{{ $t("errorCorrection.customerReference.orderCount") }}</div>
-              <div class="stat-value">{{ consumptionStats.orderCount }}{{ $t("errorCorrection.customerReference.times") }}</div>
-            </div>
-          </el-col>
-          <el-col :span="12">
-            <div class="stat-item">
-              <div class="stat-label">{{ $t("errorCorrection.customerReference.visit90d") }}</div>
-              <div class="stat-value">{{ consumptionStats.visit90d }}{{ $t("errorCorrection.customerReference.times") }}</div>
-            </div>
-          </el-col>
-          <el-col :span="12">
-            <div class="stat-item">
-              <div class="stat-label">{{ $t("errorCorrection.customerReference.lastVisit") }}</div>
-              <div class="stat-value">{{ consumptionStats.lastVisit || $t("errorCorrection.customerReference.none") }}</div>
-            </div>
-          </el-col>
-        </el-row>
+        <el-descriptions :column="3" border size="small">
+          <el-descriptions-item :label="$t('errorCorrection.customerReference.totalSpend')">
+            <span class="money-font">¥{{ formatMoney(consumptionStats.totalSpend) }}</span>
+          </el-descriptions-item>
+          <el-descriptions-item :label="$t('errorCorrection.customerReference.avgSpend')">
+            <span class="money-font">¥{{ formatMoney(consumptionStats.avgSpend) }}</span>
+          </el-descriptions-item>
+          <el-descriptions-item :label="$t('errorCorrection.customerReference.orderCount')">
+            {{ consumptionStats.orderCount }}{{ $t("errorCorrection.customerReference.times") }}
+          </el-descriptions-item>
+          <el-descriptions-item :label="$t('errorCorrection.customerReference.visit90d')">
+            {{ consumptionStats.visit90d }}{{ $t("errorCorrection.customerReference.times") }}
+          </el-descriptions-item>
+          <el-descriptions-item :label="$t('errorCorrection.customerReference.lastVisit')">
+            {{ consumptionStats.lastVisit || $t("errorCorrection.customerReference.none") }}
+          </el-descriptions-item>
+        </el-descriptions>
       </el-card>
 
       <!-- 身份血缘溯源 -->
@@ -1122,10 +1136,9 @@ const basicInfoForm = ref<{
   city: string;
   familyStatus: string;
   addresses: Array<{ slotKey: string; slotLabel: string; value: string; weightLabel: string }>;
-  phoneList: string[];
-  phoneRelationTags: string[]; // 每个号码的关系标签 key（与 H5 一致）
-  phoneReadonly: boolean[];
-  /** 优选号码所在行下标（多号码时仅能设置一个） */
+  /** 联系电话列表（与 H5 一致：按人分组展示，每项含联系人姓名+关系+号码） */
+  phoneItems: Array<{ value: string; contactName: string; relationTagKey: string; readonly: boolean }>;
+  /** 优选号码在 phoneItems 中的下标 */
   preferredPhoneIndex: number;
   lifecycleStatus: LifecycleStatus;
   originalLifecycleStatus: LifecycleStatus;
@@ -1136,12 +1149,38 @@ const basicInfoForm = ref<{
   city: "",
   familyStatus: "",
   addresses: [],
-  phoneList: [],
-  phoneRelationTags: [],
-  phoneReadonly: [],
+  phoneItems: [],
   preferredPhoneIndex: 0,
   lifecycleStatus: "active",
   originalLifecycleStatus: "active"
+});
+
+/** 当前正在编辑的号码项下标（与 H5 一致：点击编辑展开表单，null 为未编辑） */
+const editingPhoneIndex = ref<number | null>(null);
+
+/** 按人分组联系电话（与 H5「查看全部联系电话」一致：contactName 或关系标签为组键） */
+const groupedPhoneItems = computed(() => {
+  const items = basicInfoForm.value.phoneItems.map((item, index) => ({ ...item, index }));
+  const getKey = (item: (typeof items)[0]) =>
+    (item.contactName || "").trim() || item.relationTagKey || `i-${item.index}`;
+  const map = new Map<string, (typeof items)[0][]>();
+  for (const item of items) {
+    const k = getKey(item);
+    if (!map.has(k)) map.set(k, []);
+    map.get(k)!.push(item);
+  }
+  return Array.from(map.entries()).map(([key, groupItems]) => {
+    const first = groupItems[0];
+    const relationTagLabel =
+      relationTagOptions.value.find(o => o.value === first.relationTagKey)?.label || "";
+    return {
+      key,
+      contactName: (first.contactName || "").trim() || relationTagLabel || "未知联系人",
+      relationTagKey: first.relationTagKey,
+      relationTagLabel,
+      items: groupItems
+    };
+  });
 });
 
 // 公司信息编辑表单（仅 company 类型 OneID，在公司卡片右上角进行编辑）
@@ -1175,32 +1214,31 @@ const companyStatusValue = computed(() => {
 // 编辑模式下的标签选中状态（用于临时存储，保存时才提交）
 const editModeSelectedTags = ref<Record<string, string[]>>({});
 
-// 所有可用的标签分类（用于编辑模式下显示所有可选标签）
-// 说明：这里的 tag 值统一使用「叶子编码」，与 TAG_CATEGORY_OPTIONS 中的 value 对齐，
-// 这样在展示时可以通过 getCategoryFullPath 还原多级路径。
+// 所有可用的标签分类（仅保留系统默认标签：会员分层、售后行为、活跃度相关、粘性产品、投诉相关）
+// 说明：这里的 tag 值统一使用「叶子编码」，与 TAG_CATEGORY_OPTIONS 中的 value 对齐。
 const allCategoryTags: Record<string, string[]> = {
-  // 业务 / 意向级别
-  意向级别: ["意向-高", "意向-中", "意向-低"],
-  // 业务 / SC
-  "SC【必选】": [
-    "SC-高",
-    "SC-中",
-    "SC-低"
+  会员分层: [
+    "会员分层-销售钻石客户",
+    "会员分层-售后钻石客户",
+    "会员分层-普通活跃售后客户",
+    "会员分层-休眠客户",
+    "会员分层-流失客户"
   ],
-  // 业务 / SA（示例：仍然用原始文案，后续可按需接入多级配置）
-  "SA【必选】": ["本市", "省内外市", "私牌"],
-  // 业务 / 续保
-  "续保【必选】": [
-    "续保-到期-3个月内",
-    "续保-到期-已过期"
+  售后行为: [
+    "售后行为-12个月内完成首保",
+    "售后行为-12个月内完成首次回厂",
+    "售后行为-12个月内回厂",
+    "售后行为-13-24个月回厂"
   ],
-  // 业务 / POC
-  "POC【必选】": ["POC-高", "POC-中"],
-  免打扰车主: ["车主免打扰"],
-  // 业务 / 线上活动
-  线上活动: ["线上-试驾活动", "线上-金融活动"],
-  "爱好(≥1项)": ["亲子", "品酒", "宠物", "潮玩", "自驾游", "艺术文化", "赛车", "运动", "高尔夫"],
-  服务偏好: ["下午联系", "微信沟通", "需要代步车", "预约保养", "周末有空", "喜欢喝茶", "关注新款", "预算充足", "偏好SUV"]
+  活跃度相关: [
+    "活跃度-购买附加产品",
+    "活跃度-推荐其他客户",
+    "活跃度-有增购换购",
+    "活跃度-参加社群市场活动"
+  ],
+  粘性产品: ["粘性产品-粘性产品"],
+  投诉相关: ["投诉相关-6个月内有投诉"],
+  定保相关: ["定保相关-达标定保"]
 };
 
 // 转换数据格式：根据当前客户手机号（支持多值）生成展示列表
@@ -1220,6 +1258,7 @@ const phoneValues = computed(() => {
         isPreferred,
         updateTime: obj?.updateTime || "",
         relationTagName: obj?.relationTagName,
+        contactName: obj?.contactName ?? "",
         isPreferredRepairer: obj?.isPreferredRepairer ?? false,
         isPrimaryContact: obj?.isPrimaryContact ?? false,
         readonly: obj?.readonly ?? false
@@ -1308,7 +1347,7 @@ const opportunityInfoList = computed(() => {
     { leadType: "BDC Campaign", priority: "high" as const, status: "pending" as const, ruleName: "Campaign规则" },
     { leadType: "新车满意度回访", priority: "high" as const, status: "pushed" as const, ruleName: "新车回访规则" },
     { leadType: "TTR调研", priority: "low" as const, status: "completed" as const, ruleName: "调研规则" },
-    { leadType: "PCN售后 Campaign", priority: "medium" as const, status: "pending" as const, ruleName: "PCN规则" }
+    { leadType: "PCN召回Campaign", priority: "medium" as const, status: "pending" as const, ruleName: "PCN规则" }
   ];
 
   return [...opportunities, ...mockOpportunities];
@@ -1329,17 +1368,14 @@ const selectedTags = computed(() => {
     }
   }
 
-  // 强制合并mock数据(仅demo演示用)
+  // 强制合并 mock 数据（仅 demo 演示用，仅使用默认标签分类）
   const mockTags: Record<string, string[]> = {
-    意向级别: ["热", "高意向", "近期购车"],
-    SC: ["老客重购", "全款", "置换"],
-    SA: ["本市", "私牌", "首次保养"],
-    续保: ["平安", "保险到期月份-3月", "续保", "出险1次"],
-    POC: ["精确报价", "试驾完成"],
-    "爱好(≥1项)": ["自驾游", "运动", "高尔夫", "摄影", "美食"],
-    服务偏好: ["下午联系", "微信沟通", "需要代步车", "预约保养", "周末有空"],
-    职业信息: ["企业高管", "金融行业"],
-    家庭情况: ["二胎家庭", "有宠物"]
+    会员分层: ["会员分层-售后钻石客户"],
+    售后行为: ["售后行为-12个月内完成首保", "售后行为-12个月内回厂"],
+    活跃度相关: ["活跃度-购买附加产品"],
+    粘性产品: [],
+    投诉相关: [],
+    定保相关: []
   };
 
   // 合并对象
@@ -1624,10 +1660,10 @@ const getCategoryDisplayLabel = (category: string): string => {
   return getCategoryFullPath(TAG_CATEGORY_OPTIONS, clean) || clean;
 };
 
-// 判断某个标签分类是否为自动计算类
+// 判断某个标签分类是否为自动计算类（默认标签均为系统自动）
 const isAutoCategory = (category: string): boolean => {
   const displayName = getCategoryDisplayName(category);
-  const autoCategories = ["意向级别", "SC", "SA", "续保", "POC", "免打扰车主", "线上活动"];
+  const autoCategories = ["会员分层", "售后行为", "活跃度相关", "粘性产品", "投诉相关", "定保相关"];
   return autoCategories.some(key => displayName.includes(key));
 };
 
@@ -1651,18 +1687,15 @@ const getTagOriginClass = (category: string, tag: string): string => {
   return isAutoCategory(category) ? "auto" : "manual";
 };
 
-// 获取分类颜色索引（用于区分不同分类）
+// 获取分类颜色索引（仅默认标签分类）
 const getCategoryColorIndex = (category: string): number => {
   const categoryMap: Record<string, number> = {
-    意向级别: 0,
-    SC: 1,
-    SA: 2,
-    续保: 3,
-    POC: 4,
-    免打扰车主: 5,
-    线上活动: 6,
-    "爱好(≥1项)": 7,
-    服务偏好: 2
+    会员分层: 0,
+    售后行为: 1,
+    活跃度相关: 2,
+    粘性产品: 3,
+    投诉相关: 4,
+    定保相关: 5
   };
 
   for (const key in categoryMap) {
@@ -1691,15 +1724,21 @@ const enterBasicInfoEditMode = () => {
   if (!display) return;
 
   const phones = phoneValues.value;
-  const phoneList = phones.length > 0 ? phones.map(p => p.value) : [""];
+  const phoneItems =
+    phones.length > 0
+      ? phones.map(p => {
+          const relationTagKey =
+            relationTagOptions.value.find(opt => opt.label === p.relationTagName)?.value ?? "";
+          return {
+            value: p.value,
+            contactName: p.contactName ?? "",
+            relationTagKey,
+            readonly: !!p.readonly
+          };
+        })
+      : [{ value: "", contactName: "", relationTagKey: "", readonly: false }];
   const preferredIdx = phones.findIndex(p => p.isPreferred ?? p.isPrimary);
   const preferredPhoneIndex = preferredIdx >= 0 ? preferredIdx : 0;
-  const phoneRelationTags = phoneList.map((_, i) => {
-    const name = phones[i]?.relationTagName;
-    if (!name) return "";
-    const found = relationTagOptions.value.find(option => option.label === name);
-    return found?.value ?? "";
-  });
   const addresses = addressValues.value.map((item, index) => {
     const slotKey = item.slotKey || `address${index + 1}`;
     return {
@@ -1717,9 +1756,7 @@ const enterBasicInfoEditMode = () => {
     city: (display as { city?: string }).city || "",
     familyStatus: (display.familyStatus as string) || "",
     addresses,
-    phoneList,
-    phoneRelationTags,
-    phoneReadonly: phoneList.map((_, index) => !!phones[index]?.readonly),
+    phoneItems,
     preferredPhoneIndex,
     lifecycleStatus: (props.profileData?.customer.lifecycleStatus as LifecycleStatus) ?? "active",
     originalLifecycleStatus: (props.profileData?.customer.lifecycleStatus as LifecycleStatus) ?? "active"
@@ -1728,21 +1765,41 @@ const enterBasicInfoEditMode = () => {
   isBasicInfoEditMode.value = true;
 };
 
-function addBasicInfoPhone() {
-  basicInfoForm.value.phoneList.push("");
-  basicInfoForm.value.phoneRelationTags.push("");
-  basicInfoForm.value.phoneReadonly.push(false);
+/** 在当前联系人组下添加一个号码（与 H5 一致） */
+function addNumberInGroup(group: { relationTagKey: string; contactName: string }) {
+  basicInfoForm.value.phoneItems.push({
+    value: "",
+    contactName: group.contactName,
+    relationTagKey: group.relationTagKey,
+    readonly: false
+  });
+  editingPhoneIndex.value = basicInfoForm.value.phoneItems.length - 1;
+}
+
+/** 新增联系人（与 H5「新增联系人」一致） */
+function addNewContact() {
+  basicInfoForm.value.phoneItems.push({
+    value: "",
+    contactName: "",
+    relationTagKey: "",
+    readonly: false
+  });
+  editingPhoneIndex.value = basicInfoForm.value.phoneItems.length - 1;
+}
+
+function setPreferredPhoneIndex(index: number) {
+  basicInfoForm.value.preferredPhoneIndex = index;
 }
 
 function removeBasicInfoPhone(index: number) {
-  const list = basicInfoForm.value.phoneList;
+  const list = basicInfoForm.value.phoneItems;
   if (list.length <= 1) return;
   list.splice(index, 1);
-  basicInfoForm.value.phoneRelationTags.splice(index, 1);
-  basicInfoForm.value.phoneReadonly.splice(index, 1);
   const preferred = basicInfoForm.value.preferredPhoneIndex;
   if (preferred >= list.length) basicInfoForm.value.preferredPhoneIndex = Math.max(0, list.length - 1);
   else if (preferred > index) basicInfoForm.value.preferredPhoneIndex = preferred - 1;
+  if (editingPhoneIndex.value === index) editingPhoneIndex.value = null;
+  else if (editingPhoneIndex.value != null && editingPhoneIndex.value > index) editingPhoneIndex.value = editingPhoneIndex.value - 1;
 }
 
 const exitBasicInfoEditMode = () => {
@@ -1754,13 +1811,12 @@ const exitBasicInfoEditMode = () => {
     city: "",
     familyStatus: "",
     addresses: [],
-    phoneList: [],
-    phoneRelationTags: [],
-    phoneReadonly: [],
+    phoneItems: [],
     preferredPhoneIndex: 0,
     lifecycleStatus: "active",
     originalLifecycleStatus: "active"
   };
+  editingPhoneIndex.value = null;
 };
 
 // 公司信息编辑模式：公司档案已下线，保留空实现以兼容调用
@@ -1790,12 +1846,13 @@ const handleSubmitBasicInfo = async () => {
       ElMessage.success("保存成功");
     }
 
-    const phonePayload = basicInfoForm.value.phoneList
-      .map((value, i) => ({
-        value,
-        relationTagName: relationTagOptions.value.find(option => option.value === basicInfoForm.value.phoneRelationTags[i])?.label,
+    const phonePayload = basicInfoForm.value.phoneItems
+      .map((item, i) => ({
+        value: item.value,
+        contactName: item.contactName || undefined,
+        relationTagName: relationTagOptions.value.find(opt => opt.value === item.relationTagKey)?.label,
         isPreferred: basicInfoForm.value.preferredPhoneIndex === i,
-        readonly: basicInfoForm.value.phoneReadonly[i]
+        readonly: item.readonly
       }))
       .filter(p => p.value);
     console.log("提交基础信息:", {
@@ -1805,7 +1862,6 @@ const handleSubmitBasicInfo = async () => {
       familyStatus: basicInfoForm.value.familyStatus,
       addresses: basicInfoForm.value.addresses,
       phoneList: phonePayload,
-      preferredPhoneIndex: basicInfoForm.value.preferredPhoneIndex,
       lifecycleStatus: basicInfoForm.value.lifecycleStatus
     });
     exitBasicInfoEditMode();
@@ -2817,6 +2873,85 @@ const handleSaveTags = async () => {
     width: 100%;
     font-size: 12px;
     color: var(--el-text-color-secondary);
+  }
+  /* 与 H5「查看全部联系电话」一致的编辑区 */
+  .h5-style-contact {
+    .phone-edit-section-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--el-text-color-primary);
+      margin-bottom: 12px;
+    }
+    .phone-group {
+      margin-bottom: 16px;
+      border: 1px solid var(--el-border-color-lighter);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .phone-group-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: var(--el-fill-color-light);
+      .group-contact-name {
+        font-weight: 500;
+        color: var(--el-text-color-primary);
+      }
+      .group-relation-tag {
+        flex-shrink: 0;
+      }
+      .add-number-btn {
+        margin-left: auto;
+      }
+    }
+    .phone-row {
+      padding: 8px 12px;
+      border-top: 1px solid var(--el-border-color-lighter);
+      &.is-preferred {
+        background: var(--el-color-primary-light-9);
+      }
+    }
+    .phone-row-display {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      .phone-number {
+        font-weight: 500;
+      }
+      .preferred-badge {
+        font-size: 12px;
+        color: var(--el-color-primary);
+        font-weight: 500;
+      }
+      .set-preferred-link {
+        font-size: 12px;
+        color: var(--el-color-primary);
+        cursor: pointer;
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+    .phone-row-edit {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      .phone-input {
+        width: 140px;
+      }
+      .contact-name-input {
+        width: 120px;
+      }
+      .relation-tag-select {
+        width: 140px;
+      }
+    }
+    .add-contact-btn {
+      margin-top: 8px;
+    }
   }
   .vehicle-person-cell {
     font-weight: 500;

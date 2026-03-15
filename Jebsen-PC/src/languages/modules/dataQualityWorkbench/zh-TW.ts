@@ -62,6 +62,7 @@ export default {
       completedFileName: "文件名",
       reupload: "重新上傳",
       taskListTitle: "{platform} 平台任務清單",
+      uploadCycle: "上傳週期",
       reportName: "報表名稱",
       status: "狀態",
       lastUploadTime: "最後上傳時間"
@@ -75,6 +76,9 @@ export default {
       voucher_sales: "附加銷售報表",
       voucher_benefits: "會員優惠信息統計表",
       voucher_balance: "優惠券餘額報表 (明細)",
+      voucher_member_benefit_stats: "會員優惠信息統計表",
+      voucher_member_addon_sales: "會員附加銷售報表",
+      voucher_balance_detail: "優惠券餘額報表明細",
       manual_pc_marketing: "PC主動營銷跟進信息更新表",
       manual_client_base: "客戶基盤",
       manual_loss_15m: "首保15個月流失判定",

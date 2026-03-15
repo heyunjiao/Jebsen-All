@@ -7,12 +7,24 @@ export default {
     subtitle: "Customer Segmentation & Rule Builder",
 
     // 快捷筛选区
+    filterSections: {
+      basic: "基础档案信息",
+      value: "客户价值",
+      vehicle: "车辆关联信息",
+      sales: "销售行为",
+      afterSales: "售后行为",
+      tags: "标签"
+    },
     quickFilters: {
       title: "快捷筛选",
       keyword: "关键字搜索",
       keywordPlaceholder: "输入姓名、手机号、VIN码...",
       tags: "快速标签",
-      tagsPlaceholder: "选择标签",
+      tagsPlaceholder: "选择或输入标签",
+      tagSection: "标签筛选",
+      tagLabel: "标签",
+      bdcComplaintTagsPlaceholder: "选择或输入投诉标签",
+      valueSection: "客户价值",
       store: "归属保时捷中心",
       storePlaceholder: "选择保时捷中心"
     },
@@ -106,6 +118,9 @@ export default {
       lastVisit: "最近到店时间",
       visits90D: "90天进店频次",
       annualSpend: "年均消费",
+      annualSpendRange: "年度消费金额",
+      spendingLevel: "消费等级",
+      loyaltyLevel: "忠诚度等级",
       segment: "现有客户分群",
       systemTag: "系统标签",
       oppLevel: "商机等级",

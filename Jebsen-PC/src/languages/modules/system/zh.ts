@@ -75,6 +75,7 @@ export default {
       // 功能权限
       functional: {
         menuTree: "菜单树",
+        menuSyncHint: "与系统当前菜单同步",
         pageAccess: "页面访问",
         operationButtons: "操作按钮/功能",
         selectAll: "全选",
@@ -101,10 +102,16 @@ export default {
         pushOpportunity: "推送商机",
         download: "下载",
         assignPermission: "分配权限",
+        assignCustomer: "分配客户",
+        assignRole: "分配角色",
+        filter: "筛选",
         approve: "审批",
         reject: "驳回",
         batchIgnore: "批量忽略",
-        resetPassword: "重置密码"
+        resetPassword: "重置密码",
+        batchAdd: "批量新增",
+        batchDelete: "批量删除",
+        status: "状态"
       },
       // 数据范围
       dataScope: {

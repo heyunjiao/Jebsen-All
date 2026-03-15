@@ -93,6 +93,9 @@
             {{ (currentDisplayCustomer || profileData.customer).oneId }}
             <el-button link type="primary" size="small" :icon="CopyDocument" @click="copyOneId" style="margin-left: 8px" />
           </el-descriptions-item>
+          <el-descriptions-item v-if="(currentDisplayCustomer || profileData.customer).bpid" label="BPID">
+            {{ (currentDisplayCustomer || profileData.customer).bpid }}
+          </el-descriptions-item>
           <el-descriptions-item :label="$t('errorCorrection.customerReference.customerName')">
             <template v-if="!isBasicInfoEditMode">
               <span>{{ (currentDisplayCustomer || profileData.customer).name }}</span>
@@ -110,8 +113,8 @@
                     $t("customer.profile360.preferredNumber")
                   }}</span>
                   <span v-if="phoneItem.relationTagName" class="relation-tag">{{ phoneItem.relationTagName }}</span>
-                  <span v-if="phoneItem.isPrimaryContact" class="relation-tag highlight">首选联系人</span>
-                  <span v-if="phoneItem.isPreferredRepairer" class="relation-tag highlight">首选送修人</span>
+                  <span v-if="phoneItem.isPrimaryContact" class="relation-tag highlight">{{ $t("customer.profile360.primaryContact") }}</span>
+                  <span v-if="phoneItem.isPreferredRepairer" class="relation-tag highlight">{{ $t("customer.profile360.preferredRepairer") }}</span>
                   <span v-if="phoneItem.readonly" class="relation-tag readonly">售后同步</span>
                 </span>
               </div>
@@ -121,6 +124,15 @@
               <div v-for="group in groupedPhoneItems" :key="group.key" class="phone-group">
                 <div class="phone-group-header">
                   <span class="group-contact-name">{{ group.contactName }}</span>
+                  <!-- 公司类型：设为优选联系人仅展示在名字后面 -->
+                  <template v-if="isCompanyCustomer">
+                    <span v-if="group.items.some(i => i.isPrimaryContact)" class="relation-tag highlight">{{ $t("customer.profile360.primaryContact") }}</span>
+                    <span
+                      v-else
+                      class="set-preferred-link"
+                      @click="setPrimaryContactIndex(group.items[0].index)"
+                    >{{ $t("customer.profile360.setAsPrimaryContact") }}</span>
+                  </template>
                   <el-tag v-if="group.relationTagLabel" type="info" size="small" plain class="group-relation-tag">
                     {{ group.relationTagLabel }}
                   </el-tag>
@@ -130,7 +142,19 @@
                 </div>
                 <div v-for="item in group.items" :key="item.index" class="phone-row" :class="{ 'is-preferred': basicInfoForm.preferredPhoneIndex === item.index }">
                   <template v-if="editingPhoneIndex === item.index">
-                    <div class="phone-row-edit">
+                    <!-- 在本组下点击「添加号码」新增的行：仅输入号码即可，联系人/关系已继承该组 -->
+                    <div v-if="isNumberRowInGroup(item, group)" class="phone-row-edit phone-row-edit-single">
+                      <el-input
+                        v-model="basicInfoForm.phoneItems[item.index].value"
+                        :placeholder="$t('customer.placeholder.phone')"
+                        size="small"
+                        clearable
+                        class="phone-input"
+                        :disabled="item.readonly"
+                      />
+                      <el-button type="primary" link size="small" @click="editingPhoneIndex = null">{{ $t("customer.profile360.doneEdit") || "完成" }}</el-button>
+                    </div>
+                    <div v-else class="phone-row-edit">
                       <el-input
                         v-model="basicInfoForm.phoneItems[item.index].value"
                         :placeholder="$t('customer.placeholder.phone')"
@@ -169,6 +193,17 @@
                         class="set-preferred-link"
                         @click="setPreferredPhoneIndex(item.index)"
                       >{{ $t("customer.profile360.setAsPreferred") }}</span>
+                      <!-- 公司类型：优选送修人（订单同步的号码可设为首选送修人）；优选联系人已移至分组标题名字后 -->
+                      <template v-if="isCompanyCustomer">
+                        <template v-if="item.readonly">
+                          <span v-if="item.isPreferredRepairer" class="relation-tag highlight">{{ $t("customer.profile360.preferredRepairer") }}</span>
+                          <span
+                            v-else
+                            class="set-preferred-link"
+                            @click="setPreferredRepairerIndex(item.index)"
+                          >{{ $t("customer.profile360.setAsPreferredRepairer") }}</span>
+                        </template>
+                      </template>
                       <template v-if="!item.readonly">
                         <el-button type="primary" link size="small" @click="editingPhoneIndex = item.index">{{ $t("customer.profile360.edit") || "编辑" }}</el-button>
                         <el-button
@@ -180,7 +215,7 @@
                           @click="removeBasicInfoPhone(item.index)"
                         />
                       </template>
-                      <div v-if="item.readonly" class="readonly-tip">该号码来自售后订单同步，仅支持查看</div>
+                      <div v-if="item.readonly" class="readonly-tip">{{ $t("customer.profile360.phoneFromOrderSync") }}</div>
                     </div>
                   </template>
                 </div>
@@ -228,13 +263,34 @@
             <template v-if="!isBasicInfoEditMode">
               {{ (currentDisplayCustomer || profileData.customer).ageGroup || "—" }}
             </template>
-            <el-input v-else v-model="basicInfoForm.ageGroup" :placeholder="$t('customer.placeholder.ageGroup')" size="small" />
+            <el-select
+              v-else
+              v-model="basicInfoForm.ageGroup"
+              :placeholder="$t('customer.placeholder.ageGroup')"
+              size="small"
+              clearable
+              style="width: 100%"
+            >
+              <el-option v-for="opt in ageGroupOptions" :key="opt" :label="opt" :value="opt" />
+            </el-select>
+          </el-descriptions-item>
+          <el-descriptions-item :label="$t('customer.listFields.birthDate')">
+            <template v-if="!isBasicInfoEditMode">
+              {{ (currentDisplayCustomer || profileData.customer).birthDate || "—" }}
+            </template>
+            <el-input v-else v-model="basicInfoForm.birthDate" :placeholder="$t('customer.placeholder.birthDate')" size="small" />
           </el-descriptions-item>
           <el-descriptions-item :label="$t('customer.city')">
             <template v-if="!isBasicInfoEditMode">
               {{ (currentDisplayCustomer || profileData.customer).city || "—" }}
             </template>
             <el-input v-else v-model="basicInfoForm.city" :placeholder="$t('customer.placeholder.city')" size="small" />
+          </el-descriptions-item>
+          <el-descriptions-item :label="$t('customer.listFields.residenceArea')">
+            <template v-if="!isBasicInfoEditMode">
+              {{ (currentDisplayCustomer || profileData.customer).residenceArea || "—" }}
+            </template>
+            <el-input v-else v-model="basicInfoForm.residenceArea" :placeholder="$t('customer.placeholder.residenceArea')" size="small" />
           </el-descriptions-item>
           <el-descriptions-item :label="$t('errorCorrection.customerReference.familyStatus')">
             <template v-if="!isBasicInfoEditMode">
@@ -247,6 +303,23 @@
               size="small"
             />
           </el-descriptions-item>
+          <el-descriptions-item :label="$t('customer.listFields.identityType')">
+            <template v-if="!isBasicInfoEditMode">
+              {{ (currentDisplayCustomer || profileData.customer).identityType || "—" }}
+            </template>
+            <el-select
+              v-else
+              v-model="basicInfoForm.identityType"
+              :placeholder="$t('customer.placeholder.identityType')"
+              size="small"
+              style="width: 100%"
+              clearable
+            >
+              <el-option :label="$t('customer.identityType.prospective')" value="准车主" />
+              <el-option :label="$t('customer.identityType.owner')" value="车主" />
+              <el-option :label="$t('customer.identityType.formerOwner')" value="曾用车主" />
+            </el-select>
+          </el-descriptions-item>
           <el-descriptions-item :label="$t('errorCorrection.customerReference.address')" :span="2">
             <template v-if="!isBasicInfoEditMode">
               <div class="address-tags-container">
@@ -257,6 +330,7 @@
               </div>
             </template>
             <div v-else class="address-list-edit">
+              <div class="address-edit-hint">{{ $t("customer.profile360.addressSlotsHint") }}</div>
               <div v-for="(address, index) in basicInfoForm.addresses" :key="address.slotKey" class="address-item-edit">
                 <div class="address-meta">
                   <span class="slot-label">{{ address.slotLabel }}</span>
@@ -314,7 +388,7 @@
         </el-descriptions>
       </el-card>
 
-      <!-- 销售 / 售后行为 -->
+      <!-- 销售 / 售后行为（需求侧字段：销售行为 + 售后行为 + 保险/营销/粘性） -->
       <el-card v-if="profileData.behaviorInfo" shadow="never" class="reference-card">
         <template #header>
           <div class="card-header">
@@ -325,6 +399,7 @@
           </div>
         </template>
         <el-descriptions :column="3" border size="small">
+          <!-- 销售行为 -->
           <el-descriptions-item :label="$t('customer.profile360.purchaseAmount')">
             {{ profileData.behaviorInfo?.purchaseAmount != null ? formatCurrency(profileData.behaviorInfo!.purchaseAmount!) : "—" }}
           </el-descriptions-item>
@@ -334,20 +409,43 @@
           <el-descriptions-item :label="$t('customer.profile360.addonProductAmount')">
             {{ profileData.behaviorInfo?.addonProductAmount != null ? formatCurrency(profileData.behaviorInfo!.addonProductAmount!) : "—" }}
           </el-descriptions-item>
+          <!-- 售后行为（与标签重复的项如增购换购、推荐行为、达标定保、12月首保/回厂、投诉、粘性产品、活动参与等仅在下方标签卡片展示，此处不重复） -->
           <el-descriptions-item :label="$t('customer.profile360.serviceFrequencyLastYear')">
             {{ profileData.behaviorInfo?.serviceFrequencyLastYear ?? "—" }}
           </el-descriptions-item>
           <el-descriptions-item :label="$t('customer.profile360.lastMaintenanceStore')">
             {{ profileData.behaviorInfo?.lastMaintenanceStore || "—" }}
           </el-descriptions-item>
+          <el-descriptions-item :label="$t('customer.profile360.lastReturnStore')">
+            {{ profileData.behaviorInfo?.lastReturnStore || "—" }}
+          </el-descriptions-item>
           <el-descriptions-item :label="$t('customer.profile360.lastMaintenanceDate')">
             {{ profileData.behaviorInfo?.lastMaintenanceDate || "—" }}
+          </el-descriptions-item>
+          <el-descriptions-item :label="$t('customer.profile360.lastServiceDate')">
+            {{ profileData.behaviorInfo?.lastServiceDate || "—" }}
           </el-descriptions-item>
           <el-descriptions-item :label="$t('customer.profile360.repairAmountLastYear')">
             {{ profileData.behaviorInfo?.repairAmountLastYear != null ? formatCurrency(profileData.behaviorInfo!.repairAmountLastYear!) : "—" }}
           </el-descriptions-item>
           <el-descriptions-item :label="$t('customer.profile360.accidentRepairCountLastYear')">
             {{ profileData.behaviorInfo?.accidentRepairCountLastYear ?? "—" }}
+          </el-descriptions-item>
+          <el-descriptions-item :label="$t('customer.profile360.firstMaintenanceDone')">
+            {{ profileData.behaviorInfo?.firstMaintenanceDone != null ? (profileData.behaviorInfo.firstMaintenanceDone ? $t('common.yes') : $t('common.no')) : "—" }}
+          </el-descriptions-item>
+          <el-descriptions-item :label="$t('customer.profile360.inWarrantyPeriod')">
+            {{ profileData.behaviorInfo?.inWarrantyPeriod != null ? (profileData.behaviorInfo.inWarrantyPeriod ? $t('common.yes') : $t('common.no')) : "—" }}
+          </el-descriptions-item>
+          <!-- 保险/续保 -->
+          <el-descriptions-item :label="$t('customer.profile360.newInsuranceAtSale')">
+            {{ profileData.behaviorInfo?.newInsuranceAtSale != null ? (profileData.behaviorInfo.newInsuranceAtSale ? $t('common.yes') : $t('common.no')) : "—" }}
+          </el-descriptions-item>
+          <el-descriptions-item :label="$t('customer.profile360.renewedAfterExpiry')">
+            {{ profileData.behaviorInfo?.renewedAfterExpiry != null ? (profileData.behaviorInfo.renewedAfterExpiry ? $t('common.yes') : $t('common.no')) : "—" }}
+          </el-descriptions-item>
+          <el-descriptions-item :label="$t('customer.profile360.renewCountInStoreRepairOutStoreInsurance')">
+            {{ profileData.behaviorInfo?.renewCountInStoreRepairOutStoreInsurance != null ? profileData.behaviorInfo.renewCountInStoreRepairOutStoreInsurance : "—" }}
           </el-descriptions-item>
         </el-descriptions>
       </el-card>
@@ -580,14 +678,28 @@
           >
             <el-table-column type="index" label="#" width="60" />
             <el-table-column prop="type" :label="$t('customer.profile360.insuranceType')" min-width="120" />
+            <el-table-column prop="insuredPerson" :label="$t('customer.profile360.insuredPerson')" width="100" show-overflow-tooltip />
             <el-table-column prop="company" :label="$t('customer.profile360.insuranceCompany')" width="140" />
             <el-table-column prop="policyNo" :label="$t('customer.profile360.policyNo')" width="160" />
+            <el-table-column prop="compulsoryInsuranceStartDate" :label="$t('customer.profile360.compulsoryInsuranceStartDate')" width="130" />
+            <el-table-column prop="commercialInsuranceExpiryDate" :label="$t('customer.profile360.commercialInsuranceExpiryDate')" width="140" />
+            <el-table-column prop="insuranceExpiryDate" :label="$t('customer.profile360.insuranceExpiryDate')" width="120" />
             <el-table-column prop="startDate" :label="$t('customer.profile360.startDate')" width="110" />
             <el-table-column prop="endDate" :label="$t('customer.profile360.endDate')" width="110" />
             <el-table-column prop="purchaseDate" :label="$t('customer.profile360.purchaseDate')" width="110" />
+            <el-table-column prop="insurancePurchaseType" :label="$t('customer.profile360.insurancePurchaseType')" width="120" />
             <el-table-column prop="renewalSpecialistName" :label="$t('customer.profile360.renewalSpecialist')" width="100" />
             <el-table-column prop="amount" :label="$t('customer.profile360.insuranceAmount')" width="110" align="right">
               <template #default="scope">{{ formatCurrency(scope.row.amount) }}</template>
+            </el-table-column>
+            <el-table-column prop="vehicleDamageAmount" :label="$t('customer.profile360.vehicleDamageAmount')" width="110" align="right">
+              <template #default="scope">{{ scope.row.vehicleDamageAmount != null ? formatCurrency(scope.row.vehicleDamageAmount) : '—' }}</template>
+            </el-table-column>
+            <el-table-column prop="driverSeatAmount" :label="$t('customer.profile360.driverSeatAmount')" width="120" align="right">
+              <template #default="scope">{{ scope.row.driverSeatAmount != null ? scope.row.driverSeatAmount + '万' : '—' }}</template>
+            </el-table-column>
+            <el-table-column prop="passengerSeatAmount" :label="$t('customer.profile360.passengerSeatAmount')" width="130" align="right">
+              <template #default="scope">{{ scope.row.passengerSeatAmount != null ? scope.row.passengerSeatAmount + '万' : '—' }}</template>
             </el-table-column>
             <el-table-column prop="status" :label="$t('customer.profile360.status')" width="100">
               <template #default="scope">
@@ -1113,31 +1225,54 @@ const offlineActivityColumns = computed<ColumnProps[]>(() => [
   }
 ]);
 
+/** 个人客户：与车主关系标签（value 存中文，与列表/后端一致） */
 const PERSONAL_RELATION_TAGS = [
-  { value: "self", label: "本人" },
-  { value: "spouse", label: "配偶" },
-  { value: "friend", label: "家庭联系人" },
-  { value: "other", label: "其他个人关系" }
+  { value: "本人", labelKey: "self" },
+  { value: "配偶", labelKey: "spouse" },
+  { value: "子女", labelKey: "child" },
+  { value: "父母", labelKey: "parent" },
+  { value: "朋友", labelKey: "friend" },
+  { value: "其他", labelKey: "other" }
 ];
+/** 公司客户：与车主关系标签 */
 const COMPANY_RELATION_TAGS = [
-  { value: "companyPhone", label: "公司总机" },
-  { value: "colleague", label: "采购联系人" },
-  { value: "mother", label: "财务联系人" },
-  { value: "father", label: "行政联系人" },
-  { value: "other", label: "其他公司关系" }
+  { value: "法人", labelKey: "legalPerson" },
+  { value: "股东/高管", labelKey: "shareholder" },
+  { value: "法人亲属", labelKey: "legalPersonRelative" },
+  { value: "员工", labelKey: "employee" },
+  { value: "其他", labelKey: "otherCompany" }
 ];
-const relationTagOptions = computed(() => (isCompanyCustomer.value ? COMPANY_RELATION_TAGS : PERSONAL_RELATION_TAGS));
+
+/** 年龄段选项（与列表/批量操作一致） */
+const ageGroupOptions = ["18-25", "26-35", "36-45", "46-55", "56-65"];
+
+const relationTagOptions = computed(() => {
+  const list = isCompanyCustomer.value ? COMPANY_RELATION_TAGS : PERSONAL_RELATION_TAGS;
+  return list.map(o => ({ value: o.value, label: t(`customer.relationTag.${o.labelKey}`) }));
+});
 
 // 基础信息编辑表单
 const basicInfoForm = ref<{
   name: string;
   gender: string;
   ageGroup: string;
+  birthDate: string;
   city: string;
+  residenceArea: string;
   familyStatus: string;
+  identityType: string;
   addresses: Array<{ slotKey: string; slotLabel: string; value: string; weightLabel: string }>;
   /** 联系电话列表（与 H5 一致：按人分组展示，每项含联系人姓名+关系+号码） */
-  phoneItems: Array<{ value: string; contactName: string; relationTagKey: string; readonly: boolean }>;
+  phoneItems: Array<{
+    value: string;
+    contactName: string;
+    relationTagKey: string;
+    readonly: boolean;
+    /** 公司类型：是否优选联系人（仅一个） */
+    isPrimaryContact?: boolean;
+    /** 公司类型：是否优选送修人（仅一个，通常为订单同步过来的号码） */
+    isPreferredRepairer?: boolean;
+  }>;
   /** 优选号码在 phoneItems 中的下标 */
   preferredPhoneIndex: number;
   lifecycleStatus: LifecycleStatus;
@@ -1146,8 +1281,11 @@ const basicInfoForm = ref<{
   name: "",
   gender: "",
   ageGroup: "",
+  birthDate: "",
   city: "",
+  residenceArea: "",
   familyStatus: "",
+  identityType: "",
   addresses: [],
   phoneItems: [],
   preferredPhoneIndex: 0,
@@ -1157,6 +1295,15 @@ const basicInfoForm = ref<{
 
 /** 当前正在编辑的号码项下标（与 H5 一致：点击编辑展开表单，null 为未编辑） */
 const editingPhoneIndex = ref<number | null>(null);
+
+/** 是否为「在某类型下点击添加号码」新增的行：同一组内非首条，仅需输入号码即可 */
+function isNumberRowInGroup(
+  item: { index: number },
+  group: { items: Array<{ index: number }> }
+): boolean {
+  const idx = group.items.findIndex(i => i.index === item.index);
+  return idx > 0;
+}
 
 /** 按人分组联系电话（与 H5「查看全部联系电话」一致：contactName 或关系标签为组键） */
 const groupedPhoneItems = computed(() => {
@@ -1733,28 +1880,40 @@ const enterBasicInfoEditMode = () => {
             value: p.value,
             contactName: p.contactName ?? "",
             relationTagKey,
-            readonly: !!p.readonly
+            readonly: !!p.readonly,
+            isPrimaryContact: !!(p as { isPrimaryContact?: boolean }).isPrimaryContact,
+            isPreferredRepairer: !!(p as { isPreferredRepairer?: boolean }).isPreferredRepairer
           };
         })
       : [{ value: "", contactName: "", relationTagKey: "", readonly: false }];
   const preferredIdx = phones.findIndex(p => p.isPreferred ?? p.isPrimary);
   const preferredPhoneIndex = preferredIdx >= 0 ? preferredIdx : 0;
-  const addresses = addressValues.value.map((item, index) => {
-    const slotKey = item.slotKey || `address${index + 1}`;
-    return {
+  // 与 H5 一致：固定 4 个地址槽位（地址1-4），可新增/编辑
+  const weightLabels = ["高权重", "中高权重", "中权重", "低权重"];
+  const addressSlots: Array<{ slotKey: string; slotLabel: string; value: string; weightLabel: string }> = [];
+  for (let i = 1; i <= 4; i++) {
+    const slotKey = `address${i}` as "address1" | "address2" | "address3" | "address4";
+    const existing = addressValues.value.find(
+      (item: { slotKey?: string }) => (item.slotKey || "").toLowerCase() === slotKey
+    ) || addressValues.value[i - 1];
+    addressSlots.push({
       slotKey,
-      slotLabel: slotKey.replace("address", "地址"),
-      value: item.value,
-      weightLabel: item.weightLabel || ["高权重", "中高权重", "中权重", "低权重"][index] || "普通"
-    };
-  });
+      slotLabel: `地址${i}`,
+      value: existing?.value ?? "",
+      weightLabel: weightLabels[i - 1] || "普通"
+    });
+  }
+  const addresses = addressSlots;
 
   basicInfoForm.value = {
     name: display.name || "",
     gender: (display.gender as string) || "",
     ageGroup: display.ageGroup || "",
+    birthDate: (display as { birthDate?: string }).birthDate || "",
     city: (display as { city?: string }).city || "",
+    residenceArea: (display as { residenceArea?: string }).residenceArea || "",
     familyStatus: (display.familyStatus as string) || "",
+    identityType: (display as { identityType?: string }).identityType || "",
     addresses,
     phoneItems,
     preferredPhoneIndex,
@@ -1771,7 +1930,9 @@ function addNumberInGroup(group: { relationTagKey: string; contactName: string }
     value: "",
     contactName: group.contactName,
     relationTagKey: group.relationTagKey,
-    readonly: false
+    readonly: false,
+    isPrimaryContact: false,
+    isPreferredRepairer: false
   });
   editingPhoneIndex.value = basicInfoForm.value.phoneItems.length - 1;
 }
@@ -1782,13 +1943,29 @@ function addNewContact() {
     value: "",
     contactName: "",
     relationTagKey: "",
-    readonly: false
+    readonly: false,
+    isPrimaryContact: false,
+    isPreferredRepairer: false
   });
   editingPhoneIndex.value = basicInfoForm.value.phoneItems.length - 1;
 }
 
 function setPreferredPhoneIndex(index: number) {
   basicInfoForm.value.preferredPhoneIndex = index;
+}
+
+/** 公司类型：设为优选联系人（仅一个） */
+function setPrimaryContactIndex(index: number) {
+  basicInfoForm.value.phoneItems.forEach((item, i) => {
+    (item as { isPrimaryContact?: boolean }).isPrimaryContact = i === index;
+  });
+}
+
+/** 公司类型：设为优选送修人（仅一个，通常为订单同步的号码） */
+function setPreferredRepairerIndex(index: number) {
+  basicInfoForm.value.phoneItems.forEach((item, i) => {
+    (item as { isPreferredRepairer?: boolean }).isPreferredRepairer = i === index;
+  });
 }
 
 function removeBasicInfoPhone(index: number) {
@@ -1808,8 +1985,11 @@ const exitBasicInfoEditMode = () => {
     name: "",
     gender: "",
     ageGroup: "",
+    birthDate: "",
     city: "",
+    residenceArea: "",
     familyStatus: "",
+    identityType: "",
     addresses: [],
     phoneItems: [],
     preferredPhoneIndex: 0,
@@ -1852,14 +2032,20 @@ const handleSubmitBasicInfo = async () => {
         contactName: item.contactName || undefined,
         relationTagName: relationTagOptions.value.find(opt => opt.value === item.relationTagKey)?.label,
         isPreferred: basicInfoForm.value.preferredPhoneIndex === i,
-        readonly: item.readonly
+        readonly: item.readonly,
+        isPrimaryContact: item.isPrimaryContact,
+        isPreferredRepairer: item.isPreferredRepairer
       }))
       .filter(p => p.value);
     console.log("提交基础信息:", {
       name: basicInfoForm.value.name,
       gender: basicInfoForm.value.gender,
       ageGroup: basicInfoForm.value.ageGroup,
+      birthDate: basicInfoForm.value.birthDate,
+      city: basicInfoForm.value.city,
+      residenceArea: basicInfoForm.value.residenceArea,
       familyStatus: basicInfoForm.value.familyStatus,
+      identityType: basicInfoForm.value.identityType,
       addresses: basicInfoForm.value.addresses,
       phoneList: phonePayload,
       lifecycleStatus: basicInfoForm.value.lifecycleStatus
@@ -2193,6 +2379,11 @@ const handleSaveTags = async () => {
       display: flex;
       flex-direction: column;
       gap: 12px;
+    }
+    .address-edit-hint {
+      font-size: 12px;
+      color: var(--el-text-color-secondary);
+      margin-bottom: 4px;
     }
     .address-item-edit {
       display: flex;
@@ -2901,6 +3092,18 @@ const handleSaveTags = async () => {
       .group-relation-tag {
         flex-shrink: 0;
       }
+      .set-preferred-link {
+        font-size: 12px;
+        color: var(--el-color-primary);
+        cursor: pointer;
+        margin-left: 6px;
+        text-underline-offset: 2px;
+        transition: opacity 0.2s;
+        &:hover {
+          text-decoration: underline;
+          opacity: 0.85;
+        }
+      }
       .add-number-btn {
         margin-left: auto;
       }
@@ -2929,8 +3132,12 @@ const handleSaveTags = async () => {
         font-size: 12px;
         color: var(--el-color-primary);
         cursor: pointer;
+        margin-left: 6px;
+        text-underline-offset: 2px;
+        transition: opacity 0.2s;
         &:hover {
           text-decoration: underline;
+          opacity: 0.85;
         }
       }
     }
@@ -2948,6 +3155,9 @@ const handleSaveTags = async () => {
       .relation-tag-select {
         width: 140px;
       }
+    }
+    .phone-row-edit-single .phone-input {
+      width: 200px;
     }
     .add-contact-btn {
       margin-top: 8px;

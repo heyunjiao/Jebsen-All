@@ -312,6 +312,15 @@ export interface Customer360View {
     renewalSpecialistName?: string; // 续保专员名字
     policyName?: string; // 兼容
     coverage?: string;
+    // 保险业务字段（与需求侧保险合同 tab 一致）
+    insuredPerson?: string; // 被保险人（保险合同保障对象）
+    compulsoryInsuranceStartDate?: string; // 交强险起保日期
+    commercialInsuranceExpiryDate?: string; // 商业险到期日
+    vehicleDamageAmount?: number; // 车损险保额
+    driverSeatAmount?: number; // 司机位保额(万)
+    passengerSeatAmount?: number; // 乘客位保额(万)
+    insurancePurchaseType?: string; // 保险购买类型（新保/续保/无忧车险等）
+    insuranceExpiryDate?: string; // 保险到期日（综合保险保单终止日期）
   }>;
   // 资产中心（与 H5 Asset 一致，优惠券/代金券及车辆合同明细字段一个不少）
   assets: {

@@ -194,28 +194,6 @@
           </el-card>
         </section>
 
-        <section class="page-section">
-          <div class="section-heading">
-            <h2 class="section-title">全链路批处理结果</h2>
-            <el-tag size="small" type="success" effect="light">处理完成</el-tag>
-          </div>
-
-          <div class="pipeline-grid">
-            <div v-for="(step, index) in pipelineSteps" :key="step.title" class="pipeline-stage">
-              <div class="pipeline-stage-head">
-                <div class="step-icon-custom">
-                  <el-icon><component :is="step.icon" /></el-icon>
-                </div>
-                <span class="pipeline-stage-index">0{{ index + 1 }}</span>
-              </div>
-              <div class="pipeline-stage-title">{{ step.title }}</div>
-              <!-- 主界面只展示数字，鼠标悬浮时再展示完整说明 -->
-              <el-tooltip placement="top" effect="dark" :content="step.detail">
-                <div class="pipeline-stage-main">{{ step.main }}</div>
-              </el-tooltip>
-            </div>
-          </div>
-        </section>
       </template>
 
       <template v-else>

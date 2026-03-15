@@ -504,7 +504,14 @@ const personColumns = computed<ColumnProps<Customer>[]>(() => [
     enum: [
       { label: t("customer.relationTag.self"), value: "本人" },
       { label: t("customer.relationTag.spouse"), value: "配偶" },
-      { label: t("customer.relationTag.companyPhone"), value: "公司电话" }
+      { label: t("customer.relationTag.child"), value: "子女" },
+      { label: t("customer.relationTag.parent"), value: "父母" },
+      { label: t("customer.relationTag.friend"), value: "朋友" },
+      { label: t("customer.relationTag.legalPerson"), value: "法人" },
+      { label: t("customer.relationTag.shareholder"), value: "股东/高管" },
+      { label: t("customer.relationTag.legalPersonRelative"), value: "法人亲属" },
+      { label: t("customer.relationTag.employee"), value: "员工" },
+      { label: t("customer.relationTag.other"), value: "其他" }
     ],
     search: {
       el: "select",
@@ -554,7 +561,7 @@ const personColumns = computed<ColumnProps<Customer>[]>(() => [
     search: {
       el: "select",
       label: t("customer.profile360.tags"),
-      order: 1,
+      order: 0,
       defaultValue: [],
       props: { multiple: true, placeholder: t("customer.profile360.tagsPlaceholder") }
     }
@@ -564,7 +571,7 @@ const personColumns = computed<ColumnProps<Customer>[]>(() => [
     isShow: false,
     search: {
       label: t("customer.tagChangeTime"),
-      order: 0,
+      order: 1,
       key: "tagChangeTime",
       render: (scope: any) => {
         const tags = scope.searchParam?.tags;
@@ -944,8 +951,8 @@ const generateMockData = (pageNum: number, pageSize: number, filters: any = {}) 
   const segments = ["高价值客户", "普通客户", "潜在客户", "流失客户", "VIP客户"];
   const cities = ["上海", "北京", "广州", "深圳", "杭州", "成都", "南京", "苏州"];
   // 关系标签：个人客户使用“本人/配偶”，公司客户统一使用“公司电话”
-  const individualRelationTags = ["本人", "配偶"];
-  const companyRelationTag = "公司电话";
+  const individualRelationTags = ["本人", "配偶", "子女", "父母", "朋友", "其他"];
+  const companyRelationTags = ["法人", "股东/高管", "法人亲属", "员工", "其他"];
   const storeCount = MOCK_STORE_LIST.length;
 
   // 生成全量数据
@@ -998,13 +1005,13 @@ const generateMockData = (pageNum: number, pageSize: number, filters: any = {}) 
                 isPreferred: true,
                 updateTime: "2024-12-15 10:30:00",
                 relationTagName:
-                  customerType === "company" ? companyRelationTag : individualRelationTags[i % individualRelationTags.length]
+                  customerType === "company" ? companyRelationTags[i % companyRelationTags.length] : individualRelationTags[i % individualRelationTags.length]
               },
               {
                 value: `139${String(Math.floor(Math.random() * 9000) + 1000)}${String(Math.floor(Math.random() * 9000) + 1000)}`,
                 source: "BDC",
                 updateTime: "2025-01-06 14:20:00",
-                relationTagName: customerType === "company" ? "联系人" : "配偶"
+                relationTagName: customerType === "company" ? "员工" : "配偶"
               },
               {
                 value: `150${String(Math.floor(Math.random() * 9000) + 1000)}${String(Math.floor(Math.random() * 9000) + 1000)}`,
@@ -1102,9 +1109,10 @@ const generateMockData = (pageNum: number, pageSize: number, filters: any = {}) 
       city: cities[i % cities.length],
       // 主号关系标签：个人客户为“本人/配偶”，公司客户固定“公司电话”
       primaryRelationTag:
-        customerType === "company" ? companyRelationTag : individualRelationTags[i % individualRelationTags.length],
+        customerType === "company" ? companyRelationTags[i % companyRelationTags.length] : individualRelationTags[i % individualRelationTags.length],
       primaryStoreId: store.storeId,
       primaryStoreName: store.storeName,
+      bpid: `BP-${oneId}`,
       birthDate:
         customerType === "individual"
           ? `19${80 + (i % 20)}-${String((i % 12) + 1).padStart(2, "0")}-${String((i % 28) + 1).padStart(2, "0")}`
@@ -1662,19 +1670,19 @@ const buildProfilePhones = (row: Customer) => {
         value: "021-58886688",
         source: "CRM",
         isPreferred: true,
-        relationTagName: "公司总机"
+        relationTagName: "法人"
       },
       {
         value: primaryValue,
         source: "Golden Record",
-        relationTagName: "采购联系人",
+        relationTagName: "员工",
         contactName: row.handlers?.[0]?.name || "首选联系人",
         isPrimaryContact: true
       },
       {
         value: "13900008888",
         source: "DMS",
-        relationTagName: "售后送修人",
+        relationTagName: "员工",
         contactName: row.handlers?.[1]?.name || "送修人A",
         personRole: "送修人",
         readonly: true,
@@ -1695,7 +1703,7 @@ const buildProfilePhones = (row: Customer) => {
     {
       value: "13912345678",
       source: "售后订单",
-      relationTagName: "家庭联系人",
+      relationTagName: "朋友",
       contactName: `${row.name}的送修人A`,
       personRole: "送修人",
       readonly: true,
@@ -1705,7 +1713,7 @@ const buildProfilePhones = (row: Customer) => {
     {
       value: "13712345678",
       source: "售后订单",
-      relationTagName: "其他个人关系",
+      relationTagName: "其他",
       contactName: `${row.name}的送修人B`,
       personRole: "送修人",
       readonly: true,
@@ -2110,7 +2118,15 @@ const viewProfile360 = async (sourceRow: Customer | VehicleListRow) => {
         amount: 5000,
         status: "已生效",
         renewalSpecialistName: "张顾问",
-        source: "DMS"
+        source: "DMS",
+        insuredPerson: "张三",
+        compulsoryInsuranceStartDate: "2024-01-01",
+        commercialInsuranceExpiryDate: "2025-01-01",
+        vehicleDamageAmount: 280000,
+        driverSeatAmount: 20,
+        passengerSeatAmount: 20,
+        insurancePurchaseType: "续保",
+        insuranceExpiryDate: "2025-01-01"
       },
       {
         id: "2",
@@ -2123,7 +2139,11 @@ const viewProfile360 = async (sourceRow: Customer | VehicleListRow) => {
         amount: 950,
         status: "已生效",
         renewalSpecialistName: "张顾问",
-        source: "DMS"
+        source: "DMS",
+        insuredPerson: "张三",
+        compulsoryInsuranceStartDate: "2024-01-01",
+        insurancePurchaseType: "续保",
+        insuranceExpiryDate: "2025-01-01"
       }
     ],
     assets: {
@@ -2217,7 +2237,7 @@ const viewProfile360 = async (sourceRow: Customer | VehicleListRow) => {
       isDormant: false,
       isLost: false
     },
-    // 销售 / 售后行为（优先使用列表行已有的 behaviorInfo）
+    // 销售 / 售后行为（优先使用列表行已有的 behaviorInfo；补全需求侧字段供 360 展示）
     behaviorInfo: row.behaviorInfo ?? {
       hasUpgradeOrReplace: false,
       hasReferralBehavior: false,
@@ -2227,12 +2247,24 @@ const viewProfile360 = async (sourceRow: Customer | VehicleListRow) => {
       serviceFrequencyLastYear: 4,
       lastMaintenanceStore: row.primaryStoreName || "上海浦东保时捷中心",
       lastMaintenanceDate: row.lastVisitTime,
+      lastReturnStore: row.primaryStoreName || "上海浦东保时捷中心",
+      lastServiceDate: row.lastVisitTime,
       repairAmountLastYear: 6000,
       accidentRepairCountLastYear: 0,
+      firstMaintenanceDone: true,
+      inWarrantyPeriod: true,
       isOnScheduleMaintenance: true,
       isStandardMaintenance: true,
+      firstMaintenanceWithin12Months: true,
+      firstReturnWithin12Months: true,
+      hasReturnWithin12Months: true,
+      returnWithin13To24Months: false,
       hasComplaintWithin6Months: false,
-      hasReturnWithin12Months: true
+      newInsuranceAtSale: false,
+      renewedAfterExpiry: false,
+      renewCountInStoreRepairOutStoreInsurance: 0,
+      campaignParticipationCount: 2,
+      hasStickyProduct: false
     },
     // 风控状态（示例 Mock）
     riskStatus: {

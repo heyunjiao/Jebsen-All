@@ -81,12 +81,12 @@
       
       <!-- [新增层级] 公司主体信息层：仅在公司账户下显示 -->
 
-      <!-- 公司视图：顶部企业级状态栏（功能保持与个人 alert-system 一致） -->
+      <!-- 公司视图：顶部级状态栏（功能保持与个人 alert-system 一致） -->
       <div
         v-if="false"
         class="alert-system context-alert enterprise-alert"
       >
-        <!-- 企业维度：经办人/账号存在冲突提示（点击仍然打开冲突解决弹窗） -->
+        <!-- 维度：经办人/账号存在冲突提示（点击仍然打开冲突解决弹窗） -->
         <van-notice-bar
           v-if="currentConflicts && currentConflicts.length > 0"
           left-icon="warning"
@@ -95,10 +95,10 @@
           class="alert-bar conflict-alert-bar"
           @click="showConflictResolver = true"
         >
-          检测到该企业存在多条记录冲突，请核实身份与合并策略。
+          检测到该存在多条记录冲突，请核实身份与合并策略。
         </van-notice-bar>
 
-        <!-- 企业维度：最新操作提示（点击仍然打开操作日志弹窗） -->
+        <!-- 维度：最新操作提示（点击仍然打开操作日志弹窗） -->
         <van-notice-bar
           v-if="latestOperationDisplay"
           left-icon="info-o"
@@ -214,7 +214,7 @@
         </van-notice-bar>
       </div>
 
-      <!-- 核心画像层：个人视图显示，企业视图隐藏 -->
+      <!-- 核心画像层：个人视图显示，视图隐藏 -->
       <div class="premium-header" :class="{ 'premium-header-company': isCompany }">
         <div class="watermark-bg"></div>
         <div class="header-main">
@@ -324,7 +324,7 @@
             查看更多 ›
           </span>
         </div>
-        <!-- 企业视图：经办人 Chip Tab -->
+        <!-- 视图：经办人 Chip Tab -->
         <div
           v-if="isCompany && companyHandlers.length > 0"
           class="handler-tab-wrapper"
@@ -431,10 +431,6 @@
 
       <!-- 三、联系人（人）：当前选中人的档案 -->
       <div class="container contact-profile-card section-contact-person">
-        <div class="block-h block-h-contact">
-          <span class="title-text">联系人</span>
-          <span class="block-more" @click="handleOpenBasicInfoEditor">查看更多 ›</span>
-        </div>
         <div class="info-grid">
           <div class="info-node">
             <div class="node-l">姓名</div>
@@ -464,16 +460,17 @@
             <div class="node-l">首选联系人</div>
             <div class="node-v">{{ companyPrimaryContactName }}</div>
           </div>
-          <div v-if="displayedAddresses.length > 0" class="info-node info-node-summary">
+          <div class="info-node info-node-summary info-node-address-row">
             <span class="summary-chip">地址 {{ displayedAddresses.length }} 条<span v-if="displayedAddressLabels" class="summary-labels">（{{ displayedAddressLabels }}）</span></span>
+            <span class="block-more" @click="handleOpenBasicInfoEditor">查看更多 ›</span>
           </div>
         </div>
       </div>
 
-      <!-- 账户权益 / 企业账户权益 -->
+      <!-- 账户权益 / 账户权益 -->
       <div class="container" v-if="nearestExpiringAsset">
         <div class="block-h">
-          <span class="title-text">{{ isCompany ? '企业账户权益' : '账户权益' }}</span>
+          <span class="title-text">{{ isCompany ? '账户权益' : '账户权益' }}</span>
           <span class="block-more" @click="handleCouponCardClick">查看更多 ›</span>
         </div>
         <div class="asset-coupon-box">
@@ -482,10 +479,10 @@
         </div>
       </div>
 
-      <!-- 画像标签 / 企业画像标签（首屏保持扁平展示，弹窗内做分层管理） -->
+      <!-- 画像标签 / 画像标签（首屏保持扁平展示，弹窗内做分层管理） -->
       <div class="container">
         <div class="block-h">
-          <span class="title-text">{{ isCompany ? '企业画像标签' : '画像标签' }}</span>
+          <span class="title-text">{{ isCompany ? '画像标签' : '画像标签' }}</span>
           <span class="block-more" @click="showTagManager = true">管理</span>
         </div>
         <div class="tags-list-container">
@@ -504,7 +501,7 @@
               {{ isAutoPortraitTag(tag) ? '自动' : '手工' }}
             </span>
             <span class="tag-name-text">
-              {{ tag }}
+              {{ getTagDisplayLabel(tag) }}
             </span>
           </span>
           <span
@@ -656,7 +653,7 @@
               size="medium"
               :style="{ backgroundColor: tag.color }"
             >
-              {{ tag.name }}
+              {{ getTagDisplayLabel(tag.name) }}
             </van-tag>
             <van-icon
               v-if="isTagSelected(tag.name)"
@@ -693,7 +690,7 @@
               size="medium"
               :style="{ backgroundColor: tag.color }"
             >
-              {{ tag.name }}
+              {{ getTagDisplayLabel(tag.name) }}
             </van-tag>
             <van-icon
               v-if="isPreferredCarTagSelected(tag.name)"
@@ -764,7 +761,7 @@
     >
       <div class="opportunity-dialog">
         <div class="popup-header">
-          <h3>商机信息</h3>
+          <h3>三个月内推送商机</h3>
           <van-icon name="cross" @click="showOpportunityDialog = false" />
         </div>
         <div class="popup-content">
@@ -840,7 +837,7 @@
             </div>
           </div>
           <div v-if="!customerStore.opportunities || customerStore.opportunities.length === 0" class="empty-state">
-            <van-empty description="暂无商机信息" />
+            <van-empty description="暂无三个月内推送商机" />
           </div>
         </div>
       </div>
@@ -1156,10 +1153,11 @@
                   v-for="tag in selectedTagCards"
                   :key="tag.id"
                   type="button"
-                  class="tag-manager-chip selected is-compact"
+                  class="tag-manager-chip selected is-compact tag-manager-chip--colored"
+                  :style="{ background: getTagStyle(tag.name).background, color: getTagStyle(tag.name).color, border: getTagStyle(tag.name).border }"
                   @click="toggleTag(tag.name)"
                 >
-                  <span class="tag-manager-chip__name">{{ tag.name }}</span>
+                  <span class="tag-manager-chip__name">{{ getTagDisplayLabel(tag.name) }}</span>
                   <span v-if="tag.categoryLabel" class="tag-manager-chip__path">{{ tag.categoryLabel }}</span>
                 </button>
                 <div v-if="selectedTagCards.length === 0" class="tag-manager-empty-text">暂无已选标签</div>
@@ -1208,11 +1206,12 @@
                           v-for="tag in subgroup.tags"
                           :key="tag.id"
                           type="button"
-                          class="tag-manager-chip"
+                          class="tag-manager-chip tag-manager-chip--colored"
                           :class="{ selected: isTagSelectedInManager(tag.name) }"
+                          :style="{ background: getTagStyleByValue(tag.name).background, color: getTagStyleByValue(tag.name).color, border: '1px solid ' + getTagStyleByValue(tag.name).border }"
                           @click="toggleTag(tag.name)"
                         >
-                          <span class="tag-manager-chip__name">{{ tag.name }}</span>
+                          <span class="tag-manager-chip__name">{{ getTagDisplayLabel(tag.name) }}</span>
                         </button>
                       </div>
                     </div>
@@ -1412,6 +1411,7 @@ import {
   getOpportunityThemeClass,
   normalizeOpportunityType,
 } from '@/constants/opportunityTypes'
+import { DEFAULT_TAG_POOL_PC, getCategoryFullPath, getTagDisplayLabel, getTagStyleByValue, TAG_CATEGORY_OPTIONS } from '@/constants/tagCategory'
 import { buildTagHierarchy } from '@/constants/tagHierarchy'
 // 导入 Lucide 图标
 import { Phone, CarFront, Ticket, Tag, UserCircle, Edit2 } from 'lucide-vue-next'
@@ -1493,7 +1493,7 @@ const showOneIdSheet = ref(false)
 const oneIdSheetActions = computed(() =>
   oneIdList.value.map(opt => ({
     name: opt.name,
-    subname: `${opt.type === 'company' ? '企业' : '个人'} · ONEID: ${opt.oneId}`,
+    subname: `${opt.type === 'company' ? '' : '个人'} · ONEID: ${opt.oneId}`,
   }))
 )
 const onOneIdSheetSelect = (_item: { name: string }, index: number) => {
@@ -1895,7 +1895,8 @@ const displayedAddressLabels = computed(() => {
   return labels.length > 0 ? labels.join('、') : ''
 })
 
-// 画像标签来源：区分系统自动 vs 手工维护（当前仅“贷款客户”为前端自动标签）
+// 画像标签来源：区分系统自动 vs 手工维护
+// 自动：来自标签池（PC 标签管理 / 规则标签）或前端动态“贷款客户”；其余为手工
 const autoPortraitTagNames = computed(() => {
   const names: string[] = []
   if (customerStore.financialLoanRecords.length > 0) {
@@ -1905,7 +1906,9 @@ const autoPortraitTagNames = computed(() => {
 })
 
 const isAutoPortraitTag = (tag: string): boolean => {
-  return autoPortraitTagNames.value.includes(tag)
+  if (autoPortraitTagNames.value.includes(tag)) return true
+  // 标签池中的标签（TAG_CATEGORY_OPTIONS 叶子）视为系统自动标签
+  return getCategoryFullPath(TAG_CATEGORY_OPTIONS, tag) !== ''
 }
 
 // 公司视图：切换经办人
@@ -2018,7 +2021,7 @@ const displayedPhones = computed(() => {
     }
   }
 
-  // 兼容：无 profile.mobile 或无匹配项时，企业视图回退到经办人电话 + 车辆标签
+  // 兼容：无 profile.mobile 或无匹配项时，视图回退到经办人电话 + 车辆标签
   if (isCompany.value && selectedHandler.value) {
     const handler = selectedHandler.value
     if (handler?.mobile) {
@@ -2559,8 +2562,17 @@ const vehiclesForCurrentContext = computed(() => {
   return baseVehicles
 })
 
-// 首页只展示前两辆，完整列表放到车辆列表/360 弹层
-const displayedVehiclesForCurrentTab = computed(() => vehiclesForCurrentContext.value.slice(0, 2))
+// 首屏展示：优先显示「自用」车辆，最多两辆；无自用时按原顺序取前两辆
+const displayedVehiclesForCurrentTab = computed(() => {
+  const list = vehiclesForCurrentContext.value
+  if (!list.length) return []
+  const sorted = [...list].sort((a, b) => {
+    const aSelf = (a.status === '自用') ? 0 : 1
+    const bSelf = (b.status === '自用') ? 0 : 1
+    return aSelf - bSelf
+  })
+  return sorted.slice(0, 2)
+})
 
 // 车辆信息弹窗内展示的列表：始终展示当前上下文下的完整车辆清单
 const allVehiclesInVehicleDialog = computed(() => vehiclesForCurrentContext.value)
@@ -2663,9 +2675,15 @@ const getTagCustomClass = (tag: string) => {
     return 'tag-hot'
   }
   
-  // 根据分类返回不同的样式类
+  // 根据分类返回不同的样式类（含 PC 标签管理分类）
   if (tagInfo?.category) {
     const category = tagInfo.category
+    if (category === '会员分层') return 'tag-member'
+    if (category === '售后行为') return 'tag-aftersales'
+    if (category === '活跃度相关') return 'tag-activity'
+    if (category === '粘性产品') return 'tag-sticky'
+    if (category === '投诉相关') return 'tag-complaint'
+    if (category === '定保相关') return 'tag-maintenance'
     if (category.includes('意向级别')) return 'tag-intent'
     if (category.includes('SC')) return 'tag-sc'
     if (category.includes('SA')) return 'tag-sa'
@@ -2680,31 +2698,31 @@ const getTagCustomClass = (tag: string) => {
   return 'tag-normal'
 }
 
-// 获取标签的样式对象（用于内联样式）
+// 获取标签的样式对象（与 PC 画像标签一致：低饱和度浅底深字）
 const getTagStyle = (tag: string) => {
-  // 贷款客户：按照设计稿，浅绿色底 + 深绿色文字
+  // 贷款客户：灰绿
   if (tag === '贷款客户') {
     return {
-      background: '#E6F4EF', // 近似设计稿的浅绿
-      color: '#047857',
-      border: '1px solid #BFD8CC'
+      background: '#f1f8f3',
+      color: '#527a61',
+      border: '1px solid #d2e4d9'
     }
   }
 
-  // 热度极高：红色样式（保持原有告警语义）
+  // 热度极高：灰玫（略偏告警但不刺眼）
   if (tag.includes('热度极高') || tag.includes('热度')) {
     return {
-      background: '#FFF5F5',
-      color: '#E53E3E',
-      border: '1px solid #FEB2B2'
+      background: '#f9f2f2',
+      color: '#8c5e5e',
+      border: '1px solid #e8d2d2'
     }
   }
-  
-  // 其他标签：统一浅灰色矩形，靠近设计稿
+
+  const style = getTagStyleByValue(tag)
   return {
-    background: '#F1F5F9',
-    color: '#4B5563',
-    border: '1px solid #E2E8F0'
+    background: style.background,
+    color: style.color,
+    border: `1px solid ${style.border}`
   }
 }
 
@@ -2720,9 +2738,9 @@ const vehicleStatusOptions = computed(() => {
     { name: '异地用车', value: '异地用车' },
   ]
   if (!isCompany.value) return base
-  // 公司视图下把“自用”文案替换为“企业自用”
+  // 公司视图下把“自用”文案替换为“自用”
   return base.map(item =>
-    item.value === '自用' ? { ...item, name: '企业自用' } : item,
+    item.value === '自用' ? { ...item, name: '自用' } : item,
   )
 })
 
@@ -3055,33 +3073,12 @@ const isTagSelectedInManager = (tagName: string) => {
   return selectedTags.value.includes(tagName)
 }
 
-// 标签池 mock 数据：用于没有后端数据时预览 UI
-const mockTagPool: Array<{
-  id: number
-  name: string
-  category?: string
-}> = [
-  { id: 1, name: '热', category: '意向级别' },
-  { id: 2, name: 'PMP邀约', category: '意向级别' },
-  { id: 3, name: '本市', category: '其他' },
-  { id: 4, name: '人保', category: '续保【必选】' },
-  { id: 5, name: '精确报价', category: '意向级别' },
-  { id: 6, name: '亲子', category: '爱好(≥1项)' },
-  { id: 7, name: '品酒', category: '爱好(≥1项)' },
-  { id: 8, name: '贷款客户', category: 'SC【必选】' },
-  { id: 9, name: '准车主', category: '意向级别' },
-  { id: 10, name: '转介绍', category: '其他' },
-  { id: 11, name: '再购', category: '其他' },
-  { id: 12, name: '投诉', category: '其他' },
-  { id: 13, name: '预约', category: '其他' }
-]
-
-// 有真实数据优先用真实数据，否则使用 mock 数据
+// 标签池：优先用接口数据，否则使用与 PC 标签管理一致的默认池
 const effectiveTagPool = computed(() => {
   if (customerStore.tagPool && customerStore.tagPool.length > 0) {
     return customerStore.tagPool
   }
-  return mockTagPool
+  return DEFAULT_TAG_POOL_PC as TagPool[]
 })
 
 const tagHierarchyRoots = computed(() => buildTagHierarchy(effectiveTagPool.value as any, selectedTags.value))
@@ -3097,7 +3094,7 @@ const selectedTagCards = computed(() => {
     .map(tag => ({
       id: tag.id,
       name: tag.name,
-      categoryLabel: tag.meta.pathLabels.join(' / '),
+      categoryLabel: getCategoryFullPath(TAG_CATEGORY_OPTIONS, tag.name) || tag.meta.pathLabels.join(' / '),
     }))
 
   const existingNames = new Set(hierarchyCards.map(tag => tag.name))
@@ -3217,7 +3214,7 @@ const getVehicleStatusType = (status: string): any => {
 // 公司/个人视图下的车辆状态展示文案（轻量映射）
 const getVehicleStatusLabel = (status: string): string => {
   if (!isCompany.value) return status
-  if (status === '自用') return '企业自用'
+  if (status === '自用') return '自用'
   return status
 }
 
@@ -4629,7 +4626,7 @@ onMounted(async () => {
 }
 
 .phone-card.is-company {
-  margin: -26px 16px 0px; // 企业视图下稍微贴近公司卡，保持整体紧凑
+  margin: -26px 16px 0px; // 视图下稍微贴近公司卡，保持整体紧凑
 }
 
 .phone-card .section-title-inner {
@@ -4648,7 +4645,7 @@ onMounted(async () => {
   margin-top: 12px;
 }
 
-// 企业/个人视图：联系人 Tab 横向列表，联系人变多时可横向滚动不溢出
+// /个人视图：联系人 Tab 横向列表，联系人变多时可横向滚动不溢出
 .phone-card .handler-tab-wrapper {
   display: flex;
   align-items: center;
@@ -5063,10 +5060,6 @@ onMounted(async () => {
   overflow: hidden;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
-.contact-profile-card .block-h-contact {
-  padding: 6px 12px;
-  font-size: 13px;
-}
 .contact-profile-card .block-more {
   font-size: 12px;
   color: var(--accent-gold);
@@ -5124,6 +5117,12 @@ onMounted(async () => {
   flex-wrap: wrap;
   gap: 8px;
   align-items: center;
+}
+.info-node-address-row {
+  justify-content: space-between;
+}
+.info-node-address-row .block-more {
+  flex-shrink: 0;
 }
 .summary-chip {
   font-size: 11px;
@@ -6388,6 +6387,11 @@ onMounted(async () => {
   .tag-manager-chip__path {
     font-size: 10px;
     color: var(--text-sub);
+  }
+
+  .tag-manager-chip--colored .tag-manager-chip__path {
+    color: inherit;
+    opacity: 0.9;
   }
 
   .tag-manager-empty-text {

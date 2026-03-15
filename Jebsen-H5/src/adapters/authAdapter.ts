@@ -1,6 +1,6 @@
 /**
  * 多端鉴权适配器
- * 支持企业微信 OAuth2、内部系统 URL token（前端解码）两种鉴权方式
+ * 支持微信 OAuth2、内部系统 URL token（前端解码）两种鉴权方式
  */
 import { decodeUrlToken } from '@/utils/token'
 
@@ -19,12 +19,12 @@ export interface AuthResult {
  * 检测当前运行环境
  */
 export function detectEnvironment(): AuthEnvironment {
-  // 检测是否在企业微信环境中
+  // 检测是否在微信环境中
   if (typeof window !== 'undefined' && window.navigator) {
     const ua = window.navigator.userAgent.toLowerCase()
-    // 企业微信 User-Agent 特征
+    // 微信 User-Agent 特征
     if (ua.includes('wxwork') || ua.includes('micromessenger')) {
-      // 进一步检测是否是企业微信（而非普通微信）
+      // 进一步检测是否是微信（而非普通微信）
       if (ua.includes('wxwork')) {
         return 'wechat'
       }
@@ -41,7 +41,7 @@ export function detectEnvironment(): AuthEnvironment {
 }
 
 /**
- * 企业微信 OAuth2 静默登录
+ * 微信 OAuth2 静默登录
  */
 async function wechatOAuth2Login(): Promise<AuthResult> {
   try {
@@ -87,7 +87,7 @@ async function wechatOAuth2Login(): Promise<AuthResult> {
       message: data.message || '获取 token 失败',
     }
   } catch (error) {
-    console.error('企业微信登录失败:', error)
+    console.error('微信登录失败:', error)
     return {
       success: false,
       message: '网络错误，请稍后重试',
@@ -175,7 +175,7 @@ export async function authenticate(): Promise<AuthResult> {
       }
       return {
         success: false,
-        message: '无法识别运行环境，请在企业微信或内部系统中打开',
+        message: '无法识别运行环境，请在微信或内部系统中打开',
       }
   }
 }

@@ -80,7 +80,7 @@
         </el-radio-group>
         <el-select
           v-model="localNode.tagIds"
-          placeholder="选择标签（含会员分层、售后行为、活跃度、粘性产品、6个月内有投诉等）"
+          placeholder="选择标签（含会员分层、售后行为、活跃度、本年内购买过粘性产品、6个月内有投诉等）"
           multiple
           style="flex: 1; min-width: 200px"
           popper-class="rule-select-dropdown"

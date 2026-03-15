@@ -409,8 +409,8 @@
         },
         {
           "tagId": "TAG-062",
-          "tagName": "粘性产品",
-          "category": "业务 / 粘性产品",
+          "tagName": "本年内购买过粘性产品",
+          "category": "业务 / 本年内购买过粘性产品",
           "tagType": "auto",
           "status": "active",
           "coverageCount": 18900,
@@ -420,7 +420,7 @@
           "updateTime": "2024-01-01 00:00:00",
           "publishTime": "2024-01-01 00:00:00",
           "version": "v1.0",
-          "description": "粘性产品（系统默认标签）",
+          "description": "本年内购买过粘性产品（系统默认标签）",
           "ruleConfig": {
             "root": {
               "id": "root",

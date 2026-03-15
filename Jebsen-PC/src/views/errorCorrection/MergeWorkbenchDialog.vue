@@ -121,6 +121,7 @@
 import { ref, computed, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { ElMessage, ElMessageBox, ElNotification, ElLoading } from "element-plus";
+import { STORE_LIST } from "@/constants/storeList";
 import ComparisonMatrix, { type ComparisonField, type SourceSystem } from "./components/ComparisonMatrix.vue";
 import LineageTrace, { type LineageItem } from "./components/LineageTrace.vue";
 
@@ -497,40 +498,34 @@ const selectedTags = ref<SelectedTags>({
   "爱好(≥1项)": ["自驾游", "运动", "高尔夫"]
 });
 
-// 维保记录数据
+// 维保记录数据（服务类型枚举：钣金、喷漆、尊享快修、维修、常规维修、换油服务）
 const transactionsData = ref<Transaction[]>([
   {
     id: "1",
-    serviceType: "售后保养",
+    serviceType: "换油服务",
     serviceTime: "2024-02-20",
     amount: 2000,
-    description: "定期保养",
-    serviceStore: "上海浦东店",
-    vehicleModel: "911 Carrera S",
-    status: "已完成",
-    source: "DMS"
+    description: "换油服务",
+    serviceStore: STORE_LIST[0].storeName,
+    vehicleModel: "911 Carrera S"
   },
   {
     id: "2",
-    serviceType: "售后维修",
+    serviceType: "维修",
     serviceTime: "2024-03-15",
     amount: 1500,
     description: "更换雨刮片",
-    serviceStore: "上海浦东店",
-    vehicleModel: "911 Carrera S",
-    status: "已完成",
-    source: "DMS"
+    serviceStore: STORE_LIST[0].storeName,
+    vehicleModel: "911 Carrera S"
   },
   {
     id: "3",
-    serviceType: "整车销售",
+    serviceType: "常规维修",
     serviceTime: "2021-03-15",
     amount: 1500000,
-    description: "新车交付",
-    serviceStore: "上海浦东店",
-    vehicleModel: "911 Carrera S",
-    status: "已完成",
-    source: "DMS"
+    description: "常规维修项目",
+    serviceStore: STORE_LIST[0].storeName,
+    vehicleModel: "911 Carrera S"
   }
 ]);
 
@@ -613,7 +608,7 @@ const assetsData = ref<Assets>({
 // 车辆关联数据
 const vehiclesData = ref<Vehicle[]>([
   {
-    vin: "WP0ZZZ99ZKS123456",
+    vin: "WP0ZZZ991ZKS12345",
     licensePlate: "京A88888",
     model: "911 Carrera S",
     brand: "保时捷",
@@ -625,7 +620,7 @@ const vehiclesData = ref<Vehicle[]>([
     totalServiceAmount: 177000
   },
   {
-    vin: "WP0ZZZ99ZKS789012",
+    vin: "WP0ZZZ995ZKS78901",
     licensePlate: "京B66666",
     model: "Cayenne",
     brand: "保时捷",

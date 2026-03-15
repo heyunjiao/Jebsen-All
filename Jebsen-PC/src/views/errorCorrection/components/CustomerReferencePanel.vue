@@ -233,14 +233,6 @@
             min-width="140"
             show-overflow-tooltip
           />
-          <el-table-column prop="status" :label="t('customer.profile360.status')" width="90">
-            <template #default="scope">
-              <el-tag size="small" :type="getMaintenanceStatusType(scope.row.status)">{{
-                scope.row.status || t("common.none")
-              }}</el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column prop="source" :label="t('customer.profile360.source')" width="90" />
         </el-table>
       </el-tab-pane>
 
@@ -256,14 +248,6 @@
           <el-table-column prop="amount" :label="t('customer.profile360.insuranceAmount')" width="100" align="right">
             <template #default="scope">{{ formatCurrency(scope.row.amount) }}</template>
           </el-table-column>
-          <el-table-column prop="status" :label="t('customer.profile360.status')" width="90">
-            <template #default="scope">
-              <el-tag :type="getInsuranceStatusType(scope.row.status)" size="small">
-                {{ scope.row.status }}
-              </el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column prop="source" :label="t('customer.profile360.source')" width="90" />
         </el-table>
         <el-empty
           v-if="!props.insuranceData || props.insuranceData.length === 0"
@@ -573,11 +557,6 @@ const getInteractionTypeLabel = (type: string) => {
 const getInteractionTimelineType = (type: string): any => {
   const map: any = { call: "primary", wechat: "success", visit: "warning" };
   return map[type];
-};
-
-const getMaintenanceStatusType = (status: string): any => {
-  const map: any = { 已完成: "success", 进行中: "primary", 待处理: "warning", 已取消: "info" };
-  return map[status] || "info";
 };
 
 const getInsuranceStatusType = (status: string): any => {

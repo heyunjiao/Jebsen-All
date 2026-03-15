@@ -53,17 +53,6 @@
               </el-form-item>
             </el-col>
             <el-col :xs="24" :sm="12" :md="8" :lg="6">
-              <el-form-item label="家庭状态">
-                <el-checkbox-group v-model="filterForm.familyStatus" @change="handleFilterChange">
-                  <el-checkbox value="1">1人</el-checkbox>
-                  <el-checkbox value="2">2人</el-checkbox>
-                  <el-checkbox value="3-5">3-5人</el-checkbox>
-                  <el-checkbox value="5-7">5-7人</el-checkbox>
-                  <el-checkbox value="7+">7+</el-checkbox>
-                </el-checkbox-group>
-              </el-form-item>
-            </el-col>
-            <el-col :xs="24" :sm="12" :md="8" :lg="6">
               <el-form-item :label="$t('customer.listFields.residenceArea')">
                 <el-select
                   v-model="filterForm.residenceArea"
@@ -100,15 +89,6 @@
                     :value="opt.value"
                   />
                 </el-select>
-              </el-form-item>
-            </el-col>
-            <el-col :xs="24" :sm="12" :md="8" :lg="6">
-              <el-form-item label="联系方式有效性">
-                <el-radio-group v-model="filterForm.contactValidity" @change="handleFilterChange">
-                  <el-radio-button value="">不限</el-radio-button>
-                  <el-radio-button value="verified">已验证</el-radio-button>
-                  <el-radio-button value="unverified">未验证</el-radio-button>
-                </el-radio-group>
               </el-form-item>
             </el-col>
           </el-row>
@@ -382,45 +362,6 @@
                     @input="handleFilterChange"
                   />
                 </div>
-              </el-form-item>
-            </el-col>
-            <el-col :xs="24" :sm="12" :md="8" :lg="6">
-              <el-form-item :label="$t('customerSegmentation.fields.spendingLevel')">
-                <el-checkbox-group v-model="filterForm.spendingLevel" @change="handleFilterChange">
-                  <el-checkbox
-                    v-for="opt in SPENDING_LEVEL_OPTIONS"
-                    :key="opt.value"
-                    :value="opt.value"
-                  >
-                    {{ opt.label }}
-                  </el-checkbox>
-                </el-checkbox-group>
-              </el-form-item>
-            </el-col>
-            <el-col :xs="24" :sm="12" :md="8" :lg="6">
-              <el-form-item :label="$t('customerSegmentation.fields.loyaltyLevel')">
-                <el-checkbox-group v-model="filterForm.loyaltyLevel" @change="handleFilterChange">
-                  <el-checkbox
-                    v-for="opt in LOYALTY_LEVEL_OPTIONS"
-                    :key="opt.value"
-                    :value="opt.value"
-                  >
-                    {{ opt.label }}
-                  </el-checkbox>
-                </el-checkbox-group>
-              </el-form-item>
-            </el-col>
-            <el-col :xs="24" :sm="12" :md="8" :lg="6">
-              <el-form-item :label="$t('customerSegmentation.fields.customerValueTier')">
-                <el-checkbox-group v-model="filterForm.customerValueTier" @change="handleFilterChange">
-                  <el-checkbox
-                    v-for="opt in CUSTOMER_VALUE_TIER_OPTIONS"
-                    :key="opt.value"
-                    :value="opt.value"
-                  >
-                    {{ opt.label }}
-                  </el-checkbox>
-                </el-checkbox-group>
               </el-form-item>
             </el-col>
           </el-row>
@@ -733,11 +674,6 @@ import {
 import { SEGMENT_TAG_OPTIONS } from "../constants/tagOptions";
 import { TAG_CATEGORY_OPTIONS } from "@/constants/tagCategory";
 import {
-  SPENDING_LEVEL_OPTIONS,
-  LOYALTY_LEVEL_OPTIONS,
-  CUSTOMER_VALUE_TIER_OPTIONS
-} from "../constants/valueOptions";
-import {
   VEHICLE_ATTRIBUTE_OPTIONS,
   PURCHASE_ATTRIBUTE_OPTIONS
 } from "../constants/vehicleOptions";
@@ -750,10 +686,8 @@ export interface FilterFormType {
   name: string;
   gender: string;
   ageGroup: string[];
-  familyStatus: string[];
   residenceArea: string;   // 居住区域，支持搜索城市
   lifecycleStatus: string; // OneID/生命周期状态
-  contactValidity: string;
   // 售后行为
   lastVisitTime: [string, string] | null;
   visits90d: { min: number | undefined; max: number | undefined };
@@ -763,8 +697,6 @@ export interface FilterFormType {
   // 客户价值
   annualSpend: { min: number | undefined; max: number | undefined };
   compositeScore: { min: number | undefined; max: number | undefined }; // 价值综合评分
-  spendingLevel: string[];
-  loyaltyLevel: string[];
   // 车辆关联信息（需求侧表格拆解）
   modelLine: string;
   modelLines: string[];
@@ -782,8 +714,6 @@ export interface FilterFormType {
   totalCarPrice: { min: number | undefined; max: number | undefined }; // 总车价起止范围（万元）
   totalOptionPrice: { min: number | undefined; max: number | undefined }; // 选配总价范围起止（万元）
   afterSalesSelfPayAmount: { min: number | undefined; max: number | undefined }; // 售后自费金额起止金额
-  // 客户价值分层
-  customerValueTier: string[]; // 客户价值分层类型（钻石客户等）
   completedOrderCount: { min: number | undefined; max: number | undefined }; // 已成交订单数范围（购车数）
   // 两年内进场
   visitsIn2Years: { min: number | undefined; max: number | undefined }; // 两年内进场多少次
@@ -847,10 +777,8 @@ const getInitialForm = (): FilterFormType => ({
   name: "",
   gender: "",
   ageGroup: [],
-  familyStatus: [],
   residenceArea: "",
   lifecycleStatus: "",
-  contactValidity: "",
   // 售后行为
   lastVisitTime: null,
   visits90d: { min: undefined, max: undefined },
@@ -859,8 +787,6 @@ const getInitialForm = (): FilterFormType => ({
   // 客户价值
   annualSpend: { min: undefined, max: undefined },
   compositeScore: { min: undefined, max: undefined },
-  spendingLevel: [],
-  loyaltyLevel: [],
   // 车辆关联
   modelLine: "",
   modelLines: [],
@@ -879,8 +805,6 @@ const getInitialForm = (): FilterFormType => ({
   totalCarPrice: { min: undefined, max: undefined },
   totalOptionPrice: { min: undefined, max: undefined },
   afterSalesSelfPayAmount: { min: undefined, max: undefined },
-  // 客户价值分层
-  customerValueTier: [],
   // 车型与订单
   modelLines: [],
   completedOrderCount: { min: undefined, max: undefined },
@@ -1018,10 +942,8 @@ const getSectionCount = (section: string): number => {
       if (hasValue(f.name)) basicCount++;
       if (hasValue(f.gender)) basicCount++;
       if (hasValue(f.ageGroup)) basicCount++;
-      if (hasValue(f.familyStatus)) basicCount++;
       if (hasValue(f.residenceArea)) basicCount++;
       if (hasValue(f.lifecycleStatus)) basicCount++;
-      if (hasValue(f.contactValidity)) basicCount++;
       return basicCount;
     case "behavior":
       let behaviorCount = 0;
@@ -1040,9 +962,6 @@ const getSectionCount = (section: string): number => {
       let valueCount = 0;
       if (hasValue(f.annualSpend.min) || hasValue(f.annualSpend.max)) valueCount++;
       if (hasValue(f.compositeScore?.min) || hasValue(f.compositeScore?.max)) valueCount++;
-      if (hasValue(f.spendingLevel)) valueCount++;
-      if (hasValue(f.loyaltyLevel)) valueCount++;
-      if (hasValue(f.customerValueTier)) valueCount++;
       return valueCount;
     case "vehicle":
       let vehicleCount = 0;

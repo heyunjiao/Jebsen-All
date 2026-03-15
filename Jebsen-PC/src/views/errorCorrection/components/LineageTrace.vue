@@ -45,25 +45,25 @@ const columns = reactive<ColumnProps<LineageItem>[]>([
   {
     prop: "mergeTime",
     label: "合并时间",
-    width: 180,
+    minWidth: 180,
     sortable: true
   },
   {
     prop: "mergePerson",
     label: "合并人",
-    width: 150,
+    minWidth: 150,
     search: { el: "input", placeholder: "请输入合并人" }
   },
   {
     prop: "systemName",
     label: "系统名称",
-    width: 120,
+    minWidth: 120,
     search: { el: "input", placeholder: "请输入系统名称" }
   },
   {
     prop: "field",
     label: "变更字段",
-    width: 120
+    minWidth: 120
   },
   {
     prop: "oldValue",

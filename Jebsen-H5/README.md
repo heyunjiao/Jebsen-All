@@ -1,6 +1,6 @@
 # C360 客户画像插件
 
-汽车平台 C360 客户画像插件，支持在企业微信侧边栏和第三方 CRM 系统中运行。
+汽车平台 C360 客户画像插件，支持在微信侧边栏和第三方 CRM 系统中运行。
 
 ## 技术栈
 
@@ -13,8 +13,8 @@
 ## 功能特性
 
 ### 1. 多端免登录鉴权
-- 自动识别运行环境（企业微信 / 内部系统）
-- 企业微信环境：OAuth2 静默登录
+- 自动识别运行环境（微信 / 内部系统）
+- 微信环境：OAuth2 静默登录
 - 内部系统环境：URL 携带 token，前端解码鉴权（支持 JWT / Base64 JSON）
 
 ### 2. C360 数据展示
@@ -131,8 +131,8 @@ pnpm preview
 - `VITE_APP_ENV` - 当前环境标识
 - `VITE_USE_MOCK` - 是否启用 Mock 数据（开发环境默认 true）
 - `VITE_API_BASE_URL` - API 基础地址
-- `VITE_WECHAT_APP_ID` - 企业微信 AppID
-- `VITE_WECHAT_REDIRECT_URI` - 企业微信回调地址
+- `VITE_WECHAT_APP_ID` - 微信 AppID
+- `VITE_WECHAT_REDIRECT_URI` - 微信回调地址
 
 ## 测试用例
 

@@ -80,9 +80,9 @@ export interface TagHierarchyRoot {
 const ROOT_CONFIGS: RootConfig[] = [
   {
     key: 'business',
-    label: '业务标签',
-    description: '反映线索、续保、评估与活动状态',
-    categories: ['意向级别', 'SC【必选】', 'SA【必选】', '续保【必选】', 'POC【必选】', '线上活动'],
+    label: '业务',
+    description: '与 PC 标签管理一致：会员分层、售后行为、活跃度、本年内购买过粘性产品、投诉、定保',
+    categories: ['会员分层', '售后行为', '活跃度相关', '粘性产品', '投诉相关', '定保相关', '意向级别', 'SC【必选】', 'SA【必选】', '续保【必选】', 'POC【必选】', '线上活动'],
     order: 1,
   },
   {
@@ -109,41 +109,78 @@ const ROOT_CONFIGS: RootConfig[] = [
 ]
 
 const CATEGORY_CONFIGS: Record<string, CategoryConfig> = {
+  // PC 标签管理分类（与 tagCategory.TAG_CATEGORY_OPTIONS 一致）
+  会员分层: {
+    rootKey: 'business',
+    label: '会员分层',
+    description: '销售/售后钻石、活跃、休眠、流失',
+    order: 1,
+  },
+  售后行为: {
+    rootKey: 'business',
+    label: '售后行为',
+    description: '首保、回厂等行为标签',
+    order: 2,
+  },
+  活跃度相关: {
+    rootKey: 'business',
+    label: '活跃度相关',
+    description: '附加产品、推荐、增购、活动',
+    order: 3,
+  },
+  粘性产品: {
+    rootKey: 'business',
+    label: '本年内购买过粘性产品',
+    description: '本年内购买过粘性产品标签',
+    order: 4,
+  },
+  投诉相关: {
+    rootKey: 'business',
+    label: '投诉相关',
+    description: '6个月内有投诉等',
+    order: 5,
+  },
+  定保相关: {
+    rootKey: 'business',
+    label: '定保相关',
+    description: '达标定保等',
+    order: 6,
+  },
   意向级别: {
     rootKey: 'business',
     label: '意向级别',
     description: '快速判断线索热度',
-    order: 1,
+    order: 7,
   },
   'SC【必选】': {
     rootKey: 'business',
     label: 'SC【必选】',
     description: '线索来源类标签，至少选 1 项',
-    order: 2,
+    order: 8,
   },
   'SA【必选】': {
     rootKey: 'business',
     label: 'SA【必选】',
     description: '区域属性类标签，至少选 1 项',
-    order: 3,
+    order: 9,
   },
   '续保【必选】': {
     rootKey: 'business',
     label: '续保【必选】',
     description: '续保公司、到期月份与状态标签',
-    order: 4,
+    order: 10,
   },
   'POC【必选】': {
     rootKey: 'business',
     label: 'POC【必选】',
     description: '评估方式类标签，至少选 1 项',
-    order: 5,
+    order: 11,
   },
   线上活动: {
     rootKey: 'business',
     label: '线上活动',
     description: '活动参与或触达记录',
-    order: 6,
+    order: 12,
   },
   客户类型: {
     rootKey: 'identity',
@@ -179,6 +216,12 @@ const DEFAULT_SUBGROUP: SubgroupConfig = {
 }
 
 const SUBGROUP_CONFIGS: Record<string, SubgroupConfig[]> = {
+  会员分层: [{ key: 'member-tier', label: '会员分层', order: 1, matcher: () => true }],
+  售后行为: [{ key: 'aftersales', label: '售后行为', order: 1, matcher: () => true }],
+  活跃度相关: [{ key: 'activity', label: '活跃度', order: 1, matcher: () => true }],
+  粘性产品: [{ key: 'sticky', label: '本年内购买过粘性产品', order: 1, matcher: () => true }],
+  投诉相关: [{ key: 'complaint', label: '投诉相关', order: 1, matcher: () => true }],
+  定保相关: [{ key: 'maintenance', label: '定保相关', order: 1, matcher: () => true }],
   意向级别: [
     {
       key: 'intent-level',

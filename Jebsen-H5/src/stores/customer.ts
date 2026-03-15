@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import type { CustomerProfile, TagPool, MaintenanceRecord, TransactionRecord, VehicleRelation, Asset, ConflictResolution, Appointment, PlatformSource, Opportunity, OperationLog, InsuranceRecord, MarketingCampaign, FinancialLoanRecord } from '@/api/customer'
 import { customerApi } from '@/api/customer'
 import { normalizeOpportunityField, normalizeOpportunities } from '@/constants/opportunityTypes'
+import { DEFAULT_TAG_POOL_PC, MOCK_PORTRAIT_TAG_NAMES } from '@/constants/tagCategory'
 import { mockFinancialLoanRecords, mockMarketingCampaigns } from '@/mock/data'
 import { showLoadingToast, closeToast, showToast } from 'vant'
 
@@ -93,7 +94,7 @@ export const useCustomerStore = defineStore('customer', () => {
             { id: 'H003', name: '周杰', role: '行政总监', mobile: '13855556666' },
           ],
           selectedHandlerId: 'H001',
-          tags: ['大客户', '高价值', '餐饮行业'],
+          tags: MOCK_PORTRAIT_TAG_NAMES.slice(0, 4),
           city: { value: '上海', isConflict: false },
           totalConsumption: { value: 5680000, isConflict: false },
           age: { value: 'N/A', isConflict: false },
@@ -125,7 +126,7 @@ export const useCustomerStore = defineStore('customer', () => {
           city: { value: '北京', isConflict: false },
           preferredCarModel: { value: '3系', isConflict: false },
           maintenanceRecords: { value: '3次保养', isConflict: false },
-          tags: ['高意向', '置换需求'],
+          tags: MOCK_PORTRAIT_TAG_NAMES.slice(0, 3),
           customerType: { value: '个人', isConflict: false },
         } as CustomerProfile)
       }
@@ -143,81 +144,8 @@ export const useCustomerStore = defineStore('customer', () => {
         tagPool.value = res.data
       }
     } catch (error: any) {
-      // Fallback: 使用本地数据（静默处理，不显示警告）
-      // 使用与Mock数据一致的分类标签（莫兰迪色系）
-      tagPool.value = [
-        // 意向级别 - 灰蓝色系
-        { id: 'intent_cold', name: '冷', category: '意向级别', categoryPath: ['业务标签', '线索经营', '意向分层', '意向级别'], color: '#A8B5C0' },
-        { id: 'intent_warm', name: '暖', category: '意向级别', categoryPath: ['业务标签', '线索经营', '意向分层', '意向级别'], color: '#D8C8A8' },
-        { id: 'intent_hot', name: '热', category: '意向级别', categoryPath: ['业务标签', '线索经营', '意向分层', '意向级别'], color: '#D4B8B8' },
-        // 客户类型 - 灰青色系
-        { id: 'type_prospective_owner', name: '准车主', category: '客户类型', categoryPath: ['身份标签', '客户身份', '生命周期', '客户类型'], color: '#B8D4D8' },
-        { id: 'type_referral', name: '转介绍', category: '客户类型', categoryPath: ['身份标签', '客户身份', '生命周期', '客户类型'], color: '#B8D4D8' },
-        { id: 'type_repurchase', name: '再购', category: '客户类型', categoryPath: ['身份标签', '客户身份', '生命周期', '客户类型'], color: '#B8D4D8' },
-        // SC【必选】- 灰绿色系
-        { id: 'sc_pmp', name: 'PMP邀约', category: 'SC【必选】', categoryPath: ['业务标签', '线索经营', '售前跟进', 'SC【必选】'], required: true, color: '#B8C8B8' },
-        { id: 'sc_full_payment', name: '全款', category: 'SC【必选】', categoryPath: ['业务标签', '线索经营', '售前跟进', 'SC【必选】'], required: true, color: '#B8C8B8' },
-        { id: 'sc_employee_referral', name: '员工介绍', category: 'SC【必选】', categoryPath: ['业务标签', '线索经营', '售前跟进', 'SC【必选】'], required: true, color: '#B8C8B8' },
-        { id: 'sc_marketing', name: '市场活动', category: 'SC【必选】', categoryPath: ['业务标签', '线索经营', '售前跟进', 'SC【必选】'], required: true, color: '#B8C8B8' },
-        { id: 'sc_new_car', name: '新车', category: 'SC【必选】', categoryPath: ['业务标签', '线索经营', '售前跟进', 'SC【必选】'], required: true, color: '#B8C8B8' },
-        { id: 'sc_used_car', name: '易手车', category: 'SC【必选】', categoryPath: ['业务标签', '线索经营', '售前跟进', 'SC【必选】'], required: true, color: '#B8C8B8' },
-        { id: 'sc_old_customer_referral', name: '老客介绍', category: 'SC【必选】', categoryPath: ['业务标签', '线索经营', '售前跟进', 'SC【必选】'], required: true, color: '#B8C8B8' },
-        { id: 'sc_old_customer_repurchase', name: '老客重购', category: 'SC【必选】', categoryPath: ['业务标签', '线索经营', '售前跟进', 'SC【必选】'], required: true, color: '#B8C8B8' },
-        { id: 'sc_natural_flow', name: '自然客流', category: 'SC【必选】', categoryPath: ['业务标签', '线索经营', '售前跟进', 'SC【必选】'], required: true, color: '#B8C8B8' },
-        { id: 'sc_loan', name: '贷款', category: 'SC【必选】', categoryPath: ['业务标签', '线索经营', '售前跟进', 'SC【必选】'], required: true, color: '#B8C8B8' },
-        { id: 'sc_sales_invitation', name: '销售邀约', category: 'SC【必选】', categoryPath: ['业务标签', '线索经营', '售前跟进', 'SC【必选】'], required: true, color: '#B8C8B8' },
-        { id: 'sc_public_plate', name: '公牌', category: 'SC【必选】', categoryPath: ['业务标签', '线索经营', '售前跟进', 'SC【必选】'], required: true, color: '#B8C8B8' },
-        { id: 'sc_other', name: '其他', category: 'SC【必选】', categoryPath: ['业务标签', '线索经营', '售前跟进', 'SC【必选】'], required: true, color: '#B8C8B8' },
-        // SA【必选】- 灰紫色系
-        { id: 'sa_local', name: '本市', category: 'SA【必选】', categoryPath: ['业务标签', '区域经营', '区域属性', 'SA【必选】'], required: true, color: '#D8C8E8' },
-        { id: 'sa_outside', name: '省内外市', category: 'SA【必选】', categoryPath: ['业务标签', '区域经营', '区域属性', 'SA【必选】'], required: true, color: '#D8C8E8' },
-        { id: 'sa_private_plate', name: '私牌', category: 'SA【必选】', categoryPath: ['业务标签', '区域经营', '区域属性', 'SA【必选】'], required: true, color: '#D8C8E8' },
-        // 续保【必选】- 灰粉色系
-        { id: 'insurance_picc', name: '人保', category: '续保【必选】', categoryPath: ['业务标签', '续保经营', '到期识别', '续保【必选】'], required: true, color: '#E4C8C8' },
-        { id: 'insurance_life', name: '人寿', category: '续保【必选】', categoryPath: ['业务标签', '续保经营', '到期识别', '续保【必选】'], required: true, color: '#E4C8C8' },
-        { id: 'insurance_expire_10', name: '保险到期月份-10月', category: '续保【必选】', categoryPath: ['业务标签', '续保经营', '到期识别', '续保【必选】'], required: true, color: '#E4C8C8' },
-        { id: 'insurance_expire_11', name: '保险到期月份-11月', category: '续保【必选】', categoryPath: ['业务标签', '续保经营', '到期识别', '续保【必选】'], required: true, color: '#E4C8C8' },
-        { id: 'insurance_expire_12', name: '保险到期月份-12月', category: '续保【必选】', categoryPath: ['业务标签', '续保经营', '到期识别', '续保【必选】'], required: true, color: '#E4C8C8' },
-        { id: 'insurance_expire_1', name: '保险到期月份-1月', category: '续保【必选】', categoryPath: ['业务标签', '续保经营', '到期识别', '续保【必选】'], required: true, color: '#E4C8C8' },
-        { id: 'insurance_expire_2', name: '保险到期月份-2月', category: '续保【必选】', categoryPath: ['业务标签', '续保经营', '到期识别', '续保【必选】'], required: true, color: '#E4C8C8' },
-        { id: 'insurance_expire_3', name: '保险到期月份-3月', category: '续保【必选】', categoryPath: ['业务标签', '续保经营', '到期识别', '续保【必选】'], required: true, color: '#E4C8C8' },
-        { id: 'insurance_expire_4', name: '保险到期月份-4月', category: '续保【必选】', categoryPath: ['业务标签', '续保经营', '到期识别', '续保【必选】'], required: true, color: '#E4C8C8' },
-        { id: 'insurance_expire_5', name: '保险到期月份-5月', category: '续保【必选】', categoryPath: ['业务标签', '续保经营', '到期识别', '续保【必选】'], required: true, color: '#E4C8C8' },
-        { id: 'insurance_expire_6', name: '保险到期月份-6月', category: '续保【必选】', categoryPath: ['业务标签', '续保经营', '到期识别', '续保【必选】'], required: true, color: '#E4C8C8' },
-        { id: 'insurance_expire_7', name: '保险到期月份-7月', category: '续保【必选】', categoryPath: ['业务标签', '续保经营', '到期识别', '续保【必选】'], required: true, color: '#E4C8C8' },
-        { id: 'insurance_expire_8', name: '保险到期月份-8月', category: '续保【必选】', categoryPath: ['业务标签', '续保经营', '到期识别', '续保【必选】'], required: true, color: '#E4C8C8' },
-        { id: 'insurance_expire_9', name: '保险到期月份-9月', category: '续保【必选】', categoryPath: ['业务标签', '续保经营', '到期识别', '续保【必选】'], required: true, color: '#E4C8C8' },
-        { id: 'insurance_other', name: '其他', category: '续保【必选】', categoryPath: ['业务标签', '续保经营', '到期识别', '续保【必选】'], required: true, color: '#E4C8C8' },
-        { id: 'insurance_repair_not_insured', name: '在修不在保', category: '续保【必选】', categoryPath: ['业务标签', '续保经营', '到期识别', '续保【必选】'], required: true, color: '#E4C8C8' },
-        { id: 'insurance_cpic', name: '太保', category: '续保【必选】', categoryPath: ['业务标签', '续保经营', '到期识别', '续保【必选】'], required: true, color: '#E4C8C8' },
-        { id: 'insurance_pingan', name: '平安', category: '续保【必选】', categoryPath: ['业务标签', '续保经营', '到期识别', '续保【必选】'], required: true, color: '#E4C8C8' },
-        { id: 'insurance_new', name: '新保', category: '续保【必选】', categoryPath: ['业务标签', '续保经营', '到期识别', '续保【必选】'], required: true, color: '#E4C8C8' },
-        { id: 'insurance_renewal', name: '续保', category: '续保【必选】', categoryPath: ['业务标签', '续保经营', '到期识别', '续保【必选】'], required: true, color: '#E4C8C8' },
-        { id: 'insurance_taiping', name: '太平', category: '续保【必选】', categoryPath: ['业务标签', '续保经营', '到期识别', '续保【必选】'], required: true, color: '#E4C8C8' },
-        { id: 'insurance_dadi', name: '大地', category: '续保【必选】', categoryPath: ['业务标签', '续保经营', '到期识别', '续保【必选】'], required: true, color: '#E4C8C8' },
-        // POC【必选】- 灰黄色系
-        { id: 'poc_other', name: '其他评估', category: 'POC【必选】', categoryPath: ['业务标签', '评估经营', '成交评估', 'POC【必选】'], required: true, color: '#E8D8B8' },
-        { id: 'poc_range', name: '区间报价', category: 'POC【必选】', categoryPath: ['业务标签', '评估经营', '成交评估', 'POC【必选】'], required: true, color: '#E8D8B8' },
-        { id: 'poc_aftersales', name: '售后评估', category: 'POC【必选】', categoryPath: ['业务标签', '评估经营', '成交评估', 'POC【必选】'], required: true, color: '#E8D8B8' },
-        { id: 'poc_precise', name: '精确报价', category: 'POC【必选】', categoryPath: ['业务标签', '评估经营', '成交评估', 'POC【必选】'], required: true, color: '#E8D8B8' },
-        { id: 'poc_sales', name: '销售评估', category: 'POC【必选】', categoryPath: ['业务标签', '评估经营', '成交评估', 'POC【必选】'], required: true, color: '#E8D8B8' },
-        // 免打扰车主 - 灰褐色系
-        { id: 'dnd_owner', name: '车主免打扰', category: '免打扰车主', categoryPath: ['身份标签', '触达控制', '静默策略', '免打扰车主'], color: '#D8C8B8' },
-        // 线上活动 - 灰蓝色系
-        { id: 'online_activity_aug', name: '8月再购活动抽奖', category: '线上活动', categoryPath: ['业务标签', '活动经营', '线上活动', '线上活动'], color: '#C8D5E0' },
-        // 爱好(≥1项) - 灰绿色系
-        { id: 'hobby_parent_child', name: '亲子', category: '爱好(≥1项)', categoryPath: ['兴趣标签', '兴趣偏好', '生活方式', '爱好(≥1项)'], minSelect: 1, color: '#C8D8C8' },
-        { id: 'hobby_wine', name: '品酒', category: '爱好(≥1项)', categoryPath: ['兴趣标签', '兴趣偏好', '生活方式', '爱好(≥1项)'], minSelect: 1, color: '#C8D8C8' },
-        { id: 'hobby_pet', name: '宠物', category: '爱好(≥1项)', categoryPath: ['兴趣标签', '兴趣偏好', '生活方式', '爱好(≥1项)'], minSelect: 1, color: '#C8D8C8' },
-        { id: 'hobby_trendy', name: '潮玩', category: '爱好(≥1项)', categoryPath: ['兴趣标签', '兴趣偏好', '生活方式', '爱好(≥1项)'], minSelect: 1, color: '#C8D8C8' },
-        { id: 'hobby_self_drive', name: '自驾游', category: '爱好(≥1项)', categoryPath: ['兴趣标签', '兴趣偏好', '生活方式', '爱好(≥1项)'], minSelect: 1, color: '#C8D8C8' },
-        { id: 'hobby_art', name: '艺术文化', category: '爱好(≥1项)', categoryPath: ['兴趣标签', '兴趣偏好', '生活方式', '爱好(≥1项)'], minSelect: 1, color: '#C8D8C8' },
-        { id: 'hobby_racing', name: '赛车', category: '爱好(≥1项)', categoryPath: ['兴趣标签', '兴趣偏好', '生活方式', '爱好(≥1项)'], minSelect: 1, color: '#C8D8C8' },
-        { id: 'hobby_sports', name: '运动', category: '爱好(≥1项)', categoryPath: ['兴趣标签', '兴趣偏好', '生活方式', '爱好(≥1项)'], minSelect: 1, color: '#C8D8C8' },
-        { id: 'hobby_golf', name: '高尔夫', category: '爱好(≥1项)', categoryPath: ['兴趣标签', '兴趣偏好', '生活方式', '爱好(≥1项)'], minSelect: 1, color: '#C8D8C8' },
-        { id: 'status_complaint', name: '投诉', category: '客户状态', categoryPath: ['身份标签', '客户状态', '服务进程', '客户状态'], color: '#E4C8C8' },
-        { id: 'status_appointment', name: '预约', category: '客户状态', categoryPath: ['身份标签', '客户状态', '服务进程', '客户状态'], color: '#B8C8B8' },
-      ]
+      // Fallback: 与 PC 标签管理一致（TAG_CATEGORY_OPTIONS 展开的默认标签池）
+      tagPool.value = DEFAULT_TAG_POOL_PC as TagPool[]
     }
   }
 
@@ -405,7 +333,7 @@ export const useCustomerStore = defineStore('customer', () => {
           vehicleModel: '3系 2023款',
           licensePlate: '京A12345',
           registrationCity: '北京',
-          vin: 'LBVNU210X3K123456',
+          vin: 'LBVNU2104X3K12345',
           purchaseDate: '2023-10-01',
           status: '已售',
           source: '官网',
@@ -415,7 +343,7 @@ export const useCustomerStore = defineStore('customer', () => {
           vehicleModel: 'X5 2023款',
           licensePlate: '京B67890',
           registrationCity: '北京',
-          vin: '5UXKR0C50L9A12345',
+          vin: '5UXKR0C550L9A1234',
           purchaseDate: '2022-05-15',
           status: '已售',
           source: '线下门店',

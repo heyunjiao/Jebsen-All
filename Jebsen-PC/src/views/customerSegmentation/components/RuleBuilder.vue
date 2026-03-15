@@ -1,5 +1,16 @@
 <template>
   <div class="rule-builder-simple">
+    <!-- 顶部操作栏：与 addCondition 同组件，点击必定生效 -->
+    <div class="top-toolbar">
+      <button type="button" class="top-toolbar-btn primary" @click="addCondition">
+        <el-icon><Plus /></el-icon>
+        <span>添加条件</span>
+      </button>
+      <button type="button" class="top-toolbar-btn info" @click="addGroup">
+        <el-icon><FolderAdd /></el-icon>
+        <span>添加条件组</span>
+      </button>
+    </div>
     <!-- 条件组合方式 -->
     <div class="condition-operator">
       <span class="operator-label">{{ $t("customerSegmentation.ruleBuilder.rootOperator") }}：</span>
@@ -30,31 +41,25 @@
 
           <!-- 条件输入 -->
           <div class="condition-inputs">
-            <!-- 字段选择（多选+搜索） -->
+            <!-- 字段选择 -->
             <el-select
               v-model="condition.field"
               :placeholder="$t('customerSegmentation.ruleBuilder.selectField')"
-              multiple
               filterable
               clearable
-              collapse-tags
-              collapse-tags-tooltip
-              :max-collapse-tags="1"
+              style="min-width: 160px"
               @change="() => onFieldChange(condition)"
             >
               <el-option v-for="option in fieldOptions" :key="option.field" :label="option.label" :value="option.field" />
             </el-select>
 
-            <!-- 操作符选择（多选+搜索） -->
+            <!-- 操作符选择 -->
             <el-select
               v-model="condition.operator"
               :placeholder="$t('customerSegmentation.ruleBuilder.selectOperator')"
-              multiple
               filterable
               clearable
-              collapse-tags
-              collapse-tags-tooltip
-              :max-collapse-tags="1"
+              style="min-width: 120px"
               :disabled="!condition.field"
             >
               <el-option
@@ -156,12 +161,9 @@
                 <el-select
                   v-model="condition.field"
                   :placeholder="$t('customerSegmentation.ruleBuilder.selectField')"
-                  multiple
                   filterable
                   clearable
-                  collapse-tags
-                  collapse-tags-tooltip
-                  :max-collapse-tags="1"
+                  style="min-width: 160px"
                   @change="() => onFieldChange(condition)"
                 >
                   <el-option v-for="option in fieldOptions" :key="option.field" :label="option.label" :value="option.field" />
@@ -169,12 +171,9 @@
                 <el-select
                   v-model="condition.operator"
                   :placeholder="$t('customerSegmentation.ruleBuilder.selectOperator')"
-                  multiple
                   filterable
                   clearable
-                  collapse-tags
-                  collapse-tags-tooltip
-                  :max-collapse-tags="1"
+                  style="min-width: 120px"
                   :disabled="!condition.field"
                 >
                   <el-option
@@ -227,8 +226,8 @@ const emit = defineEmits<{
 
 interface Condition {
   id: string;
-  field: string | string[]; // 支持多选
-  operator: string | string[]; // 支持多选
+  field: string;
+  operator: string;
   value: any;
   logic: "AND" | "OR"; // 与前一个条件的连接逻辑
 }
@@ -263,14 +262,18 @@ const initFromModelValue = () => {
   const conditions: Condition[] = [];
   const groups: ConditionGroup[] = [];
 
-  // 辅助函数：解析 predicate 节点
-  const parsePredicate = (child: RuleNode, logic: "AND" | "OR"): Condition => ({
-    id: child.id || generateId(),
-    field: child.field || "",
-    operator: child.operatorType || "",
-    value: child.value,
-    logic
-  });
+  // 辅助函数：解析 predicate 节点（保证 field/operator 为字符串）
+  const parsePredicate = (child: RuleNode, logic: "AND" | "OR"): Condition => {
+    const field = child.field;
+    const op = child.operatorType;
+    return {
+      id: child.id || generateId(),
+      field: Array.isArray(field) ? (field[0] ?? "") : (field ?? ""),
+      operator: Array.isArray(op) ? (op[0] ?? "") : (op ?? ""),
+      value: child.value,
+      logic
+    };
+  };
 
   // 辅助函数：解析 group 节点 (作为普通组)
   const parseGroup = (child: RuleNode, logic: "AND" | "OR"): ConditionGroup => {
@@ -396,8 +399,8 @@ const buildRuleNode = (): RuleNode => {
         return {
           id: c.id,
           type: "predicate",
-          field: c.field,
-          operatorType: c.operator,
+          field: c.field ?? "",
+          operatorType: c.operator ?? "",
           value: c.value
         } as RuleNode;
       } else {
@@ -409,8 +412,8 @@ const buildRuleNode = (): RuleNode => {
           children: g.conditions.map(c => ({
             id: c.id,
             type: "predicate",
-            field: c.field,
-            operatorType: c.operator,
+            field: c.field ?? "",
+            operatorType: c.operator ?? "",
             value: c.value
           }))
         } as RuleNode;
@@ -528,14 +531,12 @@ const toggleGroupInnerOperator = (group: ConditionGroup) => {
   group.operator = group.operator === "AND" ? "OR" : "AND";
 };
 
-// Helper Functions ...
-const getFieldOption = (field: string | string[]) => {
-  const fieldValue = Array.isArray(field) ? (field.length > 0 ? field[0] : "") : field;
-  return props.fieldOptions.find(opt => opt.field === fieldValue);
+// Helper Functions
+const getFieldOption = (field: string) => {
+  return props.fieldOptions.find(opt => opt.field === field);
 };
-const getAvailableOperators = (field: string | string[]) => {
-  const fieldValue = Array.isArray(field) ? (field.length > 0 ? field[0] : "") : field;
-  return getFieldOption(fieldValue)?.operators || [];
+const getAvailableOperators = (field: string) => {
+  return getFieldOption(field)?.operators || [];
 };
 const getOperatorLabel = (op: string) => {
   const opMap: Record<string, string> = {
@@ -556,9 +557,7 @@ const getOperatorLabel = (op: string) => {
 
 const onFieldChange = (condition: Condition) => {
   condition.operator = "";
-  // 支持多选：如果是数组，取第一个值；否则直接使用
-  const fieldValue = Array.isArray(condition.field) ? (condition.field.length > 0 ? condition.field[0] : "") : condition.field;
-  const fieldOpt = getFieldOption(fieldValue);
+  const fieldOpt = getFieldOption(condition.field);
   if (fieldOpt && ["checkbox", "tagselect", "image_select"].includes(fieldOpt.inputType || "")) {
     condition.value = [];
   } else {
@@ -567,16 +566,20 @@ const onFieldChange = (condition: Condition) => {
 };
 
 const addCondition = () => {
-  localConditions.value.push({
+  const logic = rootOperator.value === "MIXED" ? "AND" : rootOperator.value;
+  const newCondition: Condition = {
     id: generateId(),
     field: "",
     operator: "",
     value: null,
-    logic: rootOperator.value // 新增时跟随当前选择的 Global Operator
-  });
+    logic
+  };
+  localConditions.value = [...localConditions.value, newCondition];
 };
 
-const removeCondition = (index: number) => localConditions.value.splice(index, 1);
+const removeCondition = (index: number) => {
+  localConditions.value = localConditions.value.filter((_, i) => i !== index);
+};
 
 const clearAll = () => {
   localConditions.value = [];
@@ -584,10 +587,11 @@ const clearAll = () => {
 };
 
 const addGroup = () => {
-  localGroups.value.push({
+  const logic = rootOperator.value === "MIXED" ? "AND" : rootOperator.value;
+  const newGroup: ConditionGroup = {
     id: generateId(),
     operator: "AND",
-    logic: rootOperator.value,
+    logic,
     conditions: [
       {
         id: generateId(),
@@ -597,28 +601,77 @@ const addGroup = () => {
         logic: "AND"
       }
     ]
-  });
+  };
+  localGroups.value = [...localGroups.value, newGroup];
 };
 
-const removeGroup = (index: number) => localGroups.value.splice(index, 1);
+const removeGroup = (index: number) => {
+  localGroups.value = localGroups.value.filter((_, i) => i !== index);
+};
 
 const addGroupCondition = (groupIndex: number) => {
-  localGroups.value[groupIndex].conditions.push({
+  const group = localGroups.value[groupIndex];
+  const newCond: Condition = {
     id: generateId(),
     field: "",
     operator: "",
     value: null,
     logic: "AND"
-  });
+  };
+  localGroups.value = localGroups.value.map((g, i) =>
+    i === groupIndex ? { ...g, conditions: [...g.conditions, newCond] } : g
+  );
 };
 
 const removeGroupCondition = (groupIndex: number, conditionIndex: number) => {
-  localGroups.value[groupIndex].conditions.splice(conditionIndex, 1);
+  localGroups.value = localGroups.value.map((g, i) =>
+    i === groupIndex ? { ...g, conditions: g.conditions.filter((_, j) => j !== conditionIndex) } : g
+  );
 };
+
+defineExpose({ addCondition, addGroup });
 </script>
 
 <style scoped lang="scss">
 .rule-builder-simple {
+  .top-toolbar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--el-border-color-lighter);
+    .top-toolbar-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      font-size: 14px;
+      border-radius: 4px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition:
+        background 0.2s,
+        border-color 0.2s;
+      &.primary {
+        background: var(--el-color-primary);
+        color: #fff;
+        border-color: var(--el-color-primary);
+        &:hover {
+          background: var(--el-color-primary-light-3);
+          border-color: var(--el-color-primary-light-3);
+        }
+      }
+      &.info {
+        background: var(--el-fill-color-light);
+        color: var(--el-text-color-regular);
+        border-color: var(--el-border-color);
+        &:hover {
+          background: var(--el-fill-color);
+          border-color: var(--el-border-color-darker);
+        }
+      }
+    }
+  }
   .condition-operator {
     display: flex;
     align-items: center;

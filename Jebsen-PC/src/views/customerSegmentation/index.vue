@@ -8,7 +8,19 @@
           <span class="page-subtitle">{{ $t("customerSegmentation.pageSubtitle") }}</span>
         </div>
         <div class="mode-switch">
-          <el-segmented v-model="filterMode" :options="filterModeOptions" size="large" />
+          <div class="mode-buttons">
+            <button type="button" class="mode-btn" :class="{ active: filterMode === 'quick' }" @click="filterMode = 'quick'">
+              漏斗筛选
+            </button>
+            <button
+              type="button"
+              class="mode-btn"
+              :class="{ active: filterMode === 'advanced' }"
+              @click="filterMode = 'advanced'"
+            >
+              自定义筛选
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -34,16 +46,16 @@
     <div class="main-content">
       <!-- 左侧：规则构建画布 (70%) -->
       <div class="left-panel">
-        <!-- 快捷筛选区 (Quick Filter Mode) - 在混合模式或快捷筛选模式下显示 -->
+        <!-- 漏斗筛选：仅快捷/混合模式渲染 -->
         <QuickFilters
-          v-show="filterMode === 'hybrid' || filterMode === 'quick'"
+          v-if="filterMode === 'quick' || filterMode === 'hybrid'"
           v-model="quickFilters"
           :conflict-fields="conflictFields"
           @change="handleQuickFilterChange"
         />
 
-        <!-- 高级规则构建器 (Advanced Builder Mode) - 在混合模式或高级模式下显示 -->
-        <el-card v-show="filterMode === 'hybrid' || filterMode === 'advanced'" shadow="never" class="rule-builder-card">
+        <!-- 自定义筛选：仅高级/混合模式渲染，保证子组件在可见时挂载、按钮正常显示 -->
+        <el-card v-if="filterMode === 'advanced' || filterMode === 'hybrid'" shadow="never" class="rule-builder-card">
           <template #header>
             <div class="card-header">
               <div class="header-left">
@@ -95,12 +107,15 @@
 
           <el-divider v-if="quickFilterConditionsCount > 0 && filterMode === 'hybrid'" />
 
-          <RuleBuilder
-            :key="ruleBuilderKey"
-            v-model="ruleTree"
-            :field-options="fieldOptions"
-            @estimate="handleEstimateDebounced"
-          />
+          <!-- 自定义筛选内容区（添加条件按钮已移入 RuleBuilder 内部，同组件内点击必生效） -->
+          <div class="rule-builder-wrapper">
+            <RuleBuilder
+              :key="ruleBuilderKey"
+              v-model="ruleTree"
+              :field-options="fieldOptions"
+              @estimate="handleEstimateDebounced"
+            />
+          </div>
         </el-card>
       </div>
 
@@ -146,15 +161,6 @@
           </el-tag>
         </div>
         <div class="right-actions">
-          <el-button
-            v-if="hasExportPermission"
-            :icon="Download"
-            :loading="exporting"
-            :disabled="!canSubmit"
-            @click="handleExport"
-          >
-            {{ $t("customerSegmentation.actionBar.export") }}
-          </el-button>
           <el-button type="primary" :icon="FolderAdd" size="large" :disabled="!canSubmit" @click="handleSaveSegment">
             保存为分群
           </el-button>
@@ -173,7 +179,6 @@ import {
   Operation,
   DataAnalysis,
   RefreshLeft,
-  Download,
   WarningFilled,
   Connection,
   Refresh,
@@ -182,20 +187,13 @@ import {
 } from "@element-plus/icons-vue";
 import QuickFilters from "./components/QuickFilters.vue";
 import type { FilterFormType } from "./components/QuickFilters.vue";
+import RuleBuilder from "./components/RuleBuilder.vue";
+import InsightPanel from "./components/InsightPanel.vue";
 import type { CustomerSegmentation } from "@/api/modules/customerSegmentation";
 import { getFieldOptions, estimateCount } from "@/api/modules/customerSegmentation";
 import type { RuleNode } from "@/views/tagManage/components/RuleEditor.vue";
 import { getSegmentTagLabel, formatTagLabels } from "./constants/tagOptions";
-import {
-  formatValueLabels,
-  getSpendingLevelLabel,
-  getLoyaltyLevelLabel,
-  getCustomerValueTierLabel
-} from "./constants/valueOptions";
-import {
-  getVehicleAttributeLabel,
-  getPurchaseAttributeLabel
-} from "./constants/vehicleOptions";
+import { getVehicleAttributeLabel, getPurchaseAttributeLabel } from "./constants/vehicleOptions";
 import { getLastServiceStoreLabel } from "./constants/afterSalesOptions";
 import { UNIQUE_FILTER_FIELD_KEYS } from "./constants/segmentFilterFields";
 
@@ -203,45 +201,27 @@ const { t } = useI18n();
 
 // 筛选模式
 const filterMode = ref<string>("quick");
-// 混合模式暂时隐藏，后续可能需要放开
-const showHybridMode = ref(false);
-const filterModeOptions = computed(() => {
-  const options = [
-    { label: "漏斗筛选", value: "quick" },
-    { label: "自定义筛选", value: "advanced" }
-  ];
-  // 如果后续需要显示混合模式，取消下面的注释
-  if (showHybridMode.value) {
-    options.push({ label: "混合模式", value: "hybrid" });
-  }
-  return options;
-});
 
 // Refs
 const formRef = ref<FormInstance>();
 const fieldOptions = ref<CustomerSegmentation.FieldOption[]>([]);
 const estimateLoading = ref(false);
-const exporting = ref(false);
 const isCalculationTimeout = ref(false);
-const ruleBuilderKey = ref(0); // 用于强制重新渲染 RuleBuilder 组件
+const ruleBuilderKey = ref(0); // 仅重置时 +1，强制 RuleBuilder 重挂载以清空内部状态
 
 // 漏斗筛选表单初始值（与需求侧字段列表 + 标签管理默认标签对齐）
 const getInitialFilterForm = (): FilterFormType => ({
   name: "",
   gender: "",
   ageGroup: [],
-  familyStatus: [],
   residenceArea: "",
   lifecycleStatus: "",
-  contactValidity: "",
   lastVisitTime: null,
   visits90d: { min: undefined, max: undefined },
   annualOrderFreq: { min: undefined, max: undefined },
   avgSpend: { min: undefined, max: undefined },
   annualSpend: { min: undefined, max: undefined },
   compositeScore: { min: undefined, max: undefined },
-  spendingLevel: [],
-  loyaltyLevel: [],
   modelLine: "",
   modelLines: [],
   versionYear: "",
@@ -256,7 +236,6 @@ const getInitialFilterForm = (): FilterFormType => ({
   totalCarPrice: { min: undefined, max: undefined },
   totalOptionPrice: { min: undefined, max: undefined },
   afterSalesSelfPayAmount: { min: undefined, max: undefined },
-  customerValueTier: [],
   completedOrderCount: { min: undefined, max: undefined },
   visitsIn2Years: { min: undefined, max: undefined },
   selfPayAmountIn2Years: { min: undefined, max: undefined },
@@ -288,9 +267,6 @@ const form = reactive<CustomerSegmentation.ReqSegmentForm>({
   rulePayload: null,
   validityPeriod: undefined
 });
-
-// 权限控制 - Mock
-const hasExportPermission = ref(true);
 
 // ========== 冲突检测逻辑 ==========
 
@@ -495,7 +471,7 @@ const detectConflicts = () => {
     const rValStr = String(rValue);
 
     // 字符串/枚举类型冲突
-    if (["gender", "residenceArea", "lifecycleStatus", "lastMaintenanceStore", "lastReturnStore", "modelLine", "contactValidity"].includes(field)) {
+    if (["gender", "residenceArea", "lifecycleStatus", "lastMaintenanceStore", "lastReturnStore", "modelLine"].includes(field)) {
       if (typeof qValue === "string") {
         if (rOp === "equals" && qValue !== rValStr) return true;
         if (rOp === "notEquals" && qValue === rValStr) return true;
@@ -526,6 +502,8 @@ const detectConflicts = () => {
     return false;
   };
 
+  // 仅在有快捷筛选条件时检测「快捷筛选 vs 规则树」冲突（纯自定义筛选模式不检测此项）
+  const hasQuickFilterActive = quickFilterConditionsCount.value > 0;
   const traverseRuleTree = (node: any) => {
     if (!node) return;
     if (node.type === "predicate" && node.field) {
@@ -545,7 +523,7 @@ const detectConflicts = () => {
     }
   };
 
-  if (ruleTree.value) {
+  if (hasQuickFilterActive && ruleTree.value) {
     traverseRuleTree(ruleTree.value);
   }
 
@@ -562,10 +540,8 @@ const quickFilterConditionsCount = computed(() => {
   if (qf.name) count++;
   if (qf.gender) count++;
   if (qf.ageGroup.length > 0) count++;
-  if (qf.familyStatus.length > 0) count++;
   if (qf.residenceArea) count++;
   if (qf.lifecycleStatus) count++;
-  if (qf.contactValidity) count++;
   if (qf.lastVisitTime) count++;
   if (qf.visits90d.min !== undefined || qf.visits90d.max !== undefined) count++;
   if (qf.annualOrderFreq.min !== undefined || qf.annualOrderFreq.max !== undefined) count++;
@@ -574,8 +550,6 @@ const quickFilterConditionsCount = computed(() => {
   // 客户价值
   if (qf.annualSpend.min !== undefined || qf.annualSpend.max !== undefined) count++;
   if (qf.compositeScore?.min !== undefined || qf.compositeScore?.max !== undefined) count++;
-  if (qf.spendingLevel.length > 0) count++;
-  if (qf.loyaltyLevel.length > 0) count++;
   // 车辆关联
   if (qf.modelLine) count++;
   if (qf.modelLines.length > 0) count++;
@@ -591,8 +565,6 @@ const quickFilterConditionsCount = computed(() => {
   if (qf.totalCarPrice.min !== undefined || qf.totalCarPrice.max !== undefined) count++;
   if (qf.totalOptionPrice.min !== undefined || qf.totalOptionPrice.max !== undefined) count++;
   if (qf.afterSalesSelfPayAmount.min !== undefined || qf.afterSalesSelfPayAmount.max !== undefined) count++;
-  // 客户价值分层
-  if (qf.customerValueTier.length > 0) count++;
   if (qf.completedOrderCount.min !== undefined || qf.completedOrderCount.max !== undefined) count++;
   // 两年内进场
   if (qf.visitsIn2Years.min !== undefined || qf.visitsIn2Years.max !== undefined) count++;
@@ -646,12 +618,6 @@ const quickFilterPreviewTags = computed(() => {
     });
   if (qf.ageGroup.length > 0)
     tags.push({ label: `年龄段: ${qf.ageGroup.length}项`, conflict: conflictFieldSet.has("ageGroup"), field: "ageGroup" });
-  if (qf.familyStatus.length > 0)
-    tags.push({
-      label: `家庭状态: ${qf.familyStatus.length}项`,
-      conflict: conflictFieldSet.has("familyStatus"),
-      field: "familyStatus"
-    });
   if (qf.residenceArea)
     tags.push({
       label: `${t("customer.listFields.residenceArea")}: ${qf.residenceArea}`,
@@ -664,13 +630,6 @@ const quickFilterPreviewTags = computed(() => {
       conflict: conflictFieldSet.has("lifecycleStatus"),
       field: "lifecycleStatus"
     });
-  if (qf.contactValidity)
-    tags.push({
-      label: `联系方式: ${qf.contactValidity === "verified" ? "已验证" : "未验证"}`,
-      conflict: conflictFieldSet.has("contactValidity"),
-      field: "contactValidity"
-    });
-
   if (qf.lastVisitTime)
     tags.push({ label: `到店时间已选`, conflict: conflictFieldSet.has("lastVisitTime"), field: "lastVisitTime" });
   if (qf.visits90d.min !== undefined || qf.visits90d.max !== undefined) {
@@ -717,22 +676,6 @@ const quickFilterPreviewTags = computed(() => {
       field: "compositeScore"
     });
   }
-  if (qf.spendingLevel.length > 0) {
-    const text = formatValueLabels(qf.spendingLevel, getSpendingLevelLabel) || `${qf.spendingLevel.length}项`;
-    tags.push({
-      label: `${t("customerSegmentation.fields.spendingLevel")}: ${text}`,
-      conflict: conflictFieldSet.has("spendingLevel"),
-      field: "spendingLevel"
-    });
-  }
-  if (qf.loyaltyLevel.length > 0) {
-    const text = formatValueLabels(qf.loyaltyLevel, getLoyaltyLevelLabel) || `${qf.loyaltyLevel.length}项`;
-    tags.push({
-      label: `${t("customerSegmentation.fields.loyaltyLevel")}: ${text}`,
-      conflict: conflictFieldSet.has("loyaltyLevel"),
-      field: "loyaltyLevel"
-    });
-  }
   // 车辆关联信息：车系、车型、版本/年款
   if (qf.modelLine)
     tags.push({ label: `车系: ${qf.modelLine}`, conflict: conflictFieldSet.has("modelLine"), field: "modelLine" });
@@ -752,8 +695,7 @@ const quickFilterPreviewTags = computed(() => {
       field: "carAge"
     });
   }
-  if (qf.vin)
-    tags.push({ label: `车架号: ${qf.vin}`, conflict: conflictFieldSet.has("vin"), field: "vin" });
+  if (qf.vin) tags.push({ label: `车架号: ${qf.vin}`, conflict: conflictFieldSet.has("vin"), field: "vin" });
   if (qf.licensePlate)
     tags.push({ label: `车牌号: ${qf.licensePlate}`, conflict: conflictFieldSet.has("licensePlate"), field: "licensePlate" });
   if (qf.vehicleAttribute)
@@ -814,16 +756,6 @@ const quickFilterPreviewTags = computed(() => {
       label: `售后自费: ${qf.afterSalesSelfPayAmount.min ?? 0}-${qf.afterSalesSelfPayAmount.max ?? "∞"}元`,
       conflict: conflictFieldSet.has("afterSalesSelfPayAmount"),
       field: "afterSalesSelfPayAmount"
-    });
-  }
-
-  // 客户价值分层
-  if (qf.customerValueTier.length > 0) {
-    const tierText = formatValueLabels(qf.customerValueTier, getCustomerValueTierLabel) || `${qf.customerValueTier.length}项`;
-    tags.push({
-      label: `${t("customerSegmentation.fields.customerValueTier")}: ${tierText}`,
-      conflict: conflictFieldSet.has("customerValueTier"),
-      field: "customerValueTier"
     });
   }
 
@@ -1006,32 +938,6 @@ const handleReset = () => {
     });
 };
 
-// 导出
-const handleExport = async () => {
-  if (!rulePayload.value) {
-    ElMessage.warning(t("customerSegmentation.messages.ruleRequired"));
-    return;
-  }
-
-  exporting.value = true;
-  try {
-    // 使用 mock 数据模拟导出
-    await import("@/assets/json/customerSegmentationMockData.json");
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    ElMessage.success(t("customerSegmentation.messages.exportSuccess"));
-    // 记录审计日志
-    console.log("Export audit log:", {
-      timestamp: new Date(),
-      rulePayload: rulePayload.value,
-      estimatedCount: estimateResult.value?.estimatedCount || 0
-    });
-  } catch (error) {
-    ElMessage.error("导出失败");
-  } finally {
-    exporting.value = false;
-  }
-};
-
 // 保存分群
 const handleSaveSegment = () => {
   if (!rulePayload.value) {
@@ -1104,7 +1010,12 @@ const loadFieldOptions = async () => {
       },
       { field: "residenceArea", label: "居住区域", operators: ["equals"], inputType: "select" },
       { field: "lifecycleStatus", label: "OneID状态", operators: ["equals"], inputType: "select" },
-      { field: "compositeScore", label: "价值综合评分", operators: ["between", "greaterThan", "lessThan"], inputType: "numberrange" },
+      {
+        field: "compositeScore",
+        label: "价值综合评分",
+        operators: ["between", "greaterThan", "lessThan"],
+        inputType: "numberrange"
+      },
       { field: "carAge", label: "车龄", operators: ["equals", "greaterThan", "lessThan", "between"], inputType: "numberrange" },
       { field: "annualSpend", label: "年均消费", operators: ["greaterThan", "lessThan", "between"], inputType: "numberrange" },
       { field: "lastVisit", label: "最近到店时间", operators: ["before", "after", "between"], inputType: "daterange" },
@@ -1149,18 +1060,6 @@ const loadFieldOptions = async () => {
         label: "最后一次返厂门店",
         operators: ["equals"],
         inputType: "select"
-      },
-      {
-        field: "customerValueTier",
-        label: "客户价值分层",
-        operators: ["equals", "belongsTo"],
-        inputType: "checkbox",
-        options: [
-          { label: "钻石", value: "diamond" },
-          { label: "白金", value: "platinum" },
-          { label: "黄金", value: "gold" },
-          { label: "白银", value: "silver" }
-        ]
       },
       {
         field: "modelLines",
@@ -1229,8 +1128,8 @@ const clearAllConditions = () => {
 
 // 监听筛选模式变化，切换时清空条件
 watch(filterMode, (newMode, oldMode) => {
-  // 只在模式真正改变时清空（避免初始化时触发）
-  if (oldMode !== undefined && newMode !== oldMode) {
+  // 仅切回「漏斗筛选」时清空，避免切换到「自定义筛选」时清空导致规则区空白
+  if (oldMode !== undefined && newMode !== oldMode && newMode === "quick") {
     clearAllConditions();
   }
 });
@@ -1301,14 +1200,27 @@ onUnmounted(() => {
       }
       .mode-switch {
         flex-shrink: 0;
-        :deep(.el-segmented) {
+        .mode-buttons {
+          display: inline-flex;
           height: 40px;
-          .el-segmented__item {
-            height: 40px;
+          padding: 2px;
+          background: var(--el-fill-color-light);
+          border-radius: 6px;
+          .mode-btn {
+            height: 36px;
             padding: 0 20px;
             font-size: 14px;
             font-weight: 500;
-            line-height: 40px;
+            border: none;
+            border-radius: 4px;
+            background: transparent;
+            color: var(--el-text-color-regular);
+            cursor: pointer;
+            transition: all 0.2s;
+            &.active {
+              background: var(--el-color-primary);
+              color: #fff;
+            }
           }
         }
       }
@@ -1326,15 +1238,12 @@ onUnmounted(() => {
         }
         .mode-switch {
           width: 100%;
-          :deep(.el-segmented) {
+          .mode-buttons {
             width: 100%;
-            height: 36px;
-            .el-segmented__item {
+            .mode-btn {
               flex: 1;
-              height: 36px;
               padding: 0 12px;
               font-size: 13px;
-              line-height: 36px;
             }
           }
         }
@@ -1398,6 +1307,10 @@ onUnmounted(() => {
         }
         :deep(.el-card__body) {
           padding: 24px;
+          min-height: 320px;
+        }
+        .rule-builder-wrapper {
+          min-height: 260px;
         }
         .card-header {
           display: flex;

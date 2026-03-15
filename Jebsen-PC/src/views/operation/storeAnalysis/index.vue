@@ -18,6 +18,7 @@ import ProTable from "@/components/ProTable/index.vue";
 import { useI18n } from "vue-i18n";
 import { ElTooltip, ElIcon } from "element-plus";
 import { InfoFilled } from "@element-plus/icons-vue";
+import { STORE_LIST } from "@/constants/storeList";
 
 const { t } = useI18n();
 
@@ -58,16 +59,7 @@ const columns: ColumnProps[] = [
         placeholder: t("operation.placeholder.store")
       }
     },
-    enum: [
-      { label: "上海浦东保时捷中心", value: "1" },
-      { label: "上海静安保时捷中心", value: "2" },
-      { label: "杭州西湖保时捷中心", value: "3" },
-      { label: "北京长安保时捷中心", value: "4" },
-      { label: "广州天河保时捷中心", value: "5" },
-      { label: "深圳福田保时捷中心", value: "6" },
-      { label: "成都锦江保时捷中心", value: "7" },
-      { label: "南京玄武保时捷中心", value: "8" }
-    ]
+    enum: STORE_LIST.map(s => ({ label: s.storeName, value: s.storeId }))
   },
   {
     prop: "year",

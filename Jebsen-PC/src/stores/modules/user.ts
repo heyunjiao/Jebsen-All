@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { UserState } from "@/stores/interface";
 import piniaPersistConfig from "@/stores/helper/persist";
+import { STORE_LIST } from "@/constants/storeList";
 
 export const useUserStore = defineStore({
   id: "geeker-user",
@@ -9,13 +10,7 @@ export const useUserStore = defineStore({
     userInfo: {
       name: "Admin",
       role: "admin",
-      storeList: [
-        { storeId: "store_001", storeName: "上海浦东保时捷中心" },
-        { storeId: "store_002", storeName: "北京保时捷中心" },
-        { storeId: "store_003", storeName: "广州天河保时捷中心" },
-        { storeId: "store_004", storeName: "深圳南山保时捷中心" },
-        { storeId: "store_005", storeName: "杭州西湖保时捷中心" }
-      ]
+      storeList: STORE_LIST
     }
   }),
   getters: {

@@ -160,7 +160,7 @@ export interface CustomerBehaviorInfo {
   renewedAfterExpiry?: boolean;
   /** 在店维修不在店投保成功续保数 */
   renewCountInStoreRepairOutStoreInsurance?: number;
-  /** 是否购买粘性产品 */
+  /** 本年内购买过粘性产品 */
   hasStickyProduct?: boolean;
   /** 活动 / Campaign 参与次数 */
   campaignParticipationCount?: number;
@@ -266,18 +266,16 @@ export interface CompanyInfo {
 export interface Customer360View {
   customer: Customer;
   company?: CompanyInfo; // 所属公司信息（如果客户属于公司）
-  // 维保记录（与 H5 MaintenanceRecord 一致，字段一个不少）
+  // 维保记录（与 H5 MaintenanceRecord 一致）
   transactions: Array<{
     id: string;
-    serviceType: string; // 服务类型：保养、维修、检测等
+    serviceType: string; // 服务类型：钣金、喷漆、尊享快修、维修、常规维修、换油服务
     serviceTime: string; // 服务时间
     serviceStore: string; // 服务门店
     vehicleModel?: string; // 车辆型号
     amount?: number; // 服务金额
     description?: string; // 服务描述
-    status: string; // 状态：已完成、进行中、待处理、已取消
     tags?: string[]; // 标签列表
-    source?: string; // 来源系统
     // 兼容旧字段
     type?: "sale" | "service";
     date?: string;

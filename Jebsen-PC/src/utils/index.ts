@@ -1,6 +1,8 @@
 import { isArray } from "@/utils/is";
 import { FieldNamesProps } from "@/components/ProTable/interface";
 
+export { buildValidVin, computeVinCheckDigit, isValidVin, mockVin } from "@/utils/vin";
+
 const mode = import.meta.env.VITE_ROUTER_MODE;
 
 /**

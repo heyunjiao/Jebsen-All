@@ -32,7 +32,7 @@ export interface CategoryExplorerRoot {
   branches: CategoryExplorerBranch[];
 }
 
-/** 多级分类树（仅保留系统默认标签分类：会员分层、售后行为、活跃度相关、粘性产品、投诉相关） */
+/** 多级分类树（仅保留系统默认标签分类：会员分层、售后行为、活跃度相关、本年内购买过粘性产品、投诉相关） */
 export const TAG_CATEGORY_OPTIONS: CategoryOption[] = [
   {
     value: "业务",
@@ -71,8 +71,8 @@ export const TAG_CATEGORY_OPTIONS: CategoryOption[] = [
       },
       {
         value: "粘性产品",
-        label: "粘性产品",
-        children: [{ value: "粘性产品-粘性产品", label: "粘性产品" }]
+        label: "本年内购买过粘性产品",
+        children: [{ value: "粘性产品-粘性产品", label: "本年内购买过粘性产品" }]
       },
       {
         value: "投诉相关",
@@ -126,6 +126,12 @@ export function getCategoryMeta(
   if (!value) return null;
   const target = flattenCategoryNodes(options).find(item => item.value === value);
   return target || null;
+}
+
+/** 根据标签 value 返回展示用 label（用于客户列表、360 视图等标签展示） */
+export function getTagDisplayLabel(value: string): string {
+  const meta = getCategoryMeta(TAG_CATEGORY_OPTIONS, value);
+  return meta?.label ?? value;
 }
 
 export function getFlattenedCategoryMeta(options: CategoryOption[]): CategoryMeta[] {

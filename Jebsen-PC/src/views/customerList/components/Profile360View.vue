@@ -409,7 +409,7 @@
           <el-descriptions-item :label="$t('customer.profile360.addonProductAmount')">
             {{ profileData.behaviorInfo?.addonProductAmount != null ? formatCurrency(profileData.behaviorInfo!.addonProductAmount!) : "—" }}
           </el-descriptions-item>
-          <!-- 售后行为（与标签重复的项如增购换购、推荐行为、达标定保、12月首保/回厂、投诉、粘性产品、活动参与等仅在下方标签卡片展示，此处不重复） -->
+          <!-- 售后行为（与标签重复的项如增购换购、推荐行为、达标定保、12月首保/回厂、投诉、本年内购买过粘性产品、活动参与等仅在下方标签卡片展示，此处不重复） -->
           <el-descriptions-item :label="$t('customer.profile360.serviceFrequencyLastYear')">
             {{ profileData.behaviorInfo?.serviceFrequencyLastYear ?? "—" }}
           </el-descriptions-item>
@@ -450,7 +450,7 @@
         </el-descriptions>
       </el-card>
 
-      <!-- 商机信息（个人：商机信息；企业：企业商机信息，与联系人档案联动展示） -->
+      <!-- 三个月内推送商机（个人/企业，与联系人档案联动展示） -->
       <el-card v-if="opportunityInfoList.length > 0 || isCompanyCustomer" shadow="never" class="reference-card">
         <template #header>
           <div class="card-header">
@@ -534,7 +534,7 @@
                         <el-icon v-else><User /></el-icon>
                         {{ getTagOriginLabel(category, tag) }}
                       </span>
-                      <span class="tag-text">{{ getCategoryFullPath(TAG_CATEGORY_OPTIONS, tag) || tag }}</span>
+                      <span class="tag-text">{{ getTagDisplayLabel(tag) }}</span>
                     </el-tag>
                   </div>
                 </div>
@@ -564,7 +564,7 @@
                           <el-icon v-else><User /></el-icon>
                           {{ getTagOriginLabel(category, tag) }}
                         </span>
-                        <span class="tag-text">{{ getCategoryFullPath(TAG_CATEGORY_OPTIONS, tag) || tag }}</span>
+                        <span class="tag-text">{{ getTagDisplayLabel(tag) }}</span>
                       </el-tag>
                     </div>
                   </div>
@@ -643,11 +643,6 @@
               min-width="140"
               show-overflow-tooltip
             />
-            <el-table-column prop="status" :label="$t('customer.profile360.status')" width="100">
-              <template #default="scope">
-                <el-tag size="small" :type="getMaintenanceStatusType(scope.row.status)">{{ scope.row.status || "—" }}</el-tag>
-              </template>
-            </el-table-column>
             <el-table-column prop="tags" :label="$t('customer.profile360.tags')" width="120">
               <template #default="scope">
                 <template v-if="scope.row.tags && scope.row.tags.length">
@@ -656,7 +651,6 @@
                 <span v-else>—</span>
               </template>
             </el-table-column>
-            <el-table-column prop="source" :label="$t('customer.profile360.source')" width="90" />
           </el-table>
           <el-empty v-if="filteredTransactions.length === 0" :description="$t('common.noData')" />
         </el-tab-pane>
@@ -701,12 +695,6 @@
             <el-table-column prop="passengerSeatAmount" :label="$t('customer.profile360.passengerSeatAmount')" width="130" align="right">
               <template #default="scope">{{ scope.row.passengerSeatAmount != null ? scope.row.passengerSeatAmount + '万' : '—' }}</template>
             </el-table-column>
-            <el-table-column prop="status" :label="$t('customer.profile360.status')" width="100">
-              <template #default="scope">
-                <el-tag size="small" :type="getInsuranceStatusType(scope.row.status)">{{ scope.row.status }}</el-tag>
-              </template>
-            </el-table-column>
-            <el-table-column prop="source" :label="$t('customer.profile360.source')" width="90" />
           </el-table>
           <el-empty v-else :description="$t('common.noData')" />
         </el-tab-pane>
@@ -715,26 +703,22 @@
           <el-alert type="info" :closable="false" show-icon class="sync-notice-alert" style="margin-bottom: 16px">
             <template #title> 数据同步提示：沟通记录由各业务系统 T+1 同步，暂不支持在本平台直接记录。 </template>
           </el-alert>
-          <el-timeline v-if="profileData.interactions && profileData.interactions.length > 0">
-            <el-timeline-item
-              v-for="item in profileData.interactions"
-              :key="item.id"
-              :timestamp="item.time || item.communicationTime || formatDateTime(String(item.date || ''))"
-              placement="top"
-              :type="getInteractionTimelineType(item.channel || item.type)"
-            >
-              <el-card shadow="hover" class="interaction-card">
-                <div class="interaction-item">
-                  <div class="interaction-header">
-                    <el-tag :type="getInteractionType(item.channel || item.type)" size="small">
-                      {{ getInteractionTypeLabel(item.channel || item.type) || item.channel || item.type }}
-                    </el-tag>
-                  </div>
-                  <div class="interaction-content">{{ item.content || "—" }}</div>
-                </div>
-              </el-card>
-            </el-timeline-item>
-          </el-timeline>
+          <el-table
+            v-if="profileData.interactions && profileData.interactions.length > 0"
+            :data="profileData.interactions"
+            border
+            stripe
+            row-key="id"
+          >
+            <el-table-column label="时间" width="180" align="center">
+              <template #default="{ row }">
+                {{ row.time || row.communicationTime || formatDateTime(String(row.date || '')) }}
+              </template>
+            </el-table-column>
+            <el-table-column prop="content" label="沟通内容" min-width="200" show-overflow-tooltip>
+              <template #default="{ row }">{{ row.content || "—" }}</template>
+            </el-table-column>
+          </el-table>
           <el-empty v-else :description="$t('common.noData')" />
         </el-tab-pane>
 
@@ -1118,7 +1102,7 @@ import {
 import { useI18n } from "vue-i18n";
 import { Customer360View, LifecycleStatus, VehicleRelatedPerson } from "../interface";
 import LineageView from "./LineageView.vue";
-import { TAG_CATEGORY_OPTIONS, getCategoryFullPath } from "@/constants/tagCategory";
+import { TAG_CATEGORY_OPTIONS, getCategoryFullPath, getTagDisplayLabel } from "@/constants/tagCategory";
 import ProTable from "@/components/ProTable/index.vue";
 import { ColumnProps } from "@/components/ProTable/interface";
 import { h } from "vue";
@@ -1361,7 +1345,7 @@ const companyStatusValue = computed(() => {
 // 编辑模式下的标签选中状态（用于临时存储，保存时才提交）
 const editModeSelectedTags = ref<Record<string, string[]>>({});
 
-// 所有可用的标签分类（仅保留系统默认标签：会员分层、售后行为、活跃度相关、粘性产品、投诉相关）
+// 所有可用的标签分类（仅保留系统默认标签：会员分层、售后行为、活跃度相关、本年内购买过粘性产品、投诉相关）
 // 说明：这里的 tag 值统一使用「叶子编码」，与 TAG_CATEGORY_OPTIONS 中的 value 对齐。
 const allCategoryTags: Record<string, string[]> = {
   会员分层: [
@@ -1677,22 +1661,12 @@ const getVehicleStatusTagType = (status: string): "success" | "info" | "warning"
   const map: Record<string, "success" | "info" | "warning" | "primary"> = {
     已售: "info",
     自用: "success",
-    企业自用: "success",
+    自用: "success",
     维修中: "warning",
     "订车中-在途": "primary",
     异地用车: "info"
   };
   return map[status || ""] || "info";
-};
-
-const getMaintenanceStatusType = (status: string): "success" | "primary" | "warning" | "info" | "danger" => {
-  const map: Record<string, "success" | "primary" | "warning" | "info" | "danger"> = {
-    已完成: "success",
-    进行中: "primary",
-    待处理: "warning",
-    已取消: "info"
-  };
-  return map[status] || "info";
 };
 
 const getInsuranceStatusType = (status: string): "success" | "warning" | "primary" | "info" | "danger" => {

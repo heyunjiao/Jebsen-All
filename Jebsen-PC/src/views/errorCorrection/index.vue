@@ -602,7 +602,7 @@ const columns = computed<ColumnProps<ExceptionTask>[]>(() => {
     {
       prop: "oneId",
       label: t("errorCorrection.table.oneId"),
-      width: 120,
+      minWidth: 120,
       search: { el: "input", props: { placeholder: t("errorCorrection.table.oneId") } }
     }
   ];
@@ -613,7 +613,7 @@ const columns = computed<ColumnProps<ExceptionTask>[]>(() => {
       prop: "sourceName",
       label: t("errorCorrection.table.customerName"),
       align: "center",
-      width: 120,
+      minWidth: 120,
       search: { el: "input", props: { placeholder: t("errorCorrection.table.customerName") } }
     });
   }
@@ -623,7 +623,7 @@ const columns = computed<ColumnProps<ExceptionTask>[]>(() => {
     baseColumns.push({
       prop: "category",
       label: t("errorCorrection.table.errorType"),
-      width: 120,
+      minWidth: 120,
       search: {
         el: "select",
         props: { placeholder: t("errorCorrection.filter.errorType"), clearable: true },
@@ -649,7 +649,7 @@ const columns = computed<ColumnProps<ExceptionTask>[]>(() => {
   baseColumns.push({
     prop: "status",
     label: t("errorCorrection.table.status"),
-    width: 100,
+    minWidth: 100,
     search: {
       el: "select",
       props: { placeholder: t("errorCorrection.filter.status"), clearable: true },
@@ -669,7 +669,7 @@ const columns = computed<ColumnProps<ExceptionTask>[]>(() => {
     baseColumns.push({
       prop: "severity",
       label: t("errorCorrection.table.severity"),
-      width: 100,
+      minWidth: 100,
       search: {
         el: "select",
         props: { placeholder: t("errorCorrection.filter.severity"), clearable: true },
@@ -689,7 +689,7 @@ const columns = computed<ColumnProps<ExceptionTask>[]>(() => {
   baseColumns.push({
     prop: "createTime",
     label: "冲突创建日期",
-    width: 140,
+    minWidth: 140,
     render: scope => {
       const isHighSeverity = scope.row.severity === "high";
       const isMediumSeverity = scope.row.severity === "medium";
@@ -724,7 +724,7 @@ const columns = computed<ColumnProps<ExceptionTask>[]>(() => {
     {
       prop: "sourceSystem",
       label: t("errorCorrection.table.sourceSystem"),
-      width: 100,
+      minWidth: 100,
       search: {
         el: "select",
         props: { placeholder: t("errorCorrection.filter.sourceSystem"), clearable: true },
@@ -737,12 +737,12 @@ const columns = computed<ColumnProps<ExceptionTask>[]>(() => {
     },
     // 处理人仅在「已处理」Tab 展示
     ...(activeStatusTab.value === "processed"
-      ? ([{ prop: "handler", label: t("errorCorrection.table.handler"), width: 100 }] as ColumnProps<ExceptionTask>[])
+      ? ([{ prop: "handler", label: t("errorCorrection.table.handler"), minWidth: 100 }] as ColumnProps<ExceptionTask>[])
       : []),
     {
       prop: "operation",
       label: t("errorCorrection.table.operation"),
-      width: 160,
+      minWidth: 160,
       fixed: "right",
       render: scope => {
         // 关联性异常：只允许查看，不允许处理
@@ -1381,7 +1381,7 @@ const handleMobileFooter = (type: "call" | "wechat") => {
     );
   }
   if (type === "wechat") {
-    ElMessage.success("正在打开企业微信会话窗口...");
+    ElMessage.success("正在打开微信会话窗口...");
   }
 };
 

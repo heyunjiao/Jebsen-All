@@ -33,7 +33,7 @@
       "errorRows": [
         {
           "rowIndex": 3,
-          "VIN": "LSGBF53M8DS123456",
+          "VIN": "LSGBF53M7DS123456",
           "Phone": "1381234",
           "Customer_Name": "张明",
           "Model": "BMW 320Li",
@@ -75,7 +75,7 @@
         },
         {
           "rowIndex": 12,
-          "VIN": "LSGBF53M8DS789012",
+          "VIN": "LSGBF53M2DS789012",
           "Phone": "",
           "Customer_Name": "刘建国",
           "Model": "BMW 525Li",
@@ -96,7 +96,7 @@
         },
         {
           "rowIndex": 15,
-          "VIN": "LSGBF53M8DS345678",
+          "VIN": "LSGBF53M6DS345678",
           "Phone": "13812345678",
           "Customer_Name": "",
           "Model": "BMW X5",
@@ -117,7 +117,7 @@
         },
         {
           "rowIndex": 20,
-          "VIN": "LSGBF53M8DS901234",
+          "VIN": "LSGBF53M1DS901234",
           "Phone": "138abc5678",
           "Customer_Name": "陈丽",
           "Model": "BMW 330i",
@@ -138,7 +138,7 @@
         },
         {
           "rowIndex": 25,
-          "VIN": "LSGBF53M8DS567890",
+          "VIN": "LSGBF53M7DS567890",
           "Phone": "15912345678",
           "Customer_Name": "杨洋",
           "Model": "BMW 740Li",
@@ -159,7 +159,7 @@
         },
         {
           "rowIndex": 28,
-          "VIN": "LSGBF53M8DS111222",
+          "VIN": "LSGBF53MXDS111222",
           "Phone": "18612345678",
           "Customer_Name": "黄晓明",
           "Model": "BMW X1",
@@ -180,7 +180,7 @@
         },
         {
           "rowIndex": 32,
-          "VIN": "LSGBF53M8DS333444",
+          "VIN": "LSGBF53M9DS33344",
           "Phone": "13712345678",
           "Customer_Name": "林心如",
           "Model": "BMW 530Le",
@@ -194,7 +194,7 @@
             {
               "rowIndex": 32,
               "column": "VIN",
-              "value": "LSGBF53M8DS333444",
+              "value": "LSGBF53M9DS33344",
               "errorMessage": "VIN码格式错误：长度应为17位"
             }
           ]
@@ -222,7 +222,7 @@
         },
         {
           "rowIndex": 40,
-          "VIN": "LSGBF53M8DS777888",
+          "VIN": "LSGBF53M7DS777888",
           "Phone": "13512345678",
           "Customer_Name": "范冰冰",
           "Model": "BMW 730Li",
@@ -243,7 +243,7 @@
         },
         {
           "rowIndex": 45,
-          "VIN": "LSGBF53M8DS999000",
+          "VIN": "LSGBF53M4DS999000",
           "Phone": "13612345678",
           "Customer_Name": "邓超",
           "Model": "BMW 540i",
@@ -285,7 +285,7 @@
         },
         {
           "rowIndex": 55,
-          "VIN": "LSGBF53M8DS222444",
+          "VIN": "LSGBF53M2DS222444",
           "Phone": "15112345678",
           "Customer_Name": "胡歌",
           "Model": "BMW 840i",
@@ -306,7 +306,7 @@
         },
         {
           "rowIndex": 60,
-          "VIN": "LSGBF53M8DS333555",
+          "VIN": "LSGBF53M7DS333555",
           "Phone": "15212345678",
           "Customer_Name": "刘诗诗",
           "Model": "BMW 218i",

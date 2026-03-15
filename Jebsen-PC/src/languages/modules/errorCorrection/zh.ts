@@ -6,7 +6,7 @@ export default {
     simulateWeCom: "模拟 WeCom 销售视角",
     duplicateProfileQueue: "疑似重复客户队列",
     exitDemo: "退出演示",
-    weComSidebar: "企业微信侧边栏 (Sales View)",
+    weComSidebar: "微信侧边栏 (Sales View)",
     customerProfile: "客户画像",
     fullView: "360全貌",
     interactionTimeline: "互动动态",
@@ -408,7 +408,7 @@ export default {
       vehicleInfo: "车辆信息",
       consumptionStats: "消费统计",
       loyaltyValue: "忠诚度与价值",
-      opportunityInfo: "商机信息",
+      opportunityInfo: "三个月内推送商机",
       servicePreference: "服务偏好",
       remarks: "备注信息",
       // 客户信息字段

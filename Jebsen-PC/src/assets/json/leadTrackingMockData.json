@@ -312,7 +312,7 @@
           "firstOrderTime": "2024-01-15 14:30:00",
           "lastOrderTime": "2024-01-18 10:20:00",
           "advisorName": "李顾问",
-          "storeName": "北京保时捷中心",
+          "storeName": "HN-POA",
           "status": "completed"
         },
         {
@@ -333,7 +333,7 @@
           "firstOrderTime": "2024-01-14 16:45:00",
           "lastOrderTime": "2024-01-14 16:45:00",
           "advisorName": "王顾问",
-          "storeName": "上海保时捷中心",
+          "storeName": "SHPX-PC",
           "status": "completed"
         },
         {
@@ -627,7 +627,7 @@
           "firstOrderTime": "2024-01-15 10:00:00",
           "lastOrderTime": "2024-01-20 09:30:00",
           "advisorName": "周顾问",
-          "storeName": "北京保时捷中心",
+          "storeName": "HN-POA",
           "status": "completed"
         },
         {
@@ -648,7 +648,7 @@
           "firstOrderTime": "2024-01-16 12:00:00",
           "lastOrderTime": "2024-01-18 15:30:00",
           "advisorName": "邹顾问",
-          "storeName": "上海保时捷中心",
+          "storeName": "SHPX-PC",
           "status": "completed"
         },
         {
@@ -690,7 +690,7 @@
           "firstOrderTime": null,
           "lastOrderTime": null,
           "advisorName": "何顾问",
-          "storeName": "上海保时捷中心",
+          "storeName": "SHPX-PC",
           "status": "pending"
         },
         {
@@ -711,7 +711,7 @@
           "firstOrderTime": "2024-01-18 09:10:00",
           "lastOrderTime": "2024-01-18 09:10:00",
           "advisorName": "侯顾问",
-          "storeName": "北京保时捷中心",
+          "storeName": "HN-POA",
           "status": "completed"
         },
         {
@@ -837,7 +837,7 @@
           "firstOrderTime": null,
           "lastOrderTime": null,
           "advisorName": "程顾问",
-          "storeName": "北京保时捷中心",
+          "storeName": "HN-POA",
           "status": "processing"
         },
         {

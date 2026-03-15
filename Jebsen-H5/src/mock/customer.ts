@@ -1,6 +1,9 @@
 import { MockMethod } from 'vite-plugin-mock'
 import type { CustomerProfile, TagPool, MobileData, MobileItem, AddressData, EmailData, MaintenanceRecord, TransactionRecord, VehicleRelation, Asset, NameMobileConflict, Appointment, PlatformSource, InsuranceInfo, Opportunity, OperationLog, InsuranceRecord, FinancialLoanRecord } from '@/types/customer'
 import { validateInsuranceRecords, normalizeInsuranceRecords } from './rules'
+import { MOCK_PORTRAIT_TAG_NAMES } from '@/constants/tagCategory'
+import { STORE_LIST } from '@/constants/storeList'
+import { mockTagPool } from './data'
 
 // Mock 客户画像数据（包含冲突数据）
 const mockCustomerProfile: CustomerProfile = {
@@ -85,13 +88,13 @@ const mockCustomerProfile: CustomerProfile = {
       { origin: 'BDC', value: 'Macan', time: '2025-09-15 14:20:00' },
       { origin: 'CRM', value: '911', time: '2025-09-20 09:15:00' },
     ],
-    tags: ['热', 'PMP邀约'],
+    tags: MOCK_PORTRAIT_TAG_NAMES.slice(0, 2),
   },
   maintenanceRecords: {
     value: '8次保养，2次维修',
     isConflict: false,
   },
-  tags: ['VIP 车主', '热', 'PMP邀约', '本市', '人保', '精确报价', '亲子', '品酒', '贷款客户', '贷款', '贷款即将到期', '准车主', '转介绍', '再购', '投诉', '预约'],
+  tags: [...MOCK_PORTRAIT_TAG_NAMES],
   // 新增字段
   opportunityType: {
     value: 'CM 自定义',
@@ -215,7 +218,7 @@ const mockCustomerProfile: CustomerProfile = {
       vehicleModel: '911 2025款',
       licensePlate: '沪A12345',
       registrationCity: '上海',
-      vin: 'WP0AB2A99DS123456',
+      vin: 'WP0AB2A909DS12345',
       purchaseDate: '2025-10-01',
       status: '已售',
       source: 'DMS',
@@ -237,7 +240,7 @@ const mockCustomerProfile: CustomerProfile = {
       vehicleModel: 'Cayenne 2025款',
       licensePlate: '沪B67890',
       registrationCity: '上海',
-      vin: 'WP1AG2A99DS67890',
+      vin: 'WP1AG2A979DS67890',
       purchaseDate: '2025-05-15',
       status: '已售',
       source: 'BDC',
@@ -257,7 +260,7 @@ const mockCustomerProfile: CustomerProfile = {
       vehicleModel: 'Panamera 2025款',
       licensePlate: '沪C11111',
       registrationCity: '上海',
-      vin: 'WP0AF2A99NS11111',
+      vin: 'WP0AF2A959NS11111',
       purchaseDate: '2025-03-20',
       status: '已售',
       source: 'DMS',
@@ -277,7 +280,7 @@ const mockCustomerProfile: CustomerProfile = {
       vehicleModel: 'Macan 2025款',
       licensePlate: '沪D22222',
       registrationCity: '上海',
-      vin: 'WP1AA2A99DS22222',
+      vin: 'WP1AA2A939DS22222',
       purchaseDate: '2025-06-10',
       status: '自用',
       source: 'BDC',
@@ -297,7 +300,7 @@ const mockCustomerProfile: CustomerProfile = {
       vehicleModel: 'Taycan 2025款',
       licensePlate: '沪E33333',
       registrationCity: '上海',
-      vin: 'WP0AC2A99DS33333',
+      vin: 'WP0AC2A939DS33333',
       purchaseDate: '2025-04-05',
       status: '维修中',
       source: 'DMS',
@@ -326,7 +329,7 @@ const mockCustomerProfile: CustomerProfile = {
       commissionNo: 'H28310',
       newCarSeries: 'Macan Basis',
       newCarModel: 'Macan Passion',
-      vin: 'WP1AA2953TLB01952',
+      vin: 'WP1AA29533TLB0195',
       contractNo: 'POS_0520_26_00001',
       submitTime: '2026-01-01 10:00:00',
       signTime: '2026-01-09 16:10:47',
@@ -343,11 +346,11 @@ const mockCustomerProfile: CustomerProfile = {
       status: '未使用',
       validFrom: '2025-09-01',
       validTo: '2025-12-31',
-      source: '上海浦东店',
+      source: STORE_LIST[0].storeName,
       commissionNo: 'H29355',
       newCarSeries: 'Cayenne Basis',
       newCarModel: 'Cayenne',
-      vin: 'WP1AA29Y6TDA06418',
+      vin: 'WP1AA29Y36TDA0641',
       contractNo: 'POS_0130_26_00021',
       submitTime: '2026-01-01 10:00:00',
       signTime: '2026-01-10 15:00:20',
@@ -364,11 +367,11 @@ const mockCustomerProfile: CustomerProfile = {
       status: '未使用',
       validFrom: '2025-01-01',
       validTo: '2025-12-31',
-      source: '上海浦东店',
+      source: STORE_LIST[0].storeName,
       commissionNo: 'H20177',
       newCarSeries: 'Cayenne Basis',
       newCarModel: 'Cayenne',
-      vin: 'WP1AA29Y7TDA00875',
+      vin: 'WP1AA29Y17TDA0087',
       contractNo: 'POS_0203_26_00015',
       submitTime: '2026-01-01 10:00:00',
       signTime: '2026-01-09 14:30:00',
@@ -389,11 +392,11 @@ const mockCustomerProfile: CustomerProfile = {
       commissionNo: 'H31763',
       newCarSeries: 'Macan Basis',
       newCarModel: 'Macan Passion',
-      vin: 'WP1AA2956TLB02965',
+      vin: 'WP1AA29536TLB0296',
       contractNo: 'POS_0520_26_00045',
       submitTime: '2026-01-02 09:00:00',
       signTime: '2026-01-05 11:20:00',
-      issueCenter: '广州天河保时捷中心',
+      issueCenter: STORE_LIST[1].storeName,
       packageName: '优享购车礼包',
       itemAmount: 2100,
       itemSource: '优惠项目',
@@ -406,15 +409,15 @@ const mockCustomerProfile: CustomerProfile = {
       status: '未使用',
       validFrom: '2025-11-01',
       validTo: '2025-11-01',
-      source: '上海浦东店',
+      source: STORE_LIST[0].storeName,
       commissionNo: 'H08072',
       newCarSeries: '718 Boxster',
       newCarModel: '718 Boxster',
-      vin: 'WP0CA2988XKZ13655',
+      vin: 'WP0CA298X8XKZ1365',
       contractNo: 'POS_0520_26_00033',
       submitTime: '2026-01-01 10:00:00',
       signTime: '2026-01-03 15:45:00',
-      issueCenter: '上海浦东保时捷中心',
+      issueCenter: STORE_LIST[0].storeName,
       packageName: '车辆检测套餐',
       itemAmount: 300,
       itemSource: '售后项目',
@@ -431,7 +434,7 @@ const mockCustomerProfile: CustomerProfile = {
       commissionNo: 'H35495',
       newCarSeries: 'Cayenne Basis',
       newCarModel: 'Cayenne',
-      vin: 'WP1AA29Y7TDA08123',
+      vin: 'WP1AA29Y27TDA0812',
       contractNo: 'POS_0203_26_00028',
       submitTime: '2026-01-01 10:00:00',
       signTime: '2026-01-05 10:30:00',
@@ -448,11 +451,11 @@ const mockCustomerProfile: CustomerProfile = {
       status: '已过期',
       validFrom: '2025-01-01',
       validTo: '2025-01-01',
-      source: '上海浦东店',
+      source: STORE_LIST[0].storeName,
       commissionNo: 'H29355-OLD',
       newCarSeries: 'Cayenne Basis',
       newCarModel: 'Cayenne',
-      vin: 'WP1AA29Y7TDA06418',
+      vin: 'WP1AA29Y36TDA0641',
       contractNo: 'POS_0130_25_00088',
       submitTime: '2025-01-01 10:00:00',
       signTime: '2025-01-10 14:00:00',
@@ -512,13 +515,13 @@ const mockCompanyProfile: CustomerProfile = {
   preferredCarModel: {
     value: 'Taycan',
     isConflict: false,
-    tags: ['意向客户', '大客户'],
+    tags: MOCK_PORTRAIT_TAG_NAMES.slice(0, 2),
   },
   maintenanceRecords: {
     value: '25次保养，5次维修',
     isConflict: false,
   },
-  tags: ['大客户', '高价值', '餐饮行业', '全款客户'],
+  tags: MOCK_PORTRAIT_TAG_NAMES.slice(0, 4),
   customerType: {
     value: '公司',
     isConflict: false,
@@ -536,95 +539,7 @@ const mockCompanyProfile: CustomerProfile = {
 }
 
 
-// Mock 标签池数据（按分类组织，参考客户系统已知标签）
-const mockTagPool: TagPool[] = [
-  // 意向级别 - 蓝紫色系
-  { id: 'intent_h', name: 'H', category: '意向级别', color: '#B8C8E8' },
-  { id: 'intent_a', name: 'A', category: '意向级别', color: '#B8C8E8' },
-  { id: 'intent_b', name: 'B', category: '意向级别', color: '#B8C8E8' },
-  { id: 'intent_c', name: 'C', category: '意向级别', color: '#B8C8E8' },
-  { id: 'intent_o', name: 'O', category: '意向级别', color: '#B8C8E8' },
-  { id: 'intent_loan', name: '贷款客户', category: '意向级别', color: '#B8C8E8' },
-  { id: 'intent_loan_simple', name: '贷款', category: '意向级别', color: '#B8C8E8' },
-  { id: 'intent_full', name: '全款客户', category: '意向级别', color: '#B8C8E8' },
-
-  // 客户类型 - 灰青色系
-  { id: 'type_prospective_owner', name: '准车主', category: '客户类型', color: '#B8D4D8' },
-  { id: 'type_referral', name: '转介绍', category: '客户类型', color: '#B8D4D8' },
-  { id: 'type_repurchase', name: '再购', category: '客户类型', color: '#B8D4D8' },
-
-  // SC【必选】- 灰绿色系
-  { id: 'sc_pmp', name: 'PMP邀约', category: 'SC【必选】', required: true, color: '#B8C8B8' },
-  { id: 'sc_full_payment', name: '全款', category: 'SC【必选】', required: true, color: '#B8C8B8' },
-  { id: 'sc_employee_referral', name: '员工介绍', category: 'SC【必选】', required: true, color: '#B8C8B8' },
-  { id: 'sc_marketing', name: '市场活动', category: 'SC【必选】', required: true, color: '#B8C8B8' },
-  { id: 'sc_new_car', name: '新车', category: 'SC【必选】', required: true, color: '#B8C8B8' },
-  { id: 'sc_used_car', name: '易手车', category: 'SC【必选】', required: true, color: '#B8C8B8' },
-  { id: 'sc_old_customer_referral', name: '老客介绍', category: 'SC【必选】', required: true, color: '#B8C8B8' },
-  { id: 'sc_old_customer_repurchase', name: '老客重购', category: 'SC【必选】', required: true, color: '#B8C8B8' },
-  { id: 'sc_natural_flow', name: '自然客流', category: 'SC【必选】', required: true, color: '#B8C8B8' },
-  { id: 'sc_loan', name: '贷款', category: 'SC【必选】', required: true, color: '#B8C8B8' },
-  { id: 'sc_sales_invitation', name: '销售邀约', category: 'SC【必选】', required: true, color: '#B8C8B8' },
-  { id: 'sc_public_plate', name: '公牌', category: 'SC【必选】', required: true, color: '#B8C8B8' },
-  { id: 'sc_other', name: '其他', category: 'SC【必选】', required: true, color: '#B8C8B8' },
-
-  // SA【必选】- 灰紫色系
-  { id: 'sa_local', name: '本市', category: 'SA【必选】', required: true, color: '#D8C8E8' },
-  { id: 'sa_outside', name: '省内外市', category: 'SA【必选】', required: true, color: '#D8C8E8' },
-  { id: 'sa_private_plate', name: '私牌', category: 'SA【必选】', required: true, color: '#D8C8E8' },
-
-  // 续保【必选】- 灰粉色系
-  { id: 'insurance_picc', name: '人保', category: '续保【必选】', required: true, color: '#E4C8C8' },
-  { id: 'insurance_life', name: '人寿', category: '续保【必选】', required: true, color: '#E4C8C8' },
-  { id: 'insurance_expire_10', name: '保险到期月份-10月', category: '续保【必选】', required: true, color: '#E4C8C8' },
-  { id: 'insurance_expire_11', name: '保险到期月份-11月', category: '续保【必选】', required: true, color: '#E4C8C8' },
-  { id: 'insurance_expire_12', name: '保险到期月份-12月', category: '续保【必选】', required: true, color: '#E4C8C8' },
-  { id: 'insurance_expire_1', name: '保险到期月份-1月', category: '续保【必选】', required: true, color: '#E4C8C8' },
-  { id: 'insurance_expire_2', name: '保险到期月份-2月', category: '续保【必选】', required: true, color: '#E4C8C8' },
-  { id: 'insurance_expire_3', name: '保险到期月份-3月', category: '续保【必选】', required: true, color: '#E4C8C8' },
-  { id: 'insurance_expire_4', name: '保险到期月份-4月', category: '续保【必选】', required: true, color: '#E4C8C8' },
-  { id: 'insurance_expire_5', name: '保险到期月份-5月', category: '续保【必选】', required: true, color: '#E4C8C8' },
-  { id: 'insurance_expire_6', name: '保险到期月份-6月', category: '续保【必选】', required: true, color: '#E4C8C8' },
-  { id: 'insurance_expire_7', name: '保险到期月份-7月', category: '续保【必选】', required: true, color: '#E4C8C8' },
-  { id: 'insurance_expire_8', name: '保险到期月份-8月', category: '续保【必选】', required: true, color: '#E4C8C8' },
-  { id: 'insurance_expire_9', name: '保险到期月份-9月', category: '续保【必选】', required: true, color: '#E4C8C8' },
-  { id: 'insurance_other', name: '其他', category: '续保【必选】', required: true, color: '#E4C8C8' },
-  { id: 'insurance_repair_not_insured', name: '在修不在保', category: '续保【必选】', required: true, color: '#E4C8C8' },
-  { id: 'insurance_cpic', name: '太保', category: '续保【必选】', required: true, color: '#E4C8C8' },
-  { id: 'insurance_pingan', name: '平安', category: '续保【必选】', required: true, color: '#E4C8C8' },
-  { id: 'insurance_new', name: '新保', category: '续保【必选】', required: true, color: '#E4C8C8' },
-  { id: 'insurance_renewal', name: '续保', category: '续保【必选】', required: true, color: '#E4C8C8' },
-  { id: 'insurance_taiping', name: '太平', category: '续保【必选】', required: true, color: '#E4C8C8' },
-  { id: 'insurance_dadi', name: '大地', category: '续保【必选】', required: true, color: '#E4C8C8' },
-
-  // POC【必选】- 灰黄色系
-  { id: 'poc_other', name: '其他评估', category: 'POC【必选】', required: true, color: '#E8D8B8' },
-  { id: 'poc_range', name: '区间报价', category: 'POC【必选】', required: true, color: '#E8D8B8' },
-  { id: 'poc_aftersales', name: '售后评估', category: 'POC【必选】', required: true, color: '#E8D8B8' },
-  { id: 'poc_precise', name: '精确报价', category: 'POC【必选】', required: true, color: '#E8D8B8' },
-  { id: 'poc_sales', name: '销售评估', category: 'POC【必选】', required: true, color: '#E8D8B8' },
-
-  // 免打扰车主 - 灰褐色系
-  { id: 'dnd_owner', name: '车主免打扰', category: '免打扰车主', color: '#D8C8B8' },
-
-  // 线上活动 - 灰蓝色系
-  { id: 'online_activity_aug', name: '8月再购活动抽奖', category: '线上活动', color: '#C8D5E0' },
-
-  // 爱好(≥1项) - 灰绿色系
-  { id: 'hobby_parent_child', name: '亲子', category: '爱好(≥1项)', minSelect: 1, color: '#C8D8C8' },
-  { id: 'hobby_wine', name: '品酒', category: '爱好(≥1项)', minSelect: 1, color: '#C8D8C8' },
-  { id: 'hobby_pet', name: '宠物', category: '爱好(≥1项)', minSelect: 1, color: '#C8D8C8' },
-  { id: 'hobby_trendy', name: '潮玩', category: '爱好(≥1项)', minSelect: 1, color: '#C8D8C8' },
-  { id: 'hobby_self_drive', name: '自驾游', category: '爱好(≥1项)', minSelect: 1, color: '#C8D8C8' },
-  { id: 'hobby_art', name: '艺术文化', category: '爱好(≥1项)', minSelect: 1, color: '#C8D8C8' },
-  { id: 'hobby_racing', name: '赛车', category: '爱好(≥1项)', minSelect: 1, color: '#C8D8C8' },
-  { id: 'hobby_sports', name: '运动', category: '爱好(≥1项)', minSelect: 1, color: '#C8D8C8' },
-  { id: 'hobby_golf', name: '高尔夫', category: '爱好(≥1项)', minSelect: 1, color: '#C8D8C8' },
-
-  // 客户状态
-  { id: 'status_complaint', name: '投诉', category: '客户状态', color: '#E4C8C8' },
-  { id: 'status_appointment', name: '预约', category: '客户状态', color: '#B8C8B8' },
-]
+// 画像标签池：与 PC 标签管理一致，使用 data 中的 mockTagPool（来自 TAG_CATEGORY_OPTIONS）
 
 // Mock 服务偏好标签池数据
 const mockServicePreferenceTagPool: TagPool[] = [
@@ -646,15 +561,13 @@ const mockServicePreferenceTagPool: TagPool[] = [
 const mockMaintenanceRecords = [
   {
     id: 'M001',
-    serviceType: '定期保养',
+    serviceType: '换油服务',
     serviceTime: '2025-01-15 10:30:00',
     serviceStore: '上海闵行4S店',
     vehicleModel: '911 2025款',
     amount: 1200,
     description: '更换机油、机滤、空滤，检查轮胎、刹车系统',
-    status: '已完成',
-    tags: ['定期保养', '质保期内'],
-    source: 'DMS',
+    tags: ['换油服务', '质保期内'],
     insurance: {
       type: '商业险',
       company: '中国人保',
@@ -666,15 +579,13 @@ const mockMaintenanceRecords = [
   },
   {
     id: 'M002',
-    serviceType: '紧急维修',
+    serviceType: '维修',
     serviceTime: '2025-12-20 14:20:00',
-    serviceStore: '上海浦东4S店',
+    serviceStore: STORE_LIST[0].storeName,
     vehicleModel: '911 2025款',
     amount: 3500,
     description: '更换前保险杠，修复前大灯',
-    status: '已完成',
-    tags: ['紧急维修', '质保期内'],
-    source: 'BDC',
+    tags: ['维修', '质保期内'],
     insurance: {
       type: '交强险+商业险',
       company: '平安保险',
@@ -686,15 +597,13 @@ const mockMaintenanceRecords = [
   },
   {
     id: 'M003',
-    serviceType: '定期保养',
+    serviceType: '常规维修',
     serviceTime: '2025-10-05 09:15:00',
     serviceStore: '上海闵行4S店',
     vehicleModel: '911 2025款',
     amount: 1500,
     description: '更换机油、机滤、空滤、空调滤芯，检查电瓶',
-    status: '已完成',
-    tags: ['定期保养', '质保期内', '满意客户'],
-    source: 'DMS',
+    tags: ['常规维修', '质保期内', '满意客户'],
     insurance: {
       type: '商业险',
       company: '中国人保',
@@ -706,19 +615,17 @@ const mockMaintenanceRecords = [
   },
   {
     id: 'M004',
-    serviceType: '检测服务',
+    serviceType: '尊享快修',
     serviceTime: '2025-08-18 11:00:00',
-    serviceStore: '上海浦东4S店',
+    serviceStore: STORE_LIST[0].storeName,
     vehicleModel: '911 2025款',
     amount: 0,
-    description: '免费检测：发动机、变速箱、制动系统',
-    status: '已完成',
-    tags: ['质保期内'],
-    source: 'DMS',
+    description: '尊享快修：发动机、变速箱、制动系统',
+    tags: ['尊享快修', '质保期内'],
   },
 ]
 
-// Mock 保险记录数据（原始数据，将通过规则验证和规范化）
+// Mock 保险记录数据（全部字段均有值，便于展示与联调）
 const mockInsuranceRecordsRaw: Partial<InsuranceRecord>[] = [
   {
     id: 'I001',
@@ -729,8 +636,9 @@ const mockInsuranceRecordsRaw: Partial<InsuranceRecord>[] = [
     policyNo: 'PICC202501010012345',
     startDate: '2025-01-15',
     endDate: '2026-01-14',
+    commercialInsuranceExpiryDate: '2026-01-14',
+    insuredPerson: '张明',
     purchaseDate: '2024-12-20',
-    source: 'DMS',
     renewalSpecialistName: '张明',
   },
   {
@@ -742,8 +650,12 @@ const mockInsuranceRecordsRaw: Partial<InsuranceRecord>[] = [
     policyNo: 'PICC202501150012346',
     startDate: '2025-01-15',
     endDate: '2026-01-14',
+    commercialInsuranceExpiryDate: '2026-01-14',
+    insuredPerson: '张明',
+    vehicleDamageAmount: 280000,
+    driverSeatAmount: 50,
+    passengerSeatAmount: 50,
     purchaseDate: '2024-12-20',
-    source: 'DMS',
     renewalSpecialistName: '张明',
   },
   {
@@ -755,8 +667,12 @@ const mockInsuranceRecordsRaw: Partial<InsuranceRecord>[] = [
     policyNo: 'PAIC202501010056789',
     startDate: '2025-01-15',
     endDate: '2026-01-14',
+    commercialInsuranceExpiryDate: '2026-01-14',
+    insuredPerson: '张明',
+    vehicleDamageAmount: 0,
+    driverSeatAmount: 10,
+    passengerSeatAmount: 10,
     purchaseDate: '2024-12-25',
-    source: 'BDC',
     renewalSpecialistName: '李芳',
   },
   {
@@ -768,8 +684,10 @@ const mockInsuranceRecordsRaw: Partial<InsuranceRecord>[] = [
     policyNo: 'CPIC202501150090123',
     startDate: '2025-01-15',
     endDate: '2026-01-14',
+    commercialInsuranceExpiryDate: '2026-01-14',
+    insuredPerson: '张明',
     purchaseDate: '2024-12-28',
-    source: 'CRM',
+    renewalSpecialistName: '王敏',
   },
   {
     id: 'I005',
@@ -780,8 +698,10 @@ const mockInsuranceRecordsRaw: Partial<InsuranceRecord>[] = [
     policyNo: 'PICC202401010012344',
     startDate: '2024-01-15',
     endDate: '2025-01-14',
+    commercialInsuranceExpiryDate: '2025-01-14',
+    insuredPerson: '张明',
     purchaseDate: '2023-12-20',
-    source: 'DMS',
+    renewalSpecialistName: '李四',
   },
   {
     id: 'I006',
@@ -792,8 +712,12 @@ const mockInsuranceRecordsRaw: Partial<InsuranceRecord>[] = [
     policyNo: 'PAIC202406010056788',
     startDate: '2024-06-15',
     endDate: '2025-06-14',
+    commercialInsuranceExpiryDate: '2025-06-14',
+    insuredPerson: '张明',
+    vehicleDamageAmount: 320000,
+    driverSeatAmount: 60,
+    passengerSeatAmount: 60,
     purchaseDate: '2024-05-25',
-    source: 'BDC',
     renewalSpecialistName: '王静',
   },
 ]
@@ -910,7 +834,7 @@ const mockFinancialLoanRecords: FinancialLoanRecord[] = [
     period: '2023-05 - 2024-05',
     status: '即将到期',
     source: 'DMS',
-    issueCenter: '广州天河保时捷中心',
+    issueCenter: STORE_LIST[1].storeName,
   }
 ]
 
@@ -1685,7 +1609,7 @@ export default [
           type: '保养预约',
           date: '2025-02-20',
           time: '10:00',
-          store: '上海浦东4S店',
+          store: STORE_LIST[0].storeName,
           status: '待确认',
           description: '定期保养服务',
           vehicleModel: '911 2025款',

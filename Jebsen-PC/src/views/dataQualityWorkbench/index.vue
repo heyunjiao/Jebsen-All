@@ -1273,7 +1273,7 @@ const simulateErrorFile = () => {
       font-size: 11px;
       font-weight: 500;
       line-height: 1.4;
-      color: var(--el-color-danger);
+      // color: var(--el-color-danger);
       white-space: nowrap;
       text-overflow: ellipsis;
       overflow: hidden;

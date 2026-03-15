@@ -91,7 +91,6 @@
             <div>
               <h2 class="section-title">今日数据采集状态</h2>
             </div>
-            <el-tag :type="systemStatusSummary.type" effect="light">{{ systemStatusSummary.text }}</el-tag>
           </div>
 
           <el-card shadow="hover" class="content-card status-card" id="step-admin-system">
@@ -153,7 +152,7 @@
                 </div>
               </div>
 
-              <div class="system-group">
+              <div class="system-group system-group-auto">
                 <div class="system-group-header">
                   <div>
                     <div class="system-group-title">{{ $t("welcome.data.autoGroupTitle") }}</div>
@@ -534,7 +533,7 @@ const sourceSystems = computed(() => [
     type: "auto",
     status: "success",
     statusText: t("welcome.data.status.synced"),
-    desc: "企业微信互动数据",
+    desc: "微信互动数据",
     uploadTime: "T+1 09:00",
     uploadCycle: "T+1 同步",
     icon: Connection
@@ -1316,7 +1315,7 @@ onMounted(() => {
 .system-section-split {
   display: grid;
   grid-template-columns: minmax(0, 1.45fr) minmax(320px, 1fr);
-  gap: 18px;
+  gap: 32px;
   align-items: start;
 }
 
@@ -1365,6 +1364,10 @@ onMounted(() => {
 .group-badge-success {
   color: var(--el-color-success);
   background: rgba(103, 194, 58, 0.12);
+}
+
+.system-group-auto {
+  background: rgba(103, 194, 58, 0.06);
 }
 
 .system-grid {
@@ -1424,9 +1427,9 @@ onMounted(() => {
   }
 
   &.gray {
-    color: var(--el-color-primary);
-    background: rgba(64, 158, 255, 0.12);
-    border: 1px solid rgba(64, 158, 255, 0.2);
+    color: #000;
+    background: rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.12);
     animation: pulse-upload 2s ease-in-out infinite;
   }
 }

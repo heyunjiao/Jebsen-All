@@ -514,7 +514,7 @@ onMounted(async () => {
     font-size: 11px;
     font-weight: 500;
     line-height: 1.4;
-    color: var(--el-color-danger);
+    // color: var(--el-color-danger);
     // background: rgba(245, 108, 108, 0.08);
     // border-radius: 999px;
     // max-width: 200px;

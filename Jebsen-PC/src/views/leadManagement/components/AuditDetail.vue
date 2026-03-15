@@ -472,7 +472,7 @@ const getTargetSystemLabel = (target: string) => {
   const labelMap: Record<string, string> = {
     bdc: "BDC系统",
     BDC外呼系统: "BDC系统",
-    wechat: "企业微信",
+    wechat: "微信",
     crm: "CRM系统"
   };
   return labelMap[target] || target;

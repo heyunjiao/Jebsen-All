@@ -176,15 +176,13 @@ export interface Asset {
 // 维保记录类型
 export interface MaintenanceRecord {
   id: string
-  serviceType: string // 服务类型：保养、维修、检测等
+  serviceType: string // 服务类型：钣金、喷漆、尊享快修、维修、常规维修、换油服务
   serviceTime: string // 服务时间
   serviceStore: string // 服务门店
   vehicleModel?: string // 车辆型号
   amount?: number // 服务金额
   description?: string // 服务描述
-  status: string // 状态：已完成、进行中、待处理、已取消
   tags?: string[] // 标签列表（可多选）
-  source?: string // 来源系统
   insurance?: InsuranceInfo // 保险信息
 }
 
@@ -204,13 +202,18 @@ export interface InsuranceRecord {
   id: string
   type: '交强险' | '商业险' | '第三者责任险' | '意外险' // 保险类型
   amount: number // 保险金额（取整）
-  status: string // 状态：已生效、已过期、待续保、已退保等
+  status: string // 状态：已生效、已过期、待续保、已退保等（展示用可隐藏）
   company?: string // 保险公司
   policyNo?: string // 保单号
   startDate?: string // 保险开始日期
   endDate?: string // 保险结束日期
+  commercialInsuranceExpiryDate?: string // 商业险到期日
+  insuredPerson?: string // 被保险人
+  vehicleDamageAmount?: number // 车损险保额
+  driverSeatAmount?: number // 司机位保额(万)
+  passengerSeatAmount?: number // 乘客位保额(万)
   purchaseDate?: string // 购买日期
-  source?: string // 来源系统
+  source?: string // 来源系统（展示用可隐藏）
   renewalSpecialistName?: string // 续保专员名字
 }
 

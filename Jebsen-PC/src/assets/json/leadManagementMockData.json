@@ -24,7 +24,7 @@
             "customerName": "陈建华",
             "phone": "138****8888",
             "vehicleInfo": {
-              "vin": "LSGBF5338CH123456",
+              "vin": "LSGBF53348CH12345",
               "licensePlate": "京A12345",
               "model": "XC60",
               "lastServiceDate": "2023-07-15",
@@ -219,7 +219,7 @@
             "customerName": "吴九",
             "phone": "133****3333",
             "vehicleInfo": {
-              "vin": "LSGBF5338CH123457",
+              "vin": "LSGBF53368CH12346",
               "licensePlate": "京B12345",
               "model": "S90",
               "lastServiceDate": "2023-08-20",
@@ -414,7 +414,7 @@
             "customerName": "张十五",
             "phone": "157****3333",
             "vehicleInfo": {
-              "vin": "LSGBF5338CH123458",
+              "vin": "LSGBF53388CH12347",
               "licensePlate": "京C12345",
               "model": "XC40",
               "lastServiceDate": "2023-09-10",
@@ -1612,7 +1612,7 @@
             "phone": "138****8888",
             "leadType": "aftersales_cs",
             "vehicleInfo": {
-              "vin": "LSGBF5338CH123456",
+              "vin": "LSGBF53348CH12345",
               "licensePlate": "京A12345",
               "model": "XC60",
               "nextServiceDate": "2024-01-20"
@@ -1651,7 +1651,7 @@
           "responseData": {
             "taskId": "TASK-20240113001",
             "status": "received",
-            "message": "商机已成功推送到企业微信",
+            "message": "商机已成功推送到微信",
             "receiveTime": "2024-01-13 10:30:05"
           }
         },
@@ -1784,7 +1784,7 @@
             "timestamp": "2024-01-13T12:00:00.000Z"
           },
           "result": "failed",
-          "errorMessage": "企业微信API调用失败：网络超时，请稍后重试",
+          "errorMessage": "微信API调用失败：网络超时，请稍后重试",
           "responseData": null
         },
         {
@@ -2012,7 +2012,7 @@
           "responseData": {
             "taskId": "WECHAT-20240113001",
             "status": "received",
-            "message": "商机已推送至企业微信",
+            "message": "商机已推送至微信",
             "receiveTime": "2024-01-13 16:20:05"
           }
         },

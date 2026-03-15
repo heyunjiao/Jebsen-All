@@ -87,6 +87,7 @@ import ImportExcel from "@/components/ImportExcel/index.vue";
 import SelectFilter from "@/components/SelectFilter/index.vue";
 import { ProTableInstance, ColumnProps } from "@/components/ProTable/interface";
 import { CirclePlus, Delete, Download, View, Warning } from "@element-plus/icons-vue";
+import { STORE_LIST } from "@/constants/storeList";
 import { Customer, LifecycleStatus, Customer360View } from "./interface";
 import MultiValueField from "./components/MultiValueField.vue";
 import Profile360View from "./components/Profile360View.vue";
@@ -907,7 +908,7 @@ const viewProfile360 = async (row: Customer) => {
         amount: 50000,
         description: "购车",
         orderNo: "ORD20240115001",
-        storeName: "上海浦东店",
+        storeName: STORE_LIST[0].storeName,
         paymentMethod: "银行转账"
       },
       {
@@ -917,7 +918,7 @@ const viewProfile360 = async (row: Customer) => {
         amount: 2000,
         description: "保养",
         orderNo: "ORD20240220001",
-        storeName: "上海浦东店",
+        storeName: STORE_LIST[0].storeName,
         paymentMethod: "现金"
       }
     ],

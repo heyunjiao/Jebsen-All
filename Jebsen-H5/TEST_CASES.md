@@ -22,7 +22,7 @@ eyJ0b2tlbiI6ImRlbW9fdG9rZW5fYzM2MCIsInVzZXJJZCI6ImRlbW9fdXNlcl8wMDEifQ==
 
 ## 一、手机号搜索 + 多 OneID 场景
 
-H5 可通过 URL 参数 `phone` 以「手机号搜索」方式打开，后端可能返回多个 OneID（个人/企业），页面顶部会展示「当前身份」切换栏。
+H5 可通过 URL 参数 `phone` 以「手机号搜索」方式打开，后端可能返回多个 OneID（个人/），页面顶部会展示「当前身份」切换栏。
 
 ### 1.1 多 OneID（5 个）— 下拉模式
 

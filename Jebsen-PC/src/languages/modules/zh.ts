@@ -629,7 +629,7 @@ export default {
   login: {
     slogan: "驱动数据 · 智造未来",
     subtitle: "Customer 360 全域消费者数据中台，为您提供安全、实时、智能的身份认证服务。连接全球业务，赋能数字化转型。",
-    feature1: "企业级安全认证",
+    feature1: "级安全认证",
     feature2: "毫秒级数据同步",
     feature3: "全球合规保障",
     title: "账号登录",
@@ -637,13 +637,13 @@ export default {
     privacy: "隐私条款",
     support: "联系支持",
     tabs: {
-      sso: "企业 SSO",
+      sso: " SSO",
       local: "管理员登录"
     },
     sso: {
-      title: "使用您的企业身份认证快速登录",
+      title: "使用您的身份认证快速登录",
       subtitle: "安全 · 便捷 · 统一身份管理",
-      button: "使用企业 ID 登录 (SSO)",
+      button: "使用 ID 登录 (SSO)",
       loading: "正在跳转...",
       info: "首次登录将自动创建您的账户"
     },
@@ -690,7 +690,7 @@ export default {
     simulateWeCom: "模拟 WeCom 销售视角",
     duplicateProfileQueue: "疑似重复客户队列",
     exitDemo: "退出演示",
-    weComSidebar: "企业微信侧边栏 (Sales View)",
+    weComSidebar: "微信侧边栏 (Sales View)",
     customerProfile: "客户画像",
     fullView: "360全貌",
     interactionTimeline: "互动动态",
@@ -1079,7 +1079,7 @@ export default {
       vehicleInfo: "车辆信息",
       consumptionStats: "消费统计",
       loyaltyValue: "忠诚度与价值",
-      opportunityInfo: "商机信息",
+      opportunityInfo: "三个月内推送商机",
       servicePreference: "服务偏好",
       remarks: "备注信息",
       // 客户信息字段

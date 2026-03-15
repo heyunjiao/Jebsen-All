@@ -15,14 +15,15 @@
       >
         <div class="card-header">
           <div class="record-title">{{ record.type }}</div>
-          <van-tag :type="getStatusType(record.status)" :size="'small' as any">
-            {{ record.status }}
-          </van-tag>
         </div>
         <div class="card-content">
           <div class="info-row">
             <span class="label">保险类型：</span>
             <span class="value">{{ record.type }}</span>
+          </div>
+          <div v-if="record.insuredPerson != null && record.insuredPerson !== ''" class="info-row">
+            <span class="label">被保险人：</span>
+            <span class="value">{{ record.insuredPerson }}</span>
           </div>
           <div v-if="record.company" class="info-row">
             <span class="label">保险公司：</span>
@@ -34,9 +35,11 @@
           </div>
           <div v-if="record.startDate || record.endDate" class="info-row">
             <span class="label">保险期限：</span>
-            <span class="value">
-              {{ record.startDate || '未知' }} 至 {{ record.endDate || '未知' }}
-            </span>
+            <span class="value">{{ record.startDate || '—' }} 至 {{ record.endDate || '—' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">商业险到期日：</span>
+            <span class="value">{{ record.commercialInsuranceExpiryDate || record.endDate || '—' }}</span>
           </div>
           <div v-if="record.purchaseDate" class="info-row">
             <span class="label">购买日期：</span>
@@ -49,6 +52,18 @@
           <div class="info-row">
             <span class="label">保险金额：</span>
             <span class="value amount">¥{{ formatAmount(record.amount) }}</span>
+          </div>
+          <div v-if="record.vehicleDamageAmount != null" class="info-row">
+            <span class="label">车损险保额：</span>
+            <span class="value">¥{{ formatAmount(record.vehicleDamageAmount) }}</span>
+          </div>
+          <div v-if="record.driverSeatAmount != null" class="info-row">
+            <span class="label">司机位保额(万)：</span>
+            <span class="value">{{ record.driverSeatAmount }}万</span>
+          </div>
+          <div v-if="record.passengerSeatAmount != null" class="info-row">
+            <span class="label">乘客位保额(万)：</span>
+            <span class="value">{{ record.passengerSeatAmount }}万</span>
           </div>
         </div>
       </div>
@@ -75,18 +90,6 @@ const pageSize = ref(5) // 每页加载 5 条
 const insuranceRecords = computed(() => {
   return customerStore.insuranceRecords || []
 })
-
-// 获取状态类型
-const getStatusType = (status: string): any => {
-  const typeMap: Record<string, any> = {
-    '已生效': 'success',
-    '已过期': 'warning',
-    '待续保': 'primary',
-    '已退保': 'default',
-    '生效中': 'success',
-  }
-  return typeMap[status] || 'default'
-}
 
 // 格式化金额（取整）
 const formatAmount = (amount: number) => {

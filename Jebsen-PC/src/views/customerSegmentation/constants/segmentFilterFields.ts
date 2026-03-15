@@ -1,7 +1,7 @@
 /**
  * 客户分群 - 筛选条件配置
  * 基于「需求侧字段列表」与「标签管理-默认标签」统一维护
- * 标签选项来自 @/constants/tagCategory（会员分层、售后行为、活跃度、粘性产品、投诉相关、定保相关）
+ * 标签选项来自 @/constants/tagCategory（会员分层、售后行为、活跃度、本年内购买过粘性产品、投诉相关、定保相关）
  */
 
 export type SectionKey =
@@ -28,17 +28,12 @@ export const SECTION_FIELD_KEYS: Record<SectionKey, string[]> = {
     "name",
     "gender",
     "ageGroup",
-    "familyStatus",
     "residenceArea",   // 居住区域（搜索城市）
-    "lifecycleStatus", // OneID/生命周期状态
-    "contactValidity"
+    "lifecycleStatus"  // OneID/生命周期状态
   ],
   value: [
     "annualSpend",
     "compositeScore",  // 价值综合评分
-    "spendingLevel",
-    "loyaltyLevel",
-    "customerValueTier",
     "afterSalesSelfPayAmount"
   ],
   vehicle: [

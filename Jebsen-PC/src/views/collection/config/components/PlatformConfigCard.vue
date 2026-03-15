@@ -39,7 +39,7 @@
             {{ getStageDayDesc(index) }}{{ localConfig.schedules[index].time || getDefaultTime(index)
             }}{{ getStageDescSuffix(index) }}
           </span>
-          <span v-else class="schedule-desc-compact">当天18:00前已成功上传文件清单，发送给操作人（唯一邮箱）</span>
+          <span v-else class="schedule-desc-compact">T+0</span>
         </div>
         <el-form-item
           :label="$t('collection.config.recipients.scheduleConfig.recipientLabel')"
@@ -251,7 +251,7 @@ const handleEmployeeChange = (index: number, value: number | number[]) => {
 
   .schedules-list {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
     gap: 16px;
   }
 

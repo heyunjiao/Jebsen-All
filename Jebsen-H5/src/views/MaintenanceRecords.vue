@@ -15,9 +15,6 @@
       >
         <div class="card-header">
           <div class="record-title">{{ record.serviceType }}</div>
-          <van-tag :type="getStatusType(record.status)" :size="'small' as any">
-            {{ record.status }}
-          </van-tag>
         </div>
         <div class="card-content">
           <div class="info-row">
@@ -83,17 +80,6 @@ const pageSize = ref(5) // 每页加载 5 条
 const maintenanceRecords = computed(() => {
   return customerStore.maintenanceRecords || []
 })
-
-// 获取状态类型
-const getStatusType = (status: string): any => {
-  const typeMap: Record<string, any> = {
-    '已完成': 'success',
-    '进行中': 'primary',
-    '待处理': 'warning',
-    '已取消': 'default',
-  }
-  return typeMap[status] || 'default'
-}
 
 // 格式化金额
 const formatAmount = (amount: number) => {

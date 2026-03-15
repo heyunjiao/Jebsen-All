@@ -164,7 +164,7 @@
       <template #tags="scope">
         <div v-if="scope.row.tags && scope.row.tags.length" class="person-tags-cell">
           <el-tag v-for="tag in scope.row.tags" :key="tag" size="small" :type="getTagType(tag)" class="person-tag">
-            {{ getCategoryFullPath(TAG_CATEGORY_OPTIONS, tag) || tag }}
+            {{ getTagDisplayLabel(tag) }}
           </el-tag>
         </div>
         <span v-else class="table-cell-empty">{{ TABLE_EMPTY_PLACEHOLDER }}</span>
@@ -210,7 +210,7 @@
             :type="getTagType(tag)"
             class="person-tag"
           >
-            {{ getCategoryFullPath(TAG_CATEGORY_OPTIONS, tag) || tag }}
+            {{ getTagDisplayLabel(tag) }}
           </el-tag>
         </div>
         <span v-else class="table-cell-empty">{{ TABLE_EMPTY_PLACEHOLDER }}</span>
@@ -246,7 +246,8 @@ import { useUserStore } from "@/stores/modules/user";
 import ProTable from "@/components/ProTable/index.vue";
 import { ColumnProps } from "@/components/ProTable/interface";
 import { TABLE_EMPTY_PLACEHOLDER } from "@/utils";
-import { getCategoryFullPath, getCategoryType, TAG_CATEGORY_META, TAG_CATEGORY_OPTIONS } from "@/constants/tagCategory";
+import { getCategoryFullPath, getCategoryType, getTagDisplayLabel, TAG_CATEGORY_META, TAG_CATEGORY_OPTIONS } from "@/constants/tagCategory";
+import { STORE_LIST } from "@/constants/storeList";
 import { Customer, Customer360View, FeedbackForm, LifecycleStatus, CompanyInfo } from "./interface";
 import MultiValueField from "./components/MultiValueField.vue";
 import Profile360View from "./components/Profile360View.vue";
@@ -311,14 +312,8 @@ interface VehicleListRow {
   buyerTags?: string[];
 }
 
-// 模拟门店列表（与 Mock 数据一致，保证搜索选项与列表数据可关联、门店筛选生效）
-const MOCK_STORE_LIST = [
-  { storeId: "store_001", storeName: "上海浦东保时捷中心" },
-  { storeId: "store_002", storeName: "北京保时捷中心" },
-  { storeId: "store_003", storeName: "广州天河保时捷中心" },
-  { storeId: "store_004", storeName: "深圳南山保时捷中心" },
-  { storeId: "store_005", storeName: "杭州西湖保时捷中心" }
-];
+// 模拟门店列表（与 constants/storeList 一致，枚举取 - 前内容）
+const MOCK_STORE_LIST = STORE_LIST;
 
 // 门店筛选项：与 Mock 数据使用同一门店列表，选「全部」不按门店过滤，选具体门店则按 primaryStoreId 过滤
 const storeSearchOptions = computed(() => [
@@ -1427,7 +1422,7 @@ const buildVehicleRows = (customers: Customer[]): VehicleListRow[] =>
     const insuranceTypes = ["商业险", "交强险", "商业险+交强险"];
     const insuranceStatuses = ["已生效", "待续保", "已过期"];
     const financeInstitutions = ["招商银行金融", "保时捷金融", "建设银行"];
-    const issueCenters = ["上海闵行保时捷中心", "上海闵行保时捷金融中心", "上海浦东保时捷中心"];
+    const issueCenters = STORE_LIST.map(s => s.storeName);
     const loanStatuses = ["正常", "即将到期", "已结清"];
     const loanTerms = ["12期", "24期", "36期", "48期"];
     const insuranceIndex = customer.id % insuranceCompanies.length;
@@ -1751,7 +1746,7 @@ const buildProfileHandlers = (row: Customer) => {
 
 const buildProfileVehicles = (row: Customer, selectedVehicle?: VehicleListRow | null) => {
   const licensePlate = selectedVehicle?.licensePlate || getDisplayValue(row.licensePlate) || "沪A12345";
-  const vin = selectedVehicle?.vin || getDisplayValue(row.vinInfo) || "WP0ZZZ99ZTS392124";
+  const vin = selectedVehicle?.vin || getDisplayValue(row.vinInfo) || "WP0ZZZ994ZTS39212";
   const purchaseDate = selectedVehicle?.purchaseDate || row.createdAt?.slice(0, 10) || "2024-01-01";
   const primaryPhone = typeof row.phone === "string" ? row.phone : row.phone?.[0]?.value || "";
 
@@ -1795,7 +1790,7 @@ const buildProfileVehicles = (row: Customer, selectedVehicle?: VehicleListRow | 
       signStatus: "已签单",
       submitTime: "2025-12-20",
       signTime: "2026-01-01",
-      issueCenter: row.primaryStoreName || "上海浦东",
+      issueCenter: row.primaryStoreName || STORE_LIST[0].storeName,
       newCarMsrp: 1200000,
       newCarContractPrice: 1150000,
       nonCashDiscountAmount: 20000,
@@ -2077,23 +2072,23 @@ const viewProfile360 = async (sourceRow: Customer | VehicleListRow) => {
     transactions: [
       {
         id: "2",
-        serviceType: "保养",
+        serviceType: "换油服务",
         serviceTime: "2024-02-20 10:00:00",
-        serviceStore: "上海浦东店",
+        serviceStore: STORE_LIST[0].storeName,
         vehicleModel: row.carSeriesModel,
         amount: 2000,
-        description: "常规保养",
+        description: "换油服务",
         status: "已完成",
-        tags: ["保养"],
+        tags: ["换油服务"],
         source: "DMS",
         orderNo: "ORD20240220001",
-        storeName: "上海浦东店"
+        storeName: STORE_LIST[0].storeName
       },
       {
         id: "3",
         serviceType: "维修",
         serviceTime: "2024-03-15 14:30:00",
-        serviceStore: "上海浦东店",
+        serviceStore: STORE_LIST[0].storeName,
         vehicleModel: row.carSeriesModel,
         amount: 1500,
         description: "更换刹车片",
@@ -2101,7 +2096,7 @@ const viewProfile360 = async (sourceRow: Customer | VehicleListRow) => {
         tags: ["维修"],
         source: "DMS",
         orderNo: "ORD20240315001",
-        storeName: "上海浦东店"
+        storeName: STORE_LIST[0].storeName
       }
     ],
     consumptionTrend,
@@ -2165,7 +2160,7 @@ const viewProfile360 = async (sourceRow: Customer | VehicleListRow) => {
           contractNo: "CT2024001",
           submitTime: "2024-01-05",
           signTime: "2024-01-06",
-          issueCenter: "上海浦东",
+          issueCenter: STORE_LIST[0].storeName,
           packageName: "保养套餐A",
           itemAmount: 500,
           itemSource: "DMS"
@@ -2186,7 +2181,7 @@ const viewProfile360 = async (sourceRow: Customer | VehicleListRow) => {
           contractNo: "CT2024002",
           submitTime: "2024-01-10",
           signTime: "2024-01-11",
-          issueCenter: "上海浦东",
+          issueCenter: STORE_LIST[0].storeName,
           itemAmount: 300,
           itemSource: "CRM"
         }
@@ -2204,7 +2199,7 @@ const viewProfile360 = async (sourceRow: Customer | VehicleListRow) => {
           contractNo: "CT2024003",
           submitTime: "2024-01-08",
           signTime: "2024-01-09",
-          issueCenter: "上海浦东",
+          issueCenter: STORE_LIST[0].storeName,
           packageName: "代金券包",
           itemAmount: 2000,
           itemSource: "活动"
@@ -2245,9 +2240,9 @@ const viewProfile360 = async (sourceRow: Customer | VehicleListRow) => {
       optionAmount: 20000,
       addonProductAmount: 8000,
       serviceFrequencyLastYear: 4,
-      lastMaintenanceStore: row.primaryStoreName || "上海浦东保时捷中心",
+      lastMaintenanceStore: row.primaryStoreName || STORE_LIST[0].storeName,
       lastMaintenanceDate: row.lastVisitTime,
-      lastReturnStore: row.primaryStoreName || "上海浦东保时捷中心",
+      lastReturnStore: row.primaryStoreName || STORE_LIST[0].storeName,
       lastServiceDate: row.lastVisitTime,
       repairAmountLastYear: 6000,
       accidentRepairCountLastYear: 0,
@@ -2306,7 +2301,7 @@ const viewProfile360 = async (sourceRow: Customer | VehicleListRow) => {
         signDate: "2024-01-14",
         signStatus: "已签单",
         submitDate: "2024-01-10",
-        issueCenter: "上海浦东",
+        issueCenter: STORE_LIST[0].storeName,
         financeInstitution: "招商银行金融",
         loanTerm: "36期",
         customerRate: 4.5,
@@ -2334,7 +2329,7 @@ const viewProfile360 = async (sourceRow: Customer | VehicleListRow) => {
         signDate: "2023-06-18",
         signStatus: "已签单",
         submitDate: "2023-06-15",
-        issueCenter: "上海闵行",
+        issueCenter: STORE_LIST[1].storeName,
         financeInstitution: "建设银行",
         loanTerm: "24期",
         customerRate: 4.2,
@@ -2376,7 +2371,7 @@ const viewProfile360 = async (sourceRow: Customer | VehicleListRow) => {
         activityDate: "2026-02-01",
         campaignName: "保时捷新春试驾",
         activityTime: "2026-02-01",
-        location: "上海浦东店",
+        location: STORE_LIST[0].storeName,
         status: "已报名",
         validExamples: 30,
         description: "新春试驾体验"

@@ -29,24 +29,7 @@
           <span class="operation-time">{{ formatDateTime(profileData.latestOperation.operationTime) }}</span>
         </template>
       </el-alert>
-      <!-- 与 H5 一致：数据状态监控 -->
-      <el-card v-if="profileData.platformSyncStatus?.length" shadow="never" class="reference-card sync-monitor-card">
-        <div class="sync-monitor-header">
-          <el-icon><Setting /></el-icon>
-          <span>{{ $t("customer.profile360.dataSyncMonitor") }}</span>
-          <span v-if="profileData.syncTime" class="sync-time">
-            {{ $t("customer.profile360.syncTime") }}: {{ profileData.syncTime }}
-          </span>
-        </div>
-        <div class="sync-source-list">
-          <div v-for="source in profileData.platformSyncStatus" :key="source.name" class="sync-source-item">
-            <span class="source-name">{{ source.name }}</span>
-            <el-tag :type="source.status === 'success' ? 'success' : 'danger'" size="small">
-              {{ source.status === "success" ? $t("customer.profile360.valid") : $t("customer.profile360.expired") }}
-            </el-tag>
-          </div>
-        </div>
-      </el-card>
+    
       <!-- 客户基本信息（联系人档案） -->
       <el-card shadow="never" class="reference-card">
         <template #header>

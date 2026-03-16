@@ -971,20 +971,26 @@ const loadFieldOptions = async () => {
     // 使用 mock 数据
     const mockData = await import("@/assets/json/customerSegmentationMockData.json");
     if (mockData.default?.fieldOptions?.data) {
-      fieldOptions.value = mockData.default.fieldOptions.data as CustomerSegmentation.FieldOption[];
+      const allOptions = mockData.default.fieldOptions.data as CustomerSegmentation.FieldOption[];
+      // 自定义筛选字段与漏斗筛选保持完全一致，只保留漏斗里存在的字段
+      fieldOptions.value = allOptions.filter(opt => UNIQUE_FILTER_FIELD_KEYS.includes(opt.field));
       return;
     }
     const res = await getFieldOptions();
-    fieldOptions.value = res.data || [];
+    const allOptions = (res.data || []) as CustomerSegmentation.FieldOption[];
+    // 只保留漏斗筛选使用过的字段，避免出现无对应「漏斗条件」的字段
+    fieldOptions.value = allOptions.filter(opt => UNIQUE_FILTER_FIELD_KEYS.includes(opt.field));
   } catch (error) {
     console.error("加载字段选项失败:", error);
     // Mock fallback
     const mockData = await import("@/assets/json/customerSegmentationMockData.json");
     if (mockData.default?.fieldOptions?.data) {
-      fieldOptions.value = mockData.default.fieldOptions.data as CustomerSegmentation.FieldOption[];
+      const allOptions = mockData.default.fieldOptions.data as CustomerSegmentation.FieldOption[];
+      fieldOptions.value = allOptions.filter(opt => UNIQUE_FILTER_FIELD_KEYS.includes(opt.field));
       return;
     }
-    fieldOptions.value = [
+    // 本地兜底字段配置，同样仅包含与漏斗筛选对齐的字段
+    const fallbackOptions: CustomerSegmentation.FieldOption[] = [
       {
         field: "ageGroup",
         label: "年龄段",
@@ -1018,9 +1024,7 @@ const loadFieldOptions = async () => {
       },
       { field: "carAge", label: "车龄", operators: ["equals", "greaterThan", "lessThan", "between"], inputType: "numberrange" },
       { field: "annualSpend", label: "年均消费", operators: ["greaterThan", "lessThan", "between"], inputType: "numberrange" },
-      { field: "lastVisit", label: "最近到店时间", operators: ["before", "after", "between"], inputType: "daterange" },
-      { field: "systemTag", label: "系统标签", operators: ["contains", "notContains", "allMatch"], inputType: "tagselect" },
-      { field: "existingSegment", label: "所属分群", operators: ["belongsTo", "notBelongsTo"], inputType: "select" },
+      { field: "lastVisitTime", label: "最近到店时间", operators: ["before", "after", "between"], inputType: "daterange" },
       {
         field: "totalCarPrice",
         label: "总车价",
@@ -1101,7 +1105,9 @@ const loadFieldOptions = async () => {
         operators: ["before", "after", "between"],
         inputType: "daterange"
       }
-    ] as CustomerSegmentation.FieldOption[];
+    ];
+    // 再次通过 UNIQUE_FILTER_FIELD_KEYS 过滤，确保完全与漏斗字段对齐
+    fieldOptions.value = fallbackOptions.filter(opt => UNIQUE_FILTER_FIELD_KEYS.includes(opt.field));
   }
 };
 

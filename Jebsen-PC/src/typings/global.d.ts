@@ -1,22 +1,44 @@
-/* Menu */
+/* Menu - 与 src/assets/json/authMenuList.json 结构一致 */
 declare namespace Menu {
+  /** 单条菜单项：路由 + 菜单信息 + 组件路径 */
   interface MenuOptions {
+    /** 路由路径 */
     path: string;
+    /** 路由名称（唯一，用于 keepAlive、权限等） */
     name: string;
+    /** 组件路径（相对 views 的路径，如 /welcome/index） */
     component?: string | (() => Promise<unknown>);
+    /** 重定向路径（有 children 时通常配置） */
     redirect?: string;
+    /** 菜单展示与行为配置 */
     meta: MetaProps;
+    /** 子菜单（多级递归） */
     children?: MenuOptions[];
   }
+  /** 菜单元信息（侧栏标题、图标、是否缓存等） */
   interface MetaProps {
+    /** 菜单图标（Element Plus 图标名） */
     icon: string;
+    /** 菜单标题（侧栏展示） */
     title: string;
-    activeMenu?: string;
+    /** 外链地址，空字符串表示非外链（authMenuList.json 中必有） */
     isLink?: string;
+    /** 是否在侧栏隐藏 */
     isHide: boolean;
+    /** 是否全屏显示 */
     isFull: boolean;
+    /** 是否固定在标签页 */
     isAffix: boolean;
+    /** 是否缓存页面 */
     isKeepAlive: boolean;
+    /** 详情页高亮父菜单 path（可选） */
+    activeMenu?: string;
+  }
+  /** 角色菜单树接口返回结构（与 authMenuList.json 根结构一致） */
+  interface AuthMenuListResponse {
+    code: number;
+    data: MenuOptions[];
+    msg: string;
   }
 }
 
